@@ -1,0 +1,203 @@
+export const APPARELPRO_ENDPOINTS = {
+  REFERENCE_SECTION: {
+    CURRENCY: {
+      GET: "api/currency/list",
+      GET_BY_PAGINATION: "api/currency/list",
+      DOES_CURRENCY_EXIST: "api/currency/list/does-currency-exist/",
+      GET_COUNTRY_BY_PAGE_NUMBER: "api/currency/list/paging/",
+      GETBY_CODE: "api/currency/list/",
+      POST: "api/currency",
+      DELETE: "api/currency/",
+      PUT: "api/currency/",
+      PATCH: "api/currency",
+    },
+    COUNTRY: {
+      GET_BY_PAGINATION: "api/country/list",
+      GETBY_CODE: "api/country/list/",
+      DOES_COUNTRY_EXIST: "api/country/list/does-country-exist/",
+      POST: "api/country",
+      DELETE: "api/country/",
+      PUT: "api/country/",
+      PATCH: "api/country",
+    },
+    BUYER: {
+      GET_BY_PAGINATION: "api/buyer/list",
+      GET_BY_BUYER_ORDER_TYPE_STYLE: "api/buyer/list/",
+      POST: "api/buyer",
+      DELETE: "api/buyer/",
+      PUT: "api/buyer/",
+      PATCH: "api/buyer",
+    },
+    GARMENT_TYPE: {
+      GET_BY_PAGINATION: "api/garmentType/list",
+      GET_ALL_GARMENT_TYPES: "api/garmentType/list/all",
+      GETBY_TYPECODE: "api/garmentType/list/",
+      POST: "api/garmentType",
+      DELETE: "api/garmentType/",
+      PUT: "api/garmentType/",
+      PATCH: "api/garmentTypes",
+    },
+    UNIT: {
+      GET: "api/unit/list",
+      GET_BY_PAGINATION: "api/unit/list",
+      //GETBY_TYPECODE: "api/unit/list/",
+      DOES_UNIT_EXIST: "api/unit/list/does-unit-exist/",
+      POST: "api/unit",
+      DELETE: "api/unit/",
+      PUT: "api/unit/",
+      PATCH: "api/unit",
+    },
+    DEPARTMENT: {
+      GET_BY_PAGINATION: "api/department/list",
+      GET_ALL: "api/department/lookup",
+    },
+    UNITCONVERSION: {
+      GET: "api/unit-conversions/list",
+      GET_BY_PAGINATION: "api/unit-conversions/list",
+    },
+    BASIS: {
+      GET: "api/basis/list",
+      GET_BY_PAGINATION: "api/basis/list",
+      GETBY_TYPECODE: "api/basis/list/",
+      POST: "api/basis",
+      DELETE: "api/basis/",
+      PUT: "api/basis/",
+      PATCH: "api/basis",
+    },
+    SUBSCRIPTION: {
+      GET: "api/subscription/list",
+      POST: "api/subscription",
+    },
+    CURRENCY_EXCHANGE: {
+      GET: "api/currencyExchange/list",
+      GET_BY_PAGINATION: "api/currencyExchange/list",
+      GET_BY_DATE: "api/currencyExchange/list/byDate",
+      GET_CURRENCY_EXCHANGES_BY_BASE_CURRENCY:
+        "api/currencyExchange/list/baseCurrency",
+      GET_CURRENCY_EXCHANGES_BY_BASE_CURRENCY_AND_QUOTE_CURRENCY_ON_DATE:
+        "api/list/{baseCurrency}/{quoteCurrency}/{date}",
+      POST: "api/currencyExchange",
+      PUT: "api/currencyExchange/",
+      DELETE: "api/currencyExchange/",
+    },
+    CURRENCY_CONVERSION: {
+      GET: "api/currencyConversion/list",
+      GET_BY_PAGINATION: "api/currencyConversion/list",
+      GET_BY_DATE: "api/currencyConversion/list/byDate",
+      GET_CURRENCY_EXCHANGES_BY_BASE_CURRENCY:
+        "api/currencyConversion/list/baseCurrency",
+      GET_CURRENCY_EXCHANGES_BY_BASE_CURRENCY_AND_QUOTE_CURRENCY_ON_DATE:
+        "api/list/{baseCurrency}/{quoteCurrency}/{date}",
+      POST: "api/currencyConversion",
+      PUT: "api/currencyConversion/",
+      DELETE: "api/currencyConversion/{baseCurrency}/{quoteCurrency}/{date}",
+    },
+    BANK: {
+      GET_BY_PAGINATION: "api/bank/list",
+      GET_BY_BANK_CODE: "api/bank/list/",
+      DOES_BANK_EXIST: "api/bank/list/does-bank-exist/",
+      POST: "api/bank",
+      DELETE: "api/bank/",
+      PUT: "api/bank/",
+      PATCH: "api/bank",
+    },
+    SUPPLIER: {
+      GET_BY_PAGINATION: "api/supplier/list",
+      GET_BY_SUPPLIER_CODE: "api/supplier/list/",
+      DOES_SUPPLIER_EXIST: "api/supplier/list/does-supplier-exist/",
+      SUPPLIERS_LOOKUP: "api/supplier/suppliers-lookup",
+      SUPPLIER_PO: "api/supplier-po/unfulfilled-budget",
+      SAVE_SUPPLIER_PO: "api/supplier-po/save-supplier-po",
+      POST: "api/supplier",
+      DELETE: "api/supplier/",
+      PUT: "api/supplier/",
+      PATCH: "api/supplier",
+    },
+    ADDRESS: {
+      GET_BY_PAGINATION: "api/address/list",
+      GET_BY_ADDRESS_ID_PAGINATION: "api/address/list/byAddressId/",
+      GET_BY_ADDRESS_ID: "api/address/list/addressId/",
+      GET_BY_BUYER_CODE: "api/address/list/buyerCode/",
+      DOES_BANK_EXIST: "api/address/list/does-bank-exist/",
+      POST: "api/address",
+      DELETE: "api/address/",
+      UPDATE_BY_BUYER_CODE_AND_ADDRESS_ID: "api/address/buyerCode/addressId",
+      PUT: "api/address/buyerCode/addressId",
+      PATCH: "api/address",
+    },
+    DESTINATION: {
+      GET_BY_PAGINATION: "api/portDestination/list",
+      GET_PORT_BY_COUNTRY_AND_DESTINATION_ID:
+        "api/portDestination/list/countryCode/id",
+      GET_ALL_PORTS_BY_COUNTRY_CODE: "api/portDestination/list/countryCode",
+      POST: "api/portDestination",
+      DELETE: "api/portDestination/",
+      PUT: "api/portDestination/",
+      PATCH: "api/portDestination",
+    },
+  },
+  REGISTRATION: {
+    USER: {
+      GET_ALL: "api/user/list",
+      GET_BY_EMAIL: "api/user/list/",
+      POST: "api/user/register",
+      LOGIN: "api/user/login",
+      PUT: "api/user/",
+      PATCH: "api/user",
+      DELETE: "api/user/",
+    },
+  },
+  TOKEN: {
+    REFRESH: "api/security/refresh-token",
+    REVOKE: "api/security/revoke-token",
+  },
+  ORDER_MANAGEMENT: {
+    PO: {
+      GET: "api/po/list",
+      GET_PO_BY_BUYER_AND_ORDER: "api/po/list/buyer/order",
+      GET_ALL_POS_BY_BUYER_CODE: "api/po/list/buyer",
+      POST: "api/po",
+      DELETE: "api/po/",
+      PUT: "api/po/",
+      PATCH: "api/po",
+    },
+    STYLE_DETAILS: {
+      GET_BY_PAGINATION: "api/styleDetails/list",
+      GET_STYLE_DETAILS_BY_BUYER_AND_ORDER: "api/styleDetails/list/buyer/order",
+      GET_STYLE_DETAILS_BY_BUYER_AND_ORDER_AND_TYPE:
+        "api/styleDetails/list/styles",
+      DOES_STYLE_EXIST: "api/styleDetails/list/does-style-exist/",
+      GETBY_PONO: "api/styleDetails/list/",
+      POST: "api/styleDetails",
+      DELETE: "api/styleDetails/",
+      PUT: "api/styleDetails/",
+      PATCH: "api/styleDetails",
+    },
+    COLOR_SIZE_DETAILS: {
+      GET_COLOR_SIZE_DETAILS_BY_BUYER_AND_ORDER_AND_TYPE_AND_STYLE:
+        "api/colorSizeBreakdownDetails/singleOrDefault-By-Style/buyer/order/type/style",
+      GET_COLOR_AND_SIZE_ONLY_DETAILS_BY_STYLE:
+        "api/colorSizeBreakdownDetails/style-dimensions",
+      GET_COLOR_SIZE_MATRIX: "api/colorSizeBreakdownDetails/color-size-matrix",
+      POST: "api/colorSizeBreakdownDetails/bulk-save",
+      DELETE: "api/colorSizeBreakdownDetails/",
+    },
+    MATERIAL_CONSUMPTION: {
+      GET_AVAILABLE_MATERIALS: "api/material-consumption/items-lookup",
+      GET_ALL_MATERIAL_CONSUMPTIONS_BY_STYLE:
+        "api/material-consumption/by-style",
+    },
+    STYLE_WISE_EVENTS: {
+      GET_STYLE_WISE_EVENTS_REPORT: "api/stylewise-reports/print-report",
+    },
+  },
+  ORDER_WISE_INVENTORY: {
+    SRN: {
+      VERIFY_STOCK: "api/orderwise-inventory-srn/verify-stock",
+      POST: "api/orderwise-inventory-srn/commit",
+    },
+  },
+  URLS: {
+    BASEURL: import.meta.env.VITE_API_BASE_URL || "https://localhost:5000/",
+  },
+};
