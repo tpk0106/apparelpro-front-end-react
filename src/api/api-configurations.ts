@@ -186,15 +186,20 @@ export const APPARELPRO_ENDPOINTS = {
       GET_AVAILABLE_MATERIALS: "api/material-consumption/items-lookup",
       GET_ALL_MATERIAL_CONSUMPTIONS_BY_STYLE:
         "api/material-consumption/by-style",
+      GET_DYNAMIC_FEATURE_HEADERS: "api/material-consumption/feature-headers",
+      CALCULATE_CONSUMPTION: "api/material-consumption/calculate-consumption",
+      SAVE_ENTRY: "api/material-consumption/save-entry",
+      DELETE_ENTRY: "api/material-consumption/delete-entry",
     },
     STYLE_WISE_EVENTS: {
       GET_STYLE_WISE_EVENTS_REPORT: "api/stylewise-reports/print-report",
     },
   },
   ORDER_WISE_INVENTORY: {
-    SRN: {
-      VERIFY_STOCK: "api/orderwise-inventory-srn/verify-stock",
-      POST: "api/orderwise-inventory-srn/commit",
+    STRN: {
+      VERIFY_STOCK: "api/orderwise-inventory-strn/verify-stock",
+      POST: "api/orderwise-inventory-strn/commit",
+      AVAILABLE_CHOICES: "api/orderwise-inventory-strn/available-choices",
     },
   },
   URLS: {

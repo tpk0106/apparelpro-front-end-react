@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Box,
   Table,
@@ -21,14 +21,12 @@ import type {
 } from "./orderwise-inventory.types";
 import {
   useGetAvailableStockChoicesQuery,
-  useLazyVerifyStockItemAvailabilityQuery,
-} from "../../services/order-wise-inventory.services";
+  useVerifyStockItemAvailabilityMutation,
+} from "../../tanstack-hooks/orderwise-inventory-strn.hooks";
 
 // Import global master lookup reference hook to populate the Unit select dropdown cell
-import {
-  useGetAllUnitsQuery,
-  type UnitServiceModel,
-} from "../../services/material-consumption.services";
+import { useGetUnits } from "../../tanstack-hooks/custom-hooks";
+import type { Unit } from "../../interfaces/references/Unit";
 
 // 1. Ensure you import the Autocomplete component near the top of StoresRequisitionLinesGrid.tsx:
 // import Autocomplete from "@mui/material/Autocomplete";
@@ -48,8 +46,9 @@ export default function StoresRequisitionLinesGrid({
   lineItems,
   setLineItems,
 }: LinesGridProps) {
-  // 1. Central Asynchronous Trigger Hook: Runs lazy vertical inventory balance checks on cellular blur
-  const [triggerStockCheck] = useLazyVerifyStockItemAvailabilityQuery();
+  // 1. Central Asynchronous Trigger Hook: Runs an on-demand inventory balance check on cellular blur
+  const { mutateAsync: triggerStockCheck } =
+    useVerifyStockItemAvailabilityMutation();
 
   // Local state container caching live balance metrics row-by-row to show warnings beneath textboxes
   const [rowStockBalances, setRowStockBalances] = useState<
@@ -62,18 +61,13 @@ export default function StoresRequisitionLinesGrid({
   const { data: stockChoicesList = [], isLoading: isStockLoading } =
     useGetAvailableStockChoicesQuery(
       { buyerCode, order, storeCode: defaultStoreCode },
-      { skip: buyerCode === 0 || !order || !defaultStoreCode },
+      buyerCode !== 0 && !!order && !!defaultStoreCode,
     );
-
-  useEffect(() => {
-    console.log("stock Choice: ", stockChoicesList);
-    console.log("default store code: ", defaultStoreCode);
-  });
 
   // ... Inside your table lines mapping loop (.map((row, idx) => {)):
 
   // 2. Query System Reference Units to populate the Unit column selection dropdowns
-  const { data: unitsPageData } = useGetAllUnitsQuery({
+  const { data: unitsPageData } = useGetUnits({
     pageIndex: 0,
     pageSize: 999,
     sortColumn: "code",
@@ -126,24 +120,22 @@ export default function StoresRequisitionLinesGrid({
     // const mainItemCode = rawCode.substring(2);
 
     try {
-      // Trigger the lazy network promise to fetch live balances out of OrderwiseStocks
+      // Trigger the imperative stock-balance check against OrderwiseStocks
       const stockDetails = await triggerStockCheck({
         buyerCode,
         order,
         storeCode: basisCode, // Maps storeCode to your Basis context column
         itemCode: rawCode, // Full code lookup match string
         targetUnit: currentUnit,
-      }).unwrap();
+      });
 
       if (stockDetails) {
         // Cache the live row summary metric into component memory to update on-screen badges
         setRowStockBalances((prev) => ({ ...prev, [index]: stockDetails }));
       }
-    } catch (err) {
-      console.warn(
-        "Inventory check skipped or item not tracked yet in stock ledger pools:",
-        err,
-      );
+    } catch {
+      // Item not yet tracked in the stock ledger, or the balance check failed —
+      // the grid simply won't show a live balance badge for this row.
     }
   };
   return (
@@ -202,7 +194,7 @@ export default function StoresRequisitionLinesGrid({
                     onChange={(e) => {
                       const selectedItemCode = e.target.value;
                       const matchedDbItem = stockChoicesList.find(
-                        (opt: any) => opt.itemCode === selectedItemCode,
+                        (opt) => opt.itemCode === selectedItemCode,
                       );
 
                       if (matchedDbItem) {
@@ -235,7 +227,7 @@ export default function StoresRequisitionLinesGrid({
                       }
                     }}
                   >
-                    {stockChoicesList.map((item: any) => (
+                    {stockChoicesList.map((item) => (
                       <MenuItem key={item.itemCode} value={item.itemCode}>
                         {item.itemCode} — {item.description}
                       </MenuItem>
@@ -427,7 +419,7 @@ export default function StoresRequisitionLinesGrid({
                     }}
                     slotProps={{ htmlInput: { style: { fontSize: "13px" } } }}
                   >
-                    {systemUnits.map((u: UnitServiceModel) => (
+                    {systemUnits.map((u: Unit) => (
                       <MenuItem key={u.id} value={u.code}>
                         {u.code}
                       </MenuItem>

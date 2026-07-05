@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Typography,
@@ -13,8 +13,8 @@ import ColorBreakdown from "./color-breakdown.component";
 import type { LocalColorRow } from "./color-breakdown-table.component";
 import SizeBreakdown from "./size-breakdown.component";
 import type StyleContext from "../../interfaces/OrderManagement/StyleContext";
-import { useGetColorSizeSavedMatrixQuery } from "../../services/material-consumption.services";
-// import type { ColorSizeDetailsServiceModel } from "../material-consumption/material-consumption.types";
+import { useGetColorSizeSavedMatrix } from "../../tanstack-hooks/custom-hooks";
+import type { ColorSizeDetailsServiceModel } from "../material-consumption/material-consumption.types";
 
 // 1. Move the MatrixRow interface here so it's accessible globally
 export interface MatrixRow {
@@ -78,14 +78,14 @@ export default function ColorSizeBreakdown({
   }
   // if existing color/size breakdown
   const { data: savedMatrixData, isLoading: isMatrixLoading } =
-    useGetColorSizeSavedMatrixQuery(
+    useGetColorSizeSavedMatrix(
       {
         buyerCode: buyerCode,
         order: order,
         typeCode: selectedStyleFromGrid?.typeCode || 0,
         styleCode: selectedStyleFromGrid?.styleCode || "",
       },
-      { skip: !selectedStyleFromGrid }, // Skip query if no active style context is selected yet
+      !!selectedStyleFromGrid, // Skip query if no active style context is selected yet
     );
 
   // const matrix1 = useMemo(() => {
@@ -108,11 +108,6 @@ export default function ColorSizeBreakdown({
   //     allocationWeight: totalQty,
   //   }));
   // }, [savedMatrixData]); // matrix auto-updates safely only when data changes
-
-  useEffect(() => {
-    console.log("retrieving color/size data from database :", savedMatrixData);
-    console.log("matrix :", matrix);
-  });
 
   {
     /* end of new component to pass existing colorSizeDetails from DB */
@@ -137,11 +132,10 @@ export default function ColorSizeBreakdown({
   let matrix: LocalColorRow[] = [];
   if (hasExistingDbEntries) {
     const colorTotalQty: Record<string, number> = {};
-    activeDataArray.forEach((item: any) => {
+    activeDataArray.forEach((item: ColorSizeDetailsServiceModel) => {
       if (item?.color) {
         const colorKey = String(item.color).toUpperCase().trim();
-        colorTotalQty[colorKey] =
-          (colorTotalQty[colorKey] || 0) + (item.qty || item.quantity || 0);
+        colorTotalQty[colorKey] = (colorTotalQty[colorKey] || 0) + (item.qty || 0);
       }
     });
 
@@ -166,7 +160,7 @@ export default function ColorSizeBreakdown({
     if (hasExistingDbEntries) {
       const uniqueSizesInDb = Array.from(
         new Set(
-          activeDataArray.map((item: any) =>
+          activeDataArray.map((item: ColorSizeDetailsServiceModel) =>
             String(item?.size || "")
               .trim()
               .toUpperCase(),
@@ -179,15 +173,15 @@ export default function ColorSizeBreakdown({
       const initialRows = targetSizes.map((sizeName) => {
         const rowObject: MatrixRow = { sizeCode: sizeName };
         const matchingDbRowsForSize = activeDataArray.filter(
-          (item: any) =>
+          (item: ColorSizeDetailsServiceModel) =>
             String(item?.size || "")
               .trim()
               .toUpperCase() === sizeName,
         );
 
-        matchingDbRowsForSize.forEach((item: any) => {
+        matchingDbRowsForSize.forEach((item: ColorSizeDetailsServiceModel) => {
           if (item?.color) {
-            rowObject[item.color] = item.qty || item.quantity || 0;
+            rowObject[item.color] = item.qty || 0;
           }
         });
         return rowObject;

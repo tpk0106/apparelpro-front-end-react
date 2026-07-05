@@ -13,14 +13,14 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Grid from "@mui/material/Grid";
 
 import {
-  useGetBuyersPagedQuery,
-  useGetOrdersByBuyerQuery,
-  useGetAllCurrenciesQuery,
-  useGetSuppliersLookupQuery,
-  type CurrencyServiceModel,
-  useGetAllGarmentTypesQuery,
-  useGetStylesByScopeQuery,
-} from "../../services/material-consumption.services";
+  useGetBuyersQuery,
+  useGetAllPurchaseOrdersByBuyerCode,
+  useGetCurrenciesQuery,
+  useGetSuppliersLookup,
+  useGetAllGarmentTypes,
+  useGetStylesByScope,
+} from "../../tanstack-hooks/custom-hooks";
+import type { Currency } from "../../interfaces/references/Currency";
 
 import type {
   SelectedPOContext,
@@ -59,11 +59,11 @@ export default function SupplierPOHeaderSelector({
     null,
   );
   const [selectedCurrency, setSelectedCurrency] =
-    useState<CurrencyServiceModel | null>(null);
+    useState<Currency | null>(null);
 
   // 2. Fetch Master Datasets from your active RTK-Query Service Caches
   const { data: buyerPageData, isLoading: isBuyersLoading } =
-    useGetBuyersPagedQuery({
+    useGetBuyersQuery({
       pageIndex: 0,
       pageSize: 999,
       sortColumn: "name",
@@ -77,28 +77,29 @@ export default function SupplierPOHeaderSelector({
   );
 
   const { data: ordersList = [], isLoading: isOrdersLoading } =
-    useGetOrdersByBuyerQuery(selectedBuyer?.buyerCode ?? 0, {
-      skip: !selectedBuyer,
-    });
+    useGetAllPurchaseOrdersByBuyerCode(
+      selectedBuyer?.buyerCode ?? 0,
+      !!selectedBuyer,
+    );
 
   const { data: globalTypesList = [], isLoading: isTypesLoading } =
-    useGetAllGarmentTypesQuery();
+    useGetAllGarmentTypes();
 
   const { data: stylesList = [], isLoading: isStylesLoading } =
-    useGetStylesByScopeQuery(
+    useGetStylesByScope(
       {
         buyerCode: selectedBuyer?.buyerCode ?? 0,
         order: selectedOrder ?? "",
         typeCode: selectedType?.id ?? 0,
       },
-      { skip: !selectedBuyer || !selectedOrder || !selectedType },
+      !!selectedBuyer && !!selectedOrder && !!selectedType,
     );
 
   const { data: suppliersList = [], isLoading: isSuppliersLoading } =
-    useGetSuppliersLookupQuery();
+    useGetSuppliersLookup();
 
   const { data: currencyPageData, isLoading: isCurrenciesLoading } =
-    useGetAllCurrenciesQuery({
+    useGetCurrenciesQuery({
       pageIndex: 0,
       pageSize: 999,
       sortColumn: "name",
@@ -106,7 +107,7 @@ export default function SupplierPOHeaderSelector({
       filterColumn: null,
       filterQuery: null,
     });
-  const currenciesList = useMemo<CurrencyServiceModel[]>(
+  const currenciesList = useMemo<Currency[]>(
     () => currencyPageData?.items || [],
     [currencyPageData],
   );
@@ -302,11 +303,11 @@ export default function SupplierPOHeaderSelector({
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Autocomplete
             options={currenciesList}
-            getOptionLabel={(option: CurrencyServiceModel) =>
+            getOptionLabel={(option: Currency) =>
               option.code ? `${option.code} (${option.name})` : ""
             }
             value={selectedCurrency}
-            onChange={(_: SyntheticEvent, val: CurrencyServiceModel | null) => {
+            onChange={(_: SyntheticEvent, val: Currency | null) => {
               setSelectedCurrency(val);
               verifyAndBroadcastContext(
                 purchaseNumber,

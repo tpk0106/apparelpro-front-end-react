@@ -6,37 +6,18 @@ import {
 } from "material-react-table";
 import { Box, IconButton, Tooltip, Typography, Alert } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import type { StyleContext } from "./material-consumption.types";
-// import type { StyleContext } from "./material-consumption.types";
+import type {
+  StyleContext,
+  StyleMaterialConsumptionLedgerRow,
+} from "./material-consumption.types";
 
 import { toast } from "react-toastify";
 
 // 1. Ensure you import your new hook at the very top of your grid file:
-import { useDeleteConsumptionEntryMutation } from "../../services/material-consumption.services";
+import { useDeleteConsumptionEntryMutation } from "../../tanstack-hooks/material-consumption-entry.hooks";
+import type { AppError } from "../../auth/axiosClient";
 
 import EditIcon from "@mui/icons-material/Edit"; // Add this icon import
-
-// Explicitly type the inbound data contract mapping your C# EF Core Ledger structure
-export interface StyleMaterialConsumptionLedgerRow {
-  buyerCode: number;
-  order: string;
-  typeCode: number;
-  styleCode: string;
-  color: string;
-  size: string;
-  stockCode: string;
-  itemCode: string;
-  feature1: string;
-  feature2: string;
-  feature3: string;
-  feature4: string;
-  consumptionUnit: string;
-  quantityPerGarment: number;
-  percentageAllowance: number;
-  itemUnit: string;
-  totalConsumption: number;
-  supplierCode: string;
-}
 
 interface LedgerGridProps {
   styleContext: StyleContext;
@@ -127,7 +108,7 @@ export default function ConsumptionLedgerGrid({
   );
 
   // ... Inside your main MaterialConsumptionGrid function component body:
-  const [deleteLineItem] = useDeleteConsumptionEntryMutation();
+  const { mutateAsync: deleteLineItem } = useDeleteConsumptionEntryMutation();
 
   // 2. Enforce the strict Clipper Cascading Delete Verification Guard Hook
 
@@ -151,7 +132,7 @@ export default function ConsumptionLedgerGrid({
         itemCode: row.itemCode,
         color: row.color || "",
         size: row.size || "",
-      }).unwrap();
+      });
 
       toast.update(toastId, {
         render:
@@ -160,12 +141,12 @@ export default function ConsumptionLedgerGrid({
         isLoading: false,
         autoClose: 3000,
       });
-    } catch (err: any) {
+      onRefresh(); // BUG FIX: grid never refreshed after a successful delete
+    } catch (err) {
       // Gracefully intercepts bad requests from the C# backend if a PO has already been raised
+      const appError = err as AppError;
       const errorMsg =
-        err?.data?.Message ||
-        err?.data?.message ||
-        "Failed to complete record deletion.";
+        appError?.message || "Failed to complete record deletion.";
 
       toast.update(toastId, {
         render: `🛑 Deletion Aborted: ${errorMsg}`,

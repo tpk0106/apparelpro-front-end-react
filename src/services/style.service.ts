@@ -3,6 +3,16 @@ import { client } from "../auth/axiosClient";
 import type { PaginationData } from "../interfaces/definitions";
 import type { Style } from "../interfaces/OrderManagement/Style";
 
+const loadStylesByScope = async (params: {
+  buyerCode: number;
+  order: string;
+  typeCode: number;
+}) => {
+  return await client.get<Style[]>(
+    `${APPARELPRO_ENDPOINTS.ORDER_MANAGEMENT.STYLE_DETAILS.GET_STYLE_DETAILS_BY_BUYER_AND_ORDER_AND_TYPE}/${params.buyerCode}/${params.order}/${params.typeCode}`,
+  );
+};
+
 const loadStyles = async (data: PaginationData) => {
   console.log("bank service started ", data);
   return await client.get(
@@ -47,4 +57,10 @@ const updateEditStyle = async (styleCode: string, existingStyle: Style) => {
     },
   );
 };
-export { loadStyles, createNewStyle, updateEditStyle, deleteStyle };
+export {
+  loadStyles,
+  loadStylesByScope,
+  createNewStyle,
+  updateEditStyle,
+  deleteStyle,
+};

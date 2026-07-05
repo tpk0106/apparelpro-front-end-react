@@ -25,24 +25,25 @@ import {
   type RequisitionLineItemRow,
   // type RequisitionHeaderModel,
 } from "./orderwise-inventory.types";
-import { useCreateSRNMutation } from "../../services/order-wise-inventory.services";
+import { useCreateSTRNMutation } from "../../tanstack-hooks/orderwise-inventory-strn.hooks";
+import type { AppError } from "../../auth/axiosClient";
 
 // Import your existing live global lookups query hooks for standard contextual filters
 import {
-  useGetBuyersPagedQuery,
-  useGetOrdersByBuyerQuery,
-  //   Buyer,
-} from "../../services/material-consumption.services";
+  useGetBuyersQuery,
+  useGetAllPurchaseOrdersByBuyerCode,
+} from "../../tanstack-hooks/custom-hooks";
 import type { Buyer } from "../../interfaces/references/Buyer";
 import {
   useGetAllDepartmentsQuery,
   // useGetDepartmentsPagedQuery,
-} from "../../services/common.service";
+} from "../../tanstack-hooks/common.hooks";
 // import type { Department } from "../../interfaces/references/Department";
 
 export default function StoresRequisitionWorkspace() {
   // 1. Central Transaction Mutation Hook
-  const [commitSRN, { isLoading: isSubmitting }] = useCreateSRNMutation();
+  const { mutateAsync: commitSTRN, isPending: isSubmitting } =
+    useCreateSTRNMutation();
 
   // 2. Document Level Header Form States
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
@@ -57,7 +58,7 @@ export default function StoresRequisitionWorkspace() {
 
   // 4. Fetch Master Filtering Datasets out of active RTK-Query Cache Layers
   const { data: buyerPageData, isLoading: isBuyersLoading } =
-    useGetBuyersPagedQuery({
+    useGetBuyersQuery({
       pageIndex: 0,
       pageSize: 999,
       sortColumn: "name",
@@ -71,9 +72,10 @@ export default function StoresRequisitionWorkspace() {
   );
 
   const { data: ordersList = [], isLoading: isOrdersLoading } =
-    useGetOrdersByBuyerQuery(selectedBuyer?.buyerCode ?? 0, {
-      skip: !selectedBuyer,
-    });
+    useGetAllPurchaseOrdersByBuyerCode(
+      selectedBuyer?.buyerCode ?? 0,
+      !!selectedBuyer,
+    );
 
   const isHeaderValid =
     selectedBuyer && selectedOrder.trim() !== "" && selectedDept.trim() !== "";
@@ -120,7 +122,7 @@ export default function StoresRequisitionWorkspace() {
 
   // 2. THE TRANS-ACTION SAVE COMMIT SUBMISSION HANDLER (Replicating Clipper lastkey() = 27 loops)
   const handleCommitRequisition = async () => {
-    if (!isHeaderValid || lineItems.length === 0) {
+    if (!selectedBuyer || !isHeaderValid || lineItems.length === 0) {
       toast.warning(
         "Validation Error: Cannot submit an empty or incomplete requisition manifest.",
       );
@@ -138,7 +140,7 @@ export default function StoresRequisitionWorkspace() {
       return;
     }
 
-    const confirmationPrompt = `Confirm all entries and save Stores Requisition Note (SRN)?\n\nThis will lock down allocated balances across your warehouse stock ledger pool. Proceed?`;
+    const confirmationPrompt = `Confirm all entries and save Stores Requisition Note (STRN)?\n\nThis will lock down allocated balances across your warehouse stock ledger pool. Proceed?`;
     if (!window.confirm(confirmationPrompt)) return;
 
     // Trigger Toastify loading progress spinner instantly
@@ -165,7 +167,7 @@ export default function StoresRequisitionWorkspace() {
     };
 
     try {
-      const response = await commitSRN(payload).unwrap();
+      const response = await commitSTRN(payload);
 
       toast.update(toastId, {
         render:
@@ -178,11 +180,10 @@ export default function StoresRequisitionWorkspace() {
       });
 
       handleResetForm(); // Fully clear the workspace view upon successful completion!
-    } catch (err: any) {
-      // Case-insensitive extractor handler transforms errors into descriptive warning toasters
+    } catch (err) {
+      const appError = err as AppError;
       const serverMsg =
-        err?.data?.Error ||
-        err?.data?.error ||
+        appError?.message ||
         "Failed to process requisition transaction on SQL Server.";
 
       toast.update(toastId, {
@@ -230,7 +231,7 @@ export default function StoresRequisitionWorkspace() {
           variant="h5"
           sx={{ fontWeight: "bold", color: "#1a237e", mb: 3 }}
         >
-          Stores Requisition Note (SRN) Data Entry Dashboard
+          Stores Requisition Note (STRN) Data Entry Dashboard
         </Typography>
 
         {/* SECTION 1: DOCUMENT HEADER DATA CAPTURE TRACK PANEL */}
@@ -303,7 +304,7 @@ export default function StoresRequisitionWorkspace() {
               onChange={(e) => setSelectedDept(e.target.value)}
               disabled={isDeptsLoading}
             >
-              {dbDepartments.map((dept: any) => (
+              {dbDepartments.map((dept) => (
                 <MenuItem key={dept.departmentCode} value={dept.departmentCode}>
                   {dept.name} [ {dept.departmentCode} ]
                 </MenuItem>
@@ -315,7 +316,7 @@ export default function StoresRequisitionWorkspace() {
         <Divider sx={{ my: 3 }} />
 
         {/* SECTION 2: WORKSPACE ACCESSIBILITY GATE LOCK BANNER */}
-        {!isHeaderValid ? (
+        {!selectedBuyer || !isHeaderValid ? (
           <Alert
             severity="info"
             variant="outlined"
@@ -367,7 +368,7 @@ export default function StoresRequisitionWorkspace() {
                 display: "block",
               }}
             >
-              Active Target Context: Buyer {selectedBuyer?.name} | Purchase
+              Active Target Context: Buyer {selectedBuyer.name} | Purchase
               Order Ref #{selectedOrder}
             </Typography>
 

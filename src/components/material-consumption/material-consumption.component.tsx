@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Box, Paper, Typography, Alert } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import ConsumptionScopeHeader from "./consumption-scope-header.component";
@@ -7,21 +7,18 @@ import ConsumptionEntryForm from "./consumption-entry-form.component";
 // import OrderItemLookupRow from "./material-master-list.component";
 // import type ConsumptionLedgerGrid from "./consumption-ledger-grid.component";
 
-//import { useGetBreakdownByStyleQuery } from "./materialConsumptionApi";
-
-// Import your custom RTK Query data fetch hooks
+// Import your TanStack Query data fetch hooks
 import {
-  useGetAvailableMaterialsQuery,
-  useGetBreakdownByStyleQuery,
-} from "../../services/material-consumption.services"; // Fetch mapping endpoint
+  useGetAvailableMaterials,
+  useGetLedgerBreakdownByStyle,
+} from "../../tanstack-hooks/material-consumption-entry.hooks";
 
 import type {
   OrderItemServiceModel,
   SelectedScopeContext,
+  StyleMaterialConsumptionLedgerRow,
 } from "./material-consumption.types";
-import ConsumptionLedgerGrid, {
-  type StyleMaterialConsumptionLedgerRow,
-} from "./consumption-ledger-grid.component";
+import ConsumptionLedgerGrid from "./consumption-ledger-grid.component";
 
 export default function MaterialConsumption() {
   const [scopeContext, setScopeContext] = useState<SelectedScopeContext | null>(
@@ -48,14 +45,14 @@ export default function MaterialConsumption() {
 
   // Inside material-consumption.component.tsx:
   const { data: materialsData = [], isLoading: isChecklistLoading } =
-    useGetAvailableMaterialsQuery(
+    useGetAvailableMaterials(
       {
         buyerCode: scopeContext?.buyerCode ?? 0,
         order: scopeContext?.order ?? "",
         typeCode: scopeContext?.typeCode ?? 0,
         styleCode: scopeContext?.styleCode ?? "",
       },
-      { skip: !scopeContext },
+      !!scopeContext,
     );
 
   // Fetch the bottom ledger rows dynamically using your active selection context keys
@@ -63,23 +60,15 @@ export default function MaterialConsumption() {
     data: currentLedger = [],
     isLoading: isLedgerLoading,
     refetch,
-  } = useGetBreakdownByStyleQuery(
+  } = useGetLedgerBreakdownByStyle(
     {
       buyerCode: scopeContext?.buyerCode ?? 0,
       order: scopeContext?.order ?? "",
       typeCode: scopeContext?.typeCode ?? 0,
       styleCode: scopeContext?.styleCode ?? "",
     },
-    { skip: !scopeContext }, // Skip loading database records until header selection is complete
+    !!scopeContext, // Skip loading database records until header selection is complete
   );
-
-  useEffect(() => {
-    console.log("loaded buyer ", scopeContext?.buyerCode);
-    console.log("loaded order ", scopeContext?.order);
-    console.log("loaded type ", scopeContext?.typeCode);
-    console.log("loaded style ", scopeContext?.styleCode);
-    console.log("loaded style ledger ", currentLedger);
-  });
 
   return (
     <Box sx={{ width: "100%", p: 1 }}>

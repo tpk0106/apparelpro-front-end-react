@@ -10,9 +10,6 @@ import { rootReducer } from "./rootReducer";
 import { persistReducer, persistStore } from "redux-persist";
 import { thunk } from "redux-thunk";
 
-// Import your active RTK-Query material consumption API services instance
-import { materialConsumptionApi } from "../services/material-consumption.services";
-
 // Import lookups safely to handle CommonJS vs ESM issues inside Vite compilation scopes
 import storageModule from "redux-persist/lib/storage";
 const storage = (storageModule as any).default || storageModule;
@@ -21,8 +18,6 @@ import reduxLogger from "redux-logger";
 import { supplierPurchaseOrderApi } from "../services/supplier-purchase-order.service";
 import { stylewiseEventApi } from "../services/stylewise-event.services";
 import { partShipmentApi } from "../services/part-shipment.service";
-import { orderwiseInventoryApi } from "../services/order-wise-inventory.services";
-import { commonServiceApi } from "../services/common.service";
 const logger = (reduxLogger as any).default || reduxLogger;
 
 declare global {
@@ -39,11 +34,8 @@ const persistConfig = {
   // Add the middleware instance inside your middleWares pipeline array block:
 
   blacklist: [
-    materialConsumptionApi.reducerPath,
     supplierPurchaseOrderApi.reducerPath,
     stylewiseEventApi.reducerPath, // FIXED: Isolates the milestone cache state from storage bloat
-    orderwiseInventoryApi.reducerPath, // Shields your inventory caches from browser storage bloat
-    commonServiceApi.reducerPath,
   ],
 };
 
@@ -69,12 +61,9 @@ const middleWares: Middleware[] = [
   persistGuardMiddleware, // Mounted directly between thunk and logger architectures
   import.meta.env.DEV && logger,
   sagaMiddleware,
-  materialConsumptionApi.middleware,
   supplierPurchaseOrderApi.middleware,
   stylewiseEventApi.middleware, // FIXED: Registers asynchronous event query transport listeners
   partShipmentApi.middleware, // LOCKED SAFE FROM SERIALIZATION CRASHES
-  orderwiseInventoryApi.middleware,
-  commonServiceApi.middleware,
 ].filter((middleware): middleware is Middleware => Boolean(middleware));
 
 // Safe execution check for developer browser devtools extensions

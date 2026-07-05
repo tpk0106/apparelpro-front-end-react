@@ -2,6 +2,13 @@ import { client } from "../auth/axiosClient";
 import { APPARELPRO_ENDPOINTS } from "../api/api-configurations";
 import type { PaginationData } from "../interfaces/definitions";
 import type { Supplier } from "../interfaces/references/Supplier";
+import type { SupplierServiceModel } from "../tanstack-hooks/interfaces";
+
+const loadSuppliersLookup = async () => {
+  return await client.get<SupplierServiceModel[]>(
+    APPARELPRO_ENDPOINTS.REFERENCE_SECTION.SUPPLIER.SUPPLIERS_LOOKUP,
+  );
+};
 
 const loadSuppliers = async (data: PaginationData) => {
   return await client.get(
@@ -47,4 +54,10 @@ const removeSupplier = async (supplierCode: number) => {
   );
 };
 
-export { loadSuppliers, createNewSupplier, updateEditSupplier, removeSupplier };
+export {
+  loadSuppliers,
+  loadSuppliersLookup,
+  createNewSupplier,
+  updateEditSupplier,
+  removeSupplier,
+};

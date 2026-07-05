@@ -4,14 +4,12 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Grid from "@mui/material/Grid";
 import type { Style } from "../../interfaces/OrderManagement/Style";
 import {
-  useGetBuyersPagedQuery,
-  useGetOrdersByBuyerQuery,
-  useGetAllGarmentTypesQuery,
-  useGetStylesByScopeQuery,
-  // 1. IMPORT your existing live currency endpoint query hook
-  useGetAllCurrenciesQuery,
-  // Buyer,
-} from "../../services/material-consumption.services";
+  useGetBuyersQuery,
+  useGetAllPurchaseOrdersByBuyerCode,
+  useGetAllGarmentTypes,
+  useGetStylesByScope,
+  useGetCurrenciesQuery,
+} from "../../tanstack-hooks/custom-hooks";
 
 import {
   // type BuyerOption,
@@ -19,6 +17,7 @@ import {
   type GarmentTypeServiceModel,
 } from "./material-consumption.types";
 import type { Buyer } from "../../interfaces/references/Buyer";
+import type { Currency } from "../../interfaces/references/Currency";
 
 interface ScopeHeaderProps {
   onScopeChange: (context: SelectedScopeContext | null) => void;
@@ -34,18 +33,21 @@ export default function ConsumptionScopeHeader({
   const [selectedStyle, setSelectedStyle] = useState<Style | null>(null);
 
   // 2. Add local state to hold your active currency selection
-  const [selectedCurrency, setSelectedCurrency] = useState<any | null>(null);
+  const [selectedCurrency, setSelectedCurrency] = useState<Currency | null>(
+    null,
+  );
 
   // Fetch Buyers Registry
-  const { data: buyerPageData, isLoading: isBuyersLoading } =
-    useGetBuyersPagedQuery({
+  const { data: buyerPageData, isLoading: isBuyersLoading } = useGetBuyersQuery(
+    {
       pageIndex: 0,
       pageSize: 999,
       sortColumn: "name",
       sortOrder: "asc",
       filterColumn: null,
       filterQuery: null,
-    });
+    },
+  );
 
   const buyersList = useMemo<Buyer[]>(
     () => buyerPageData?.items || [],
@@ -54,7 +56,7 @@ export default function ConsumptionScopeHeader({
 
   // Fetch Currencies Master Registry mapping your standard pagination variables
   const { data: currencyPageData, isLoading: isCurrenciesLoading } =
-    useGetAllCurrenciesQuery({
+    useGetCurrenciesQuery({
       pageIndex: 0,
       pageSize: 999,
       sortColumn: "name",
@@ -63,28 +65,29 @@ export default function ConsumptionScopeHeader({
       filterQuery: null,
     });
 
-  const currenciesList = useMemo<any[]>(
+  const currenciesList = useMemo<Currency[]>(
     () => currencyPageData?.items || [],
     [currencyPageData],
   );
 
   // Cascade Dependent Requests
   const { data: ordersList = [], isLoading: isOrdersLoading } =
-    useGetOrdersByBuyerQuery(selectedBuyer?.buyerCode ?? 0, {
-      skip: !selectedBuyer,
-    });
+    useGetAllPurchaseOrdersByBuyerCode(
+      selectedBuyer?.buyerCode ?? 0,
+      !!selectedBuyer,
+    );
 
   const { data: globalTypesList = [], isLoading: isTypesLoading } =
-    useGetAllGarmentTypesQuery();
+    useGetAllGarmentTypes();
 
   const { data: stylesList = [], isLoading: isStylesLoading } =
-    useGetStylesByScopeQuery(
+    useGetStylesByScope(
       {
         buyerCode: selectedBuyer?.buyerCode ?? 0,
         order: selectedOrder ?? "",
         typeCode: selectedType?.id ?? 0,
       },
-      { skip: !selectedBuyer || !selectedOrder || !selectedType },
+      !!selectedBuyer && !!selectedOrder && !!selectedType,
     );
 
   // --- EVENT HANDLERS ---
@@ -119,7 +122,7 @@ export default function ConsumptionScopeHeader({
   };
 
   // 3. Trigger context confirmation ONLY when currency is selected
-  const handleCurrencyChange = (currencyObj: any | null) => {
+  const handleCurrencyChange = (currencyObj: Currency | null) => {
     setSelectedCurrency(currencyObj);
 
     if (
@@ -231,8 +234,8 @@ export default function ConsumptionScopeHeader({
           <Autocomplete
             options={currenciesList}
             disabled={!selectedStyle} // Remains locked until the style profile context is active
-            getOptionLabel={(option: any) =>
-              option.code ? `${option.code} (${option.description})` : ""
+            getOptionLabel={(option: Currency) =>
+              option.code ? `${option.code} (${option.name})` : ""
             }
             value={selectedCurrency}
             onChange={(_, val) => handleCurrencyChange(val)}

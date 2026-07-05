@@ -5,11 +5,11 @@ import Grid from "@mui/material/Grid";
 
 // Import your existing live master lookup hooks directly from your verified service slices
 import {
-  useGetBuyersPagedQuery,
-  useGetOrdersByBuyerQuery,
-  useGetAllGarmentTypesQuery,
-  useGetStylesByScopeQuery,
-} from "../../services/material-consumption.services";
+  useGetBuyersQuery,
+  useGetAllPurchaseOrdersByBuyerCode,
+  useGetAllGarmentTypes,
+  useGetStylesByScope,
+} from "../../tanstack-hooks/custom-hooks";
 
 import type { Style } from "../../interfaces/OrderManagement/Style"; // Ensure this relative path targets your project style model
 import type { SelectedHeaderContext } from "./stylewise-events.types";
@@ -32,36 +32,38 @@ export default function StylewiseEventsHeader({
   const [selectedStyle, setSelectedStyle] = useState<Style | null>(null);
 
   // 2. Fetch Master Datasets from your active RTK-Query Service Caches
-  const { data: buyerPageData, isLoading: isBuyersLoading } =
-    useGetBuyersPagedQuery({
+  const { data: buyerPageData, isLoading: isBuyersLoading } = useGetBuyersQuery(
+    {
       pageIndex: 0,
       pageSize: 999,
       sortColumn: "name",
       sortOrder: "asc",
       filterColumn: null,
       filterQuery: null,
-    });
+    },
+  );
   const buyersList = useMemo<Buyer[]>(
     () => buyerPageData?.items || [],
     [buyerPageData],
   );
 
   const { data: ordersList = [], isLoading: isOrdersLoading } =
-    useGetOrdersByBuyerQuery(selectedBuyer?.buyerCode ?? 0, {
-      skip: !selectedBuyer,
-    });
+    useGetAllPurchaseOrdersByBuyerCode(
+      selectedBuyer?.buyerCode ?? 0,
+      !!selectedBuyer,
+    );
 
   const { data: globalTypesList = [], isLoading: isTypesLoading } =
-    useGetAllGarmentTypesQuery();
+    useGetAllGarmentTypes();
 
   const { data: stylesList = [], isLoading: isStylesLoading } =
-    useGetStylesByScopeQuery(
+    useGetStylesByScope(
       {
         buyerCode: selectedBuyer?.buyerCode ?? 0,
         order: selectedOrder ?? "",
         typeCode: selectedType?.id ?? 0,
       },
-      { skip: !selectedBuyer || !selectedOrder || !selectedType },
+      !!selectedBuyer && !!selectedOrder && !!selectedType,
     );
 
   // --- CASCADING STATE ROUTING MANIPULATION ACTIONS ---

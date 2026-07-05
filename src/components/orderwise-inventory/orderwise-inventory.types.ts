@@ -8,6 +8,13 @@ export interface StockItemAvailabilityDetails {
   netAvailableBalance: number;
 }
 
+export interface StockLookupRow {
+  itemCode: string;
+  storeCode: string;
+  unit: string;
+  description: string;
+}
+
 export interface RequisitionHeaderModel {
   srnNumber: string; // Will be allocated by the C# backend common service
   transactionDate: string; // ISO date string format (YYYY-MM-DD)

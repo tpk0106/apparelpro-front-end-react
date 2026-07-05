@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   Box,
   Card,
@@ -21,22 +21,17 @@ import type {
 
 // Import your custom hooks from your services slice
 import {
-  useGetDynamicFeatureHeadersQuery,
-  useLazyCalculateConsumptionQuery,
+  useGetDynamicFeatureHeaders,
+  useCalculateConsumptionMutation,
   useSaveConsumptionEntryMutation,
-  // 1. ADDED: Import your live units fetching hook from your service file
-  useGetAllUnitsQuery,
-  useGetStyleDimensionsQuery,
-  useGetSuppliersLookupQuery,
-} from "../../services/material-consumption.services";
+} from "../../tanstack-hooks/material-consumption-entry.hooks";
+import {
+  useGetUnits,
+  useGetStyleDimensions,
+  useGetSuppliersLookup,
+} from "../../tanstack-hooks/custom-hooks";
 import type { SupplierServiceModel } from "../../tanstack-hooks/interfaces";
-
-// Define the exact C# service contract model layout locally to satisfy strict typings
-interface UnitServiceModel {
-  id: number;
-  code: string;
-  description: string;
-}
+import type { Unit } from "../../interfaces/references/Unit";
 
 interface EntryFormProps {
   styleContext: StyleContext;
@@ -140,7 +135,7 @@ export default function ConsumptionEntryForm({
   }
 
   const { data: dimensionsData, isLoading: isDimensionsLoading } =
-    useGetStyleDimensionsQuery({
+    useGetStyleDimensions({
       buyerCode: styleContext.buyerCode,
       order: styleContext.order,
       typeCode: styleContext.typeCode,
@@ -152,50 +147,38 @@ export default function ConsumptionEntryForm({
   const availableSizes = dimensionsData?.sizes || [];
 
   // 2. Fetch all system master unit profiles using your standard parameters payload
-  const { data: unitsPageData, isLoading: isUnitsLoading } =
-    useGetAllUnitsQuery({
-      pageIndex: 0,
-      pageSize: 999,
-      sortColumn: "code",
-      sortOrder: "asc",
-      filterColumn: null,
-      filterQuery: null,
-    });
-
-  useEffect(() => {
-    console.log("style color size details----->>>", availableColors);
-    console.log("style color size details----->>>", availableSizes);
+  const { data: unitsPageData, isLoading: isUnitsLoading } = useGetUnits({
+    pageIndex: 0,
+    pageSize: 999,
+    sortColumn: "code",
+    sortOrder: "asc",
+    filterColumn: null,
+    filterQuery: null,
   });
 
   // Inside your ConsumptionEntryForm component block:
   const { data: suppliersData = [], isLoading: isSuppliersLoading } =
-    useGetSuppliersLookupQuery();
+    useGetSuppliersLookup();
   const suppliersList = useMemo<SupplierServiceModel[]>(
     () => suppliersData || [],
     [suppliersData],
   );
 
   // Extract the item list array from your PaginationAPIModel structure safely via useMemo
-  const unitsList = useMemo<UnitServiceModel[]>(
+  const unitsList = useMemo<Unit[]>(
     () => unitsPageData?.items || [],
     [unitsPageData],
   );
 
   const { data: featureMap, isLoading: isFeaturesLoading } =
-    useGetDynamicFeatureHeadersQuery({
+    useGetDynamicFeatureHeaders({
       stockCode: selectedMaterial.stockCode,
       itemCode: selectedMaterial.itemCode,
     });
 
-  useEffect(() => {
-    console.log("suppliers : ", suppliersData);
-    console.log("suppliers list: ", suppliersList);
-    console.log("feature map list: ", featureMap);
-  });
-
-  const [triggerCalculation, { isFetching: isCalculating }] =
-    useLazyCalculateConsumptionQuery();
-  const [saveEntry, { isLoading: isSaving }] =
+  const { mutateAsync: triggerCalculation, isPending: isCalculating } =
+    useCalculateConsumptionMutation();
+  const { mutateAsync: saveEntry, isPending: isSaving } =
     useSaveConsumptionEntryMutation();
 
   const handleInputChange = (field: keyof FormInputs, value: string) => {
@@ -217,7 +200,7 @@ export default function ConsumptionEntryForm({
         finalItemUnit: form.finalItemUnit,
         quantityPerGarment: Number(form.quantityPerGarment) || 0,
         allowancePercentage: Number(form.allowancePercentage) || 0,
-      }).unwrap();
+      });
 
       setCalculatedTotal(result);
     } catch (err: unknown) {
@@ -532,10 +515,8 @@ export default function ConsumptionEntryForm({
               }
               // Cross-references the active form selection code string by finding the matching object value
               value={
-                unitsList.find(
-                  (s: UnitServiceModel) =>
-                    String(s.code) === form.finalItemUnit,
-                ) || null
+                unitsList.find((s) => String(s.code) === form.finalItemUnit) ||
+                null
               }
               // Updates your master form input state cleanly upon user selection choice updates
               onChange={(_, val) =>
@@ -693,7 +674,7 @@ export default function ConsumptionEntryForm({
                   currency: styleContext.currencyCode,
                 };
 
-                await saveEntry(payload).unwrap();
+                await saveEntry(payload);
                 alert(
                   "Material ledger entry saved and synchronized with SQL Server successfully!",
                 );

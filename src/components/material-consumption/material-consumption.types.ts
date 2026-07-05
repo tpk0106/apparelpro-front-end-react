@@ -126,6 +126,50 @@ export interface MaterialSelection {
   description: string;
 }
 
+export interface StyleMaterialConsumptionLedgerRow {
+  buyerCode: number;
+  order: string;
+  typeCode: number;
+  styleCode: string;
+  color: string;
+  size: string;
+  stockCode: string;
+  itemCode: string;
+  feature1: string;
+  feature2: string;
+  feature3: string;
+  feature4: string;
+  consumptionUnit: string;
+  quantityPerGarment: number;
+  percentageAllowance: number;
+  itemUnit: string;
+  totalConsumption: number;
+  supplierCode: string;
+}
+
+export interface ConsumptionEntryPayload {
+  buyerCode: number;
+  order: string;
+  typeCode: number;
+  styleCode: string;
+  color: string;
+  size: string;
+  stockCode: string;
+  itemCode: string;
+  feature1: string;
+  feature2: string;
+  feature3: string;
+  feature4: string;
+  consumptionUnit: string;
+  quantityPerGarment: number;
+  percentageAllowance: number;
+  itemUnit: string;
+  totalConsumption: number;
+  supplierCode: string;
+  unitPrice: number;
+  currency: string;
+}
+
 // Strictly types the local form baseline capture parameters
 export interface FormInputs {
   feature1: string;

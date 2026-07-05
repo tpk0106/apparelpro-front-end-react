@@ -32,10 +32,8 @@ import {
 } from "../../services/part-shipment.service";
 
 // Import your existing live master lookup hook for units reference validation
-import {
-  useGetAllUnitsQuery,
-  type UnitServiceModel,
-} from "../../services/material-consumption.services";
+import { useGetUnits } from "../../tanstack-hooks/custom-hooks";
+import type { Unit } from "../../interfaces/references/Unit";
 
 // import { type MRT_Row, MaterialReactTable, useMaterialReactTable, type MRT_ColumnDef } from "material-react-table";
 
@@ -96,7 +94,7 @@ export default function PartShipmentsGrid({
   });
 
   // Fetch master system units to drive cell and modal dropdown selectors
-  const { data: unitsPageData } = useGetAllUnitsQuery({
+  const { data: unitsPageData } = useGetUnits({
     pageIndex: 0,
     pageSize: 999,
     sortColumn: "code",
@@ -320,7 +318,7 @@ export default function PartShipmentsGrid({
             defaultValue={cell.getValue() || "PCS"}
             onChange={(e) => handleCellEditBlur(row, "unit", e.target.value)}
           >
-            {systemUnits.map((u: UnitServiceModel) => (
+            {systemUnits.map((u: Unit) => (
               <MenuItem key={u.id} value={u.code}>
                 {u.code}
               </MenuItem>
@@ -574,7 +572,7 @@ export default function PartShipmentsGrid({
                   setNewForm((p) => ({ ...p, unit: e.target.value }))
                 }
               >
-                {systemUnits.map((u: UnitServiceModel) => (
+                {systemUnits.map((u: Unit) => (
                   <MenuItem key={u.id} value={u.code}>
                     {u.code}
                   </MenuItem>

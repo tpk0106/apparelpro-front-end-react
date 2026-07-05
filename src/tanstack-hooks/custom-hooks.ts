@@ -13,6 +13,7 @@ import type { GarmentType } from "../interfaces/references/GarmentType";
 import {
   createNewGarmentType,
   loadGarmentTypes,
+  loadAllGarmentTypes,
   removeGarmentType,
   updateEditGarmentType,
 } from "../services/garment-type.service";
@@ -59,6 +60,7 @@ import type {
   DeleteBasisPayload,
   DeleteStylePayload,
   PurchaseOrderPayload,
+  SupplierServiceModel,
   UpdateAddressPayload,
   UpdateBasisPayload,
   UpdateStylePayload,
@@ -75,6 +77,7 @@ import {
   createNewStyle,
   deleteStyle,
   loadStyles,
+  loadStylesByScope,
   updateEditStyle,
 } from "../services/style.service";
 import type PurchaseOrder from "../interfaces/OrderManagement/PurchaseOrder";
@@ -84,7 +87,13 @@ import {
   loadPurchaseOrdersByBuyerCode,
 } from "../services/poService";
 
-import { createNewColorSizeBreakdownDetails } from "../services/color-size-breakdown-details.service";
+import {
+  createNewColorSizeBreakdownDetails,
+  loadStyleDimensions,
+  loadSavedColorSizeMatrix,
+} from "../services/color-size-breakdown-details.service";
+import { loadSuppliersLookup } from "../services/supplier.service";
+import type { ColorSizeDetailsServiceModel } from "../components/material-consumption/material-consumption.types";
 
 // 1. THE FETCH HOOK (Replaces loadAllCurrencies Saga & Reducer)
 export const useGetGarmentTypes = (paginate: PaginationData) => {
@@ -99,6 +108,18 @@ export const useGetGarmentTypes = (paginate: PaginationData) => {
       return response.data;
     },
     placeholderData: (previousData) => previousData, // Keeps old page data visible while loading the next page (smooth transitions)
+  });
+};
+
+// Non-paginated lookup for dropdowns (replaces useGetAllGarmentTypesQuery)
+export const useGetAllGarmentTypes = () => {
+  return useQuery<GarmentType[], Error>({
+    queryKey: ["allGarmentTypes"],
+    queryFn: async () => {
+      const response: AxiosResponse<GarmentType[]> =
+        await loadAllGarmentTypes();
+      return response.data;
+    },
   });
 };
 
@@ -615,6 +636,89 @@ export const useGetStyles = (paginate: PaginationData) => {
       return response.data;
     },
     placeholderData: (previousData) => previousData, // Keeps old page data visible while loading the next page (smooth transitions)
+  });
+};
+
+// Styles scoped to buyer/order/garment-type (replaces useGetStylesByScopeQuery)
+export const useGetStylesByScope = (
+  params: { buyerCode: number; order: string; typeCode: number },
+  enabled: boolean,
+) => {
+  return useQuery<Style[], Error>({
+    queryKey: [
+      "stylesByScope",
+      params.buyerCode,
+      params.order,
+      params.typeCode,
+    ],
+    queryFn: async () => {
+      const response: AxiosResponse<Style[]> =
+        await loadStylesByScope(params);
+      return response.data;
+    },
+    enabled,
+  });
+};
+
+// Colour/size dimension lookup for a scoped style (replaces useGetStyleDimensionsQuery)
+export const useGetStyleDimensions = (params: {
+  buyerCode: number;
+  order: string;
+  typeCode: number;
+  styleCode: string;
+}) => {
+  return useQuery<{ colors: string[]; sizes: string[] }, Error>({
+    queryKey: [
+      "styleDimensions",
+      params.buyerCode,
+      params.order,
+      params.typeCode,
+      params.styleCode,
+    ],
+    queryFn: async () => {
+      const response: AxiosResponse<{ colors: string[]; sizes: string[] }> =
+        await loadStyleDimensions(params);
+      return response.data;
+    },
+  });
+};
+
+// Non-paginated supplier lookup for dropdowns (replaces useGetSuppliersLookupQuery)
+export const useGetSuppliersLookup = () => {
+  return useQuery<SupplierServiceModel[], Error>({
+    queryKey: ["suppliersLookup"],
+    queryFn: async () => {
+      const response: AxiosResponse<SupplierServiceModel[]> =
+        await loadSuppliersLookup();
+      return response.data;
+    },
+  });
+};
+
+// Previously-saved colour/size allocation matrix for a style (replaces useGetColorSizeSavedMatrixQuery)
+export const useGetColorSizeSavedMatrix = (
+  params: {
+    buyerCode: number;
+    order: string;
+    typeCode: number;
+    styleCode: string;
+  },
+  enabled: boolean,
+) => {
+  return useQuery<ColorSizeDetailsServiceModel[], Error>({
+    queryKey: [
+      "colorSizeSavedMatrix",
+      params.buyerCode,
+      params.order,
+      params.typeCode,
+      params.styleCode,
+    ],
+    queryFn: async () => {
+      const response: AxiosResponse<ColorSizeDetailsServiceModel[]> =
+        await loadSavedColorSizeMatrix(params);
+      return response.data;
+    },
+    enabled,
   });
 };
 

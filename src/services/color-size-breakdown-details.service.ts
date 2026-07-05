@@ -6,6 +6,7 @@ import type {
   ColorSizeBreakdownDetailsParams,
 } from "../interfaces/definitions";
 import type ColorSizeBreakdownDetails from "../interfaces/OrderManagement/ColorSizeDetails";
+import type { ColorSizeDetailsServiceModel } from "../components/material-consumption/material-consumption.types";
 
 const loadColorSizeBreakdownDetailsByStyle = async (
   data: ColorSizeBreakdownDetailsParams,
@@ -90,6 +91,32 @@ const createNewColorSizeBreakdownDetails = async (
 //     },
 //   );
 
+const loadStyleDimensions = async (params: {
+  buyerCode: number;
+  order: string;
+  typeCode: number;
+  styleCode: string;
+}) => {
+  return await client.get<{ colors: string[]; sizes: string[] }>(
+    APPARELPRO_ENDPOINTS.ORDER_MANAGEMENT.COLOR_SIZE_DETAILS
+      .GET_COLOR_AND_SIZE_ONLY_DETAILS_BY_STYLE,
+    { params },
+  );
+};
+
+const loadSavedColorSizeMatrix = async (params: {
+  buyerCode: number;
+  order: string;
+  typeCode: number;
+  styleCode: string;
+}) => {
+  return await client.get<ColorSizeDetailsServiceModel[]>(
+    APPARELPRO_ENDPOINTS.ORDER_MANAGEMENT.COLOR_SIZE_DETAILS
+      .GET_COLOR_SIZE_MATRIX,
+    { params },
+  );
+};
+
 const deleteColorSizeBreakdownDetails = async (
   colorSizeBreakdownDetailsPayload: ColorSizeBreakdownDetailsParams,
 ) => {
@@ -115,5 +142,7 @@ const deleteColorSizeBreakdownDetails = async (
 export {
   loadColorSizeBreakdownDetailsByStyle,
   createNewColorSizeBreakdownDetails,
+  loadStyleDimensions,
+  loadSavedColorSizeMatrix,
   deleteColorSizeBreakdownDetails,
 };

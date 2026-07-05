@@ -8,7 +8,7 @@ const loadPurchaseOrdersByBuyerCode = async (buyerCode: number) => {
     APPARELPRO_ENDPOINTS.ORDER_MANAGEMENT.PO.GET_ALL_POS_BY_BUYER_CODE,
     {
       params: {
-        buyer: buyerCode,
+        buyerCode: buyerCode,
       },
     },
   );

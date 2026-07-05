@@ -14,13 +14,9 @@ import { basisReducer } from "./basis/basis.reducer";
 import { currencyConversionReducer } from "./currency-conversion/currency-conversion.reducer";
 import { currencyExchangeReducer } from "./currency-exchange/currency-exchange.reducer";
 
-// 1. Import your material consumption API slice safely
-import { materialConsumptionApi } from "../services/material-consumption.services";
 import { supplierPurchaseOrderApi } from "../services/supplier-purchase-order.service";
 import { stylewiseEventApi } from "../services/stylewise-event.services";
 import { partShipmentApi } from "../services/part-shipment.service";
-import { orderwiseInventoryApi } from "../services/order-wise-inventory.services";
-import { commonServiceApi } from "../services/common.service";
 
 export const rootReducer = combineReducers({
   user: userReducer,
@@ -38,14 +34,10 @@ export const rootReducer = combineReducers({
   currencyExchange: currencyExchangeReducer,
   currencyConversion: currencyConversionReducer,
 
-  // Maps the dynamic RTK-Query reducer execution tree to the main Redux state store
-  [materialConsumptionApi.reducerPath]: materialConsumptionApi.reducer,
   // Add the reducer inside your rootReducer or store reducer mapping block:
   [supplierPurchaseOrderApi.reducerPath]: supplierPurchaseOrderApi.reducer,
   [stylewiseEventApi.reducerPath]: stylewiseEventApi.reducer,
   [partShipmentApi.reducerPath]: partShipmentApi.reducer,
-  [orderwiseInventoryApi.reducerPath]: orderwiseInventoryApi.reducer, // Shields your inventory caches from browser storage bloat
-  [commonServiceApi.reducerPath]: commonServiceApi.reducer,
 });
 
 // Automatically extracts the exact shape of your entire combined Redux store state

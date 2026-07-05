@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   Box,
   Paper,
@@ -32,10 +32,8 @@ import type {
   PODetailItemRow,
   SupplierPOFormInputs,
 } from "../../interfaces/OrderManagement/purchase-order-types";
-import {
-  useGetAllUnitsQuery,
-  type UnitServiceModel,
-} from "../../services/material-consumption.services";
+import { useGetUnits } from "../../tanstack-hooks/custom-hooks";
+import type { Unit } from "../../interfaces/references/Unit";
 
 // Import your custom RTK-Query mutation hook from your verified store services
 import {
@@ -68,7 +66,7 @@ export default function SupplierPurchaseOrderWorkspace() {
 
   // Fetch master system units for our order unit dropdown selector
   const { data: unitsPageData, isLoading: isUnitsLoading } =
-    useGetAllUnitsQuery({
+    useGetUnits({
       pageIndex: 0,
       pageSize: 999,
       sortColumn: "code",
@@ -80,10 +78,6 @@ export default function SupplierPurchaseOrderWorkspace() {
     () => unitsPageData?.items || [],
     [unitsPageData],
   );
-
-  useEffect(() => {
-    console.log("units :", systemUnits);
-  }, [systemUnits]);
 
   const { data: unfulfilledBudgetDetails, isLoading } =
     useGetUnfulfilledBudgetLinesQuery({
@@ -342,7 +336,7 @@ export default function SupplierPurchaseOrderWorkspace() {
                             handleInputChange("orderUnit", e.target.value)
                           }
                         >
-                          {systemUnits.map((u: UnitServiceModel) => (
+                          {systemUnits.map((u: Unit) => (
                             <MenuItem key={u.id} value={u.code}>
                               {u.code} ({u.description})
                             </MenuItem>

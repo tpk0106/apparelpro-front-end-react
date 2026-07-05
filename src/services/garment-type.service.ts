@@ -3,6 +3,12 @@ import { APPARELPRO_ENDPOINTS } from "../api/api-configurations";
 import type { PaginationData } from "../interfaces/definitions";
 import type { GarmentType } from "../interfaces/references/GarmentType";
 
+const loadAllGarmentTypes = async () => {
+  return await client.get<GarmentType[]>(
+    APPARELPRO_ENDPOINTS.REFERENCE_SECTION.GARMENT_TYPE.GET_ALL_GARMENT_TYPES,
+  );
+};
+
 const loadGarmentTypes = async (data: PaginationData) => {
   return await client.get(
     APPARELPRO_ENDPOINTS.REFERENCE_SECTION.GARMENT_TYPE.GET_BY_PAGINATION,
@@ -49,6 +55,7 @@ const removeGarmentType = async (id: number) => {
 
 export {
   loadGarmentTypes,
+  loadAllGarmentTypes,
   createNewGarmentType,
   updateEditGarmentType,
   removeGarmentType,
