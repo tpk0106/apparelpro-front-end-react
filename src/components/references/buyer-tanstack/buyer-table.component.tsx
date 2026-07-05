@@ -153,67 +153,67 @@ const BuyerTable = ({
     //   onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }),
     // }),
 
-    muiTopToolbarProps: {
-      sx: () => ({
-        backgroundColor: "rgb(96 165 250)",
-        boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
-      }),
-    },
+    // muiTopToolbarProps: {
+    //   sx: () => ({
+    //     backgroundColor: "rgb(96 165 250)",
+    //     boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
+    //   }),
+    // },
 
-    // Cell styling
-    muiTableHeadCellProps: {
-      sx: {
-        fontSize: "0.8rem",
-        fontWeight: "600",
-        backgroundColor: "#fff",
-        // color: "#42a5f5",
-        // color: "#000",
-        boxShadow: "0 -5px 3px -3px black, 0 5px 3px -3px ",
-      },
-    },
+    // // Cell styling
+    // muiTableHeadCellProps: {
+    //   sx: {
+    //     fontSize: "0.8rem",
+    //     fontWeight: "600",
+    //     backgroundColor: "#fff",
+    //     // color: "#42a5f5",
+    //     // color: "#000",
+    //     boxShadow: "0 -5px 3px -3px black, 0 5px 3px -3px ",
+    //   },
+    // },
 
-    // table body
-    muiTableBodyProps: {
-      sx: {
-        fontSize: "0.5rem",
-      },
-    },
+    // // table body
+    // muiTableBodyProps: {
+    //   sx: {
+    //     fontSize: "0.5rem",
+    //   },
+    // },
 
-    muiTableBodyRowProps: ({ row, table }) => ({
-      hover: !table.getState().editingRow,
-      sx: {
-        opacity:
-          !table.getState().editingRow ||
-          table.getState().editingRow?.id === row.id ||
-          table.getState().creatingRow
-            ? 1
-            : 0.4,
-        backgroundColor:
-          Number(row?.id) % 2 === 0 ||
-          table.getState().editingRow?.id === row.id
-            ? darken("#4B9CD3", 0)
-            : darken("#7CB9E8", 0),
-        "&:hover td": {
-          borderTop: "1px solid #fff",
-          borderBottom: "1px solid #fff",
-          // color: "#4B9CD3",
-          color: "#ffffff",
-          backgroundColor:
-            table.getState().editingRow?.id === row.id ||
-            table.getState().creatingRow
-              ? "#fff"
-              : "#7CB9E8",
-        },
-      },
-    }),
+    // muiTableBodyRowProps: ({ row, table }) => ({
+    //   hover: !table.getState().editingRow,
+    //   sx: {
+    //     opacity:
+    //       !table.getState().editingRow ||
+    //       table.getState().editingRow?.id === row.id ||
+    //       table.getState().creatingRow
+    //         ? 1
+    //         : 0.4,
+    //     backgroundColor:
+    //       Number(row?.id) % 2 === 0 ||
+    //       table.getState().editingRow?.id === row.id
+    //         ? darken("#4B9CD3", 0)
+    //         : darken("#7CB9E8", 0),
+    //     "&:hover td": {
+    //       borderTop: "1px solid #fff",
+    //       borderBottom: "1px solid #fff",
+    //       // color: "#4B9CD3",
+    //       color: "#ffffff",
+    //       backgroundColor:
+    //         table.getState().editingRow?.id === row.id ||
+    //         table.getState().creatingRow
+    //           ? "#fff"
+    //           : "#7CB9E8",
+    //     },
+    //   },
+    // }),
 
-    muiTableFooterRowProps: {
-      sx: () => ({
-        backgroundColor: "rgb(96 165 250)",
-        boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
-        boder: "5px solid red",
-      }),
-    },
+    // muiTableFooterRowProps: {
+    //   sx: () => ({
+    //     backgroundColor: "rgb(96 165 250)",
+    //     boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
+    //     boder: "5px solid red",
+    //   }),
+    // },
 
     renderCaption: () => {
       return (isLoading && (

@@ -24,6 +24,7 @@ import {
   useDeleteCurrency,
   useUpdateCountry,
 } from "../../../data/custom-hooks/apparel-pro.repository.hooks";
+import { useApparelProTable } from "../../../themes/useApparelProTable";
 
 interface Props {
   columns: MRT_ColumnDef<Country>[];
@@ -124,7 +125,7 @@ const CountryTable = ({
     useDeleteCurrency(pagination);
   //
 
-  const table = useMaterialReactTable({
+  const table = useApparelProTable<Country>({
     columns,
     data: data,
 
@@ -173,110 +174,110 @@ const CountryTable = ({
       onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }),
     }),
 
-    muiTopToolbarProps: {
-      sx: () => ({
-        backgroundColor: "rgb(96 165 250)",
-        boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
-      }),
-    },
+    // muiTopToolbarProps: {
+    //   sx: () => ({
+    //     backgroundColor: "rgb(96 165 250)",
+    //     boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
+    //   }),
+    // },
 
     // Cell styling
-    muiTableHeadCellProps: {
-      sx: (theme) => ({
-        fontSize: (theme.palette.background.paper = "0.8rem"),
-        fontWeight: "600",
-        backgroundColor: "#fff",
-        // color: "#42a5f5",
-        color: "#000",
-        boxShadow: "0 -5px 3px -3px black, 0 5px 3px -3px ",
-      }),
-    },
+    // muiTableHeadCellProps: {
+    //   sx: (theme) => ({
+    //     fontSize: (theme.palette.background.paper = "0.8rem"),
+    //     fontWeight: "600",
+    //     backgroundColor: "#fff",
+    //     // color: "#42a5f5",
+    //     color: "#000",
+    //     boxShadow: "0 -5px 3px -3px black, 0 5px 3px -3px ",
+    //   }),
+    // },
 
-    // table body
-    muiTableBodyProps: {
-      sx: (theme) => ({
-        fontSize: (theme.palette.background.paper = "0.5rem"),
-      }),
-    },
+    // // table body
+    // muiTableBodyProps: {
+    //   sx: (theme) => ({
+    //     fontSize: (theme.palette.background.paper = "0.5rem"),
+    //   }),
+    // },
 
-    muiTableBodyRowProps: ({ row, table }) => ({
-      hover: !table.getState().editingRow,
-      sx: {
-        opacity:
-          !table.getState().editingRow ||
-          table.getState().editingRow?.id === row.id ||
-          table.getState().creatingRow
-            ? 1
-            : 0.4,
-        backgroundColor:
-          Number(row?.id) % 2 === 0 ||
-          table.getState().editingRow?.id === row.id
-            ? darken("#4B9CD3", 0)
-            : darken("#7CB9E8", 0),
-        "&:hover td": {
-          borderTop: "1px solid #fff",
-          borderBottom: "1px solid #fff",
-          color: "#4B9CD3",
-          backgroundColor:
-            table.getState().editingRow?.id === row.id ||
-            table.getState().creatingRow
-              ? "#fff"
-              : "#000",
-        },
-      },
-    }),
+    // muiTableBodyRowProps: ({ row, table }) => ({
+    //   hover: !table.getState().editingRow,
+    //   sx: {
+    //     opacity:
+    //       !table.getState().editingRow ||
+    //       table.getState().editingRow?.id === row.id ||
+    //       table.getState().creatingRow
+    //         ? 1
+    //         : 0.4,
+    //     backgroundColor:
+    //       Number(row?.id) % 2 === 0 ||
+    //       table.getState().editingRow?.id === row.id
+    //         ? darken("#4B9CD3", 0)
+    //         : darken("#7CB9E8", 0),
+    //     "&:hover td": {
+    //       borderTop: "1px solid #fff",
+    //       borderBottom: "1px solid #fff",
+    //       color: "#4B9CD3",
+    //       backgroundColor:
+    //         table.getState().editingRow?.id === row.id ||
+    //         table.getState().creatingRow
+    //           ? "#fff"
+    //           : "#000",
+    //     },
+    //   },
+    // }),
 
-    muiTableFooterRowProps: {
-      sx: () => ({
-        backgroundColor: "rgb(96 165 250)",
-        boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
-        boder: "5px solid red",
-      }),
-    },
+    // muiTableFooterRowProps: {
+    //   sx: () => ({
+    //     backgroundColor: "rgb(96 165 250)",
+    //     boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
+    //     boder: "5px solid red",
+    //   }),
+    // },
 
-    renderCaption: () => {
-      return (isLoading && (
-        <div className="text1-red-600 flex justify-center border1-2 border1-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-          <div className="bg-gray-50 z-40 w-full h-full absolute top-5 left-10 opacity-90">
-            <div className="w-[85%] h-[70%] border-2 border1-red-400 p-20  m-auto">
-              <HourglassFullOutlinedIcon />
-              {/* <PendingOutlinedIcon />
-            <RefreshOutlinedIcon /> */}
-            </div>
-          </div>
-        </div>
-      )) ||
-        (isUpdatingCurrency && (
-          <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-            <div className="flex-col flex justify-center font-bold text-lg">
-              <div>Updating Supplier.....</div>
-            </div>
-          </div>
-        )) ||
-        (isCreatingCurrency && (
-          <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-            <div className="flex-col flex justify-center font-bold text-lg">
-              <div>Creating new Supplier....</div>
-            </div>
-          </div>
-        )) ||
-        (isDeletingCurrency && (
-          <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-            <div className="flex-col flex justify-center">
-              <div>Deleting Supplier.....</div>
-            </div>
-          </div>
-        )) ||
-        (validationErrors && validationErrors.typeName) ? (
-        <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-          <div className="flex-col flex justify-center">
-            <div>{validationErrors.typeName}</div>
-          </div>
-        </div>
-      ) : (
-        ""
-      );
-    },
+    // renderCaption: () => {
+    //   return (isLoading && (
+    //     <div className="text1-red-600 flex justify-center border1-2 border1-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
+    //       <div className="bg-gray-50 z-40 w-full h-full absolute top-5 left-10 opacity-90">
+    //         <div className="w-[85%] h-[70%] border-2 border1-red-400 p-20  m-auto">
+    //           <HourglassFullOutlinedIcon />
+    //           {/* <PendingOutlinedIcon />
+    //         <RefreshOutlinedIcon /> */}
+    //         </div>
+    //       </div>
+    //     </div>
+    //   )) ||
+    //     (isUpdatingCurrency && (
+    //       <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
+    //         <div className="flex-col flex justify-center font-bold text-lg">
+    //           <div>Updating Supplier.....</div>
+    //         </div>
+    //       </div>
+    //     )) ||
+    //     (isCreatingCurrency && (
+    //       <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
+    //         <div className="flex-col flex justify-center font-bold text-lg">
+    //           <div>Creating new Supplier....</div>
+    //         </div>
+    //       </div>
+    //     )) ||
+    //     (isDeletingCurrency && (
+    //       <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
+    //         <div className="flex-col flex justify-center">
+    //           <div>Deleting Supplier.....</div>
+    //         </div>
+    //       </div>
+    //     )) ||
+    //     (validationErrors && validationErrors.typeName) ? (
+    //     <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
+    //       <div className="flex-col flex justify-center">
+    //         <div>{validationErrors.typeName}</div>
+    //       </div>
+    //     </div>
+    //   ) : (
+    //     ""
+    //   );
+    // },
 
     renderTopToolbarCustomActions: ({ table }) => (
       <Button

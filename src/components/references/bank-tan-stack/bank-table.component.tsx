@@ -9,7 +9,7 @@ import {
 
 import {
   MaterialReactTable,
-  useMaterialReactTable,
+  // useMaterialReactTable,
   type MRT_ColumnDef,
   type MRT_PaginationState,
   type MRT_Row,
@@ -20,6 +20,9 @@ import type { PaginationData } from "../../../interfaces/definitions";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
 import type { Bank } from "../../../interfaces/references/Bank";
+import { useApparelProTable } from "../../../themes/useApparelProTable";
+
+//import { darken, lighten } from '@mui/material/styles';
 
 interface Props {
   columns: MRT_ColumnDef<Bank>[];
@@ -108,7 +111,7 @@ const BankTable = ({
 
   //  CRUD Operations
 
-  const table = useMaterialReactTable({
+  const table = useApparelProTable<Bank>({
     columns,
     data: data,
 
@@ -157,66 +160,216 @@ const BankTable = ({
       onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }),
     }),
 
-    muiTopToolbarProps: {
-      sx: () => ({
-        backgroundColor: "rgb(96 165 250)",
-        boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
-      }),
-    },
+    // // 1. Top Toolbar Workspace Header
+    // muiTopToolbarProps: {
+    //   sx: {
+    //     backgroundColor: "#141922", // Surface/Card background color choice
+    //     backgroundImage: "none",
+    //     borderBottom: "1px solid rgba(139, 147, 161, 0.15)", // Light muted border accent edge
+    //     paddingY: "8px",
+    //   },
+    // },
+
+    // // 2. Table Headers (Enforcing structural grid typography rules)
+    // muiTableHeadCellProps: {
+    //   sx: {
+    //     fontFamily: '"Space Grotesk", sans-serif', // UI labels layout font
+    //     fontSize: "0.85rem",
+    //     fontWeight: "600",
+    //     letterSpacing: "0.03em",
+    //     textTransform: "uppercase",
+    //     backgroundColor: "#141922",
+    //     color: "#F4F6F8", // Primary crisp text color rule
+    //     borderBottom: "2px solid rgba(99, 102, 241, 0.3)", // Indigo primary glow signature under headers
+    //     paddingY: "14px",
+    //   },
+    // },
+
+    // // 3. Table Data Body Workspace Panel
+    // muiTableBodyProps: {
+    //   sx: {
+    //     backgroundColor: "#0A0E14", // Core Primary background depth
+    //   },
+    // },
+
+    // // 4. Custom Dense Tabular Rows & Editing States
+    // muiTableBodyRowProps: ({ row, table }) => {
+    //   const isEditing = table.getState().editingRow?.id === row.id;
+    //   const isRowEven = Number(row?.id) % 2 === 0;
+
+    //   return {
+    //     hover: !table.getState().editingRow,
+    //     sx: {
+    //       // Enforce strict focus isolation opacity mapping rules
+    //       opacity:
+    //         !table.getState().editingRow ||
+    //         isEditing ||
+    //         table.getState().creatingRow
+    //           ? 1
+    //           : 0.35,
+    //       transition: "all 0.15s ease-in-out",
+
+    //       // Zebra striping using deep variant shifts
+    //       backgroundColor: isEditing
+    //         ? "rgba(99, 102, 241, 0.12)"
+    //         : isRowEven
+    //           ? "#0A0E14"
+    //           : "#10141C",
+
+    //       // Typography settings inside row cell targets
+    //       "& td": {
+    //         fontFamily: '"Inter", sans-serif',
+    //         fontSize: "0.75rem",
+    //         color: "#8B93A1", // Default cell data text color (Muted)
+    //         borderBottom: "1px solid rgba(139, 147, 161, 0.08)",
+    //         paddingY: "10px",
+    //       },
+
+    //       // Prevent column metrics jitter during loading values or number parsing
+    //       '& td[data-numeric="true"], & td:has(span[class*="numeric"])': {
+    //         fontFamily: '"JetBrains Mono", monospace',
+    //         letterSpacing: "-0.02em",
+    //       },
+
+    //       // Modern operational row hovering transformations
+    //       "&:hover": {
+    //         backgroundColor: isEditing
+    //           ? "rgba(99, 102, 241, 0.16)"
+    //           : "#141922 !important",
+    //         "& td": {
+    //           color: "#F4F6F8", // Glow active text items on interaction ranges
+    //         },
+    //       },
+    //     },
+    //   };
+    // },
+
+    // // 5. Table Bottom Operational Summary Aggregator Footer
+    // muiTableFooterRowProps: {
+    //   sx: {
+    //     backgroundColor: "#141922",
+    //     borderTop: "1px solid rgba(139, 147, 161, 0.2)",
+    //     boxShadow: "0px -4px 20px rgba(0, 0, 0, 0.4)",
+    //     "& td": {
+    //       fontFamily: '"Space Grotesk", sans-serif',
+    //       fontWeight: "600",
+    //       color: "#6366F1", // Highlight calculated totals using your primary Indigo accent
+    //     },
+    //   },
+    // },
+
+    // muiTopToolbarProps: {
+    //   sx: () => ({
+    //     backgroundColor: "#60a5fa",
+    //     boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
+    //   }),
+    // },
 
     // Cell styling
-    muiTableHeadCellProps: {
-      sx: {
-        fontSize: "0.8rem",
-        fontWeight: "600",
-        backgroundColor: "#fff",
-        // color: "#42a5f5",
-        color: "#000",
-        boxShadow: "0 -5px 3px -3px black, 0 5px 3px -3px ",
-      },
-    },
+    // muiTableHeadCellProps: {
+    //   sx: {
+    //     fontSize: "0.8rem",
+    //     fontWeight: "600",
+    //     backgroundColor: "#fff",
+    //     // color: "#42a5f5",
+    //     color: "#000",
+    //     boxShadow: "0 -5px 3px -3px black, 0 5px 3px -3px ",
+    //   },
+    // },
 
-    // table body
-    muiTableBodyProps: {
-      sx: {
-        fontSize: "0.5rem",
-      },
-    },
+    // // table body
+    // muiTableBodyProps: {
+    //   sx: {
+    //     fontSize: "0.5rem",
+    //   },
+    // },
 
-    muiTableBodyRowProps: ({ row, table }) => ({
-      hover: !table.getState().editingRow,
-      sx: {
-        opacity:
-          !table.getState().editingRow ||
-          table.getState().editingRow?.id === row.id ||
-          table.getState().creatingRow
-            ? 1
-            : 0.4,
-        backgroundColor:
-          Number(row?.id) % 2 === 0 ||
-          table.getState().editingRow?.id === row.id
-            ? darken("#4B9CD3", 0)
-            : darken("#7CB9E8", 0),
-        "&:hover td": {
-          borderTop: "1px solid #fff",
-          borderBottom: "1px solid #fff",
-          color: "#4B9CD3",
-          backgroundColor:
-            table.getState().editingRow?.id === row.id ||
-            table.getState().creatingRow
-              ? "#fff"
-              : "#000",
-        },
-      },
-    }),
+    // muiTableBodyRowProps: ({ row, table }) => ({
+    //   hover: !table.getState().editingRow,
+    //   sx: {
+    //     opacity:
+    //       !table.getState().editingRow ||
+    //       table.getState().editingRow?.id === row.id ||
+    //       table.getState().creatingRow
+    //         ? 1
+    //         : 0.4,
+    //     backgroundColor:
+    //       Number(row?.id) % 2 === 0 ||
+    //       table.getState().editingRow?.id === row.id
+    //         ? darken("#4B9CD3", 0)
+    //         : darken("#7CB9E8", 0),
+    //     "&:hover td": {
+    //       borderTop: "1px solid #fff",
+    //       borderBottom: "1px solid #fff",
+    //       color: "#4B9CD3",
+    //       backgroundColor:
+    //         table.getState().editingRow?.id === row.id ||
+    //         table.getState().creatingRow
+    //           ? "#fff"
+    //           : "#000",
+    //     },
+    //   },
+    // }),
 
-    muiTableFooterRowProps: {
-      sx: () => ({
-        backgroundColor: "rgb(96 165 250)",
-        boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
-        boder: "5px solid red",
-      }),
-    },
+    // muiTableBodyRowProps: ({ row, table }) => {
+    //   const isEditing = table.getState().editingRow?.id === row.id;
+    //   const isCreating = table.getState().creatingRow;
+    //   const anyRowEditing = !!table.getState().editingRow;
+    //   const isRowEven = Number(row?.id) % 2 === 0;
+
+    //   return {
+    //     hover: !anyRowEditing,
+    //     sx: {
+    //       // 1. Maintain strict focus isolation opacity mapping rules
+    //       opacity: !anyRowEditing || isEditing || isCreating ? 1 : 0.4,
+    //       transition: "all 0.15s ease-in-out",
+
+    //       // 2. Active Editing Row VS Standard Alternating Blue Layers
+    //       backgroundColor: isEditing
+    //         ? "#FFFFFF !important" // Forces white canvas background during active edits
+    //         : isRowEven
+    //           ? "#4B9CD3 !important" // Target air force blue
+    //           : "#7CB9E8 !important", // Target aero light blue
+
+    //       // 3. Keep cell typography legible across varying dark and light states
+    //       "& td": {
+    //         color: isEditing ? "#000000 !important" : "#000000 !important",
+    //         borderColor: "rgba(0, 0, 0, 0.1) !important",
+    //       },
+
+    //       // 4. Force action icons context to lock onto premium purple
+    //       "& .MuiSvgIcon-root, & .MuiIconButton-root": {
+    //         color: "#A855F7 !important",
+    //       },
+
+    //       // 5. Clean, high-contrast hover interactions
+    //       "&:hover td": {
+    //         borderTop: "1px solid #FFFFFF !important",
+    //         borderBottom: "1px solid #FFFFFF !important",
+    //         color: "#4B9CD3 !important",
+    //         backgroundColor:
+    //           isEditing || isCreating
+    //             ? "#FFFFFF !important"
+    //             : "#000000 !important",
+    //         // Force hover icons to remain beautifully visible inside the dark background range
+    //         "& .MuiSvgIcon-root, & .MuiIconButton-root": {
+    //           color:
+    //             isEditing || isCreating
+    //               ? "#4169E1 !important"
+    //               : "#4169E1 !important",
+    //         },
+    //       },
+    //     },
+    //   };
+    // },
+
+    // muiTableFooterRowProps: {
+    //   sx: () => ({
+    //     backgroundColor: "rgb(96 165 250)",
+    //     boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
+    //     boder: "5px solid red",
+    //   }),
+    // },
 
     renderCaption: () => {
       return (isLoading && (

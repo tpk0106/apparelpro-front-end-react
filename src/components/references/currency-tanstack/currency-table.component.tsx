@@ -19,6 +19,7 @@ import { Box, Button, darken, IconButton, Tooltip } from "@mui/material";
 import type { PaginationData } from "../../../interfaces/definitions";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
+import { useApparelProTable } from "../../../themes/useApparelProTable";
 
 interface Props {
   columns: MRT_ColumnDef<Currency>[];
@@ -107,7 +108,7 @@ const CurrencyTable = ({
 
   //  CRUD Operations
 
-  const table = useMaterialReactTable({
+  const table = useApparelProTable<Currency>({
     columns,
     data: data,
 
@@ -156,31 +157,31 @@ const CurrencyTable = ({
       onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }),
     }),
 
-    muiTopToolbarProps: {
-      sx: () => ({
-        backgroundColor: "rgb(96 165 250)",
-        boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
-      }),
-    },
+    // muiTopToolbarProps: {
+    //   sx: () => ({
+    //     backgroundColor: "rgb(96 165 250)",
+    //     boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
+    //   }),
+    // },
 
-    // Cell styling
-    muiTableHeadCellProps: {
-      sx: {
-        fontSize: "0.8rem",
-        fontWeight: "600",
-        backgroundColor: "#fff",
-        // color: "#42a5f5",
-        color: "#000",
-        boxShadow: "0 -5px 3px -3px black, 0 5px 3px -3px ",
-      },
-    },
+    // // Cell styling
+    // muiTableHeadCellProps: {
+    //   sx: {
+    //     fontSize: "0.8rem",
+    //     fontWeight: "600",
+    //     backgroundColor: "#fff",
+    //     // color: "#42a5f5",
+    //     color: "#000",
+    //     boxShadow: "0 -5px 3px -3px black, 0 5px 3px -3px ",
+    //   },
+    // },
 
-    // table body
-    muiTableBodyProps: {
-      sx: {
-        fontSize: "0.5rem",
-      },
-    },
+    // // table body
+    // muiTableBodyProps: {
+    //   sx: {
+    //     fontSize: "0.5rem",
+    //   },
+    // },
 
     muiTableBodyRowProps: ({ row, table }) => ({
       hover: !table.getState().editingRow,

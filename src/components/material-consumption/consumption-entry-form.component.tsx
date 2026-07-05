@@ -503,8 +503,8 @@ export default function ConsumptionEntryForm({
           </Grid>
 
           {/* Group 4: Purchasing Metrics and Logistics */}
-          <Grid size={{ xs: 12, sm: 4 }}>
-            {/* FIXED: Dynamic Purchase Unit Select Field populating from your live units list cache */}
+          {/* FIXED: Dynamic Purchase Unit Select Field populating from your live units list cache */}
+          {/* <Grid size={{ xs: 12, sm: 4 }}>
             <TextField
               select
               label="Final Purchase Unit"
@@ -521,6 +521,39 @@ export default function ConsumptionEntryForm({
                 </MenuItem>
               ))}
             </TextField>
+          </Grid> */}
+
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <Autocomplete
+              options={unitsList}
+              // Displays the code alongside the name nicely for operators (e.g. "1001 (Millers Fabrics)")
+              getOptionLabel={(option) =>
+                option.code ? `${option.code} (${option.description})` : ""
+              }
+              // Cross-references the active form selection code string by finding the matching object value
+              value={
+                unitsList.find(
+                  (s: UnitServiceModel) =>
+                    String(s.code) === form.finalItemUnit,
+                ) || null
+              }
+              // Updates your master form input state cleanly upon user selection choice updates
+              onChange={(_, val) =>
+                handleInputChange("finalItemUnit", val ? String(val.code) : "")
+              }
+              isOptionEqualToValue={(option, value) =>
+                option.code === value?.code
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Select Final Purchase Unit"
+                  size="small"
+                  fullWidth
+                  required
+                />
+              )}
+            />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Autocomplete

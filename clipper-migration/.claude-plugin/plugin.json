@@ -1,0 +1,13 @@
+{
+  "name": "clipper-migration-toolkit",
+  "version": "1.0.0",
+  "description": "Comprehensive modernization workspace for mapping legacy Clipper systems to React 19, MUI 9, Zod, and a 3-project .NET 10 architecture.",
+  "author": "Internal Architecture Team",
+  "license": "MIT",
+  "compatibility": {
+    "host": "claude-code>=2.1.128",
+    "platforms": ["web", "desktop", "cowork", "cli"]
+  },
+  "allowed-tools": ["read_file", "write_file", "search_grep"],
+  "tags": ["migration", "clipper", "dotnet10", "react19", "mui9"]
+}
