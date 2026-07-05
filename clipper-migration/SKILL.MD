@@ -232,6 +232,148 @@ When migrating code that references the following legacy tables, match them stri
 - Clipper Database Commands (`REPLACE`, `APPEND BLANK`, `SEEK`) $\rightarrow$ Async EF Core LINQ methods (`Add`, `SaveChangesAsync`, `FirstOrDefaultAsync`).
 
 ### 2. UI Mapping
+
+## Strict UI Design System & Component Rules
+When generating React code for data displays, grids, or Clipper arrays, you must never write local style overrides. Always follow the global design system tokens and apply our custom shared hook blueprint:
+
+### 1. Global Theme Specifications (`apparelProDarkTheme`)
+- **Canvas Colors**: Main app background is `#0A0E14`, surface panels/cards are `#141922`, and inputs/dropdown surfaces use `#0D1117`.
+- **Text & Accent**: Base body text color is `#F4F6F8`, muted indicators are `#8B93A1`, and the active sky blue accent is `#60a5fa`.
+- **Global Dropdowns (`MuiMenu`)**: Forced to a solid `#141922` surface with `opacity: 1 !important` (no transparency), crisp white option text (`#F4F6F8`), and sky blue selections.
+
+### 2. The Shared Data Table Hook (`useApparelProTable.ts`)
+Whenever replacing a Clipper `DBEDIT()` or record grid layout, you MUST generate the UI view to consume our standardized, type-safe custom hook. The generated code must mirror this exact structural configuration layout:
+
+```typescript
+import { useMaterialReactTable, type MRT_RowData, type MRT_TableOptions } from 'material-react-table';
+
+export function useApparelProTable<TData extends MRT_RowData>(
+  options: Partial<MRT_TableOptions<TData>> & Pick<MRT_TableOptions<TData>, 'columns' | 'data'>
+) {
+  return useMaterialReactTable({
+    ...options,
+    enableEditing: options.enableEditing ?? true,
+    editDisplayMode: options.editDisplayMode ?? "row",
+
+    // Top Header Toolbar: High-contrast Sky Blue surface
+      muiTopToolbarProps: {
+      sx: {
+        backgroundColor: "#60a5fa !important",
+        boxShadow: "0px 0px 20px rgba(0,0,0,.5) !important",
+        "& .MuiIconButton-root, & .MuiSvgIcon-root": {
+          //   color: "#000000 !important", // High contrast black icons on sky blue
+          color: "#ffffff !important", // High contrast black icons on sky blue
+        },
+      },
+    },
+
+    // Alternating Rows and High-contrast Editing Constraints
+    muiTableBodyRowProps: ({ row, table }) => {
+      const isEditing = table.getState().editingRow?.id === row.id;
+      const isCreating = table.getState().creatingRow;
+      const anyRowEditing = !!table.getState().editingRow;
+      const isRowEven = Number(row?.id) % 2 === 0;
+
+      return {
+        hover: !anyRowEditing,
+        sx: {
+          opacity: !anyRowEditing || isEditing || isCreating ? 1 : 0.4,
+          transition: "all 0.15s ease-in-out",
+
+          // Alternate row backgrounds cleanly
+          backgroundColor: isEditing
+            ? "#FFFFFF !important"
+            : isRowEven
+              ? "#4B9CD3 !important"
+              : "#7CB9E8 !important",
+
+          "& td": {
+            color: "#000000 !important",
+            borderColor: "rgba(0, 0, 0, 0.1) !important",
+          },
+
+          // Force all icons to be uniform purple
+          "& .MuiSvgIcon-root, & .MuiIconButton-root": {
+            color: "#A855F7 !important",
+          },
+
+          // Hover configurations over row elements
+          "&:hover td": {
+            borderTop: "1px solid #FFFFFF !important",
+            borderBottom: "1px solid #FFFFFF !important",
+            color: "#4B9CD3 !important",
+            backgroundColor:
+              isEditing || isCreating
+                ? "#FFFFFF !important"
+                : "#000000 !important",
+            "& .MuiSvgIcon-root, & .MuiIconButton-root": {
+              color:
+                isEditing || isCreating
+                  ? "#4169E1 !important"
+                  : "#4169E1 !important",
+            },
+          },
+        },
+      };
+    },
+
+    // Bottom Aggregator Footer Row: Sky Blue
+   muiTableFooterRowProps: {
+      sx: {
+        backgroundColor: "#60a5fa !important",
+        borderTop: "1px solid rgba(0, 0, 0, 0.1) !important",
+        "& td": {
+          fontFamily: '"Space Grotesk", sans-serif',
+          fontWeight: "600",
+          color: "#000000 !important", // High contrast black text on sky blue
+        },
+      },
+    },
+
+    // Bottom Toolbar & Pagination Strip: Solid Sky Blue with Black Ink Text
+   muiBottomToolbarProps: {
+      sx: {
+        backgroundColor: "#60a5fa !important",
+        boxShadow: "0px 0px 20px rgba(0,0,0,.5) !important",
+        borderTop: "1px solid rgba(0, 0, 0, 0.1) !important",
+        backgroundImage: "none !important", // Clears out dark theme altitude gradient overlays
+
+        // Force all pagination dropdowns, page counts text, and select labels to turn high-visibility black
+        "&, & .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows, & .MuiTablePagination-select, & .MuiInputBase-root":
+          {
+            color: "#000000 !important",
+            fontFamily: '"Space Grotesk", sans-serif',
+            fontWeight: "600",
+          },
+
+        // Force navigation pagination arrow buttons (Next, Prev, First, Last) to turn crisp black
+        "& .MuiIconButton-root, & .MuiSvgIcon-root": {
+          color: "#000000 !important",
+          "&:hover": {
+            backgroundColor: "rgba(0, 0, 0, 0.08) !important",
+          },
+          "&.Mui-disabled": {
+            color: "rgba(0, 0, 0, 0.25) !important", // Legible dark disabled state
+          },
+        },
+      },
+    },
+
+    // Dropdown input values mapping properties
+    muiPaginationProps: {
+      SelectProps: {
+        sx: {
+          color: "#000000 !important",
+          fontWeight: "600 !important",
+          "& .MuiSvgIcon-root": { color: "#000000 !important" },
+          "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(0, 0, 0, 0.3) !important" },
+        },
+      },
+    },
+  });
+}
+```
+
 - Clipper `@ SAY / GET / READ` text fields $\rightarrow$ Controlled MUI v9 `TextField` components inside standard forms validated with a `zod` schema.
 - Clipper `DBEDIT()` and arrays $\rightarrow$ Responsive `material-react-table` grids linked to backend server-side pagination endpoints.
 - Clipper `do error` or `do mesg` prompts $\rightarrow$ Actionable, real-time alerts via `toast.error()` or `toast.success()`.
