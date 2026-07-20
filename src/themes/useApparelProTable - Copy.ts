@@ -30,18 +30,7 @@ export function useApparelProTable<TData extends MRT_RowData>(
     },
 
     // 4. GLOBAL ODD/EVEN/EDIT ROW STATE LOCK
-    // Merges any caller-supplied muiTableBodyRowProps (e.g. onClick-to-select,
-    // a highlight sx for a selected row) with the shared default row styling
-    // below, instead of silently discarding it. Callers that don't pass their
-    // own muiTableBodyRowProps see byte-identical behavior to before - this
-    // does not change the existing theme, it only makes it extensible.
-    muiTableBodyRowProps: (params) => {
-      const { row, table } = params;
-      const custom =
-        typeof options.muiTableBodyRowProps === "function"
-          ? options.muiTableBodyRowProps(params)
-          : (options.muiTableBodyRowProps ?? {});
-
+    muiTableBodyRowProps: ({ row, table }) => {
       const isEditing = table.getState().editingRow?.id === row.id;
       const isCreating = table.getState().creatingRow;
       const anyRowEditing = !!table.getState().editingRow;
@@ -49,7 +38,6 @@ export function useApparelProTable<TData extends MRT_RowData>(
 
       return {
         hover: !anyRowEditing,
-        ...custom,
         sx: {
           opacity: !anyRowEditing || isEditing || isCreating ? 1 : 0.4,
           transition: "all 0.15s ease-in-out",
@@ -86,22 +74,7 @@ export function useApparelProTable<TData extends MRT_RowData>(
                   ? "#4169E1 !important"
                   : "#4169E1 !important",
             },
-            // The black hover background above swallows inline-editable cells
-            // (TextField/select rendered directly in a column Cell, as opposed
-            // to MRT's built-in row-edit mode) — their input text/underline
-            // otherwise stays MUI's default dark color and becomes unreadable
-            // against black. Force those to stay legible on hover.
-            "& .MuiInputBase-input, & .MuiSelect-select": {
-              color: "#FFFFFF !important",
-            },
-            "& .MuiInput-underline:before, & .MuiInput-underline:after, & .MuiInputBase-root:before, & .MuiInputBase-root:after":
-              {
-                borderColor: "#FFFFFF !important",
-              },
           },
-
-          // Caller's own sx (e.g. a selected-row highlight) wins last
-          ...(custom.sx as Record<string, unknown> | undefined),
         },
       };
     },

@@ -293,6 +293,24 @@ export const navbarData = [
         pinned: false,
       },
       {
+        routerLink: "gin-cascade",
+        icon: null,
+        label: "Goods Issue Note (Dropdown)",
+        pinned: false,
+      },
+      {
+        routerLink: "grn",
+        icon: null,
+        label: "Goods Received     Note",
+        pinned: false,
+      },
+      {
+        routerLink: "grn-cascade",
+        icon: null,
+        label: "Goods Received Note (Dropdown)",
+        pinned: false,
+      },
+      {
         routerLink: "grcn",
         icon: null,
         label: "Goods Receive     Note",

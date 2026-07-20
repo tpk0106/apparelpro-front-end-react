@@ -3,6 +3,7 @@ import { APPARELPRO_ENDPOINTS } from "../api/api-configurations";
 import type {
   ConsumptionCalculationParams,
   ConsumptionEntryPayload,
+  MaterialCatalogGroup,
   OrderItemServiceModel,
   StyleMaterialConsumptionLedgerRow,
 } from "../components/material-consumption/material-consumption.types";
@@ -83,6 +84,13 @@ const loadAvailableMaterials = async (params: {
   );
 };
 
+const loadMaterialCatalog = async () => {
+  return await client.get<MaterialCatalogGroup[]>(
+    APPARELPRO_ENDPOINTS.ORDER_MANAGEMENT.MATERIAL_CONSUMPTION
+      .GET_MATERIAL_CATALOG,
+  );
+};
+
 const loadLedgerBreakdownByStyle = async (params: {
   buyerCode: number;
   order: string;
@@ -102,5 +110,6 @@ export {
   saveConsumptionEntry,
   deleteConsumptionEntry,
   loadAvailableMaterials,
+  loadMaterialCatalog,
   loadLedgerBreakdownByStyle,
 };

@@ -229,10 +229,31 @@ export default function StoresRequisitionLinesGrid({
                   >
                     {stockChoicesList.map((item) => (
                       <MenuItem key={item.itemCode} value={item.itemCode}>
-                        {item.itemCode} — {item.description}
+                        {item.description} [{item.itemCode}]
                       </MenuItem>
                     ))}
                   </TextField>
+
+                  {/* Ordered Qty context — sourced straight from the dropdown data, no extra
+                      round trip, so it's visible the instant an item is picked. This is the
+                      quantity ordered on the Supplier P/O, separate from the live balance
+                      check below (which only fires after Basis/Unit are also filled in). */}
+                  {(() => {
+                    const selectedChoice = stockChoicesList.find(
+                      (opt) => opt.itemCode === row.itemCode,
+                    );
+                    return (
+                      selectedChoice && (
+                        <Typography
+                          variant="caption"
+                          sx={{ mt: 0.5, display: "block", color: "text.secondary" }}
+                        >
+                          Ordered: {selectedChoice.orderedQuantity.toLocaleString()}{" "}
+                          {selectedChoice.unit}
+                        </Typography>
+                      )
+                    );
+                  })()}
 
                   {/* Live inventory balance indicator text badges continue perfectly below */}
                   {balanceMetrics && (

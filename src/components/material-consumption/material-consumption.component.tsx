@@ -9,12 +9,12 @@ import ConsumptionEntryForm from "./consumption-entry-form.component";
 
 // Import your TanStack Query data fetch hooks
 import {
-  useGetAvailableMaterials,
+  useGetMaterialCatalog,
   useGetLedgerBreakdownByStyle,
 } from "../../tanstack-hooks/material-consumption-entry.hooks";
 
 import type {
-  OrderItemServiceModel,
+  MaterialSelection,
   SelectedScopeContext,
   StyleMaterialConsumptionLedgerRow,
 } from "./material-consumption.types";
@@ -27,7 +27,7 @@ export default function MaterialConsumption() {
 
   // 2. FIXED: Declare the state hook to track a true data item instance row (REMOVED 'typeof')
   const [activeSelection, setActiveSelection] =
-    useState<OrderItemServiceModel | null>(null);
+    useState<MaterialSelection | null>(null);
 
   // 1. ADD state memory to hold the specific row record currently being edited
   const [editingRow, setEditingRow] =
@@ -44,16 +44,11 @@ export default function MaterialConsumption() {
   );
 
   // Inside material-consumption.component.tsx:
-  const { data: materialsData = [], isLoading: isChecklistLoading } =
-    useGetAvailableMaterials(
-      {
-        buyerCode: scopeContext?.buyerCode ?? 0,
-        order: scopeContext?.order ?? "",
-        typeCode: scopeContext?.typeCode ?? 0,
-        styleCode: scopeContext?.styleCode ?? "",
-      },
-      !!scopeContext,
-    );
+  // Full system-wide material catalog (not style-scoped) for the picker panel -
+  // only fetched once a scope/style has actually been selected and the panel
+  // is visible.
+  const { data: catalogGroups = [], isLoading: isCatalogLoading } =
+    useGetMaterialCatalog(!!scopeContext);
 
   // Fetch the bottom ledger rows dynamically using your active selection context keys
   const {
@@ -95,10 +90,11 @@ export default function MaterialConsumption() {
 
             <Grid size={{ xs: 12, md: 4 }}>
               <Paper elevation={2} sx={{ p: 2, minHeight: "420px" }}>
-                {/* Pass the loaded materialsData array directly down as a prop */}
+                {/* Pass the loaded catalog array directly down as a prop */}
                 <MaterialMasterList
-                  materialsList={materialsData}
-                  isLoading={isChecklistLoading}
+                  catalogGroups={catalogGroups}
+                  isLoading={isCatalogLoading}
+                  selectedMaterial={activeSelection}
                   onSelectMaterial={(item) => {
                     setActiveSelection(item);
                     setEditingRow(null); // Clear active editing if they select a brand new master category
@@ -107,7 +103,10 @@ export default function MaterialConsumption() {
               </Paper>
             </Grid>
             <Grid size={{ xs: 12, md: 8 }}>
-              <Paper elevation={2} sx={{ p: 2, minHeight: "420px" }}>
+              <Paper
+                elevation={2}
+                sx={{ p: 2, minHeight: "420px", height: "100%" }}
+              >
                 {activeSelection ? (
                   <ConsumptionEntryForm
                     styleContext={scopeContext}

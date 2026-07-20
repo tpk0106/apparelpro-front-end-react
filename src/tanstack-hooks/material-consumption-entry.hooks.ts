@@ -12,12 +12,14 @@ import {
   saveConsumptionEntry,
   deleteConsumptionEntry,
   loadAvailableMaterials,
+  loadMaterialCatalog,
   loadLedgerBreakdownByStyle,
   type FeatureHeadersLookup,
 } from "../services/material-consumption-entry.service";
 import type {
   ConsumptionCalculationParams,
   ConsumptionEntryPayload,
+  MaterialCatalogGroup,
   OrderItemServiceModel,
   StyleMaterialConsumptionLedgerRow,
 } from "../components/material-consumption/material-consumption.types";
@@ -124,6 +126,21 @@ export const useGetAvailableMaterials = (
       return response.data;
     },
     enabled,
+  });
+};
+
+export const useGetMaterialCatalog = (
+  enabled: boolean,
+): UseQueryResult<MaterialCatalogGroup[], AppError> => {
+  return useQuery<MaterialCatalogGroup[], AppError>({
+    queryKey: ["materialCatalog"],
+    queryFn: async () => {
+      const response: AxiosResponse<MaterialCatalogGroup[]> =
+        await loadMaterialCatalog();
+      return response.data;
+    },
+    enabled,
+    staleTime: 5 * 60 * 1000, // reference/catalog data, doesn't change per-request
   });
 };
 

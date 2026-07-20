@@ -4,7 +4,7 @@ export interface StockItemAvailabilityDetails {
   unit: string;
   physicalQtyInHand: number;
   shadowAllocatedBalance: number;
-  requisitionedSrnBalance: number;
+  requisitionedStrnBalance: number;
   netAvailableBalance: number;
 }
 
@@ -13,10 +13,11 @@ export interface StockLookupRow {
   storeCode: string;
   unit: string;
   description: string;
+  orderedQuantity: number;
 }
 
 export interface RequisitionHeaderModel {
-  srnNumber: string; // Will be allocated by the C# backend common service
+  strnNumber: string; // Will be allocated by the C# backend common service
   transactionDate: string; // ISO date string format (YYYY-MM-DD)
   buyerCode: number;
   order: string;

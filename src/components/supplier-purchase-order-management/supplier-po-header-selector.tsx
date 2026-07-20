@@ -1,4 +1,4 @@
-import { useState, useMemo, type SyntheticEvent } from "react";
+import { useEffect, useState, useMemo, type SyntheticEvent } from "react";
 import {
   Box,
   Card,
@@ -20,13 +20,14 @@ import {
   useGetAllGarmentTypes,
   useGetStylesByScope,
 } from "../../tanstack-hooks/custom-hooks";
+import { useGetAllDepartmentsQuery } from "../../tanstack-hooks/common.hooks";
 import type { Currency } from "../../interfaces/references/Currency";
+import type { Department } from "../../interfaces/references/Department";
 
 import type {
   SelectedPOContext,
   SupplierLookupOption,
   //   CurrencyOption,
-  StoreCodeOption,
 } from "../../interfaces/OrderManagement/purchase-order-types";
 import type { Buyer } from "../../interfaces/references/Buyer";
 import type { Style } from "../../interfaces/OrderManagement/Style";
@@ -34,16 +35,30 @@ import type { GarmentTypeServiceModel } from "../material-consumption/material-c
 
 interface HeaderSelectorProps {
   onHeaderContextLock: (context: SelectedPOContext | null) => void;
+  // The real P/O number the backend just assigned after a successful save.
+  // Fed back in so the field can display it instead of staying blank.
+  confirmedPurchaseNumber?: string | null;
 }
 
 export default function SupplierPOHeaderSelector({
   onHeaderContextLock,
+  confirmedPurchaseNumber,
 }: HeaderSelectorProps) {
   // 1. ALL CORE STATE VARIABLES FULLY DECLARED HERE
   const [poMode, setPoMode] = useState<"NEW" | "EDIT">("NEW");
-  const [purchaseNumber, setPurchaseNumber] = useState<string>(() =>
-    String(Math.floor(Math.random() * 90000) + 10000).padStart(6, "0"),
-  );
+  // For a new P/O, no number exists yet - the backend allocates the real one
+  // (via the shared document sequence service) on save. This field only
+  // takes a typed value in EDIT mode, to look up an existing P/O.
+  const [purchaseNumber, setPurchaseNumber] = useState<string>("");
+
+  // Once the parent tells us a save just completed, show the real assigned
+  // number in the (until now blank, disabled) field instead of leaving it
+  // empty - the workspace already resets everything else for the next entry.
+  useEffect(() => {
+    if (confirmedPurchaseNumber) {
+      setPurchaseNumber(confirmedPurchaseNumber);
+    }
+  }, [confirmedPurchaseNumber]);
   const [proformaNo, setProformaNo] = useState<string>("");
   const [proformaDate, setProformaDate] = useState<string>("");
 
@@ -55,7 +70,7 @@ export default function SupplierPOHeaderSelector({
   const [selectedStyle, setSelectedStyle] = useState<Style | null>(null);
   const [selectedSupplier, setSelectedSupplier] =
     useState<SupplierLookupOption | null>(null);
-  const [selectedStore, setSelectedStore] = useState<StoreCodeOption | null>(
+  const [selectedStore, setSelectedStore] = useState<Department | null>(
     null,
   );
   const [selectedCurrency, setSelectedCurrency] =
@@ -112,25 +127,19 @@ export default function SupplierPOHeaderSelector({
     [currencyPageData],
   );
 
-  // Static Store/Warehouse Codes initialized in-memory to prevent loop crashes
-  const [storesList] = useState<StoreCodeOption[]>([
-    { code: "ST1", description: "Main Fabric Store" },
-    { code: "ST2", description: "Accessories & Trims Store" },
-    { code: "ST3", description: "Finished Goods bonded Warehouse" },
-  ]);
+  // Store/Warehouse allocation now sourced live from the Department (od_dept)
+  // master table - same table and hook STRN's "Issuing Department" dropdown
+  // already uses - instead of a hardcoded in-memory list.
+  const { data: departmentsList = [], isLoading: isDepartmentsLoading } =
+    useGetAllDepartmentsQuery();
 
   // --- TRANSACTIONAL MANUAL ACTION HANDLERS ---
 
   const handleModeChange = (newMode: "NEW" | "EDIT") => {
     setPoMode(newMode);
-    if (newMode === "NEW") {
-      const generatedPo = String(
-        Math.floor(Math.random() * 90000) + 10000,
-      ).padStart(6, "0");
-      setPurchaseNumber(generatedPo);
-    } else {
-      setPurchaseNumber("");
-    }
+    // Neither mode has a real number up front anymore: NEW gets one from the
+    // backend on save, EDIT requires the user to type an existing one in.
+    setPurchaseNumber("");
     setSelectedBuyer(null);
     setSelectedOrder(null);
     setSelectedType(null);
@@ -155,8 +164,14 @@ export default function SupplierPOHeaderSelector({
     updatedProformaNo = proformaNo,
     updatedProformaDate = proformaDate,
   ) => {
+    // A new P/O has no number yet - it's assigned by the backend on save -
+    // so only EDIT mode needs one typed in before the rest of the header can
+    // lock.
+    const poNumberSatisfied =
+      poMode === "NEW" ? true : !!updatedPoNumber.trim();
+
     if (
-      updatedPoNumber &&
+      poNumberSatisfied &&
       updatedSupplier &&
       updatedStore &&
       updatedCurrency &&
@@ -166,9 +181,10 @@ export default function SupplierPOHeaderSelector({
       updatedStyle
     ) {
       onHeaderContextLock({
+        isNewPurchaseOrder: poMode === "NEW",
         purchaseNumber: updatedPoNumber.trim(),
         supplierCode: String(updatedSupplier.supplierCode),
-        storeCode: updatedStore.code,
+        storeCode: updatedStore.departmentCode,
         proformaInvoiceNo: updatedProformaNo.trim(),
         proformaInvoiceDate: updatedProformaDate,
         currencyCode: updatedCurrency.code,
@@ -234,6 +250,7 @@ export default function SupplierPOHeaderSelector({
             fullWidth
             disabled={poMode === "NEW"}
             value={purchaseNumber}
+            placeholder={poMode === "NEW" ? "(assigned on save)" : ""}
             onChange={(e) => {
               const cleanedVal = e.target.value.toUpperCase();
               setPurchaseNumber(cleanedVal);
@@ -274,20 +291,21 @@ export default function SupplierPOHeaderSelector({
           />
         </Grid>
 
-        {/* Input 3: Store/Warehouse Allocation */}
+        {/* Input 3: Store/Warehouse Allocation - sourced from the Department master table */}
         <Grid size={{ xs: 12, sm: 6, md: 3.5 }}>
           <Autocomplete
-            options={storesList}
-            getOptionLabel={(option: StoreCodeOption) =>
-              `${option.code} - ${option.description}`
+            options={departmentsList}
+            getOptionLabel={(option: Department) =>
+              option.departmentCode ? `${option.departmentCode} - ${option.name}` : ""
             }
             value={selectedStore}
-            onChange={(_: SyntheticEvent, val: StoreCodeOption | null) => {
+            onChange={(_: SyntheticEvent, val: Department | null) => {
               setSelectedStore(val);
               verifyAndBroadcastContext(purchaseNumber, selectedSupplier, val);
             }}
+            loading={isDepartmentsLoading}
             isOptionEqualToValue={(option, value) =>
-              option.code === value?.code
+              option.departmentCode === value?.departmentCode
             }
             renderInput={(params) => (
               <TextField

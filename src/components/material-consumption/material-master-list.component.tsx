@@ -1,34 +1,147 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   MaterialReactTable,
-  useMaterialReactTable,
   type MRT_ColumnDef,
+  type MRT_ExpandedState,
 } from "material-react-table";
-import type { OrderItemServiceModel } from "./material-consumption.types"; // Adjust this relative path if needed
+import { Box, Typography } from "@mui/material";
+import { useApparelProTable } from "../../themes/useApparelProTable";
+import type {
+  MaterialCatalogGroup,
+  MaterialCatalogItem,
+  MaterialSelection,
+} from "./material-consumption.types";
 
-// 1. FIXED: Update the props interface signature to accept the data array from the parent shell wrapper
 interface MaterialMasterListProps {
-  materialsList: OrderItemServiceModel[];
+  catalogGroups: MaterialCatalogGroup[];
   isLoading: boolean;
-  onSelectMaterial: (material: OrderItemServiceModel) => void;
+  selectedMaterial: MaterialSelection | null;
+  onSelectMaterial: (material: MaterialSelection) => void;
 }
 
 export default function MaterialMasterList({
-  materialsList,
+  catalogGroups,
   isLoading,
+  selectedMaterial,
   onSelectMaterial,
 }: MaterialMasterListProps) {
-  // 2. Define the visible structural columns blueprint for MRT (Memoised for speed)
-  const columns = useMemo<MRT_ColumnDef<OrderItemServiceModel>[]>(
+  // Expanded state is owned here explicitly (rather than left to MRT's
+  // internal uncontrolled state) so that selecting an item in the nested
+  // table - which triggers a parent re-render via onSelectMaterial - can
+  // never cause the category row to collapse out from under the click.
+  const [expanded, setExpanded] = useState<MRT_ExpandedState>({});
+
+  // Belt-and-braces: whenever the active selection changes, make sure that
+  // material's category is (and stays) expanded.
+  useEffect(() => {
+    if (!selectedMaterial?.stockCode) return;
+    setExpanded((prev) => {
+      if (prev === true) return prev;
+      if ((prev as Record<string, boolean>)[selectedMaterial.stockCode]) {
+        return prev;
+      }
+      return { ...(prev as Record<string, boolean>), [selectedMaterial.stockCode]: true };
+    });
+  }, [selectedMaterial?.stockCode]);
+
+  // Parent table: one row per Stock category. StockCode itself is intentionally
+  // not rendered as a column - only its Description is shown. Expanding a row
+  // reveals that category's items in a nested table below it.
+  const columns = useMemo<MRT_ColumnDef<MaterialCatalogGroup>[]>(
     () => [
       {
-        accessorKey: "stockCode",
-        header: "Stock",
-        size: 70,
-        muiTableBodyCellProps: {
-          sx: { fontFamily: "monospace", color: "#455a64" },
-        },
+        accessorKey: "description",
+        header: "Material Category",
       },
+    ],
+    [],
+  );
+
+  const table = useApparelProTable<MaterialCatalogGroup>({
+    columns,
+    data: catalogGroups,
+    state: { isLoading, expanded },
+    onExpandedChange: setExpanded,
+    enableExpanding: true,
+    enableEditing: false,
+    enablePagination: false,
+    enableRowSelection: false,
+    enableColumnActions: false,
+    enableSorting: true,
+    enableTopToolbar: true,
+    enableBottomToolbar: false,
+    initialState: { density: "compact" },
+    getRowId: (row) => row.stockCode,
+
+    // Hide the expand affordance for categories with no cataloged items.
+    // row.original can be undefined for MRT's internal synthetic rows (e.g.
+    // loading-skeleton placeholders), so this is defensive on purpose.
+    muiExpandButtonProps: ({ row }) => ({
+      sx: {
+        visibility: (row.original?.items?.length ?? 0) === 0 ? "hidden" : "visible",
+      },
+    }),
+
+    // Let a click anywhere on the category row toggle expansion, not just the icon.
+    // Rows that have items (and therefore show a nested table when expanded)
+    // get a subtle neutral hover instead of the shared theme's black/blue
+    // hover - the black hover clashes with the nested table shown underneath.
+    // Rows with no items keep the default shared hover styling untouched.
+    muiTableBodyRowProps: ({ row }) => {
+      const itemCount = row.original?.items?.length ?? 0;
+      const hasChildTable = itemCount > 0;
+      return {
+        onClick: () => row.toggleExpanded(),
+        sx: {
+          cursor: hasChildTable ? "pointer" : "default",
+          ...(hasChildTable && {
+            "&:hover td": {
+              backgroundColor: "#e8eaf6 !important",
+              color: "#1a237e !important",
+              borderTop: "1px solid rgba(0, 0, 0, 0.1) !important",
+              borderBottom: "1px solid rgba(0, 0, 0, 0.1) !important",
+            },
+          }),
+        },
+      };
+    },
+
+    renderDetailPanel: ({ row }) =>
+      (row.original?.items?.length ?? 0) === 0 ? (
+        <Typography variant="body2" sx={{ color: "text.secondary", p: 1 }}>
+          No items catalogued under this category yet.
+        </Typography>
+      ) : (
+        <MaterialCatalogItemsTable
+          stockCode={row.original.stockCode}
+          items={row.original.items}
+          selectedMaterial={selectedMaterial}
+          onSelectMaterial={onSelectMaterial}
+        />
+      ),
+  });
+
+  return <MaterialReactTable table={table} />;
+}
+
+interface MaterialCatalogItemsTableProps {
+  stockCode: string;
+  items: MaterialCatalogItem[];
+  selectedMaterial: MaterialSelection | null;
+  onSelectMaterial: (material: MaterialSelection) => void;
+}
+
+// Nested table shown inside an expanded Stock category row. Clicking an item
+// row selects it, which resets/opens the consumption entry form for that
+// StockCode+ItemCode (mirrors legacy OD_TPDT1.PRG's Enter-to-select pattern).
+function MaterialCatalogItemsTable({
+  stockCode,
+  items,
+  selectedMaterial,
+  onSelectMaterial,
+}: MaterialCatalogItemsTableProps) {
+  const columns = useMemo<MRT_ColumnDef<MaterialCatalogItem>[]>(
+    () => [
       {
         accessorKey: "itemCode",
         header: "Item",
@@ -40,296 +153,59 @@ export default function MaterialMasterList({
       {
         accessorKey: "description",
         header: "Material Name / Description",
-        size: 200,
+        size: 220,
       },
     ],
     [],
   );
 
-  // 3. Configure Material React Table engine settings matching your design pattern
-  const table = useMaterialReactTable({
+  const table = useApparelProTable<MaterialCatalogItem>({
     columns,
-    data: materialsList, // FIXED: Binds straight to the array prop passed down by the parent dashboard hook
-    state: { isLoading }, // Directly shows the table spinner while the parent RTK Query is active
-    enablePagination: false, // Maintain continuous high-speed vertical list viewing
+    data: items,
+    enableEditing: false,
+    enablePagination: false,
     enableRowSelection: false,
     enableColumnActions: false,
-    enableSorting: true,
-    enableTopToolbar: true,
+    enableSorting: false,
+    enableTopToolbar: false,
     enableBottomToolbar: false,
-    initialState: { density: "compact" }, // Maximise space density for corporate operators
-
-    // Custom row attribute click configuration to trigger Selection Change instantly
-    muiTableBodyRowProps: ({ row }) => ({
-      onClick: () => {
-        // Execute the parent pass-up callback passing across the precise selected record row dictionary
-        onSelectMaterial(row.original);
-      },
-      sx: {
-        cursor: "pointer", // Give immediate spreadsheet hover cursor response
-        "&:hover": {
-          backgroundColor: "#e8eaf6 !important", // Dynamic row selection highlight
+    initialState: { density: "compact" },
+    getRowId: (row) => row.itemCode,
+    muiTableBodyRowProps: ({ row }) => {
+      const isSelected =
+        selectedMaterial?.stockCode === stockCode &&
+        selectedMaterial?.itemCode === row.original?.itemCode;
+      return {
+        onClick: () => {
+          if (!row.original) return;
+          onSelectMaterial({
+            stockCode,
+            itemCode: row.original.itemCode,
+            description: row.original.description,
+          });
         },
-      },
-    }),
+        sx: {
+          cursor: "pointer",
+          // Persistent highlight for the actively selected row only - no custom
+          // hover override here, so hover falls back to the shared hook's own
+          // default black-bg/blue-text styling, identical to any non-nested
+          // useApparelProTable table (e.g. the ledger grid).
+          // A saturated amber + left border is used instead of a pale tint so
+          // the highlight stays visible regardless of which alternating-row
+          // shade (#4B9CD3 / #7CB9E8) the shared theme put underneath it.
+          ...(isSelected && {
+            backgroundColor: "#ffca28 !important",
+            borderLeft: "4px solid #e65100 !important",
+            "& td": { color: "#3e2723 !important", fontWeight: "bold" },
+          }),
+        },
+      };
+    },
   });
 
-  return <MaterialReactTable table={table} />;
+  return (
+    <Box sx={{ pl: 4, pr: 1, py: 1 }}>
+      <MaterialReactTable table={table} />
+    </Box>
+  );
 }
-
-// import React, { useMemo } from "react";
-
-// import { Box, CircularProgress, Alert } from "@mui/material";
-
-// import {
-//   MaterialReactTable,
-//   useMaterialReactTable,
-//   type MRT_ColumnDef,
-// } from "material-react-table";
-
-// // 1. Import your strict structural API model data contract from your central services
-// import { useGetAvailableMaterialsQuery } from "../../services/material-consumption.services";
-// import type { OrderItemServiceModel } from "./material-consumption.types";
-
-// interface MaterialMasterListProps {
-//   // Callback function to pass the selected item row back up to the master wrapper
-//   onSelectMaterial: (material: OrderItemServiceModel) => void;
-// }
-
-// export default function MaterialMasterList({
-//   onSelectMaterial,
-// }: MaterialMasterListProps) {
-//   // 2. Declarative Fetch: Fire the live RTK-Query hook directly
-//   const {
-//     data: materialsData = [],
-//     isLoading,
-//     error,
-//   } = useGetAvailableMaterialsQuery();
-
-//   // 3. Define the visible structural columns blueprint for MRT (Memoised for speed)
-//   const columns = useMemo<MRT_ColumnDef<OrderItemServiceModel>[]>(
-//     () => [
-//       {
-//         accessorKey: "stockCode",
-//         header: "Stock",
-//         size: 70,
-//         muiTableBodyCellProps: {
-//           sx: { fontFamily: "monospace", color: "#455a64" },
-//         },
-//       },
-//       {
-//         accessorKey: "itemCode",
-//         header: "Item",
-//         size: 90,
-//         muiTableBodyCellProps: {
-//           sx: { fontFamily: "monospace", color: "#1a237e", fontWeight: "bold" },
-//         },
-//       },
-//       {
-//         accessorKey: "description",
-//         header: "Material Name / Description",
-//         size: 200,
-//       },
-//     ],
-//     [],
-//   );
-
-//   // 4. Configure Material React Table engine settings matching your design pattern
-//   const table = useMaterialReactTable({
-//     columns,
-//     data: materialsData, // Binds straight to the array returned by your C# controller
-//     state: { isLoading },
-//     enablePagination: false, // Maintain continuous high-speed vertical list viewing
-//     enableRowSelection: false,
-//     enableColumnActions: false,
-//     enableSorting: true,
-//     enableTopToolbar: true,
-//     enableBottomToolbar: false,
-//     initialState: { density: "compact" }, // Maximise space density for corporate operators
-
-//     // Custom row attribute click configuration to trigger Selection Change instantly
-//     muiTableBodyRowProps: ({ row }) => ({
-//       onClick: () => {
-//         // Execute the parent pass-up callback passing across the precise selected record row dictionary
-//         onSelectMaterial(row.original);
-//       },
-//       sx: {
-//         cursor: "pointer", // Give immediate spreadsheet hover cursor response
-//         "&:hover": {
-//           backgroundColor: "#e8eaf6 !important", // Dynamic row selection highlight
-//         },
-//       },
-//     }),
-//   });
-
-//   // --- Render Conditional States Layout ---
-//   if (isLoading) {
-//     return (
-//       <Box
-//         sx={{
-//           display: "flex",
-//           justifyContent: "center",
-//           alignItems: "center",
-//           paddingTop: 4,
-//           minHeight: "200px",
-//         }}
-//       >
-//         <CircularProgress size={30} sx={{ mr: 2 }} />
-//         <span>Syncing material definitions...</span>
-//       </Box>
-//     );
-//   }
-
-//   if (error) {
-//     return (
-//       <Alert severity="error" sx={{ mt: 2, fontWeight: "bold" }}>
-//         Failed to load materials inventory list from SQL Server. Verify your
-//         database connection strings.
-//       </Alert>
-//     );
-//   }
-
-//   return <MaterialReactTable table={table} />;
-// }
-
-// import { useEffect, useMemo, useState } from "react";
-// import {
-//   MaterialReactTable,
-//   useMaterialReactTable,
-//   type MRT_ColumnDef,
-// } from "material-react-table";
-// import { Box, CircularProgress, Alert } from "@mui/material";
-
-// // Local structural typing interface matching your OrderItemServiceModel API layout contract
-// export interface OrderItemLookupRow {
-//   stockCode: string;
-//   itemCode: string;
-//   description: string;
-// }
-
-// interface MaterialMasterListProps {
-//   // Callback function to communicate back to the parent shell that an item was clicked
-//   onSelectMaterial: (material: OrderItemLookupRow) => void;
-// }
-
-// const MaterialMasterList = ({ onSelectMaterial }: MaterialMasterListProps) => {
-//   const [data, setData] = useState<OrderItemLookupRow[]>([]);
-//   const [loading, setLoading] = useState<boolean>(true);
-//   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-//   // 1. Fetch available baseline production materials from C# SQL Server API pipeline
-//   useEffect(() => {
-//     const fetchMaterialChecklist = async () => {
-//       try {
-//         setLoading(true);
-
-//         // Target endpoint matching your exposed Web API controller route
-//         const response = await fetch("/api/materialConsumption/items-lookup");
-
-//         if (!response.ok) {
-//           throw new Error(
-//             `Server Error Code: ${response.status} - Unable to fetch material items.`,
-//           );
-//         }
-
-//         const payloadData = await response.json();
-//         setData(payloadData);
-//         setErrorMessage(null);
-//       } catch (error: any) {
-//         console.error("API Fetch Failure inside MaterialMasterList:", error);
-//         setErrorMessage(
-//           error.message || "Failed to load materials inventory list.",
-//         );
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchMaterialChecklist();
-//   }, []);
-
-//   // 2. Define the visible structural columns blueprint for MRT (Memoised for speed)
-//   const columns = useMemo<MRT_ColumnDef<OrderItemLookupRow>[]>(
-//     () => [
-//       {
-//         accessorKey: "stockCode",
-//         header: "Stock",
-//         size: 70,
-//         muiTableBodyCellProps: {
-//           sx: { fontFamily: "monospace", color: "#455a64" },
-//         },
-//       },
-//       {
-//         accessorKey: "itemCode",
-//         header: "Item",
-//         size: 90,
-//         muiTableBodyCellProps: {
-//           sx: { fontFamily: "monospace", color: "#1a237e", fontWeight: "bold" },
-//         },
-//       },
-//       {
-//         accessorKey: "description",
-//         header: "Material Name / Description",
-//         size: 200,
-//       },
-//     ],
-//     [],
-//   );
-
-//   // 3. Configure Material React Table engine settings matching your design pattern
-//   const table = useMaterialReactTable({
-//     columns,
-//     data,
-//     enablePagination: false, // Maintain continuous high-speed vertical list viewing
-//     enableRowSelection: false,
-//     enableColumnActions: false,
-//     enableSorting: true,
-//     enableTopToolbar: true,
-//     enableBottomToolbar: false,
-//     initialState: { density: "compact" }, // Maximise space density for corporate operators
-
-//     // Custom row attribute click configuration to trigger Selection Change instantly
-//     muiTableBodyRowProps: ({ row }) => ({
-//       onClick: () => {
-//         // Execute the parent pass-up callback passing across the precise selected record row dictionary
-//         onSelectMaterial(row.original);
-//       },
-//       sx: {
-//         cursor: "pointer", // Give immediate spreadsheet hover cursor response
-//         "&:hover": {
-//           backgroundColor: "#e8eaf6 !important", // Dynamic row selection highlight
-//         },
-//       },
-//     }),
-//   });
-
-//   // --- Render Conditional States Layout ---
-//   if (loading) {
-//     return (
-//       <Box
-//         sx={{
-//           display: "flex",
-//           justifyContent: "center",
-//           alignItems: "center",
-//           paddingTop: 4,
-//           minHeight: "200px",
-//         }}
-//       >
-//         <CircularProgress size={30} sx={{ mr: 2 }} />
-//         <span>Syncing inventory definitions...</span>
-//       </Box>
-//     );
-//   }
-
-//   if (errorMessage) {
-//     return (
-//       <Alert severity="error" sx={{ mt: 2, fontWeight: "bold" }}>
-//         {errorMessage}
-//       </Alert>
-//     );
-//   }
-
-//   return <MaterialReactTable table={table} />;
-// };
-
-// export default MaterialMasterList;

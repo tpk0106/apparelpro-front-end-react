@@ -78,6 +78,7 @@ import {
   deleteStyle,
   loadStyles,
   loadStylesByScope,
+  loadStylesByBuyerOrder,
   updateEditStyle,
 } from "../services/style.service";
 import type PurchaseOrder from "../interfaces/OrderManagement/PurchaseOrder";
@@ -636,6 +637,32 @@ export const useGetStyles = (paginate: PaginationData) => {
       return response.data;
     },
     placeholderData: (previousData) => previousData, // Keeps old page data visible while loading the next page (smooth transitions)
+  });
+};
+
+// Styles scoped to buyer/order only (matches legacy OD_STY1.PRG buyer+order filtering).
+// Used by the Order Confirmation Styles grid so switching Buyer/Order re-queries and
+// only shows rows for the selected combination.
+export const useGetStylesByBuyerOrder = (
+  buyerCode: number,
+  order: string,
+  paginate: PaginationData,
+) => {
+  return useQuery<PaginationAPIModel<Style>, Error>({
+    queryKey: [
+      "stylesByBuyerOrder",
+      buyerCode,
+      order,
+      paginate.pageIndex,
+      paginate.pageSize,
+    ],
+    queryFn: async () => {
+      const response: AxiosResponse<PaginationAPIModel<Style>> =
+        await loadStylesByBuyerOrder(buyerCode, order, paginate);
+      return response.data;
+    },
+    enabled: buyerCode > 0 && order.trim() !== "",
+    placeholderData: (previousData) => previousData,
   });
 };
 

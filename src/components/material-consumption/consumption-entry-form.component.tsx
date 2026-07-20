@@ -274,7 +274,8 @@ export default function ConsumptionEntryForm({
     <Box>
       <Typography
         variant="h6"
-        sx={{ fontWeight: "bold", mb: 2, color: "#1a237e" }}
+        sx={{ fontWeight: "bold", mb: 2, color: "#ffffff" }}
+        //sx={{ fontWeight: "bold", mb: 2, color: "#1a237e" }}
       >
         Selected: {selectedMaterial.description} ({selectedMaterial.stockCode}/
         {selectedMaterial.itemCode})
@@ -617,7 +618,7 @@ export default function ConsumptionEntryForm({
             }
             onClick={handleRunCalculation}
           >
-            Run Consumption Math
+            Calculate Consumption
           </Button>
 
           {calculatedTotal !== null && (

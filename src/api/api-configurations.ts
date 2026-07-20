@@ -190,6 +190,7 @@ export const APPARELPRO_ENDPOINTS = {
       CALCULATE_CONSUMPTION: "api/material-consumption/calculate-consumption",
       SAVE_ENTRY: "api/material-consumption/save-entry",
       DELETE_ENTRY: "api/material-consumption/delete-entry",
+      GET_MATERIAL_CATALOG: "api/material-consumption/catalog",
     },
     STYLE_WISE_EVENTS: {
       GET_STYLE_WISE_EVENTS_REPORT: "api/stylewise-reports/print-report",
@@ -200,6 +201,16 @@ export const APPARELPRO_ENDPOINTS = {
       VERIFY_STOCK: "api/orderwise-inventory-strn/verify-stock",
       POST: "api/orderwise-inventory-strn/commit",
       AVAILABLE_CHOICES: "api/orderwise-inventory-strn/available-choices",
+    },
+    GIN: {
+      ISSUABLE_LINES: "api/orderwise-inventory-gin/issuable-lines",
+      COMMIT: "api/orderwise-inventory-gin/commit",
+      PENDING_STRNS: "api/orderwise-inventory-gin/pending-strns",
+    },
+    GRN: {
+      RECEIVABLE_LINES: "api/orderwise-inventory-grn/receivable-lines",
+      COMMIT: "api/orderwise-inventory-grn/commit",
+      PENDING_POS: "api/orderwise-inventory-grn/pending-pos",
     },
   },
   URLS: {

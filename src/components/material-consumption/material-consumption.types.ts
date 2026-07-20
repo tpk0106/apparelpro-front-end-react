@@ -126,6 +126,17 @@ export interface MaterialSelection {
   description: string;
 }
 
+export interface MaterialCatalogItem {
+  itemCode: string;
+  description: string;
+}
+
+export interface MaterialCatalogGroup {
+  stockCode: string;
+  description: string;
+  items: MaterialCatalogItem[];
+}
+
 export interface StyleMaterialConsumptionLedgerRow {
   buyerCode: number;
   order: string;
@@ -135,6 +146,7 @@ export interface StyleMaterialConsumptionLedgerRow {
   size: string;
   stockCode: string;
   itemCode: string;
+  description: string;
   feature1: string;
   feature2: string;
   feature3: string;

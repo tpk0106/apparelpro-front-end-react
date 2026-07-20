@@ -22,6 +22,10 @@ import StylewiseEventsWorkspace from "./components/stylewise-events/stylewise-ev
 // import StyleShippingSummaryCard from "./components/part-shipment/style-shipping-summary-card";
 // import PartShipmentsWorkspace from "./components/part-shipment/part-shipments-workspace";
 import StoresRequisitionWorkspace from "./components/orderwise-inventory/stores-requisition-workspace";
+import GoodsIssueNoteWorkspace from "./components/orderwise-inventory/goods-issue-note-workspace";
+import GoodsIssueNoteCascadeWorkspace from "./components/orderwise-inventory/goods-issue-note-cascade-workspace";
+import GoodsReceivedNoteWorkspace from "./components/orderwise-inventory/goods-received-note-workspace";
+import GoodsReceivedNoteCascadeWorkspace from "./components/orderwise-inventory/goods-received-note-cascade-workspace";
 // import Styles from "./components/order-management/styles.component";
 // import MaterialConsumption from "./components/material-consumption/material-consumption.component";
 
@@ -68,6 +72,18 @@ function App() {
           element={<StylewiseEventsWorkspace />}
         />
         <Route index path="srn" element={<StoresRequisitionWorkspace />} />
+        <Route index path="gin" element={<GoodsIssueNoteWorkspace />} />
+        <Route
+          index
+          path="gin-cascade"
+          element={<GoodsIssueNoteCascadeWorkspace />}
+        />
+        <Route index path="grn" element={<GoodsReceivedNoteWorkspace />} />
+        <Route
+          index
+          path="grn-cascade"
+          element={<GoodsReceivedNoteCascadeWorkspace />}
+        />
       </Route>
     </Routes>
   );

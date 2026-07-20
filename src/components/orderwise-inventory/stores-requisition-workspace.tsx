@@ -151,7 +151,7 @@ export default function StoresRequisitionWorkspace() {
     // Package your header envelope metadata alongside your detail line items array
     const payload = {
       header: {
-        srnNumber: "", // Automatically generated on the C# server common service
+        strnNumber: "", // Automatically generated on the C# server common service
         transactionDate,
         buyerCode: selectedBuyer.buyerCode,
         order: selectedOrder,

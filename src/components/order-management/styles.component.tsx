@@ -4,7 +4,7 @@ import type { PaginationData } from "../../interfaces/definitions";
 
 import {
   useGetGarmentTypes,
-  useGetStyles,
+  useGetStylesByBuyerOrder,
   useGetUnits,
 } from "../../tanstack-hooks/custom-hooks";
 
@@ -62,7 +62,11 @@ const Styles = ({
     [pagination],
   );
 
-  const { data: stylePageData, isLoading, isError } = useGetStyles(paginate);
+  const {
+    data: stylePageData,
+    isLoading,
+    isError,
+  } = useGetStylesByBuyerOrder(buyerCode, order, paginate);
   const { data: unitsPageData } = useGetUnits({
     pageIndex: 0,
     pageSize: 999,

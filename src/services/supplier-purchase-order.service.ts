@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { APPARELPRO_ENDPOINTS } from "../api/api-configurations";
 import type {
   AvailableBudgetLine,
+  CommitSupplierPurchaseOrderResult,
   PODetailItemRow,
   POHeaderState,
 } from "../interfaces/OrderManagement/purchase-order-types";
@@ -40,9 +41,12 @@ export const supplierPurchaseOrderApi = createApi({
       providesTags: ["SupplierPOLedger"],
     }),
 
-    // 3. Submits the full header and array of detailed rows atomically to the server
+    // 3. Submits the full header and array of detailed rows atomically to the server.
+    // Response carries back the confirmed PurchaseNumber - for a new P/O this is
+    // the number the backend allocated server-side via the shared document
+    // sequence service, not whatever (if anything) was in the request.
     commitSupplierPurchaseOrder: builder.mutation<
-      boolean,
+      CommitSupplierPurchaseOrderResult,
       { header: POHeaderState; lineItems: PODetailItemRow[] }
     >({
       query: (payload) => ({

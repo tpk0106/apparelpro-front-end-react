@@ -1,4 +1,5 @@
 export interface POHeaderState {
+  isNewPurchaseOrder: boolean;
   purchaseNumber: string;
   supplierCode: string;
   storeCode: string;
@@ -53,6 +54,10 @@ export interface CurrencyOption {
 }
 
 export interface SelectedPOContext {
+  // True for a brand-new P/O (backend assigns the real PurchaseNumber on
+  // save); false when editing an existing one (PurchaseNumber below must
+  // already exist).
+  isNewPurchaseOrder: boolean;
   purchaseNumber: string;
   supplierCode: string;
   // FIXED: Explicitly added both missing property identifiers to pass the compiler!
@@ -70,6 +75,14 @@ export interface SelectedPOContext {
 export interface HeaderSelectorProps {
   // Callback function to broadcast the completed, verified PO context up to the workspace
   onHeaderContextLock: (context: SelectedPOContext | null) => void;
+}
+
+// Response shape from POST api/supplier-po/save-supplier-po - the backend
+// now allocates the real PurchaseNumber server-side for new P/Os, so the
+// caller must read it back from here rather than trusting request state.
+export interface CommitSupplierPurchaseOrderResult {
+  success: boolean;
+  purchaseNumber: string;
 }
 
 export interface SupplierPOFormInputs {

@@ -218,55 +218,55 @@ const CurrencyTable = ({
       }),
     },
 
-    renderCaption: () => {
-      return (isLoading && (
-        <div className="text1-red-600 flex justify-center border1-2 border1-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-          <div className="bg-gray-50 z-40 w-full h-full absolute top-5 left-10 opacity-90">
-            <div className="w-[85%] h-[70%] border-2 border1-red-400 p-20  m-auto">
-              {/* <HourglassFullOutlinedIcon /> */}
-              {/* <PendingOutlinedIcon />
-            <RefreshOutlinedIcon /> */}
-            </div>
-          </div>
-        </div>
-      )) ||
-        (isUpdatingCurrency && (
-          <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-            <div className="flex-col flex justify-center font-bold text-lg">
-              <div>Updating Supplier.....</div>
-            </div>
-          </div>
-        )) ||
-        (isCreatingCurrency && (
-          <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-            <div className="flex-col flex justify-center font-bold text-lg">
-              <div>Creating new Supplier....</div>
-            </div>
-          </div>
-        )) ||
-        (isDeletingCurrency && (
-          <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-            <div className="flex-col flex justify-center">
-              <div>Deleting Supplier.....</div>
-            </div>
-          </div>
-        )) ||
-        validationErrors ? (
-        <div className="text-red-600 flex justify-center border1-2 border1-red-200 bg1-red-300 w-[90%] m-auto h-auto align-middle rounded1-md ">
-          <div className="flex-col flex justify-center">
-            <div>
-              {validationErrors.name
-                ? validationErrors.name
-                : validationErrors.code
-                  ? validationErrors.code
-                  : validationErrors?.countryCode}
-            </div>
-          </div>
-        </div>
-      ) : (
-        ""
-      );
-    },
+    // renderCaption: () => {
+    //   return (isLoading && (
+    //     <div className="text1-red-600 flex justify-center border1-2 border1-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
+    //       <div className="bg-gray-50 z-40 w-full h-full absolute top-5 left-10 opacity-90">
+    //         <div className="w-[85%] h-[70%] border-2 border1-red-400 p-20  m-auto">
+    //           {/* <HourglassFullOutlinedIcon /> */}
+    //           {/* <PendingOutlinedIcon />
+    //         <RefreshOutlinedIcon /> */}
+    //         </div>
+    //       </div>
+    //     </div>
+    //   )) ||
+    //     (isUpdatingCurrency && (
+    //       <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
+    //         <div className="flex-col flex justify-center font-bold text-lg">
+    //           <div>Updating Supplier.....</div>
+    //         </div>
+    //       </div>
+    //     )) ||
+    //     (isCreatingCurrency && (
+    //       <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
+    //         <div className="flex-col flex justify-center font-bold text-lg">
+    //           <div>Creating new Supplier....</div>
+    //         </div>
+    //       </div>
+    //     )) ||
+    //     (isDeletingCurrency && (
+    //       <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
+    //         <div className="flex-col flex justify-center">
+    //           <div>Deleting Supplier.....</div>
+    //         </div>
+    //       </div>
+    //     )) ||
+    //     validationErrors ? (
+    //     <div className="text-red-600 flex justify-center border1-2 border1-red-200 bg1-red-300 w-[90%] m-auto h-auto align-middle rounded1-md ">
+    //       <div className="flex-col flex justify-center">
+    //         <div>
+    //           {validationErrors.name
+    //             ? validationErrors.name
+    //             : validationErrors.code
+    //               ? validationErrors.code
+    //               : validationErrors?.countryCode}
+    //         </div>
+    //       </div>
+    //     </div>
+    //   ) : (
+    //     ""
+    //   );
+    // },
 
     renderTopToolbarCustomActions: ({ table }) => (
       <Button

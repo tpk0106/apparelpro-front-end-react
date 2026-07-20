@@ -13,6 +13,7 @@ import {
 import Grid from "@mui/material/Grid";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { toast } from "react-toastify";
 // import MaterialReactTable, {
 //   useMaterialReactTable,
 //   type MRT_ColumnDef,
@@ -47,6 +48,13 @@ export default function SupplierPurchaseOrderWorkspace() {
   const [activeBudgetLine, setActiveBudgetLine] =
     useState<AvailableBudgetLine | null>(null);
 
+  // Persists on screen after a save completes and the form resets for the
+  // next entry, so the assigned P/O number isn't only visible in a toast
+  // that's easy to miss/dismiss too fast to read.
+  const [lastSavedPoNumber, setLastSavedPoNumber] = useState<string | null>(
+    null,
+  );
+
   // The temporary running array of line-items added to this active PO session
   const [poLineItems, setPoLineItems] = useState<PODetailItemRow[]>([]);
 
@@ -65,15 +73,14 @@ export default function SupplierPurchaseOrderWorkspace() {
     useCommitSupplierPurchaseOrderMutation();
 
   // Fetch master system units for our order unit dropdown selector
-  const { data: unitsPageData, isLoading: isUnitsLoading } =
-    useGetUnits({
-      pageIndex: 0,
-      pageSize: 999,
-      sortColumn: "code",
-      sortOrder: "asc",
-      filterColumn: null,
-      filterQuery: null,
-    });
+  const { data: unitsPageData, isLoading: isUnitsLoading } = useGetUnits({
+    pageIndex: 0,
+    pageSize: 999,
+    sortColumn: "code",
+    sortOrder: "asc",
+    filterColumn: null,
+    filterQuery: null,
+  });
   const systemUnits = useMemo(
     () => unitsPageData?.items || [],
     [unitsPageData],
@@ -206,19 +213,24 @@ export default function SupplierPurchaseOrderWorkspace() {
     if (!poContext || poLineItems.length === 0) return;
 
     try {
-      await commitPO({
+      // The response carries back the confirmed PurchaseNumber - for a new
+      // P/O this is the number the backend allocated server-side, not
+      // whatever (if anything) was staged in poContext beforehand.
+      const result = await commitPO({
         header: poContext,
         lineItems: poLineItems,
       }).unwrap();
 
-      alert(
-        `Supplier Purchase Order [${poContext.purchaseNumber}] saved and committed to SQL Server tables atomically!`,
+      toast.success(
+        `Supplier Purchase Order [${result.purchaseNumber}] saved and committed successfully.`,
+        { autoClose: 6000 },
       );
+      setLastSavedPoNumber(result.purchaseNumber);
       setPoLineItems([]);
       setPoContext(null);
     } catch (err) {
       console.log(err);
-      alert(
+      toast.error(
         "Failed to commit purchase order transaction on the C# backend server.",
       );
     }
@@ -263,6 +275,76 @@ export default function SupplierPurchaseOrderWorkspace() {
     }),
   });
 
+  const bottomColumns = useMemo<MRT_ColumnDef<PODetailItemRow>[]>(
+    () => [
+      {
+        accessorKey: "itemCode",
+        header: "Item Code ID",
+        size: 160,
+        muiTableBodyCellProps: {
+          sx: { fontFamily: "monospace", fontWeight: "bold" },
+        },
+      },
+      { accessorKey: "refNo", header: "Ref No", size: 100 },
+      {
+        accessorKey: "orderQuantity",
+        header: "Ordered Qty",
+        size: 130,
+        Cell: ({ cell, row }) =>
+          `${cell.getValue<number>().toLocaleString()} ${row.original.orderUnit}`,
+      },
+      {
+        accessorKey: "unitPrice",
+        header: "Unit Price",
+        size: 110,
+        Cell: ({ cell }) => `$${cell.getValue<number>().toFixed(4)}`,
+        muiTableBodyCellProps: { sx: { fontFamily: "monospace" } },
+      },
+      {
+        accessorKey: "exportDate",
+        header: "Delivery Date",
+        size: 130,
+        Cell: ({ cell }) => cell.getValue<string>() || "-",
+      },
+      {
+        accessorKey: "lcNo",
+        header: "LC Number",
+        size: 120,
+        Cell: ({ cell }) => cell.getValue<string>() || "-",
+        muiTableBodyCellProps: { sx: { fontFamily: "monospace" } },
+      },
+    ],
+    [],
+  );
+
+  const bottomTable = useMaterialReactTable({
+    columns: bottomColumns,
+    data: poLineItems,
+    enablePagination: false,
+    enableSorting: false,
+    enableTopToolbar: false,
+    enableColumnActions: false,
+    enableColumnFilters: false,
+    enableRowActions: true,
+    positionActionsColumn: "last",
+    displayColumnDefOptions: {
+      "mrt-row-actions": { header: "Actions", size: 90 },
+    },
+    renderRowActions: ({ row }) => (
+      <Button
+        size="small"
+        color="error"
+        variant="text"
+        onClick={() =>
+          setPoLineItems((prev) => prev.filter((_, idx) => idx !== row.index))
+        }
+      >
+        Remove
+      </Button>
+    ),
+    initialState: { density: "compact" },
+  });
+
   return (
     <Box sx={{ width: "100%", p: 1 }}>
       <Typography
@@ -272,11 +354,24 @@ export default function SupplierPurchaseOrderWorkspace() {
         Supplier Purchase Order Entry Module
       </Typography>
 
+      {lastSavedPoNumber && (
+        <Alert
+          severity="success"
+          variant="filled"
+          sx={{ mb: 2, fontWeight: "bold" }}
+          onClose={() => setLastSavedPoNumber(null)}
+        >
+          Last Created P/O No: {lastSavedPoNumber}
+        </Alert>
+      )}
+
       {/* Mount your completed type-safe selector card component */}
       <SupplierPOHeaderSelector
+        confirmedPurchaseNumber={lastSavedPoNumber}
         onHeaderContextLock={(context) => {
           setPoContext(context);
           setPoLineItems([]);
+          setLastSavedPoNumber(null);
         }}
       />
 
@@ -302,7 +397,11 @@ export default function SupplierPurchaseOrderWorkspace() {
                 {activeBudgetLine ? (
                   <Card
                     variant="outlined"
-                    sx={{ p: 2, border: "1px solid #1a237e" }}
+                    sx={{
+                      p: 2,
+                      border: "1px solid #1a237e",
+                      backgroundColor: "#f9f9f9",
+                    }}
                   >
                     <Typography
                       variant="body2"
@@ -464,7 +563,9 @@ export default function SupplierPurchaseOrderWorkspace() {
               >
                 {isCommitting
                   ? "Transmitting..."
-                  : `Commit P/O [${poContext.purchaseNumber}]`}
+                  : poContext.purchaseNumber
+                    ? `Commit P/O [${poContext.purchaseNumber}]`
+                    : "Commit New P/O"}
               </Button>
             </Box>
 
@@ -475,93 +576,7 @@ export default function SupplierPurchaseOrderWorkspace() {
                 this session.
               </Alert>
             ) : (
-              <Box
-                sx={{
-                  border: "1px solid #dee2e6",
-                  borderRadius: "4px",
-                  overflow: "hidden",
-                }}
-              >
-                <table
-                  style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    textAlign: "left",
-                    fontSize: "14px",
-                  }}
-                >
-                  <thead>
-                    <tr
-                      style={{
-                        backgroundColor: "#f8f9fa",
-                        borderBottom: "2px solid #dee2e6",
-                        color: "#1a237e",
-                      }}
-                    >
-                      <th style={{ padding: "10px" }}>Item Code ID</th>
-                      <th style={{ padding: "10px" }}>Ref No</th>
-                      <th style={{ padding: "10px" }}>Ordered Qty</th>
-                      <th style={{ padding: "10px" }}>Unit Price</th>
-                      <th style={{ padding: "10px" }}>Delivery Date</th>
-                      <th style={{ padding: "10px" }}>LC Number</th>
-                      <th
-                        style={{ padding: "10px", textTransform: "uppercase" }}
-                      >
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {poLineItems.map((item, index) => (
-                      <tr
-                        key={`${item.itemCode}-${index}`}
-                        style={{ borderBottom: "1px solid #dee2e6" }}
-                      >
-                        <td
-                          style={{
-                            padding: "10px",
-                            fontFamily: "monospace",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {item.itemCode}
-                        </td>
-                        <td style={{ padding: "10px" }}>{item.refNo}</td>
-                        <td style={{ padding: "10px", fontWeight: "bold" }}>
-                          {item.orderQuantity.toLocaleString()} {item.orderUnit}
-                        </td>
-                        <td
-                          style={{ padding: "10px", fontFamily: "monospace" }}
-                        >
-                          ${item.unitPrice.toFixed(4)}
-                        </td>
-                        <td style={{ padding: "10px" }}>
-                          {item.exportDate || "-"}
-                        </td>
-                        <td
-                          style={{ padding: "10px", fontFamily: "monospace" }}
-                        >
-                          {item.lcNo || "-"}
-                        </td>
-                        <td style={{ padding: "10px" }}>
-                          <Button
-                            size="small"
-                            color="error"
-                            variant="text"
-                            onClick={() =>
-                              setPoLineItems((prev) =>
-                                prev.filter((_, idx) => idx !== index),
-                              )
-                            }
-                          >
-                            Remove
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </Box>
+              <MaterialReactTable table={bottomTable} />
             )}
           </Paper>
         </Box>

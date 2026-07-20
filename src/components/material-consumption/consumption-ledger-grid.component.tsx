@@ -18,6 +18,7 @@ import { useDeleteConsumptionEntryMutation } from "../../tanstack-hooks/material
 import type { AppError } from "../../auth/axiosClient";
 
 import EditIcon from "@mui/icons-material/Edit"; // Add this icon import
+import { useApparelProTable } from "../../themes/useApparelProTable";
 
 interface LedgerGridProps {
   styleContext: StyleContext;
@@ -38,70 +39,68 @@ export default function ConsumptionLedgerGrid({
   const columns = useMemo<MRT_ColumnDef<StyleMaterialConsumptionLedgerRow>[]>(
     () => [
       {
-        accessorKey: "itemCode",
-        header: "Item ID",
-        size: 90,
+        // Material name/description instead of the raw 4-char ItemCode -
+        // ItemCode is still sent to the backend on edit/delete, just not
+        // shown as its own column anymore.
+        accessorKey: "description",
+        header: "Material",
+        size: 190,
         muiTableBodyCellProps: {
-          sx: { fontFamily: "monospace", fontWeight: "bold" },
+          sx: { fontWeight: "bold" },
         },
       },
       {
-        accessorKey: "color",
-        header: "Garm. Colour",
-        size: 110,
-        Cell: ({ cell }) => cell.getValue<string>() || "ALL COLOURS",
-      },
-      {
-        accessorKey: "size",
-        header: "Garm. Size",
-        size: 100,
-        Cell: ({ cell }) => cell.getValue<string>() || "ALL SIZES",
+        // Colour + Size merged into one column to save horizontal space.
+        header: "Colour / Size",
+        size: 130,
+        accessorFn: (row) =>
+          `${row.color || "ALL COLOURS"} / ${row.size || "ALL SIZES"}`,
       },
       {
         // Combined virtual column replicating the Clipper feature string block row summary display
-        header: "Configuration Parameters (Ft1 - Ft4)",
-        size: 200,
+        header: "Config (Ft1-4)",
+        size: 150,
         accessorFn: (row) =>
-          `${row.feature1 || "-"} / ${row.feature2 || "-"} / ${row.feature3 || "-"} / ${row.feature4 || "-"}`,
+          `${row.feature1 || "-"}/${row.feature2 || "-"}/${row.feature3 || "-"}/${row.feature4 || "-"}`,
       },
       {
         accessorKey: "consumptionUnit",
         header: "C/Unit",
-        size: 80,
+        size: 65,
       },
       {
         accessorKey: "quantityPerGarment",
         header: "Qty/Garm",
-        size: 100,
+        size: 80,
         type: "number",
         Cell: ({ cell }) => cell.getValue<number>().toFixed(3),
       },
       {
         accessorKey: "percentageAllowance",
-        header: "Allow. %",
-        size: 90,
+        header: "Allow.%",
+        size: 60,
         type: "number",
         Cell: ({ cell }) => `${cell.getValue<number>().toFixed(1)}%`,
       },
       {
         accessorKey: "itemUnit",
         header: "F/Unit",
-        size: 80,
+        size: 60,
       },
       {
         accessorKey: "totalConsumption",
-        header: "Total Consumption",
-        size: 140,
+        header: "Tot Cons.",
+        size: 70,
         type: "number",
         muiTableBodyCellProps: {
-          sx: { fontWeight: "bold", color: "#2e7d32", textAlign: "right" },
+          sx: { fontWeight: "normal", color: "#2e7d32", textAlign: "right" },
         },
         Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
       },
       {
         accessorKey: "supplierCode",
         header: "Supplier",
-        size: 100,
+        size: 90,
       },
     ],
     [],
@@ -114,7 +113,7 @@ export default function ConsumptionLedgerGrid({
 
   const handleDeleteEntry = async (row: StyleMaterialConsumptionLedgerRow) => {
     const confirmation = window.confirm(
-      `Are you sure you want to delete this consumption assignment ledger entry for item [${row.itemCode}]?`,
+      `Are you sure you want to delete this consumption assignment ledger entry for [${row.description}] (Item ${row.itemCode})?`,
     );
     if (!confirmation) return;
 
@@ -190,7 +189,7 @@ export default function ConsumptionLedgerGrid({
   //   }
   // };
 
-  const table = useMaterialReactTable({
+  const table = useApparelProTable<StyleMaterialConsumptionLedgerRow>({
     columns,
     data: ledgerData,
     state: { isLoading },
@@ -235,7 +234,8 @@ export default function ConsumptionLedgerGrid({
     <Box sx={{ mt: 3 }}>
       <Typography
         variant="subtitle2"
-        sx={{ fontWeight: "bold", mb: 1, color: "#1a237e" }}
+        // sx={{ fontWeight: "bold", mb: 1, color: "#1a237e" }}
+        sx={{ fontWeight: "bold", mb: 1, color: "#ffffff" }}
       >
         [ CONSOLIDATED STYLE RUNNING PRODUCTION LEDGER MATRIX ]
       </Typography>
