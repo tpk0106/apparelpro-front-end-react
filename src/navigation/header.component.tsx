@@ -88,14 +88,20 @@ const Header = () => {
       case "General Inventory":
         passValue = 4;
         break;
-      case "Order Wise Inventory":
+      case "Orderwise Inventory":
         passValue = 5;
         break;
       case "Production Control":
         passValue = 6;
         break;
-      case "Reports":
+      case "Reports - Orderwise Inventory":
         passValue = 7;
+        break;
+      // case "Reports - General Inventory":
+      //   passValue = 8;
+      //   break;
+      case "Reports - Order Management":
+        passValue = 8;
         break;
     }
     if (open === passValue) {
@@ -309,7 +315,7 @@ const Header = () => {
                                 justifyContent: "center",
                               }}
                             >
-                              <List className="flex justify-around bg-[#9e9e9e] h-[3.5em] w-[95%]">
+                              {/* <List className="flex justify-around bg-[#9e9e9e] h-[3.5em] w-[95%]">
                                 <ListItem
                                   className="text-[#60a5fa] flex justify-around h-full bg-black hover:text-white 
                                                       rounded-md border-2 border-white px-4"
@@ -324,7 +330,7 @@ const Header = () => {
                                     Signup
                                   </Link>
                                 </ListItem>
-                              </List>
+                              </List> */}
                             </Box>
                           </List>
                         </Box>

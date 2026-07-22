@@ -201,6 +201,8 @@ export const APPARELPRO_ENDPOINTS = {
       VERIFY_STOCK: "api/orderwise-inventory-strn/verify-stock",
       POST: "api/orderwise-inventory-strn/commit",
       AVAILABLE_CHOICES: "api/orderwise-inventory-strn/available-choices",
+      PRINT: "api/orderwise-inventory-strn/print",
+      PRINT_PDF: "api/orderwise-inventory-strn/print/pdf",
     },
     GIN: {
       ISSUABLE_LINES: "api/orderwise-inventory-gin/issuable-lines",
@@ -211,6 +213,11 @@ export const APPARELPRO_ENDPOINTS = {
       RECEIVABLE_LINES: "api/orderwise-inventory-grn/receivable-lines",
       COMMIT: "api/orderwise-inventory-grn/commit",
       PENDING_POS: "api/orderwise-inventory-grn/pending-pos",
+    },
+    STOCK_MOVEMENT_REPORT: {
+      HEADER: "api/stock-movement-reports/header",
+      LINES: "api/stock-movement-reports/lines",
+      PDF: "api/stock-movement-reports/pdf",
     },
   },
   URLS: {

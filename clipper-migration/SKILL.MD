@@ -203,6 +203,7 @@ When migrating code that references the following legacy tables, match them stri
 
 - **in_stmst** $\rightarrow$ Maps strictly to the `OrderwiseStockMaster` entity.
 - **in_stock** $\rightarrow$ Maps to the `OrderwiseStock` entity.
+- **od_sacc2** $\rightarrow$ Maps to the `StyleMaterialCostProfiles` entity.
 - **od_sacc3** $\rightarrow$ Maps to the `StyleMaterialConsumptionLedger` entity.
 - **od_po** $\rightarrow$ Maps to the `PurchaseOrder` entity.
 - **od_bref** $\rightarrow$ Maps to the `Basis` entity.
@@ -380,6 +381,11 @@ export function useApparelProTable<TData extends MRT_RowData>(
 
 ---
 
+
+### 3. Form Validation & UX Rules
+* **Inline Error Handling:** Display all input and control validation errors inline directly beneath the respective form field. **Do not use browser alert boxes** under any circumstances.
+* **Submit Button State:** Structurally disable the "Generate Report" submit button by default. The button must only become active once all form fields are validated and both a **Buyer** and an **Order** are selected.
+
 ## Output Specification
 For every Clipper code block or file provided, output exactly four distinct markdown sections:
 
@@ -411,3 +417,77 @@ Before outputting any modern C# code during Phase 1, you must perform a comprehe
 - **Performance Inefficiencies**: Point out sequential scans (`LOCATE` or unindexed `DO WHILE` loops) that will cause massive database bottlenecks if left optimized.
 - **Resource & Integrity Risks**: Flag points where early returns (`retu` or `clos data`) might leave active data streams uncommitted or corrupt data relational states.
 - **Modern Resolution Strategy**: Explain exactly how our new 3-tier .NET 10 database engine natively solves these legacy flaws (e.g., isolation levels, database transaction scopes, and indexing parameters).
+
+
+### Report Format
+---
+name: Apparel System Report & Analytics Migration Expert
+description: >
+  Manages the migration of legacy Clipper inventory modules into modern, 
+  high-fidelity reporting mechanisms. Tracks complete development scopes while prioritising 
+  the active deployment of the Stock Movement (for an Order) PDF tool featuring React/TypeScript Recharts analytics.
+---
+
+# Apparel Inventory Reporting Framework
+
+## 1. System Reporting Scope
+The legacy `rep3_scr` screen defines ten specific reporting pipelines. Keep this comprehensive register intact to track implementation progress:
+
+* **A. Stock Valuation Report** (Pending)
+* **B. Stock Valuation Report (monthly)** (Pending)
+* **C. Stock Status Report** (Pending)
+* **D. Stock Movement (for an Item)** (Pending)
+* **E. Stock Movement (for an Order)** 🚀 **[ACTIVE FIRST PRIORITY]**
+* **F. List of Transactions** (Pending)
+* **G. Item-wise Stock Balances** (Pending)
+* **H. Raw Material Control Sheet** (Pending)
+* **I. Stock Summary Report - Basis wise** (Pending)
+* **J. GRN Listings** (Pending)
+
+---
+
+## 2. Active Implementation Specs: Stock Movement (for an Order)
+This report maps out the precise stock flow footprint matching specific business constraints.
+
+### A. Core Workflow & Technical Architecture
+* **Trigger Interface:** Filter layout must use sequential user-dependent dropdown parameters: **Buyer** (`xbuyer`) and **Order** (`xorder`).
+* **Front-End Stack:** Built with **React** using strict **TypeScript** typings.
+* **Target Medium:** Render exclusively as a printable, production-grade **PDF Document** linked alongside interactive on-screen data views.
+* **Data Visualization Component:** Integrated interactive analytics widgets powered by **Recharts** to display stock metrics visually.
+<!-- 
+### B. Form Validation & UX Rules
+* **Inline Error Handling:** Display all input and control validation errors inline directly beneath the respective form field. **Do not use browser alert boxes** under any circumstances.
+* **Submit Button State:** Structurally disable the "Generate Report" submit button by default. The button must only become active once all form fields are validated and both a **Buyer** and an **Order** are selected. -->
+
+### C. Charting & Visualization Strategy (Recharts)
+To visually communicate inventory flow, use a **Recharts Pie Chart** or **Stacked Bar Chart** displaying the break-up of final stock movements.
+* **Total Pool Representation:** Chart the core transactional buckets to let users see what portion of the ordered quantities are fulfilled, in transit, or lost.
+* **Colour-Coded Slices/Bars:** Maintain exact visual harmony with the data rows:
+  * 🟢 **Green (`#22c55e`):** Fufilled/Inbound stock metrics (`rcvd_qty`, `trin_qty`).
+  * 🔴 **Red (`#ef4444`):** Outbound allocation or shrinkage metrics (`issd_qty`, `trou_qty`, `sret_qty`).
+  * 🟡 **Amber (`#f59e0b`):** Quality discrepancies or modifications (`damg_qty`, `adjs_qty`).
+
+### D. Legacy Fields & Schema Mapping
+When parsing requests or constructing queries against data models, map legacy datasets via the following matrix:
+
+| Legacy Code Pointer | Column Interface Header | Rendering Format | DB Origin |
+| :--- | :--- | :--- | :--- |
+| `item_cd` | **Item Code** | Alphanumeric Text | `in_stmst` |
+| `od_sacc2->desc` | **Description** | Alphanumeric Text | `od_sacc2` (via compound relational lookup) |
+| `unit` | **Unit** | Text String | `in_stmst` |
+| `ord_qty` | **Order Qty** | `999,999,999.99` | `in_stmst` |
+| `rcvd_qty` | **Received Qty** | `999,999,999.99` | `in_stmst` |
+| `req_qty` | **Requested Qty** | `999,999,999.99` | `in_stmst` |
+| `issd_qty` | **Issued Qty** | `999,999,999.99` | `in_stmst` |
+| `trin_qty` | **Trans. In Qty** | `999,999,999.99` | `in_stmst` |
+| `trou_qty` | **Trans. Out Qty** | `999,999,999.99` | `in_stmst` |
+| `damg_qty` | **Damaged Qty** | `999,999,999.99` | `in_stmst` |
+| `sret_qty` | **Ret. To Supp.** | `999,999,999.99` | `in_stmst` |
+| `adjs_qty` | **Last Adjust.** | `999,999,999.99` | `in_stmst` |
+| `bal_qty` | **Qty in Hand** | `999,999,999.99` | `in_stmst` |
+
+### E. PDF Layout & Visual Rules
+* **Metadata Tracking:** Header must contain the text string `'STOCK MOVEMENT REPORT'`, immediately flanked by active `Buyer: [xbuyer]` and `Order: [xorder]` variables.
+* **Modern Dividers:** Replace manual ASCII block line loops (`repl('Ä',242)`) with vector horizontal line paths (`<hr>` or canvas strokes).
+* **Color-Coded Row Alerts:** Dynamically apply contextual row text styles or cell highlights matching the transactional behavior of the inventory rows (Green for Inbound, Red for Outbound, Amber for Damage/Adjustments).
+* **Closing Flag:** Output must cleanly finish with a centered indicator string: `[ End of Report ]`.

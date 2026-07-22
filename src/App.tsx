@@ -26,6 +26,8 @@ import GoodsIssueNoteWorkspace from "./components/orderwise-inventory/goods-issu
 import GoodsIssueNoteCascadeWorkspace from "./components/orderwise-inventory/goods-issue-note-cascade-workspace";
 import GoodsReceivedNoteWorkspace from "./components/orderwise-inventory/goods-received-note-workspace";
 import GoodsReceivedNoteCascadeWorkspace from "./components/orderwise-inventory/goods-received-note-cascade-workspace";
+import StockMovementReportWorkspace from "./components/orderwise-inventory/stock-movement-report-workspace";
+import StrnPrintReportWorkspace from "./components/reports-orderwise-inventory/strn-print-report-workspace";
 // import Styles from "./components/order-management/styles.component";
 // import MaterialConsumption from "./components/material-consumption/material-consumption.component";
 
@@ -83,6 +85,16 @@ function App() {
           index
           path="grn-cascade"
           element={<GoodsReceivedNoteCascadeWorkspace />}
+        />
+        <Route
+          index
+          path="stock-movement-report"
+          element={<StockMovementReportWorkspace />}
+        />
+        <Route
+          index
+          path="strn-print-report"
+          element={<StrnPrintReportWorkspace />}
         />
       </Route>
     </Routes>
