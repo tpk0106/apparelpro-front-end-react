@@ -6,6 +6,9 @@
 export interface StrnPrintReportHeader {
   strnNumber: string;
   buyerCode: number;
+  // Added alongside the same Buyer-name fix already applied to the Stock
+  // Movement Report — legacy in_strn2.prg only ever printed the raw buyer code.
+  buyerName: string;
   order: string;
   departmentCode: string;
   transactionDate: string; // ISO date string

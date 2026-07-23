@@ -11,7 +11,10 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import type { MRT_PaginationState, MRT_SortingState } from "material-react-table";
+import type {
+  MRT_PaginationState,
+  MRT_SortingState,
+} from "material-react-table";
 import { toast } from "react-toastify";
 
 import StockMovementReportGrid from "./stock-movement-report-grid";
@@ -32,7 +35,8 @@ import type { AppError } from "../../auth/axiosClient";
 // against StockMovementReportLineServiceModel — it needs the exact PascalCase C#
 // property name ("ItemCode"), not the camelCase JSON key. Every column here is a
 // simple camelCase property, so a capitalize-first-letter is a correct, exact map.
-const toPascalCase = (key: string) => key.charAt(0).toUpperCase() + key.slice(1);
+const toPascalCase = (key: string) =>
+  key.charAt(0).toUpperCase() + key.slice(1);
 
 // Only these two are supported server-side (StockMovementReportService.GetStockMovementReportLinesAsync
 // switches on filterColumn.ToLowerInvariant()).
@@ -52,14 +56,16 @@ export default function StockMovementReportWorkspace() {
   const [filterTarget, setFilterTarget] = useState<string>("itemCode");
   const [filterQuery, setFilterQuery] = useState<string>("");
 
-  const { data: buyerPageData, isLoading: isBuyersLoading } = useGetBuyersQuery({
-    pageIndex: 0,
-    pageSize: 999,
-    sortColumn: "name",
-    sortOrder: "asc",
-    filterColumn: null,
-    filterQuery: null,
-  });
+  const { data: buyerPageData, isLoading: isBuyersLoading } = useGetBuyersQuery(
+    {
+      pageIndex: 0,
+      pageSize: 999,
+      sortColumn: "name",
+      sortOrder: "asc",
+      filterColumn: null,
+      filterQuery: null,
+    },
+  );
   const buyersList = useMemo<Buyer[]>(
     () => buyerPageData?.items ?? [],
     [buyerPageData],
@@ -137,12 +143,7 @@ export default function StockMovementReportWorkspace() {
       <Paper
         elevation={3}
         sx={{
-          // Small left/right margins, full page width — the report table needs
-          // every pixel it can get to stay scroll-free (see the grid's layoutMode
-          // comment), so horizontal padding is kept tighter than vertical.
-          px: { xs: 1, sm: 1.5, md: 2 },
-          py: 3,
-          width: "100%",
+          p: 3,
           borderTop: "4px solid #60a5fa",
           backgroundColor: "#f9f9f9",
         }}
@@ -158,9 +159,6 @@ export default function StockMovementReportWorkspace() {
           <Box>
             <Typography variant="h5" sx={{ fontWeight: "bold" }}>
               Stock Movement Report — for an Order
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Legacy reference: in_smve2.prg
             </Typography>
           </Box>
           <Button
@@ -309,11 +307,11 @@ export default function StockMovementReportWorkspace() {
             <Divider sx={{ my: 2 }} />
             <Typography variant="caption" color="text.secondary">
               * Transfer In/Out, Supplier Return and Last Adjustment currently
-              always show 0 — Order Wise Inventory doesn't have Stock
-              Transfer, Supplier Return or Stock Adjustment Note modules yet.
-              These columns start reflecting real figures automatically once
-              those modules are built and post their transactions, with no
-              changes needed here.
+              always show 0 — Order Wise Inventory doesn't have Stock Transfer,
+              Supplier Return or Stock Adjustment Note modules yet. These
+              columns start reflecting real figures automatically once those
+              modules are built and post their transactions, with no changes
+              needed here.
             </Typography>
           </>
         )}
@@ -336,16 +334,20 @@ function KpiTile({
   return (
     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
       <Paper variant="outlined" sx={{ p: 1.75, borderRadius: 2 }}>
+        {/* Same fix as StrnPrintReportWorkspace's InfoTile: this Paper has no
+            background override, so it inherits the dark theme's background.paper
+            (#141922). color="text.secondary" / the "inherit" default both silently
+            resolved to near-black here instead of the theme's actual secondary
+            color, so both are hardcoded rather than trusted a second time. */}
         <Typography
           variant="caption"
-          color="text.secondary"
-          sx={{ textTransform: "uppercase" }}
+          sx={{ textTransform: "uppercase", color: "#8B93A1" }}
         >
           {label}
         </Typography>
         <Typography
           variant="h5"
-          sx={{ fontWeight: 700, color: color ?? "inherit" }}
+          sx={{ fontWeight: 700, color: color ?? "#F4F6F8" }}
         >
           {loading ? "…" : (value ?? "—")}
         </Typography>

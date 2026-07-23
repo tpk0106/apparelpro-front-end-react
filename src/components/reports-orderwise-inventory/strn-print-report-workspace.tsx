@@ -134,7 +134,7 @@ export default function StrnPrintReportWorkspace() {
               />
               <InfoTile
                 label="Buyer"
-                value={details?.header.buyerCode}
+                value={details?.header.buyerName}
                 loading={isLoading}
               />
               <InfoTile
@@ -156,12 +156,12 @@ export default function StrnPrintReportWorkspace() {
             />
 
             <Divider sx={{ my: 2 }} />
-            <Typography variant="caption" color="text.secondary">
-              Buyer and Department are shown as their stored codes; a name
-              lookup can be added later if needed. The printed date/time
-              always reflects the moment this PDF is generated, matching the
-              legacy in_strn2.prg behaviour of reprinting with today's date
-              rather than the original transaction date.
+            <Typography variant="caption" sx={{ color: "#8B93A1" }}>
+              Department is shown as its stored code; a name lookup can be
+              added later if needed. The printed date/time always reflects the
+              moment this PDF is generated, matching the legacy in_strn2.prg
+              behaviour of reprinting with today's date rather than the
+              original transaction date.
             </Typography>
           </>
         )}
@@ -182,10 +182,14 @@ function InfoTile({
   return (
     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
       <Paper variant="outlined" sx={{ p: 1.75, borderRadius: 2 }}>
+        {/* Explicit hex instead of color="text.secondary": the same theme-prop
+            resolution silently fell back to text.primary's near-black (#000000)
+            for the value line below before it was hardcoded, so this label is
+            hardcoded too rather than trusting the prop against this dark
+            (#141922) card background a second time. */}
         <Typography
           variant="caption"
-          color="text.secondary"
-          sx={{ textTransform: "uppercase" }}
+          sx={{ textTransform: "uppercase", color: "#8B93A1" }}
         >
           {label}
         </Typography>

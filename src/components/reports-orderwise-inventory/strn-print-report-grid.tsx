@@ -16,7 +16,10 @@ export default function StrnPrintReportGrid({
 }: Props) {
   const columns = useMemo<MRT_ColumnDef<StrnPrintReportLine>[]>(
     () => [
-      { accessorKey: "itemCode", header: "Item Code", size: 130 },
+      // Widened from 130: itemCode is now the full 22-char composite (StockCode 2 +
+      // ItemCode 4 + Feature1-4 x4), not the 4-char base code — same fix already
+      // applied to the Stock Movement Report grid's underlying data.
+      { accessorKey: "itemCode", header: "Item Code", size: 210 },
       { accessorKey: "description", header: "Description", size: 260 },
       { accessorKey: "unit", header: "Unit", size: 70, enableSorting: false },
       {

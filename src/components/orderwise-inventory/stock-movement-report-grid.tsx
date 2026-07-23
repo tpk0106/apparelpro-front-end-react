@@ -87,38 +87,29 @@ export default function StockMovementReportGrid({
       {
         // itemCode from the API is the full 22-char composite (StockCode 2 +
         // ItemCode 4 + Feature1-4 x4) — same convention as OrderwiseStockMaster/
-        // PODetails. Legacy IN_SMVE2.PRG prints this whole string as-is (line 100:
-        // "@ ln,00 say item_cd"), but at a fixed column width it just reads as
-        // "..." here. Per user decision: show both — the short 4-char item code
-        // as the primary value (chars 2-5 of the composite, matching the same
-        // decomposition StoresRequisitionService already uses), full composite
-        // available on hover so nothing is hidden.
+        // PODetails, and now shown plainly (no hover-only shortcut) to match the
+        // STRN Print Report and because a hidden tooltip isn't discoverable.
         accessorKey: "itemCode",
         header: "Item Code",
-        size: 110,
-        Cell: ({ cell }) => {
-          const fullItemCode = cell.getValue<string>();
-          const baseItemCode = fullItemCode.substring(2, 6).trim();
-          return <span title={fullItemCode}>{baseItemCode || fullItemCode}</span>;
-        },
+        size: 175,
       },
-      { accessorKey: "description", header: "Description", size: 220 },
+      { accessorKey: "description", header: "Description", size: 170 },
       {
         accessorKey: "unit",
         header: "Unit",
-        size: 70,
+        size: 45,
         enableSorting: false,
       },
       {
         accessorKey: "orderedQuantity",
         header: "Ordered",
-        size: 100,
+        size: 80,
         Cell: ({ cell }) => <QuantityCell value={cell.getValue<number>()} />,
       },
       {
         accessorKey: "receivedQuantity",
         header: "Received (GRN)",
-        size: 140,
+        size: 95,
         Cell: ({ cell }) => (
           <QuantityCell value={cell.getValue<number>()} color={INBOUND} />
         ),
@@ -126,13 +117,13 @@ export default function StockMovementReportGrid({
       {
         accessorKey: "requisitionedQuantity",
         header: "Requisitioned (SRN)",
-        size: 160,
+        size: 100,
         Cell: ({ cell }) => <QuantityCell value={cell.getValue<number>()} />,
       },
       {
         accessorKey: "issuedQuantity",
         header: "Issued (GIN)",
-        size: 120,
+        size: 85,
         Cell: ({ cell }) => (
           <QuantityCell value={cell.getValue<number>()} color={OUTBOUND} />
         ),
@@ -140,7 +131,7 @@ export default function StockMovementReportGrid({
       {
         accessorKey: "transferInQuantity",
         header: "Transfer In *",
-        size: 120,
+        size: 80,
         Cell: ({ cell }) => (
           <QuantityCell value={cell.getValue<number>()} placeholder />
         ),
@@ -148,7 +139,7 @@ export default function StockMovementReportGrid({
       {
         accessorKey: "transferOutQuantity",
         header: "Transfer Out *",
-        size: 120,
+        size: 80,
         Cell: ({ cell }) => (
           <QuantityCell value={cell.getValue<number>()} placeholder />
         ),
@@ -156,7 +147,7 @@ export default function StockMovementReportGrid({
       {
         accessorKey: "supplierReturnQuantity",
         header: "Supplier Return *",
-        size: 140,
+        size: 90,
         Cell: ({ cell }) => (
           <QuantityCell value={cell.getValue<number>()} placeholder />
         ),
@@ -164,7 +155,7 @@ export default function StockMovementReportGrid({
       {
         accessorKey: "lastAdjustmentQuantity",
         header: "Last Adjustment *",
-        size: 140,
+        size: 90,
         Cell: ({ cell }) => (
           <QuantityCell value={cell.getValue<number>()} placeholder />
         ),
@@ -172,7 +163,7 @@ export default function StockMovementReportGrid({
       {
         accessorKey: "damagedQuantity",
         header: "Damaged",
-        size: 100,
+        size: 80,
         Cell: ({ cell }) => (
           <QuantityCell value={cell.getValue<number>()} color={DISCREPANCY} />
         ),
@@ -180,7 +171,7 @@ export default function StockMovementReportGrid({
       {
         accessorKey: "balanceQuantity",
         header: "Balance",
-        size: 110,
+        size: 85,
         Cell: ({ cell }) => (
           <Typography
             component="span"
@@ -213,12 +204,28 @@ export default function StockMovementReportGrid({
     // existing single-line header behavior.
     muiTableHeadCellProps: {
       sx: {
+        fontSize: "0.72rem",
+        padding: "6px 4px",
         "& .Mui-TableHeadCell-Content-Wrapper": {
           whiteSpace: "normal",
           overflow: "visible",
           textOverflow: "clip",
           lineHeight: 1.25,
         },
+      },
+    },
+
+    // NOTE on what actually shrinks the table: MRT's column `size` values ARE
+    // the pixel widths (default layoutMode) — padding/font here sit *inside*
+    // that width, they don't add to or reduce the table's total width. So the
+    // padding/font drop below is only to keep numbers legible now that columns
+    // are narrower; the actual fix for the residual scroll is the second round
+    // of `size` trims above (1370px -> 1255px column-width sum) plus pulling
+    // the outer margin in from mx:3 to mx:2 below (reclaims 16px of viewport).
+    muiTableBodyCellProps: {
+      sx: {
+        fontSize: "0.72rem",
+        padding: "4px 4px",
       },
     },
 
@@ -244,5 +251,15 @@ export default function StockMovementReportGrid({
     },
   });
 
-  return <MaterialReactTable table={table} />;
+  return (
+    // Left/right margin so the table sits inset from the page edges instead of
+    // spanning full-bleed — pulled in from 3 to 2 on md+ so the margin doesn't
+    // eat back into the width just reclaimed from column/padding trims.
+    // overflowX stays as a safety net only: with the trimmed sizes and font
+    // this shouldn't be needed on a normal desktop viewport, but it keeps any
+    // remaining overflow contained to the table instead of the whole page.
+    <Box sx={{ mx: { xs: 1, md: 2 }, overflowX: "auto" }}>
+      <MaterialReactTable table={table} />
+    </Box>
+  );
 }
