@@ -121,7 +121,7 @@ export const APPARELPRO_ENDPOINTS = {
       DOES_BANK_EXIST: "api/address/list/does-bank-exist/",
       POST: "api/address",
       DELETE: "api/address/",
-      UPDATE_BY_BUYER_CODE_AND_ADDRESS_ID: "api/address/buyerCode/addressId",
+      UPDATE_BY_BUYER_CODE_AND_ADDRESS_ID: "api/address",
       PUT: "api/address/buyerCode/addressId",
       PATCH: "api/address",
     },
@@ -134,6 +134,15 @@ export const APPARELPRO_ENDPOINTS = {
       DELETE: "api/portDestination/",
       PUT: "api/portDestination/",
       PATCH: "api/portDestination",
+    },
+    ITEM_FEATURE: {
+      GET: "api/item-feature/list",
+      GET_BY_PAGINATION: "api/item-feature/list",
+      DOES_UNIT_EXIST: "api/item-feature/list/does-unit-exist/",
+      POST: "api/item-feature",
+      DELETE: "api/item-feature/",
+      PUT: "api/item-feature/",
+      PATCH: "api/item-feature",
     },
   },
   REGISTRATION: {
@@ -213,6 +222,10 @@ export const APPARELPRO_ENDPOINTS = {
       RECEIVABLE_LINES: "api/orderwise-inventory-grn/receivable-lines",
       COMMIT: "api/orderwise-inventory-grn/commit",
       PENDING_POS: "api/orderwise-inventory-grn/pending-pos",
+    },
+    RTN: {
+      RETURNABLE_STOCK: "api/orderwise-inventory-rtn/returnable-stock",
+      COMMIT: "api/orderwise-inventory-rtn/commit",
     },
     STOCK_MOVEMENT_REPORT: {
       HEADER: "api/stock-movement-reports/header",

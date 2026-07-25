@@ -9,6 +9,11 @@ import {
   MenuItem,
   Alert,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 // import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -23,6 +28,7 @@ import StoresRequisitionLinesGrid from "./stores-requisition-lines-grid";
 // Import your strict typescript interfaces contract shapes
 import {
   type RequisitionLineItemRow,
+  type StockItemAvailabilityDetails,
   // type RequisitionHeaderModel,
 } from "./orderwise-inventory.types";
 import { useCreateSTRNMutation } from "../../tanstack-hooks/orderwise-inventory-strn.hooks";
@@ -55,17 +61,30 @@ export default function StoresRequisitionWorkspace() {
 
   // 3. Spreadsheet Lines Collection Memory State Array
   const [lineItems, setLineItems] = useState<RequisitionLineItemRow[]>([]);
+  const [rowStockBalances, setRowStockBalances] = useState<
+    Record<number, StockItemAvailabilityDetails>
+  >({});
+
+  // Replaces window.confirm() with an in-app MUI dialog, and gives commit
+  // failures a persistent inline home instead of only a transient toast -
+  // per project convention: no native browser alert/confirm boxes, and all
+  // errors must be displayed inline.
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [commitErrorMessage, setCommitErrorMessage] = useState<string | null>(
+    null,
+  );
 
   // 4. Fetch Master Filtering Datasets out of active RTK-Query Cache Layers
-  const { data: buyerPageData, isLoading: isBuyersLoading } =
-    useGetBuyersQuery({
+  const { data: buyerPageData, isLoading: isBuyersLoading } = useGetBuyersQuery(
+    {
       pageIndex: 0,
       pageSize: 999,
       sortColumn: "name",
       sortOrder: "asc",
       filterColumn: null,
       filterQuery: null,
-    });
+    },
+  );
   const buyersList = useMemo<Buyer[]>(
     () => buyerPageData?.items || [],
     [buyerPageData],
@@ -79,6 +98,26 @@ export default function StoresRequisitionWorkspace() {
 
   const isHeaderValid =
     selectedBuyer && selectedOrder.trim() !== "" && selectedDept.trim() !== "";
+
+  // Item Code is always required (rows are added explicitly, one at a time -
+  // a blank row is genuinely incomplete). Quantity 0 is treated like RTN/GRN's
+  // convention: a deliberate skip, so at least one row must be positive rather
+  // than requiring every row to be.
+  const hasIncompleteLines = lineItems.some((item) => !item.itemCode.trim());
+  const hasAnyPositiveQuantity = lineItems.some((item) => item.quantity > 0);
+  const hasAnyExceededBalance = lineItems.some((item, idx) => {
+    const balance = rowStockBalances[idx];
+    return balance
+      ? Number(item.quantity) > balance.netAvailableBalance
+      : false;
+  });
+  const isFormValid =
+    !!isHeaderValid &&
+    lineItems.length > 0 &&
+    !hasIncompleteLines &&
+    hasAnyPositiveQuantity &&
+    lineItems.every((item) => item.quantity >= 0) &&
+    !hasAnyExceededBalance;
   // 1. DYNAMIC DATA LOOKUP: Pulls your seeded od_dept table records directly from SQL Server!
   // const { data: departmentsPageData, isLoading: isDeptsLoading } =
   //   useGetDepartmentsPagedQuery({
@@ -105,6 +144,7 @@ export default function StoresRequisitionWorkspace() {
     setSelectedDept("STR");
     setLineItems([]);
     setTransactionDate(new Date().toISOString().split("T")[0]);
+    setCommitErrorMessage(null);
   };
 
   const handleAddBlankRow = () => {
@@ -113,35 +153,35 @@ export default function StoresRequisitionWorkspace() {
       {
         stockCode: "",
         itemCode: "",
-        storeCode: selectedDept,
+        // Basis is a distinct concept from the Issuing Department (selectedDept)
+        // and must be picked explicitly per line via the Basis dropdown in the
+        // lines grid - it used to default to the Department code here, which is
+        // how Department codes like "MST"/"ST1" ended up saved as Basis values.
+        storeCode: "",
         unit: "PCS",
         quantity: 0,
       },
     ]);
   };
 
-  // 2. THE TRANS-ACTION SAVE COMMIT SUBMISSION HANDLER (Replicating Clipper lastkey() = 27 loops)
-  const handleCommitRequisition = async () => {
-    if (!selectedBuyer || !isHeaderValid || lineItems.length === 0) {
+  // 2. Validation gate - replaces window.confirm() with the MUI dialog below,
+  // per project convention (no native browser confirm/alert boxes).
+  const handleRequestCommit = () => {
+    if (!selectedBuyer || !isFormValid) {
       toast.warning(
-        "Validation Error: Cannot submit an empty or incomplete requisition manifest.",
+        "Validation Error: Resolve the outstanding line issues (missing items, zero quantities, or over-allocation) before confirming.",
       );
       return;
     }
 
-    // Secondary safety pass: Scan the row inputs array to prevent any empty item strings
-    const hasInvalidLines = lineItems.some(
-      (item) => !item.itemCode.trim() || item.quantity <= 0,
-    );
-    if (hasInvalidLines) {
-      toast.error(
-        "Allocation Aborted: Please verify that all rows track valid Item Codes and quantities greater than zero.",
-      );
-      return;
-    }
+    setCommitErrorMessage(null);
+    setIsConfirmDialogOpen(true);
+  };
 
-    const confirmationPrompt = `Confirm all entries and save Stores Requisition Note (STRN)?\n\nThis will lock down allocated balances across your warehouse stock ledger pool. Proceed?`;
-    if (!window.confirm(confirmationPrompt)) return;
+  // 3. THE TRANS-ACTION SAVE COMMIT SUBMISSION HANDLER (Replicating Clipper lastkey() = 27 loops)
+  const handleConfirmCommit = async () => {
+    setIsConfirmDialogOpen(false);
+    if (!selectedBuyer) return;
 
     // Trigger Toastify loading progress spinner instantly
     const toastId = toast.loading(
@@ -157,13 +197,15 @@ export default function StoresRequisitionWorkspace() {
         order: selectedOrder,
         departmentCode: selectedDept,
       },
-      lines: lineItems.map((item) => ({
-        stockCode: item.itemCode.substring(0, 2), // Extract material prefix (e.g. "02")
-        itemCode: item.itemCode,
-        storeCode: item.storeCode, // The Basis code
-        unit: item.unit,
-        quantity: item.quantity,
-      })),
+      lines: lineItems
+        .filter((item) => item.quantity > 0)
+        .map((item) => ({
+          stockCode: item.itemCode.substring(0, 2), // Extract material prefix (e.g. "02")
+          itemCode: item.itemCode,
+          storeCode: item.storeCode, // The Basis code
+          unit: item.unit,
+          quantity: item.quantity,
+        })),
     };
 
     try {
@@ -186,6 +228,9 @@ export default function StoresRequisitionWorkspace() {
         appError?.message ||
         "Failed to process requisition transaction on SQL Server.";
 
+      // Inline, persistent error - not just a transient toast - per project
+      // convention: all errors must be displayed inline, no native alert box.
+      setCommitErrorMessage(serverMsg);
       toast.update(toastId, {
         render: `🛑 ${serverMsg}`,
         type: "error",
@@ -315,6 +360,16 @@ export default function StoresRequisitionWorkspace() {
 
         <Divider sx={{ my: 3 }} />
 
+        {commitErrorMessage && (
+          <Alert
+            severity="error"
+            sx={{ mb: 2 }}
+            onClose={() => setCommitErrorMessage(null)}
+          >
+            {commitErrorMessage}
+          </Alert>
+        )}
+
         {/* SECTION 2: WORKSPACE ACCESSIBILITY GATE LOCK BANNER */}
         {!selectedBuyer || !isHeaderValid ? (
           <Alert
@@ -344,7 +399,7 @@ export default function StoresRequisitionWorkspace() {
                   textTransform: "uppercase",
                 }}
               >
-                Material Requisition Item Rows Log Allocation Sheets
+                Material Requisition Item Allocation
               </Typography>
 
               <Button
@@ -368,55 +423,99 @@ export default function StoresRequisitionWorkspace() {
                 display: "block",
               }}
             >
-              Active Target Context: Buyer {selectedBuyer.name} | Purchase
-              Order Ref #{selectedOrder}
+              Active Target Context: Buyer {selectedBuyer.name} | Purchase Order
+              Ref #{selectedOrder}
             </Typography>
 
             {/* 🚀 INTEGRATED DETAIL LINES ENTRY GRID TABLE */}
             <StoresRequisitionLinesGrid
               buyerCode={selectedBuyer.buyerCode}
               order={selectedOrder}
-              defaultStoreCode={selectedDept}
               lineItems={lineItems}
               setLineItems={setLineItems}
+              rowStockBalances={rowStockBalances}
+              setRowStockBalances={setRowStockBalances}
             />
-
-            {/* SECTION 3: TRANSACTIONAL ACTION FOOTER CONTROL SWITCHBOARD BUTTONS */}
-            {lineItems.length > 0 && (
-              <Box
-                sx={{
-                  gap: 2,
-                  mt: 3,
-                  pt: 2,
-                  borderTop: "1px dashed #ccc",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <Button
-                  variant="text"
-                  color="secondary"
-                  size="small"
-                  onClick={handleResetForm}
-                  disabled={isSubmitting}
-                >
-                  Cancel Note
-                </Button>
-                <Button
-                  variant="contained"
-                  color="success"
-                  size="small"
-                  startIcon={<SendIcon />}
-                  onClick={handleCommitRequisition}
-                  disabled={isSubmitting}
-                >
-                  [Save] Commit Requisition Matrix Note
-                </Button>
-              </Box>
-            )}
           </Box>
         )}
+
+        {/* SECTION 3: TRANSACTIONAL ACTION FOOTER CONTROL SWITCHBOARD BUTTONS -
+            always rendered from initial page load, never hidden behind header
+            or line-count checks. Only ever enabled/disabled via isFormValid. */}
+        <Box
+          sx={{
+            gap: 2,
+            mt: 3,
+            pt: 2,
+            borderTop: "1px dashed #ccc",
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+        >
+          <Button
+            variant="text"
+            color="secondary"
+            size="small"
+            onClick={handleResetForm}
+            disabled={isSubmitting}
+          >
+            Cancel Note
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
+            size="small"
+            startIcon={<SendIcon />}
+            onClick={handleRequestCommit}
+            disabled={isSubmitting || !isFormValid}
+            sx={{
+              "&.Mui-disabled": {
+                backgroundColor: "rgba(139,147,161,0.15)",
+                color: "#8B93A1",
+                border: "1px solid rgba(139,147,161,0.4)",
+              },
+            }}
+          >
+            Save Requisition Note
+          </Button>
+        </Box>
       </Paper>
+
+      {/* Replaces window.confirm() with an in-app MUI dialog, per project
+          convention: no native browser alert/confirm boxes. */}
+      <Dialog
+        open={isConfirmDialogOpen}
+        onClose={() => setIsConfirmDialogOpen(false)}
+        aria-labelledby="strn-confirm-dialog-title"
+        slotProps={{ paper: { sx: { backgroundColor: "#141922" } } }}
+      >
+        <DialogTitle id="strn-confirm-dialog-title" sx={{ color: "#F4F6F8" }}>
+          Confirm Stores Requisition Note
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: "#F4F6F8" }}>
+            Confirm all entries and save this Stores Requisition Note? This will
+            lock down allocated balances across your warehouse stock ledger pool
+            for Buyer {selectedBuyer?.name} / Order {selectedOrder}.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setIsConfirmDialogOpen(false)}
+            color="secondary"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmCommit}
+            variant="contained"
+            color="primary"
+            autoFocus
+          >
+            Confirm & Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

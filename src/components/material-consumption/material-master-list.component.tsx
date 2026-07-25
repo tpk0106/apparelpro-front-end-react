@@ -40,7 +40,10 @@ export default function MaterialMasterList({
       if ((prev as Record<string, boolean>)[selectedMaterial.stockCode]) {
         return prev;
       }
-      return { ...(prev as Record<string, boolean>), [selectedMaterial.stockCode]: true };
+      return {
+        ...(prev as Record<string, boolean>),
+        [selectedMaterial.stockCode]: true,
+      };
     });
   }, [selectedMaterial?.stockCode]);
 
@@ -78,7 +81,8 @@ export default function MaterialMasterList({
     // loading-skeleton placeholders), so this is defensive on purpose.
     muiExpandButtonProps: ({ row }) => ({
       sx: {
-        visibility: (row.original?.items?.length ?? 0) === 0 ? "hidden" : "visible",
+        visibility:
+          (row.original?.items?.length ?? 0) === 0 ? "hidden" : "visible",
       },
     }),
 

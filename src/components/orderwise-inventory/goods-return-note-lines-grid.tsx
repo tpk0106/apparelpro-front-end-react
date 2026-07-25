@@ -4,25 +4,25 @@ import type { MRT_ColumnDef } from "material-react-table";
 import { MaterialReactTable } from "material-react-table";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useApparelProTable } from "../../themes/useApparelProTable";
-import type { GrnLineItemRow } from "./goods-received-note.types";
+import type { RtnLineItemRow } from "./goods-return-note.types";
 
-interface GoodsReceivedNoteLinesGridProps {
-  lines: GrnLineItemRow[];
-  setLines: React.Dispatch<React.SetStateAction<GrnLineItemRow[]>>;
+interface GoodsReturnNoteLinesGridProps {
+  lines: RtnLineItemRow[];
+  setLines: React.Dispatch<React.SetStateAction<RtnLineItemRow[]>>;
 }
 
-// Row-derived, read-only figures — recomputed on every render, never stored in state.
-// Unlike GIN, the receive ceiling is just the outstanding PO balance — receiving stock
-// increases qtyInHand, it isn't capped by it. This is a soft client-side warning only;
-// the hard block always happens on the server (CommitGoodsReceivedNoteAsync).
-interface GrnLineItemRowView extends GrnLineItemRow {
-  isOverBalance: boolean;
+// Row-derived, read-only figure — recomputed on every render, never stored in state.
+// The hard ceiling is the total quantity issued to date (ToDateIssued) — this is a
+// soft client-side warning only; the hard block always happens on the server
+// (CommitGoodsReturnNoteAsync — "Return Quantity cannot be greater than Total Issued").
+interface RtnLineItemRowView extends RtnLineItemRow {
+  isOverReturnable: boolean;
 }
 
-export default function GoodsReceivedNoteLinesGrid({
+export default function GoodsReturnNoteLinesGrid({
   lines,
   setLines,
-}: GoodsReceivedNoteLinesGridProps) {
+}: GoodsReturnNoteLinesGridProps) {
   const handleUpdateQuantity = (index: number, rawValue: string) => {
     const quantity = rawValue === "" ? 0 : Number(rawValue);
     setLines((prev) => {
@@ -36,34 +36,24 @@ export default function GoodsReceivedNoteLinesGrid({
     setLines((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const rows = useMemo<GrnLineItemRowView[]>(
+  const rows = useMemo<RtnLineItemRowView[]>(
     () =>
       lines.map((line) => {
         const quantity = Number(line.quantity || 0);
         return {
           ...line,
-          isOverBalance: quantity > line.balance,
+          isOverReturnable: quantity > line.maxReturnableQuantity,
         };
       }),
     [lines],
   );
 
-  const columns = useMemo<MRT_ColumnDef<GrnLineItemRowView>[]>(
+  const columns = useMemo<MRT_ColumnDef<RtnLineItemRowView>[]>(
     () => [
-      { accessorKey: "itemCode", header: "Item Code", size: 130 },
-      { accessorKey: "unit", header: "Unit", size: 80 },
-      {
-        accessorKey: "orderQuantity",
-        header: "Order Qty",
-        size: 110,
-        Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
-      },
-      {
-        accessorKey: "balance",
-        header: "Outstanding",
-        size: 110,
-        Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
-      },
+      { accessorKey: "itemCode", header: "Item Code", size: 150 },
+      { accessorKey: "description", header: "Description", size: 170 },
+      { accessorKey: "storeCode", header: "Basis", size: 80 },
+      { accessorKey: "unit", header: "Unit", size: 70 },
       {
         accessorKey: "qtyInHand",
         header: "Qty In Hand",
@@ -71,8 +61,14 @@ export default function GoodsReceivedNoteLinesGrid({
         Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
       },
       {
+        accessorKey: "maxReturnableQuantity",
+        header: "Total Issued",
+        size: 110,
+        Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
+      },
+      {
         accessorKey: "quantity",
-        header: "Receive Qty",
+        header: "Return Qty",
         size: 130,
         Cell: ({ row }) => (
           <TextField
@@ -80,34 +76,40 @@ export default function GoodsReceivedNoteLinesGrid({
             size="small"
             variant="standard"
             value={row.original.quantity}
-            error={row.original.isOverBalance}
+            error={row.original.isOverReturnable}
             onChange={(e) => handleUpdateQuantity(row.index, e.target.value)}
             slotProps={{
-              htmlInput: { min: 0, style: { fontFamily: '"JetBrains Mono", monospace' } },
+              htmlInput: {
+                min: 0,
+                style: { fontFamily: '"JetBrains Mono", monospace' },
+              },
             }}
             sx={{ width: 100 }}
           />
         ),
       },
       {
-        id: "availableToReceive",
-        header: "Available",
-        size: 110,
+        id: "returnableCeiling",
+        header: "Max Returnable",
+        size: 120,
         Cell: ({ row }) => (
           <Chip
             size="small"
-            variant={row.original.isOverBalance ? "filled" : "outlined"}
-            color={row.original.isOverBalance ? "error" : "default"}
-            label={row.original.balance.toLocaleString()}
+            variant={row.original.isOverReturnable ? "filled" : "outlined"}
+            color={row.original.isOverReturnable ? "error" : "default"}
+            label={row.original.maxReturnableQuantity.toLocaleString()}
             sx={{
-              color: "#FFFFFF !important",
+              // Default chip text otherwise inherits the theme's black text.primary,
+              // which is invisible against this dark table — hardcode explicit colors
+              // (same fix pattern as the STRN/Stock Movement report tiles).
+              color: "#F4F6F8",
               borderColor: "#8B93A1",
-              "& .MuiChip-label": { color: "#FFFFFF !important" },
+              "& .MuiChip-label": { color: "#F4F6F8" },
               transition: "background-color 0.15s ease, color 0.15s ease",
               "&:hover": {
                 backgroundColor: "#60a5fa",
                 borderColor: "#60a5fa",
-                "& .MuiChip-label": { color: "#FFFFFF !important" },
+                "& .MuiChip-label": { color: "#FFFFFF" },
               },
             }}
           />
@@ -117,7 +119,7 @@ export default function GoodsReceivedNoteLinesGrid({
     [],
   );
 
-  const table = useApparelProTable<GrnLineItemRowView>({
+  const table = useApparelProTable<RtnLineItemRowView>({
     columns,
     data: rows,
     enableEditing: false,
@@ -133,13 +135,19 @@ export default function GoodsReceivedNoteLinesGrid({
       "mrt-row-actions": { header: "Action", size: 70 },
     },
     renderRowActions: ({ row }) => (
-      <IconButton color="error" size="small" onClick={() => handleRemoveLine(row.index)}>
+      <IconButton
+        color="error"
+        size="small"
+        onClick={() => handleRemoveLine(row.index)}
+      >
         <DeleteIcon fontSize="small" />
       </IconButton>
     ),
     muiTableBodyRowProps: ({ row }) => ({
       sx: {
-        backgroundColor: row.original.isOverBalance ? "rgba(248,113,113,0.12) !important" : undefined,
+        backgroundColor: row.original.isOverReturnable
+          ? "rgba(248,113,113,0.12) !important"
+          : undefined,
       },
     }),
     initialState: { density: "compact" },

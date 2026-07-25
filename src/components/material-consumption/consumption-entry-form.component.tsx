@@ -541,9 +541,7 @@ export default function ConsumptionEntryForm({
             <Autocomplete
               options={suppliersList}
               // Displays the code alongside the name nicely for operators (e.g. "1001 (Millers Fabrics)")
-              getOptionLabel={(option) =>
-                option.name ? `${option.supplierCode} (${option.name})` : ""
-              }
+              getOptionLabel={(option) => (option.name ? `${option.name}` : "")}
               // Cross-references the active form selection code string by finding the matching object value
               value={
                 suppliersList.find(

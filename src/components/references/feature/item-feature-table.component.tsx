@@ -1,8 +1,9 @@
+// Inside ItemFeatureTable.tsx component body:
+
 import { useState } from "react";
 
 import {
   MaterialReactTable,
-  useMaterialReactTable,
   type MRT_ColumnDef,
   type MRT_PaginationState,
   type MRT_Row,
@@ -12,17 +13,17 @@ import { Box, Button, darken, IconButton, Tooltip } from "@mui/material";
 import type { PaginationData } from "../../../interfaces/definitions";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
-import type { GarmentType } from "../../../interfaces/references/GarmentType";
 import {
-  useCreateGarmentTypeMutation,
-  useDeleteGarmentTypeMutation,
-  useUpdateGarmentTypeMutation,
+  useCreateItemFeatureMutation,
+  useDeleteItemFeatureMutation,
+  useUpdateItemFeatureMutation,
 } from "../../../tanstack-hooks/custom-hooks";
 import { useApparelProTable } from "../../../themes/useApparelProTable";
+import type { ItemFeature } from "../../../interfaces/references/ItemFeature";
 
 interface Props {
-  columns: MRT_ColumnDef<GarmentType>[];
-  data: GarmentType[];
+  columns: MRT_ColumnDef<ItemFeature>[];
+  data: ItemFeature[];
   itemsCount: number;
   isError: boolean;
   isLoading: boolean;
@@ -31,7 +32,7 @@ interface Props {
   setPagination: React.Dispatch<React.SetStateAction<MRT_PaginationState>>;
 }
 
-const GarmentTypeTable = ({
+const ItemFeatureTable = ({
   columns,
   data,
   itemsCount,
@@ -45,27 +46,26 @@ const GarmentTypeTable = ({
   >({});
 
   const validationRequired = (value: string) => !value?.length;
-  const validateGarmentType = ({ typeName }: GarmentType) => {
-    console.log("validation :", validationRequired(typeName));
+  const validateItemFeature = ({ description, featureCode }: ItemFeature) => {
     return {
-      typeName: validationRequired(typeName) ? "GarmentType Name required" : "",
+      name: validationRequired(description)
+        ? "ItemFeature description required"
+        : "",
+      code: validationRequired(featureCode) ? "ItemFeature Code required" : "",
     };
   };
 
   // 1. Consume mutations cleanly
-  const { mutateAsync: createGarmentType, isPending: isCreatingCurrency } =
-    useCreateGarmentTypeMutation();
-  const { mutateAsync: updateCurrency, isPending: isUpdatingCurrency } =
-    useUpdateGarmentTypeMutation();
-  const { mutateAsync: deleteCurrency, isPending: isDeletingCurrency } =
-    useDeleteGarmentTypeMutation();
+  const { mutateAsync: createItemFeature } = useCreateItemFeatureMutation();
+  const { mutateAsync: updateItemFeature } = useUpdateItemFeatureMutation();
+  const { mutateAsync: deleteItemFeature } = useDeleteItemFeatureMutation();
 
   // 2. Your save hooks remain highly intuitive
-  const handleCreateCurrency: MRT_TableOptions<GarmentType>["onCreatingRowSave"] =
+  const handleCreateItemFeature: MRT_TableOptions<ItemFeature>["onCreatingRowSave"] =
     async ({ values, table }) => {
       console.log("save");
       values = { ...values, id: 0 };
-      const newValidationErrors = validateGarmentType(values);
+      const newValidationErrors = validateItemFeature(values);
       if (Object.values(newValidationErrors).some((error) => error)) {
         console.log("validation err: ", newValidationErrors);
         setValidationErrors(newValidationErrors);
@@ -74,14 +74,14 @@ const GarmentTypeTable = ({
       setValidationErrors({});
 
       // Fires mutationFn, runs network call, invalidates cache automatically on success!
-      await createGarmentType(values);
+      await createItemFeature(values);
       table.setCreatingRow(null);
     };
 
-  const handleSaveCurrency: MRT_TableOptions<GarmentType>["onEditingRowSave"] =
+  const handleSaveItemFeature: MRT_TableOptions<ItemFeature>["onEditingRowSave"] =
     async ({ values, table }) => {
       values = { ...values, id: 0 };
-      const newValidationErrors = validateGarmentType(values);
+      const newValidationErrors = validateItemFeature(values);
       if (Object.values(newValidationErrors).some((error) => error)) {
         setValidationErrors(newValidationErrors);
         return;
@@ -89,20 +89,20 @@ const GarmentTypeTable = ({
       setValidationErrors({});
 
       // Fires mutationFn, runs network call, invalidates cache automatically on success!
-      await updateCurrency(values);
-      table.setCreatingRow(null);
+      await updateItemFeature(values);
+      table.setEditingRow(null); //exit editing mode
     };
 
   //DELETE action
-  const openDeleteConfirmModal = (row: MRT_Row<GarmentType>) => {
-    if (window.confirm("Are you sure you want to delete this Garment Type?")) {
-      deleteCurrency(row.original.id);
+  const openDeleteConfirmModal = (row: MRT_Row<ItemFeature>) => {
+    if (window.confirm("Are you sure you want to delete this Item Feature?")) {
+      deleteItemFeature(row.original.featureCode);
     }
   };
 
   //  CRUD Operations
 
-  const table = useApparelProTable<GarmentType>({
+  const table = useApparelProTable<ItemFeature>({
     columns,
     data: data,
 
@@ -143,9 +143,9 @@ const GarmentTypeTable = ({
     },
 
     onCreatingRowCancel: () => setValidationErrors({}),
-    onCreatingRowSave: handleCreateCurrency,
+    onCreatingRowSave: handleCreateItemFeature,
     onEditingRowCancel: () => setValidationErrors({}),
-    onEditingRowSave: handleSaveCurrency,
+    onEditingRowSave: handleSaveItemFeature,
 
     muiExpandButtonProps: ({ row, table }) => ({
       onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }),
@@ -161,67 +161,6 @@ const GarmentTypeTable = ({
       },
     }),
 
-    // muiTopToolbarProps: {
-    //   sx: () => ({
-    //     backgroundColor: "rgb(96 165 250)",
-    //     boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
-    //   }),
-    // },
-
-    // // Cell styling
-    // muiTableHeadCellProps: {
-    //   sx: {
-    //     fontSize: "0.8rem",
-    //     fontWeight: "600",
-    //     backgroundColor: "#fff",
-    //     // color: "#42a5f5",
-    //     color: "#000",
-    //     boxShadow: "0 -5px 3px -3px black, 0 5px 3px -3px ",
-    //   },
-    // },
-
-    // // table body
-    // muiTableBodyProps: {
-    //   sx: {
-    //     fontSize: "0.5rem",
-    //   },
-    // },
-
-    // muiTableBodyRowProps: ({ row, table }) => ({
-    //   hover: !table.getState().editingRow,
-    //   sx: {
-    //     opacity:
-    //       !table.getState().editingRow ||
-    //       table.getState().editingRow?.id === row.id ||
-    //       table.getState().creatingRow
-    //         ? 1
-    //         : 0.4,
-    //     backgroundColor:
-    //       Number(row?.id) % 2 === 0 ||
-    //       table.getState().editingRow?.id === row.id
-    //         ? darken("#4B9CD3", 0)
-    //         : darken("#7CB9E8", 0),
-    //     "&:hover td": {
-    //       borderTop: "1px solid #fff",
-    //       borderBottom: "1px solid #fff",
-    //       color: "#4B9CD3",
-    //       backgroundColor:
-    //         table.getState().editingRow?.id === row.id ||
-    //         table.getState().creatingRow
-    //           ? "#fff"
-    //           : "#000",
-    //     },
-    //   },
-    // }),
-
-    // muiTableFooterRowProps: {
-    //   sx: () => ({
-    //     backgroundColor: "rgb(96 165 250)",
-    //     boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
-    //     boder: "5px solid red",
-    //   }),
-    // },
-
     renderTopToolbarCustomActions: ({ table }) => (
       <Button
         variant="contained"
@@ -229,7 +168,7 @@ const GarmentTypeTable = ({
           table.setCreatingRow(true);
         }}
       >
-        New GarmentType
+        New ItemFeature
       </Button>
     ),
 
@@ -252,4 +191,4 @@ const GarmentTypeTable = ({
   return <MaterialReactTable table={table} />;
 };
 
-export default GarmentTypeTable;
+export default ItemFeatureTable;

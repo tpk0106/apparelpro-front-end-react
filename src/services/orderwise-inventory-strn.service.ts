@@ -25,7 +25,6 @@ const createSTRN = async (payload: RequisitionSubmissionPayload) => {
 const getAvailableStockChoices = async (params: {
   buyerCode: number;
   order: string;
-  storeCode: string;
 }) => {
   return await client.get<StockLookupRow[]>(
     APPARELPRO_ENDPOINTS.ORDER_WISE_INVENTORY.STRN.AVAILABLE_CHOICES,

@@ -92,9 +92,13 @@ const BuyerAddresses = ({ buyerCode }: BuyerAddressProps) => {
   const columns = useMemo<MRT_ColumnDef<Address>[]>(
     () => [
       {
+        accessorKey: "addressId",
+        header: "AddressId",
+      },
+      {
         accessorKey: "streetAddress",
         header: "Street Address",
-        size: 200,
+        size: 250,
         enableResizing: true,
         enableColumnActions: false,
         enableSorting: false,
@@ -362,7 +366,7 @@ const BuyerAddresses = ({ buyerCode }: BuyerAddressProps) => {
 
   return (
     <>
-      <div className="flex justify-around mt-10">
+      <div className="flex justify-around mt-10 w-full">
         <BuyerAddressesTable
           columns={columns}
           data={allBuyerAddresses}

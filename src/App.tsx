@@ -26,8 +26,11 @@ import GoodsIssueNoteWorkspace from "./components/orderwise-inventory/goods-issu
 import GoodsIssueNoteCascadeWorkspace from "./components/orderwise-inventory/goods-issue-note-cascade-workspace";
 import GoodsReceivedNoteWorkspace from "./components/orderwise-inventory/goods-received-note-workspace";
 import GoodsReceivedNoteCascadeWorkspace from "./components/orderwise-inventory/goods-received-note-cascade-workspace";
+import GoodsReturnNoteWorkspace from "./components/orderwise-inventory/goods-return-note-workspace";
 import StockMovementReportWorkspace from "./components/orderwise-inventory/stock-movement-report-workspace";
 import StrnPrintReportWorkspace from "./components/reports-orderwise-inventory/strn-print-report-workspace";
+import Suppliers from "./components/references/supplier/supplier.component";
+import ItemFeatures from "./components/references/feature/item-feature.component";
 // import Styles from "./components/order-management/styles.component";
 // import MaterialConsumption from "./components/material-consumption/material-consumption.component";
 
@@ -54,9 +57,11 @@ function App() {
         <Route index path="bank" element={<Bank />} />
         <Route index path="country" element={<Country />} />
         <Route index path="unit" element={<Units />} />
+        <Route index path="item-feature" element={<ItemFeatures />} />
         <Route index path="buyers" element={<Buyers />} />
         <Route index path="garment-type" element={<GarmentTypes />} />
         <Route index path="basis" element={<Basises />} />
+        <Route index path="supplier" element={<Suppliers />} />
         <Route index path="po" element={<OrderConfirmationRoutine />} />
         <Route
           index
@@ -86,6 +91,7 @@ function App() {
           path="grn-cascade"
           element={<GoodsReceivedNoteCascadeWorkspace />}
         />
+        <Route index path="rtn" element={<GoodsReturnNoteWorkspace />} />
         <Route
           index
           path="stock-movement-report"

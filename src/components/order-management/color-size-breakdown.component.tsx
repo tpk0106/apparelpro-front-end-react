@@ -135,7 +135,8 @@ export default function ColorSizeBreakdown({
     activeDataArray.forEach((item: ColorSizeDetailsServiceModel) => {
       if (item?.color) {
         const colorKey = String(item.color).toUpperCase().trim();
-        colorTotalQty[colorKey] = (colorTotalQty[colorKey] || 0) + (item.qty || 0);
+        colorTotalQty[colorKey] =
+          (colorTotalQty[colorKey] || 0) + (item.qty || 0);
       }
     });
 
@@ -402,7 +403,8 @@ export default function ColorSizeBreakdown({
         sx={{
           p: 2,
           mb: 3,
-          backgroundColor: "#f0f4c3",
+          // backgroundColor: "#f0f4c3",
+          backgroundColor: "#000",
           borderColor: "#c0ca33",
           display: "flex",
           justifyContent: "space-between",
@@ -417,13 +419,17 @@ export default function ColorSizeBreakdown({
             Active Working Target: Style Code [{" "}
             {styleContextSanitized.styleCode} ]
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ fontWeight: "bold", color: "#fff" }}
+          >
             Buyer: {buyerCode} | Order Ref: {order} | Bulk Target Size:{" "}
             {styleContextSanitized.quantity.toLocaleString()}{" "}
             {selectedStyleFromGrid.unit || "Pcs"}
           </Typography>
         </Box>
-        <Box sx={{ textAlign: "right" }}>
+        <Box sx={{ textAlign: "right", color: "#fff" }}>
           <Typography
             variant="caption"
             sx={{ fontWeight: "bold", display: "block" }}
@@ -435,7 +441,7 @@ export default function ColorSizeBreakdown({
           </Typography>
           <Typography
             variant="caption"
-            sx={{ fontWeight: "bold", display: "block" }}
+            sx={{ fontWeight: "bold", display: "block", color: "#fff" }}
           >
             SIZE MATRIX MODE:{" "}
             {styleContextSanitized.sizeRatio === "R"

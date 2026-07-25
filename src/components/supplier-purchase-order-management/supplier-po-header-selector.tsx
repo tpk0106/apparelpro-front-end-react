@@ -19,10 +19,10 @@ import {
   useGetSuppliersLookup,
   useGetAllGarmentTypes,
   useGetStylesByScope,
+  useGetBasis,
 } from "../../tanstack-hooks/custom-hooks";
-import { useGetAllDepartmentsQuery } from "../../tanstack-hooks/common.hooks";
 import type { Currency } from "../../interfaces/references/Currency";
-import type { Department } from "../../interfaces/references/Department";
+import type { Basis } from "../../interfaces/references/Basis";
 
 import type {
   SelectedPOContext,
@@ -70,7 +70,7 @@ export default function SupplierPOHeaderSelector({
   const [selectedStyle, setSelectedStyle] = useState<Style | null>(null);
   const [selectedSupplier, setSelectedSupplier] =
     useState<SupplierLookupOption | null>(null);
-  const [selectedStore, setSelectedStore] = useState<Department | null>(
+  const [selectedBasis, setSelectedBasis] = useState<Basis | null>(
     null,
   );
   const [selectedCurrency, setSelectedCurrency] =
@@ -127,11 +127,26 @@ export default function SupplierPOHeaderSelector({
     [currencyPageData],
   );
 
-  // Store/Warehouse allocation now sourced live from the Department (od_dept)
-  // master table - same table and hook STRN's "Issuing Department" dropdown
-  // already uses - instead of a hardcoded in-memory list.
-  const { data: departmentsList = [], isLoading: isDepartmentsLoading } =
-    useGetAllDepartmentsQuery();
+  // Basis allocation (FOB, CMT, NFE, etc.) sourced live from the Basis
+  // (od_bref) master table - same source and hook the Buyer PO screen's
+  // Basis dropdown already uses. This field used to be wired to a
+  // warehouse/department reference table instead, which let physical
+  // location codes (e.g. "MST", "ST1") get saved into what must always be a
+  // genuine Basis code (FOB/CMT/NFE/LP/BFE/CMP) - the root cause of
+  // "Invalid Basis Code" errors surfacing later during Goods Return Note
+  // commits.
+  const { data: basisPageData, isLoading: isBasisLoading } = useGetBasis({
+    pageIndex: 0,
+    pageSize: 999,
+    sortColumn: "code",
+    sortOrder: "asc",
+    filterColumn: null,
+    filterQuery: null,
+  });
+  const basisList = useMemo<Basis[]>(
+    () => basisPageData?.items || [],
+    [basisPageData],
+  );
 
   // --- TRANSACTIONAL MANUAL ACTION HANDLERS ---
 
@@ -145,7 +160,7 @@ export default function SupplierPOHeaderSelector({
     setSelectedType(null);
     setSelectedStyle(null);
     setSelectedSupplier(null);
-    setSelectedStore(null);
+    setSelectedBasis(null);
     setSelectedCurrency(null);
     setProformaNo("");
     setProformaDate("");
@@ -155,7 +170,7 @@ export default function SupplierPOHeaderSelector({
   const verifyAndBroadcastContext = (
     updatedPoNumber = purchaseNumber,
     updatedSupplier = selectedSupplier,
-    updatedStore = selectedStore,
+    updatedBasis = selectedBasis,
     updatedCurrency = selectedCurrency,
     updatedBuyer = selectedBuyer,
     updatedOrder = selectedOrder,
@@ -173,7 +188,7 @@ export default function SupplierPOHeaderSelector({
     if (
       poNumberSatisfied &&
       updatedSupplier &&
-      updatedStore &&
+      updatedBasis &&
       updatedCurrency &&
       updatedBuyer &&
       updatedOrder &&
@@ -184,7 +199,7 @@ export default function SupplierPOHeaderSelector({
         isNewPurchaseOrder: poMode === "NEW",
         purchaseNumber: updatedPoNumber.trim(),
         supplierCode: String(updatedSupplier.supplierCode),
-        storeCode: updatedStore.departmentCode,
+        storeCode: updatedBasis.code,
         proformaInvoiceNo: updatedProformaNo.trim(),
         proformaInvoiceDate: updatedProformaDate,
         currencyCode: updatedCurrency.code,
@@ -291,28 +306,25 @@ export default function SupplierPOHeaderSelector({
           />
         </Grid>
 
-        {/* Input 3: Store/Warehouse Allocation - sourced from the Department master table */}
+        {/* Input 3: Basis Selection - sourced from the Basis (od_bref) master table.
+            Previously wired to a warehouse/department reference table, which let
+            physical location codes masquerade as Basis codes - see GRN-side
+            "Invalid Basis Code" root-cause fix. */}
         <Grid size={{ xs: 12, sm: 6, md: 3.5 }}>
           <Autocomplete
-            options={departmentsList}
-            getOptionLabel={(option: Department) =>
-              option.departmentCode ? `${option.departmentCode} - ${option.name}` : ""
+            options={basisList}
+            getOptionLabel={(option: Basis) =>
+              option.code ? `${option.code} - ${option.description}` : ""
             }
-            value={selectedStore}
-            onChange={(_: SyntheticEvent, val: Department | null) => {
-              setSelectedStore(val);
+            value={selectedBasis}
+            onChange={(_: SyntheticEvent, val: Basis | null) => {
+              setSelectedBasis(val);
               verifyAndBroadcastContext(purchaseNumber, selectedSupplier, val);
             }}
-            loading={isDepartmentsLoading}
-            isOptionEqualToValue={(option, value) =>
-              option.departmentCode === value?.departmentCode
-            }
+            loading={isBasisLoading}
+            isOptionEqualToValue={(option, value) => option.code === value?.code}
             renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Allocation Store Code"
-                size="small"
-              />
+              <TextField {...params} label="Basis" size="small" />
             )}
           />
         </Grid>
@@ -330,7 +342,7 @@ export default function SupplierPOHeaderSelector({
               verifyAndBroadcastContext(
                 purchaseNumber,
                 selectedSupplier,
-                selectedStore,
+                selectedBasis,
                 val,
               );
             }}
@@ -355,7 +367,7 @@ export default function SupplierPOHeaderSelector({
               verifyAndBroadcastContext(
                 purchaseNumber,
                 selectedSupplier,
-                selectedStore,
+                selectedBasis,
                 selectedCurrency,
                 selectedBuyer,
                 selectedOrder,
@@ -382,7 +394,7 @@ export default function SupplierPOHeaderSelector({
               verifyAndBroadcastContext(
                 purchaseNumber,
                 selectedSupplier,
-                selectedStore,
+                selectedBasis,
                 selectedCurrency,
                 selectedBuyer,
                 selectedOrder,
@@ -410,7 +422,7 @@ export default function SupplierPOHeaderSelector({
               verifyAndBroadcastContext(
                 purchaseNumber,
                 selectedSupplier,
-                selectedStore,
+                selectedBasis,
                 selectedCurrency,
                 val,
                 null,
@@ -442,7 +454,7 @@ export default function SupplierPOHeaderSelector({
               verifyAndBroadcastContext(
                 purchaseNumber,
                 selectedSupplier,
-                selectedStore,
+                selectedBasis,
                 selectedCurrency,
                 selectedBuyer,
                 val,
@@ -480,7 +492,7 @@ export default function SupplierPOHeaderSelector({
               verifyAndBroadcastContext(
                 purchaseNumber,
                 selectedSupplier,
-                selectedStore,
+                selectedBasis,
                 selectedCurrency,
                 selectedBuyer,
                 selectedOrder,
@@ -512,7 +524,7 @@ export default function SupplierPOHeaderSelector({
               verifyAndBroadcastContext(
                 purchaseNumber,
                 selectedSupplier,
-                selectedStore,
+                selectedBasis,
                 selectedCurrency,
                 selectedBuyer,
                 selectedOrder,

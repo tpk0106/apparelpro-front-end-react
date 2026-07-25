@@ -93,7 +93,13 @@ import {
   loadStyleDimensions,
   loadSavedColorSizeMatrix,
 } from "../services/color-size-breakdown-details.service";
-import { loadSuppliersLookup } from "../services/supplier.service";
+import {
+  createNewSupplier,
+  loadSuppliers,
+  loadSuppliersLookup,
+  removeSupplier,
+  updateEditSupplier,
+} from "../services/supplier.service";
 import type { ColorSizeDetailsServiceModel } from "../components/material-consumption/material-consumption.types";
 
 // 1. THE FETCH HOOK (Replaces loadAllCurrencies Saga & Reducer)
@@ -380,7 +386,7 @@ export const useUpdateUnitMutation = () => {
 
   return useMutation<void, Error, Unit>({
     mutationFn: async (updatedUnit: Unit) => {
-      await updateEditUnit(updatedUnit.id, updatedUnit);
+      await updateEditUnit(updatedUnit.code, updatedUnit);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["units"] });
@@ -396,9 +402,9 @@ export const useUpdateUnitMutation = () => {
 export const useDeleteUnitMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<void, Error, number>({
-    mutationFn: async (id: number) => {
-      removeUnit(id);
+  return useMutation<void, Error, string>({
+    mutationFn: async (code: string) => {
+      removeUnit(code);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["units"] });
@@ -406,6 +412,81 @@ export const useDeleteUnitMutation = () => {
     },
   });
 };
+
+// Item Feature
+
+// 1. THE FETCH HOOK (Replaces loadAllCurrencies Saga & Reducer)
+export const useGetItemFeatures = (paginate: PaginationData) => {
+  return useQuery<PaginationAPIModel<ItemFeature>, Error>({
+    // The queryKey acts like a dependency array.
+    // When paginate.pageIndex shifts, TanStack Query automatically fires a new network request!
+    queryKey: ["item-features", paginate.pageIndex, paginate.pageSize],
+    queryFn: async () => {
+      const response: AxiosResponse<PaginationAPIModel<ItemFeature>> =
+        await loadItemFeatures(paginate);
+      console.log("Items feature Data : ", response.data);
+      return response.data;
+    },
+    placeholderData: (previousData) => previousData, // Keeps old page data visible while loading the next page (smooth transitions)
+  });
+};
+
+export const useCreateItemFeatureMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, ItemFeature>({
+    mutationFn: async (newUnit: ItemFeature) => {
+      await createNewItemFeature(newUnit);
+    },
+    onSuccess: () => {
+      // 🚀 THE MAGIC: This instantly tells TanStack Query to clear its cache
+      // and re-fetch whatever active page your table is currently looking at!
+      queryClient.invalidateQueries({ queryKey: ["item-features"] });
+      toast.success("Item Feature created successfully");
+    },
+    onError: (error) => {
+      toast.error(`Creation failed: ${error.message}`);
+    },
+  });
+};
+
+// 3. THE UPDATE HOOK (Replaces updateCountry Saga)
+export const useUpdateItemFeatureMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, ItemFeature>({
+    mutationFn: async (updatedItemFeature: ItemFeature) => {
+      await updateEditItemFeature(
+        updatedItemFeature.featureCode,
+        updatedItemFeature,
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["item-features"] });
+      toast.success("Item Feature updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Update failed: ${error.message}`);
+    },
+  });
+};
+
+// 4. THE DELETE HOOK (Replaces deleteCountry Saga)
+export const useDeleteItemFeatureMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, string>({
+    mutationFn: async (featureCode: string) => {
+      removeItemFeature(featureCode);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["item-features"] });
+      toast.success("Item Feature deleted successfully");
+    },
+  });
+};
+
+//
 
 // Buyer
 
@@ -449,6 +530,8 @@ export const useUpdateBuyerMutation = () => {
 
   return useMutation<void, Error, Buyer>({
     mutationFn: async (updatedBuyer: Buyer) => {
+      console.log("update buyer", updatedBuyer);
+      console.log("update buyercode", updatedBuyer.buyerCode);
       await updateEditBuyer(updatedBuyer.buyerCode, updatedBuyer);
     },
     onSuccess: () => {
@@ -475,6 +558,77 @@ export const useDeleteBuyerMutation = () => {
     },
   });
 };
+
+// supplier
+
+export const useGetSuppliersQuery = (paginate: PaginationData) => {
+  return useQuery<PaginationAPIModel<Supplier>, Error>({
+    // The queryKey acts like a dependency array.
+    // When paginate.pageIndex shifts, TanStack Query automatically fires a new network request!
+    queryKey: ["suppliers", paginate.pageIndex, paginate.pageSize],
+    queryFn: async () => {
+      const response: AxiosResponse<PaginationAPIModel<Supplier>> =
+        await loadSuppliers(paginate);
+      return response.data;
+    },
+    placeholderData: (previousData) => previousData, // Keeps old page data visible while loading the next page (smooth transitions)
+  });
+};
+
+export const useCreateSupplierMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, Supplier>({
+    mutationFn: async (newSupplier: Supplier) => {
+      await createNewSupplier(newSupplier);
+    },
+    onSuccess: () => {
+      // 🚀 THE MAGIC: This instantly tells TanStack Query to clear its cache
+      // and re-fetch whatever active page your table is currently looking at!
+      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+      toast.success("Supplier created successfully");
+    },
+    onError: (error) => {
+      toast.error(`Creation failed: ${error.message}`);
+    },
+  });
+};
+
+export const useUpdateSupplierMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, Supplier>({
+    mutationFn: async (updatedSupplier: Supplier) => {
+      console.log("update buyer", updatedSupplier);
+      console.log("update buyercode", updatedSupplier.supplierCode);
+      await updateEditSupplier(updatedSupplier.supplierCode, updatedSupplier);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+      toast.success("Supplier updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Update failed: ${error.message}`);
+    },
+  });
+};
+
+// 4. THE DELETE HOOK (Replaces deleteCountry Saga)
+export const useDeleteSupplierMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, number>({
+    mutationFn: async (supplierCode: number) => {
+      removeSupplier(supplierCode);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+      toast.success("Supplier deleted successfully");
+    },
+  });
+};
+
+//
 
 // buyers address
 
@@ -512,20 +666,46 @@ export const useCreateBuyerAddressMutation = () => {
 };
 
 // 3. THE UPDATE HOOK (Replaces updateCountry Saga)
+// export const useUpdateBuyerAddressMutation = () => {
+//   const queryClient = useQueryClient();
+
+//   return useMutation<void, Error, UpdateAddressPayload>({
+//     mutationFn: async (updatedBuyerAddressPayload) => {
+//       return await updateBuyerAddress(
+//         updatedBuyerAddressPayload.buyerCode,
+//         updatedBuyerAddressPayload.addressId,
+//         { ...updatedBuyerAddressPayload.addressToUpdate },
+//       );
+//     },
+//     onSuccess: () => {
+//       queryClient.invalidateQueries({ queryKey: ["buyers"] });
+//       toast.success("Buyer updated successfully");
+//     },
+//     onError: (error) => {
+//       toast.error(`Update failed: ${error.message}`);
+//     },
+//   });
+// };
+
+// Change the first generic from 'void' to 'AxiosResponse' (or whatever your API returns)
+// import { AxiosResponse } from 'axios';
+
 export const useUpdateBuyerAddressMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<void, Error, UpdateAddressPayload>({
+  return useMutation<AxiosResponse<any>, Error, UpdateAddressPayload>({
     mutationFn: async (updatedBuyerAddressPayload) => {
-      await updateBuyerAddress(
+      console.log("payload :", updatedBuyerAddressPayload);
+      return await updateBuyerAddress(
         updatedBuyerAddressPayload.buyerCode,
         updatedBuyerAddressPayload.addressId,
-        updatedBuyerAddressPayload.addressToUpdate,
+        { ...updatedBuyerAddressPayload.addressToUpdate },
       );
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // You can now access data.data if needed!
       queryClient.invalidateQueries({ queryKey: ["buyers"] });
-      toast.success("Buyer updated successfully");
+      toast.success("Buyer Address updated successfully");
     },
     onError: (error) => {
       toast.error(`Update failed: ${error.message}`);
@@ -679,8 +859,7 @@ export const useGetStylesByScope = (
       params.typeCode,
     ],
     queryFn: async () => {
-      const response: AxiosResponse<Style[]> =
-        await loadStylesByScope(params);
+      const response: AxiosResponse<Style[]> = await loadStylesByScope(params);
       return response.data;
     },
     enabled,
@@ -869,6 +1048,14 @@ export const useCreateOrderMutation = () => {
 // Pass BulkSaveResponse as the first generic type argument
 // Pass BulkSaveResponse as the first generic type argument
 import type { AppError } from "../auth/axiosClient"; // Path to your client file
+import type { Supplier } from "../interfaces/references/Supplier";
+import type { ItemFeature } from "../interfaces/references/ItemFeature";
+import {
+  createNewItemFeature,
+  loadItemFeatures,
+  removeItemFeature,
+  updateEditItemFeature,
+} from "../services/item-feature.service";
 // Path to your client file
 
 export const useCreateColorSizeBreakdownDetailsMutation = () => {

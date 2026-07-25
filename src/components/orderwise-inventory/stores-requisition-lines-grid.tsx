@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import {
   Box,
   Table,
@@ -24,9 +24,10 @@ import {
   useVerifyStockItemAvailabilityMutation,
 } from "../../tanstack-hooks/orderwise-inventory-strn.hooks";
 
-// Import global master lookup reference hook to populate the Unit select dropdown cell
-import { useGetUnits } from "../../tanstack-hooks/custom-hooks";
+// Import global master lookup reference hooks to populate the Unit and Basis dropdown cells
+import { useGetUnits, useGetBasis } from "../../tanstack-hooks/custom-hooks";
 import type { Unit } from "../../interfaces/references/Unit";
+import type { Basis } from "../../interfaces/references/Basis";
 
 // 1. Ensure you import the Autocomplete component near the top of StoresRequisitionLinesGrid.tsx:
 // import Autocomplete from "@mui/material/Autocomplete";
@@ -34,34 +35,33 @@ import type { Unit } from "../../interfaces/references/Unit";
 interface LinesGridProps {
   buyerCode: number;
   order: string;
-  defaultStoreCode: string;
   lineItems: RequisitionLineItemRow[];
   setLineItems: React.Dispatch<React.SetStateAction<RequisitionLineItemRow[]>>;
+  rowStockBalances: Record<number, StockItemAvailabilityDetails>;
+  setRowStockBalances: React.Dispatch<
+    React.SetStateAction<Record<number, StockItemAvailabilityDetails>>
+  >;
 }
 
 export default function StoresRequisitionLinesGrid({
   buyerCode,
   order,
-  defaultStoreCode,
   lineItems,
   setLineItems,
+  rowStockBalances,
+  setRowStockBalances,
 }: LinesGridProps) {
   // 1. Central Asynchronous Trigger Hook: Runs an on-demand inventory balance check on cellular blur
   const { mutateAsync: triggerStockCheck } =
     useVerifyStockItemAvailabilityMutation();
-
-  // Local state container caching live balance metrics row-by-row to show warnings beneath textboxes
-  const [rowStockBalances, setRowStockBalances] = useState<
-    Record<number, StockItemAvailabilityDetails>
-  >({});
 
   // 2. Fetch all available stock options for this order to drive the lookup dropdown choices
   // (Assuming you have an existing stock lookup query hook registered in your services layer)
   // Stream the live selections map array from the C# backend on demand
   const { data: stockChoicesList = [], isLoading: isStockLoading } =
     useGetAvailableStockChoicesQuery(
-      { buyerCode, order, storeCode: defaultStoreCode },
-      buyerCode !== 0 && !!order && !!defaultStoreCode,
+      { buyerCode, order },
+      buyerCode !== 0 && !!order,
     );
 
   // ... Inside your table lines mapping loop (.map((row, idx) => {)):
@@ -79,6 +79,20 @@ export default function StoresRequisitionLinesGrid({
     () => unitsPageData?.items || [],
     [unitsPageData],
   );
+
+  // Fetch the Basis (od_bref) master list to populate the Basis column dropdown -
+  // replaces a free-text input that let any 3-char string (including physical
+  // warehouse/department codes like "MST"/"ST1") be saved as a Basis, only to be
+  // rejected later by GRN/RTN's "Invalid Basis Code" validation.
+  const { data: basisPageData } = useGetBasis({
+    pageIndex: 0,
+    pageSize: 999,
+    sortColumn: "code",
+    sortOrder: "asc",
+    filterColumn: null,
+    filterQuery: null,
+  });
+  const basisList = useMemo(() => basisPageData?.items || [], [basisPageData]);
 
   // --- CELL-LEVEL WORKFLOW VALIDATION PASSES ---
 
@@ -204,10 +218,15 @@ export default function StoresRequisitionLinesGrid({
                           "itemCode",
                           matchedDbItem.itemCode,
                         );
+                        // Auto-fill Basis from this specific item's own real StoreCode
+                        // (Basis) value returned by the lookup - never the Issuing
+                        // Department default, which was the root cause of Department
+                        // codes like "MST"/"ST1" ending up saved as Basis values.
+                        // Still freely overridable afterward via the Basis column.
                         handleUpdateLineCell(
                           idx,
                           "storeCode",
-                          defaultStoreCode,
+                          matchedDbItem.storeCode,
                         );
                         handleUpdateLineCell(
                           idx,
@@ -215,11 +234,10 @@ export default function StoresRequisitionLinesGrid({
                           matchedDbItem.unit || "PCS",
                         );
 
-                        // Fire your cell blur validator using the verified database choice parameters
                         const updatedRow = {
                           stockCode: matchedDbItem.itemCode.substring(0, 2),
                           itemCode: matchedDbItem.itemCode,
-                          storeCode: defaultStoreCode,
+                          storeCode: matchedDbItem.storeCode,
                           unit: matchedDbItem.unit || "PCS",
                           quantity: row.quantity,
                         };
@@ -396,32 +414,32 @@ export default function StoresRequisitionLinesGrid({
                   )}
                 </TableCell> */}
 
-                {/* Cell 2: Basis Store Code Input */}
+                {/* Cell 2: Basis Selection - sourced from the Basis (od_bref) master
+                    table. Previously a free-text input (placeholder "STR") that let
+                    any 3-char string be saved, including physical Department codes
+                    like "MST"/"ST1" - those only got caught later by GRN/RTN's
+                    "Invalid Basis Code" validation. */}
                 <TableCell>
                   <TextField
+                    select
                     size="small"
                     variant="standard"
                     fullWidth
-                    placeholder="STR"
                     value={row.storeCode}
-                    onChange={(e) =>
-                      handleUpdateLineCell(
-                        idx,
-                        "storeCode",
-                        e.target.value.toUpperCase(),
-                      )
-                    }
-                    onBlur={() => handleExecuteCellBlurCheck(idx, row)}
-                    slotProps={{
-                      htmlInput: {
-                        style: {
-                          fontSize: "13px",
-                          textTransform: "uppercase",
-                          maxLength: 3,
-                        },
-                      },
+                    onChange={(e) => {
+                      handleUpdateLineCell(idx, "storeCode", e.target.value);
+                      handleExecuteCellBlurCheck(idx, {
+                        ...row,
+                        storeCode: e.target.value,
+                      });
                     }}
-                  />
+                  >
+                    {basisList.map((basis: Basis) => (
+                      <MenuItem key={basis.code} value={basis.code}>
+                        {basis.code} - {basis.description}
+                      </MenuItem>
+                    ))}
+                  </TextField>
                 </TableCell>
 
                 {/* Cell 3: Unit Selection Dropdown Menu Selector */}

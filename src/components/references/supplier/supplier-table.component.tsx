@@ -1,8 +1,16 @@
+// Inside SupplierTable.tsx component body:
 import { useState } from "react";
-
+import {
+  useCreateBuyerMutation,
+  useCreateSupplierMutation,
+  useDeleteBuyerMutation,
+  useDeleteSupplierMutation,
+  useUpdateBuyerMutation,
+  useUpdateSupplierMutation,
+} from "../../../tanstack-hooks/custom-hooks";
+import type { Supplier } from "../../../interfaces/references/Supplier";
 import {
   MaterialReactTable,
-  useMaterialReactTable,
   type MRT_ColumnDef,
   type MRT_PaginationState,
   type MRT_Row,
@@ -12,17 +20,12 @@ import { Box, Button, darken, IconButton, Tooltip } from "@mui/material";
 import type { PaginationData } from "../../../interfaces/definitions";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
-import type { GarmentType } from "../../../interfaces/references/GarmentType";
-import {
-  useCreateGarmentTypeMutation,
-  useDeleteGarmentTypeMutation,
-  useUpdateGarmentTypeMutation,
-} from "../../../tanstack-hooks/custom-hooks";
+import BuyerAddresses from "../address-tanstack/buyer-address.component";
 import { useApparelProTable } from "../../../themes/useApparelProTable";
 
 interface Props {
-  columns: MRT_ColumnDef<GarmentType>[];
-  data: GarmentType[];
+  columns: MRT_ColumnDef<Supplier>[];
+  data: Supplier[];
   itemsCount: number;
   isError: boolean;
   isLoading: boolean;
@@ -31,7 +34,7 @@ interface Props {
   setPagination: React.Dispatch<React.SetStateAction<MRT_PaginationState>>;
 }
 
-const GarmentTypeTable = ({
+const SupplierTable = ({
   columns,
   data,
   itemsCount,
@@ -44,28 +47,26 @@ const GarmentTypeTable = ({
     Record<string, string | undefined>
   >({});
 
+  const [buyerCode, setBuyerCode] = useState<number>(null);
   const validationRequired = (value: string) => !value?.length;
-  const validateGarmentType = ({ typeName }: GarmentType) => {
-    console.log("validation :", validationRequired(typeName));
+  const validateBuyer = ({ name }: Supplier) => {
+    console.log("validation :", validationRequired(name));
     return {
-      typeName: validationRequired(typeName) ? "GarmentType Name required" : "",
+      name: validationRequired(name) ? "Supplier Name required" : "",
     };
   };
 
   // 1. Consume mutations cleanly
-  const { mutateAsync: createGarmentType, isPending: isCreatingCurrency } =
-    useCreateGarmentTypeMutation();
-  const { mutateAsync: updateCurrency, isPending: isUpdatingCurrency } =
-    useUpdateGarmentTypeMutation();
-  const { mutateAsync: deleteCurrency, isPending: isDeletingCurrency } =
-    useDeleteGarmentTypeMutation();
+  const { mutateAsync: createSupplier } = useCreateSupplierMutation();
+  const { mutateAsync: updateSupplier } = useUpdateSupplierMutation();
+  const { mutateAsync: deleteSupplier } = useDeleteSupplierMutation();
 
   // 2. Your save hooks remain highly intuitive
-  const handleCreateCurrency: MRT_TableOptions<GarmentType>["onCreatingRowSave"] =
+  const handleCreateBuyer: MRT_TableOptions<Supplier>["onCreatingRowSave"] =
     async ({ values, table }) => {
       console.log("save");
       values = { ...values, id: 0 };
-      const newValidationErrors = validateGarmentType(values);
+      const newValidationErrors = validateBuyer(values);
       if (Object.values(newValidationErrors).some((error) => error)) {
         console.log("validation err: ", newValidationErrors);
         setValidationErrors(newValidationErrors);
@@ -74,35 +75,39 @@ const GarmentTypeTable = ({
       setValidationErrors({});
 
       // Fires mutationFn, runs network call, invalidates cache automatically on success!
-      await createGarmentType(values);
+      await createSupplier(values);
       table.setCreatingRow(null);
     };
 
-  const handleSaveCurrency: MRT_TableOptions<GarmentType>["onEditingRowSave"] =
+  const handleSaveBuyer: MRT_TableOptions<Supplier>["onEditingRowSave"] =
     async ({ values, table }) => {
-      values = { ...values, id: 0 };
-      const newValidationErrors = validateGarmentType(values);
+      //  values = { ...values, id: 0 };
+      console.log("buyer code", buyerCode);
+      const newValidationErrors = validateBuyer(values);
       if (Object.values(newValidationErrors).some((error) => error)) {
         setValidationErrors(newValidationErrors);
         return;
       }
       setValidationErrors({});
 
+      values = { ...values, buyerCode: buyerCode };
+      console.log("buyer ", values);
+
       // Fires mutationFn, runs network call, invalidates cache automatically on success!
-      await updateCurrency(values);
-      table.setCreatingRow(null);
+      await updateSupplier(values);
+      table.setEditingRow(null);
     };
 
   //DELETE action
-  const openDeleteConfirmModal = (row: MRT_Row<GarmentType>) => {
+  const openDeleteConfirmModal = (row: MRT_Row<Supplier>) => {
     if (window.confirm("Are you sure you want to delete this Garment Type?")) {
-      deleteCurrency(row.original.id);
+      deleteSupplier(row.original.supplierCode);
     }
   };
 
   //  CRUD Operations
 
-  const table = useApparelProTable<GarmentType>({
+  const table = useApparelProTable<Supplier>({
     columns,
     data: data,
 
@@ -112,6 +117,9 @@ const GarmentTypeTable = ({
       pagination: {
         pageIndex: pagination.pageIndex,
         pageSize: pagination.pageSize,
+      },
+      columnVisibility: {
+        supplierCode: false,
       },
     },
 
@@ -143,13 +151,9 @@ const GarmentTypeTable = ({
     },
 
     onCreatingRowCancel: () => setValidationErrors({}),
-    onCreatingRowSave: handleCreateCurrency,
+    onCreatingRowSave: handleCreateBuyer,
     onEditingRowCancel: () => setValidationErrors({}),
-    onEditingRowSave: handleSaveCurrency,
-
-    muiExpandButtonProps: ({ row, table }) => ({
-      onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }),
-    }),
+    onEditingRowSave: handleSaveBuyer,
 
     muiTableBodyRowProps: ({ row, table }) => ({
       hover: !table.getState().editingRow,
@@ -161,67 +165,6 @@ const GarmentTypeTable = ({
       },
     }),
 
-    // muiTopToolbarProps: {
-    //   sx: () => ({
-    //     backgroundColor: "rgb(96 165 250)",
-    //     boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
-    //   }),
-    // },
-
-    // // Cell styling
-    // muiTableHeadCellProps: {
-    //   sx: {
-    //     fontSize: "0.8rem",
-    //     fontWeight: "600",
-    //     backgroundColor: "#fff",
-    //     // color: "#42a5f5",
-    //     color: "#000",
-    //     boxShadow: "0 -5px 3px -3px black, 0 5px 3px -3px ",
-    //   },
-    // },
-
-    // // table body
-    // muiTableBodyProps: {
-    //   sx: {
-    //     fontSize: "0.5rem",
-    //   },
-    // },
-
-    // muiTableBodyRowProps: ({ row, table }) => ({
-    //   hover: !table.getState().editingRow,
-    //   sx: {
-    //     opacity:
-    //       !table.getState().editingRow ||
-    //       table.getState().editingRow?.id === row.id ||
-    //       table.getState().creatingRow
-    //         ? 1
-    //         : 0.4,
-    //     backgroundColor:
-    //       Number(row?.id) % 2 === 0 ||
-    //       table.getState().editingRow?.id === row.id
-    //         ? darken("#4B9CD3", 0)
-    //         : darken("#7CB9E8", 0),
-    //     "&:hover td": {
-    //       borderTop: "1px solid #fff",
-    //       borderBottom: "1px solid #fff",
-    //       color: "#4B9CD3",
-    //       backgroundColor:
-    //         table.getState().editingRow?.id === row.id ||
-    //         table.getState().creatingRow
-    //           ? "#fff"
-    //           : "#000",
-    //     },
-    //   },
-    // }),
-
-    // muiTableFooterRowProps: {
-    //   sx: () => ({
-    //     backgroundColor: "rgb(96 165 250)",
-    //     boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
-    //     boder: "5px solid red",
-    //   }),
-    // },
-
     renderTopToolbarCustomActions: ({ table }) => (
       <Button
         variant="contained"
@@ -229,14 +172,19 @@ const GarmentTypeTable = ({
           table.setCreatingRow(true);
         }}
       >
-        New GarmentType
+        New Supplier
       </Button>
     ),
 
     renderRowActions: ({ row }) => (
       <Box sx={{ display: "flex", gap: "1rem" }}>
         <Tooltip title="Edit">
-          <IconButton onClick={() => table.setEditingRow(row)}>
+          <IconButton
+            onClick={() => {
+              table.setEditingRow(row);
+              setBuyerCode(row.original.supplierCode);
+            }}
+          >
             <ModeEditOutlinedIcon />
           </IconButton>
         </Tooltip>
@@ -247,9 +195,48 @@ const GarmentTypeTable = ({
         </Tooltip>
       </Box>
     ),
+
+    //custom expand button rotation
+
+    muiExpandButtonProps: ({ row, table }) => ({
+      onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }), //only 1 detail panel open at a time
+
+      sx: {
+        transform: row.getIsExpanded() ? "rotate(180deg)" : "rotate(-90deg)",
+        transition: "transform 0.2s",
+      },
+    }),
+
+    //conditionally render detail panel
+
+    renderDetailPanel: ({ row }) => {
+      //   const addresses = row.original.addresses;
+      //   const addressId = row.original.addressId;
+
+      return (
+        <>
+          <Box
+            sx={{
+              // "& tr:nth-of-type(odd)": {
+              //   backgroundColor: darken("#4B9CD3", 0),
+              // },
+              // "& tr:nth-of-type(even)": {
+              //   backgroundColor: darken("#7CB9E8", 0),
+              // },
+
+              margin: "0",
+              fontSize: "50%",
+              width: "100%",
+            }}
+          >
+            <BuyerAddresses buyerCode={row.original.supplierCode} />
+          </Box>
+        </>
+      );
+    },
   });
 
   return <MaterialReactTable table={table} />;
 };
 
-export default GarmentTypeTable;
+export default SupplierTable;

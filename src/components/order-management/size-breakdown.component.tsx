@@ -171,13 +171,14 @@ export default function SizeBreakdown({
   };
 
   return (
-    <Card sx={{ p: 3, mt: 2, boxShadow: 3 }}>
+    <Card sx={{ p: 3, mt: 2, boxShadow: 3, backgroundColor: "#fff" }}>
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: "2px",
+          // backgroundColor: "#fff",
         }}
       >
         <Box>

@@ -50,13 +50,10 @@ export default function ColorBreakdown({
         }}
       >
         <Box>
-          <Typography
-            variant="h5"
-            sx={{ fontWeight: "bold", color: "#1a237e" }}
-          >
+          <Typography variant="h5" sx={{ fontWeight: "bold", color: "#fff" }}>
             Stage 1: Colour Target Allocation Setup
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: "#fff" }}>
             Define unique production colour blocks and piece targets for Style:{" "}
             <strong>{styleCode}</strong>
           </Typography>

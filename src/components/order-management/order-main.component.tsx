@@ -97,11 +97,31 @@ const OrderMain = ({ buyerCode, order, mainOrderUnit }: OrderMainProps) => {
           sx={{
             borderBottom: 1,
             borderColor: "divider",
-            backgroundColor: "#9e9e9e",
+            backgroundColor: "#60A5FA",
             color: "#000",
           }}
         >
           <Tabs
+            sx={{
+              color: "#000",
+
+              // 1. Unselected tab text color
+              "& .MuiTab-root": {
+                color: "#000",
+              },
+              // 2. Selected tab text color
+              "& .MuiTab-root.Mui-selected": {
+                color: "#1c398e ",
+              },
+              // 3. Bottom sliding indicator bar color
+              "& .MuiTabs-indicator": {
+                backgroundColor: "#1c398e ",
+              },
+              // 4. Hover effect color
+              "& .MuiTab-root:hover": {
+                color: "#3f51b5",
+              },
+            }}
             value={value}
             onChange={handleChange}
             aria-label="Garment Order Control Panels"

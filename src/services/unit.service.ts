@@ -26,21 +26,21 @@ const createNewUnit = async (newUnit: Unit) => {
   );
 };
 
-const updateEditUnit = async (id: number, existingUnit: Unit) => {
+const updateEditUnit = async (code: string, existingUnit: Unit) => {
   return await client.put(
     APPARELPRO_ENDPOINTS.REFERENCE_SECTION.UNIT.PUT,
     existingUnit,
     {
       params: {
-        id: id,
+        code: code,
       },
     },
   );
 };
 
-const removeUnit = async (id: number) => {
+const removeUnit = async (code: string) => {
   return await client.delete(
-    APPARELPRO_ENDPOINTS.REFERENCE_SECTION.UNIT.DELETE + id, // buyercode pass by route
+    APPARELPRO_ENDPOINTS.REFERENCE_SECTION.UNIT.DELETE + code, // buyercode pass by route
   );
 };
 

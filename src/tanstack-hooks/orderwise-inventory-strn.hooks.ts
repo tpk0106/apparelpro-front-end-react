@@ -53,7 +53,7 @@ export const useCreateSTRNMutation = () => {
 
 // Available item lookup choices for the line grid dropdown (replaces useGetAvailableStockChoicesQuery)
 export const useGetAvailableStockChoicesQuery = (
-  params: { buyerCode: number; order: string; storeCode: string },
+  params: { buyerCode: number; order: string },
   enabled: boolean,
 ) => {
   return useQuery<StockLookupRow[], AppError>({
@@ -61,7 +61,6 @@ export const useGetAvailableStockChoicesQuery = (
       "orderwiseInventoryStrnChoices",
       params.buyerCode,
       params.order,
-      params.storeCode,
     ],
     queryFn: async () => {
       const response: AxiosResponse<StockLookupRow[]> =

@@ -6,6 +6,7 @@ import {
 } from "material-react-table";
 import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import { useApparelProTable } from "../../themes/useApparelProTable";
 
 export interface LocalColorRow {
   colorCode: string;
@@ -49,7 +50,7 @@ const ColorBreakdownTable = ({ colors, setColors }: TableProps) => {
     [],
   );
 
-  const table = useMaterialReactTable({
+  const table = useApparelProTable<LocalColorRow>({
     columns,
     data: colors,
     editDisplayMode: "row", // Smooth, click-to-edit interface rows
@@ -97,7 +98,7 @@ const ColorBreakdownTable = ({ colors, setColors }: TableProps) => {
             ]);
           }}
         >
-          Add Product Colour Row
+          Add Product Colour
         </Button>
       </Box>
     ),

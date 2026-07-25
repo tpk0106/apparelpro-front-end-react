@@ -63,16 +63,23 @@ const updateAddress = async (
 const updateBuyerAddress = async (
   buyerCode: number,
   addressId: string,
-  existingBuyerAddress: Address,
+  updateAddressAPIModel: Address,
+  // existingBuyerAddress: Address,
 ) => {
+  console.log("MUTATION PAYLOAD ARRIVED:", {
+    buyerCode,
+    addressId,
+    updateAddressAPIModel,
+  });
+  console.log(
+    "url :",
+    APPARELPRO_ENDPOINTS.REFERENCE_SECTION.ADDRESS
+      .UPDATE_BY_BUYER_CODE_AND_ADDRESS_ID + `/${buyerCode}/${addressId}`,
+  );
   return await client.put(
     APPARELPRO_ENDPOINTS.REFERENCE_SECTION.ADDRESS
-      .UPDATE_BY_BUYER_CODE_AND_ADDRESS_ID +
-      "/" +
-      buyerCode +
-      "/" +
-      addressId,
-    existingBuyerAddress,
+      .UPDATE_BY_BUYER_CODE_AND_ADDRESS_ID + `/${buyerCode}/${addressId}`,
+    updateAddressAPIModel,
   );
 };
 

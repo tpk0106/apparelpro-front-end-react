@@ -186,37 +186,49 @@ const CurrencyTable = ({
     muiTableBodyRowProps: ({ row, table }) => ({
       hover: !table.getState().editingRow,
       sx: {
-        opacity:
-          !table.getState().editingRow ||
-          table.getState().editingRow?.id === row.id ||
-          table.getState().creatingRow
-            ? 1
-            : 0.4,
-        backgroundColor:
-          Number(row?.id) % 2 === 0 ||
-          table.getState().editingRow?.id === row.id
-            ? darken("#4B9CD3", 0)
-            : darken("#7CB9E8", 0),
-        "&:hover td": {
-          borderTop: "1px solid #fff",
-          borderBottom: "1px solid #fff",
-          color: "#4B9CD3",
-          backgroundColor:
-            table.getState().editingRow?.id === row.id ||
-            table.getState().creatingRow
-              ? "#fff"
-              : "#000",
+        "& .MuiInputBase-input": {
+          color: "#000000", // Forces input text color to black
+          WebkitTextFillColor: "#000000", // Ensures compatibility with Safari
         },
       },
     }),
+    // muiTableBodyRowProps: ({ row, table }) => ({
+    //   hover: !table.getState().editingRow,
+    //   sx: {
+    //     opacity:
+    //       !table.getState().editingRow ||
+    //       table.getState().editingRow?.id === row.id ||
+    //       table.getState().creatingRow
+    //         ? 1
+    //         : 0.4,
+    //     backgroundColor:
+    //       Number(row?.id) % 2 === 0 ||
+    //       table.getState().editingRow?.id === row.id
+    //         ? darken("#4B9CD3", 0)
+    //         : darken("#7CB9E8", 0),
+    //     "&:hover td": {
+    //       borderTop: "1px solid #fff",
+    //       borderBottom: "1px solid #fff",
+    //       color: "#4B9CD3",
+    //       // backgroundColor: "#4B9CD3" /* darken("#4B9CD3", 0.1) */,
+    //     },
+    //     "&:hover": {
+    //       color:
+    //         table.getState().editingRow?.id === row.id ||
+    //         table.getState().creatingRow
+    //           ? "#fff"
+    //           : "#000",
+    //     },
+    //   },
+    // }),
 
-    muiTableFooterRowProps: {
-      sx: () => ({
-        backgroundColor: "rgb(96 165 250)",
-        boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
-        boder: "5px solid red",
-      }),
-    },
+    // muiTableFooterRowProps: {
+    //   sx: () => ({
+    //     backgroundColor: "rgb(96 165 250)",
+    //     boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
+    //     boder: "5px solid red",
+    //   }),
+    // },
 
     // renderCaption: () => {
     //   return (isLoading && (

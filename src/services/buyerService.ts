@@ -27,6 +27,8 @@ const createNewBuyer = async (createBuyerAPIModel: CreateBuyerAPIModel) => {
 };
 
 const updateEditBuyer = async (buyerCode: number, existingBuyer: Buyer) => {
+  console.log("existing buyer code in service :", buyerCode);
+  console.log("existing buyer in service :", existingBuyer);
   return await client.put(
     APPARELPRO_ENDPOINTS.REFERENCE_SECTION.BUYER.PUT,
     existingBuyer,

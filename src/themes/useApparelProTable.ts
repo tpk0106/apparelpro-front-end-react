@@ -65,6 +65,15 @@ export function useApparelProTable<TData extends MRT_RowData>(
             color: "#000000 !important",
             borderColor: "rgba(0, 0, 0, 0.1) !important",
           },
+          // Force all row text to be high-contrast black, even when editing or creating
+          // color:
+          //   isEditing || isCreating
+          //     ? "#000000 !important"
+          //     : "#000000 !important",
+          //end Force all row text to be high-contrast black, even when editing or creating
+          // Force all row borders to be high-contrast black, even when editing or creating
+          borderTop: "1px solid rgba(0, 0, 0, 0.1) !important",
+          borderBottom: "1px solid rgba(0, 0, 0, 0.1) !important",
 
           // Force all icons to be uniform purple
           "& .MuiSvgIcon-root, & .MuiIconButton-root": {
@@ -80,6 +89,7 @@ export function useApparelProTable<TData extends MRT_RowData>(
               isEditing || isCreating
                 ? "#FFFFFF !important"
                 : "#000000 !important",
+
             "& .MuiSvgIcon-root, & .MuiIconButton-root": {
               color:
                 isEditing || isCreating

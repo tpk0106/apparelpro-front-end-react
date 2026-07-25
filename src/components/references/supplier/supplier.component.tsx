@@ -1,22 +1,16 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import type { MRT_ColumnDef, MRT_PaginationState } from "material-react-table";
 import type { PaginationData } from "../../../interfaces/definitions";
-
-// Import your new hooks
-import {
-  useGetBuyersQuery,
-  //   useGetCountriesQuery,
-} from "../../../tanstack-hooks/custom-hooks";
+import { useGetSuppliersQuery } from "../../../tanstack-hooks/custom-hooks";
 
 import { Box, ThemeProvider, Typography } from "@mui/material";
 
-import BuyerTable from "./buyer-table.component";
-import type { Buyer } from "../../../interfaces/references/Buyer";
+import SupplierTable from "./supplier-table.component";
 import { Bars } from "react-loading-icons";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
-// import type { Country } from "../../../interfaces/references/Country";
+import type { Supplier } from "../../../interfaces/references/Supplier";
 
-const Buyers = () => {
+const Suppliers = () => {
   const [validationErrors, setValidationErrors] =
     useState<Record<string, string | undefined>>();
 
@@ -43,43 +37,25 @@ const Buyers = () => {
 
   //   // 3. 🚀 FETCH DATA DIRECTLY VIA TANSTACK QUERY
   const {
-    data: buyerPageData,
+    data: supplierPageData,
     isLoading,
     isFetching,
     isError,
-  } = useGetBuyersQuery(paginate);
-
-  //Fetch countries for the dropdown menu (passing pageIndex 0, pageSize 999 to get all)
-  //   const { data: countryPageData } = useGetCountriesQuery({
-  //     pageIndex: 0,
-  //     pageSize: 999,
-  //     sortColumn: "name",
-  //     sortOrder: "asc",
-  //     filterColumn: null,
-  //     filterQuery: null,
-  //   });
+  } = useGetSuppliersQuery(paginate);
 
   // Extract pure items, safely falling back to empty arrays
-  const allBuyers = buyerPageData?.items || [];
-  const BuyersTotal = buyerPageData?.totalItems || 0;
+  const allSuppliers = supplierPageData?.items || [];
+  const suppliersTotal = supplierPageData?.totalItems || 0;
 
-  useEffect(() => {
-    console.log("Buyers  list :", allBuyers);
-  }, [allBuyers]);
-
-  //   const countries = useMemo<Country[]>(() => {
-  //     return countryPageData?.items || [];
-  //   }, [countryPageData?.items]); // Only recalculates when the actual data payload changes
-
-  const columns = useMemo<MRT_ColumnDef<Buyer>[]>(
+  const columns = useMemo<MRT_ColumnDef<Supplier>[]>(
     () => [
       {
-        accessorKey: "buyerCode",
-        header: "Buyer Code",
+        accessorKey: "supplierCode",
+        header: "Supplier Code",
       },
       {
         accessorKey: "name",
-        header: "Buyer Name",
+        header: "Supplier Name",
         size: 300,
         enableEditing: true,
         enableSorting: false,
@@ -98,12 +74,7 @@ const Buyers = () => {
           type: "text",
           required: true,
           style: { textTransform: "uppercase" },
-          //   onChange: handleChange,
-          //   value: val,
-          // onKeyUpCapture: (e) => {
-          //   cell.renderValue(e.target.value.toUpperCase());
-          //   console.log("key up", e.target.value);
-          // },
+
           //  slotProps: { textTransform: "upperCase" },
           onBlur: (event) => {
             const validationError = validationRequired(
@@ -117,46 +88,6 @@ const Buyers = () => {
             });
           },
         }),
-      },
-      {
-        accessorKey: "status",
-        header: "Status",
-        size: 30,
-        enableEditing: true,
-        editVariant: "select",
-        editSelectOptions: ["BO", "BC", "NP", "AG"],
-        enableColumnFilterModes: true,
-        enableColumnFilter: true,
-        enableSorting: false,
-        Cell: ({ renderedCellValue }) => (
-          <Box
-            sx={{
-              display: "flex",
-            }}
-          >
-            <span>{renderedCellValue}</span>
-          </Box>
-        ),
-        muiEditTextFieldProps: ({ cell }) => ({
-          select: true,
-          required: true,
-          error: !!validationErrors?.state,
-          helperText: validationErrors?.state,
-          //  children,
-
-          onBlur: (event) => {
-            const validationError = validationRequired(
-              event.currentTarget?.value,
-            )
-              ? "required"
-              : undefined;
-            setValidationErrors({
-              ...validationErrors,
-              [cell.id]: validationError,
-            });
-          },
-        }),
-        columnFilterModeOptions: ["contains"],
       },
       {
         accessorKey: "telephoneNos",
@@ -215,43 +146,21 @@ const Buyers = () => {
           </Box>
         ),
       },
-      {
-        accessorKey: "cusdec",
-        header: "CUSDEC",
-        size: 30,
-        enableEditing: true,
-        enableColumnFilterModes: false,
-        enableColumnFilter: false,
-        enableSorting: false,
-        enableColumnActions: false,
-
-        Cell: ({ renderedCellValue }) => (
-          <Box
-            sx={{
-              display: "flex",
-            }}
-          >
-            <span>{renderedCellValue}</span>
-          </Box>
-        ),
-      },
     ],
     [validationErrors],
   );
 
-  // ... keep your columns array layout exactly the same as before ...
-
   return (
-    <div className="flex flex-col w-[90%] mx-auto  justify-around mt-10">
+    <div className="flex flex-col w-[90%] mx-auto justify-around mt-10">
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">Buyers</Typography>
+          <Typography color="black">SUPPLIERS</Typography>
         </ThemeProvider>
       </div>
-      <BuyerTable
+      <SupplierTable
         columns={columns}
-        data={allBuyers}
-        itemsCount={BuyersTotal}
+        data={allSuppliers}
+        itemsCount={suppliersTotal}
         pagination={pagination}
         paginate={paginate}
         setPagination={setPagination}
@@ -269,4 +178,4 @@ const Buyers = () => {
   );
 };
 
-export default Buyers;
+export default Suppliers;

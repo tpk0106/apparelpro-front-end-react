@@ -19,6 +19,7 @@ import type { PaginationData } from "../../../interfaces/definitions";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
 import BuyerAddresses from "../address-tanstack/buyer-address.component";
+import { useApparelProTable } from "../../../themes/useApparelProTable";
 
 interface Props {
   columns: MRT_ColumnDef<Buyer>[];
@@ -44,6 +45,7 @@ const BuyerTable = ({
     Record<string, string | undefined>
   >({});
 
+  const [buyerCode, setBuyerCode] = useState<number>(null);
   const validationRequired = (value: string) => !value?.length;
   const validateBuyer = ({ name }: Buyer) => {
     console.log("validation :", validationRequired(name));
@@ -82,7 +84,8 @@ const BuyerTable = ({
     values,
     table,
   }) => {
-    values = { ...values, id: 0 };
+    //  values = { ...values, id: 0 };
+    console.log("buyer code", buyerCode);
     const newValidationErrors = validateBuyer(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
       setValidationErrors(newValidationErrors);
@@ -90,9 +93,12 @@ const BuyerTable = ({
     }
     setValidationErrors({});
 
+    values = { ...values, buyerCode: buyerCode };
+    console.log("buyer ", values);
+
     // Fires mutationFn, runs network call, invalidates cache automatically on success!
     await updateBuyer(values);
-    table.setCreatingRow(null);
+    table.setEditingRow(null);
   };
 
   //DELETE action
@@ -104,7 +110,7 @@ const BuyerTable = ({
 
   //  CRUD Operations
 
-  const table = useMaterialReactTable({
+  const table = useApparelProTable<Buyer>({
     columns,
     data: data,
 
@@ -114,6 +120,9 @@ const BuyerTable = ({
       pagination: {
         pageIndex: pagination.pageIndex,
         pageSize: pagination.pageSize,
+      },
+      columnVisibility: {
+        buyerCode: false,
       },
     },
 
@@ -148,6 +157,16 @@ const BuyerTable = ({
     onCreatingRowSave: handleCreateBuyer,
     onEditingRowCancel: () => setValidationErrors({}),
     onEditingRowSave: handleSaveBuyer,
+
+    muiTableBodyRowProps: ({ row, table }) => ({
+      hover: !table.getState().editingRow,
+      sx: {
+        "& .MuiInputBase-input": {
+          color: "#000000", // Forces input text color to black
+          WebkitTextFillColor: "#000000", // Ensures compatibility with Safari
+        },
+      },
+    }),
 
     // muiExpandButtonProps: ({ row, table }) => ({
     //   onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }),
@@ -215,55 +234,55 @@ const BuyerTable = ({
     //   }),
     // },
 
-    renderCaption: () => {
-      return (isLoading && (
-        <div className="text1-red-600 flex justify-center border1-2 border1-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-          <div className="bg-gray-50 z-40 w-full h-full absolute top-5 left-10 opacity-90">
-            <div className="w-[85%] h-[70%] border-2 border1-red-400 p-20  m-auto">
-              {/* <HourglassFullOutlinedIcon /> */}
-              {/* <PendingOutlinedIcon />
-            <RefreshOutlinedIcon /> */}
-            </div>
-          </div>
-        </div>
-      )) ||
-        (isUpdatingBuyer && (
-          <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-            <div className="flex-col flex justify-center font-bold text-lg">
-              <div>Updating Supplier.....</div>
-            </div>
-          </div>
-        )) ||
-        (isCreatingBuyer && (
-          <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-            <div className="flex-col flex justify-center font-bold text-lg">
-              <div>Creating new Supplier....</div>
-            </div>
-          </div>
-        )) ||
-        (isDeletingBuyer && (
-          <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-            <div className="flex-col flex justify-center">
-              <div>Deleting Supplier.....</div>
-            </div>
-          </div>
-        )) ||
-        validationErrors ? (
-        <div className="text-red-600 flex justify-center border1-2 border1-red-200 bg1-red-300 w-[90%] m-auto h-auto align-middle rounded1-md ">
-          <div className="flex-col flex justify-center">
-            <div>
-              {validationErrors.name
-                ? validationErrors.name
-                : validationErrors.code
-                  ? validationErrors.code
-                  : validationErrors?.countryCode}
-            </div>
-          </div>
-        </div>
-      ) : (
-        ""
-      );
-    },
+    // renderCaption: () => {
+    //   return (isLoading && (
+    //     <div className="text1-red-600 flex justify-center border1-2 border1-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
+    //       <div className="bg-gray-50 z-40 w-full h-full absolute top-5 left-10 opacity-90">
+    //         <div className="w-[85%] h-[70%] border-2 border1-red-400 p-20  m-auto">
+    //           {/* <HourglassFullOutlinedIcon /> */}
+    //           {/* <PendingOutlinedIcon />
+    //         <RefreshOutlinedIcon /> */}
+    //         </div>
+    //       </div>
+    //     </div>
+    //   )) ||
+    //     (isUpdatingBuyer && (
+    //       <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
+    //         <div className="flex-col flex justify-center font-bold text-lg">
+    //           <div>Updating Supplier.....</div>
+    //         </div>
+    //       </div>
+    //     )) ||
+    //     (isCreatingBuyer && (
+    //       <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
+    //         <div className="flex-col flex justify-center font-bold text-lg">
+    //           <div>Creating new Supplier....</div>
+    //         </div>
+    //       </div>
+    //     )) ||
+    //     (isDeletingBuyer && (
+    //       <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
+    //         <div className="flex-col flex justify-center">
+    //           <div>Deleting Supplier.....</div>
+    //         </div>
+    //       </div>
+    //     )) ||
+    //     validationErrors ? (
+    //     <div className="text-red-600 flex justify-center border1-2 border1-red-200 bg1-red-300 w-[90%] m-auto h-auto align-middle rounded1-md ">
+    //       <div className="flex-col flex justify-center">
+    //         <div>
+    //           {validationErrors.name
+    //             ? validationErrors.name
+    //             : validationErrors.code
+    //               ? validationErrors.code
+    //               : validationErrors?.countryCode}
+    //         </div>
+    //       </div>
+    //     </div>
+    //   ) : (
+    //     ""
+    //   );
+    // },
 
     renderTopToolbarCustomActions: ({ table }) => (
       <Button
@@ -279,7 +298,12 @@ const BuyerTable = ({
     renderRowActions: ({ row }) => (
       <Box sx={{ display: "flex", gap: "1rem" }}>
         <Tooltip title="Edit">
-          <IconButton onClick={() => table.setEditingRow(row)}>
+          <IconButton
+            onClick={() => {
+              table.setEditingRow(row);
+              setBuyerCode(row.original.buyerCode);
+            }}
+          >
             <ModeEditOutlinedIcon />
           </IconButton>
         </Tooltip>

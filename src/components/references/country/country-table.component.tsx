@@ -200,6 +200,16 @@ const CountryTable = ({
     //   }),
     // },
 
+    muiTableBodyRowProps: ({ row, table }) => ({
+      hover: !table.getState().editingRow,
+      sx: {
+        "& .MuiInputBase-input": {
+          color: "#000000", // Forces input text color to black
+          WebkitTextFillColor: "#000000", // Ensures compatibility with Safari
+        },
+      },
+    }),
+
     // muiTableBodyRowProps: ({ row, table }) => ({
     //   hover: !table.getState().editingRow,
     //   sx: {
@@ -218,6 +228,11 @@ const CountryTable = ({
     //       borderTop: "1px solid #fff",
     //       borderBottom: "1px solid #fff",
     //       color: "#4B9CD3",
+    //       // color:
+    //       //   table.getState().editingRow?.id === row.id ||
+    //       //   table.getState().creatingRow
+    //       //     ? "#000"
+    //       //     : "#fff",
     //       backgroundColor:
     //         table.getState().editingRow?.id === row.id ||
     //         table.getState().creatingRow
@@ -233,50 +248,6 @@ const CountryTable = ({
     //     boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
     //     boder: "5px solid red",
     //   }),
-    // },
-
-    // renderCaption: () => {
-    //   return (isLoading && (
-    //     <div className="text1-red-600 flex justify-center border1-2 border1-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-    //       <div className="bg-gray-50 z-40 w-full h-full absolute top-5 left-10 opacity-90">
-    //         <div className="w-[85%] h-[70%] border-2 border1-red-400 p-20  m-auto">
-    //           <HourglassFullOutlinedIcon />
-    //           {/* <PendingOutlinedIcon />
-    //         <RefreshOutlinedIcon /> */}
-    //         </div>
-    //       </div>
-    //     </div>
-    //   )) ||
-    //     (isUpdatingCurrency && (
-    //       <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-    //         <div className="flex-col flex justify-center font-bold text-lg">
-    //           <div>Updating Supplier.....</div>
-    //         </div>
-    //       </div>
-    //     )) ||
-    //     (isCreatingCurrency && (
-    //       <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-    //         <div className="flex-col flex justify-center font-bold text-lg">
-    //           <div>Creating new Supplier....</div>
-    //         </div>
-    //       </div>
-    //     )) ||
-    //     (isDeletingCurrency && (
-    //       <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-    //         <div className="flex-col flex justify-center">
-    //           <div>Deleting Supplier.....</div>
-    //         </div>
-    //       </div>
-    //     )) ||
-    //     (validationErrors && validationErrors.typeName) ? (
-    //     <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-    //       <div className="flex-col flex justify-center">
-    //         <div>{validationErrors.typeName}</div>
-    //       </div>
-    //     </div>
-    //   ) : (
-    //     ""
-    //   );
     // },
 
     renderTopToolbarCustomActions: ({ table }) => (

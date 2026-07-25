@@ -62,10 +62,14 @@ export default function GoodsReceivedNoteWorkspace() {
   }, [lookupResult]);
 
   const hasOverBalanceLine = lines.some((l) => l.quantity > l.balance);
+  // A line at 0 means "not received in this delivery" - a valid partial-receipt
+  // skip, not an error - same convention as RTN. At least one line must still
+  // be positive, and no line may be negative or exceed its outstanding balance.
   const isFormValid =
     isHeaderReady &&
     lines.length > 0 &&
-    lines.every((l) => l.quantity > 0 && l.quantity <= l.balance);
+    lines.some((l) => l.quantity > 0) &&
+    lines.every((l) => l.quantity >= 0 && l.quantity <= l.balance);
 
   const handleReset = () => {
     setPoNumberInput("");
@@ -95,7 +99,9 @@ export default function GoodsReceivedNoteWorkspace() {
         storeCode: lookupResult.storeCode,
         supplierCode: lookupResult.supplierCode,
       },
-      lines: lines.map((l) => ({
+      lines: lines
+        .filter((l) => l.quantity > 0)
+        .map((l) => ({
         buyer: l.buyer,
         order: l.order,
         type: l.type,
@@ -208,26 +214,33 @@ export default function GoodsReceivedNoteWorkspace() {
                 quantity to proceed.
               </Alert>
             )}
-
-            {lines.length > 0 && (
-              <Box sx={{ gap: 2, mt: 3, pt: 2, borderTop: "1px dashed rgba(139,147,161,0.3)", display: "flex", justifyContent: "flex-end" }}>
-                <Button variant="text" color="secondary" size="small" onClick={handleReset} disabled={isSubmitting}>
-                  Cancel GRN
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  startIcon={<SendIcon />}
-                  onClick={handleCommit}
-                  disabled={isSubmitting || !isFormValid}
-                >
-                  Confirm All Entries
-                </Button>
-              </Box>
-            )}
           </Box>
         )}
+
+        {/* Always rendered from initial page load, never hidden behind header
+            or line-count checks. Only ever enabled/disabled via isFormValid. */}
+        <Box sx={{ gap: 2, mt: 3, pt: 2, borderTop: "1px dashed rgba(139,147,161,0.3)", display: "flex", justifyContent: "flex-end" }}>
+          <Button variant="text" color="secondary" size="small" onClick={handleReset} disabled={isSubmitting}>
+            Cancel GRN
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            startIcon={<SendIcon />}
+            onClick={handleCommit}
+            disabled={isSubmitting || !isFormValid}
+            sx={{
+              "&.Mui-disabled": {
+                backgroundColor: "rgba(139,147,161,0.15)",
+                color: "#8B93A1",
+                border: "1px solid rgba(139,147,161,0.4)",
+              },
+            }}
+          >
+            Confirm All Entries
+          </Button>
+        </Box>
       </Paper>
     </Box>
   );
