@@ -129,6 +129,14 @@ export default function StockMovementReportGrid({
         ),
       },
       {
+        accessorKey: "returnedQuantity",
+        header: "Returned (RTN)",
+        size: 95,
+        Cell: ({ cell }) => (
+          <QuantityCell value={cell.getValue<number>()} color={INBOUND} />
+        ),
+      },
+      {
         accessorKey: "transferInQuantity",
         header: "Transfer In *",
         size: 80,

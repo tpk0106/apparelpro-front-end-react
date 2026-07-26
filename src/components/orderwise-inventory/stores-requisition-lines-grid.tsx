@@ -94,6 +94,22 @@ export default function StoresRequisitionLinesGrid({
   });
   const basisList = useMemo(() => basisPageData?.items || [], [basisPageData]);
 
+  // Items already picked on another row shouldn't be selectable again - a
+  // Stores Requisition Note should carry one line per SKU (mirrors how GRN/RTN
+  // are naturally one-line-per-PO-line). Prevents split-quantity duplicates
+  // like the "same item entered twice, quantity nets over available balance"
+  // case, catching it at selection time instead of only at commit-time via the
+  // backend's Deficit Block check.
+  const usedItemCodes = useMemo(
+    () =>
+      new Set(
+        lineItems
+          .map((item) => item.itemCode)
+          .filter((code) => code.trim() !== ""),
+      ),
+    [lineItems],
+  );
+
   // --- CELL-LEVEL WORKFLOW VALIDATION PASSES ---
 
   const handleUpdateLineCell = (
@@ -184,6 +200,15 @@ export default function StoresRequisitionLinesGrid({
               balanceMetrics &&
               Number(row.quantity) > balanceMetrics.netAvailableBalance;
 
+            // Exclude items already selected on OTHER rows, but keep this
+            // row's own current selection in its own list so it doesn't
+            // appear blank.
+            const availableChoicesForRow = stockChoicesList.filter(
+              (item) =>
+                item.itemCode === row.itemCode ||
+                !usedItemCodes.has(item.itemCode),
+            );
+
             return (
               <TableRow
                 key={idx}
@@ -204,7 +229,7 @@ export default function StoresRequisitionLinesGrid({
                     variant="standard"
                     fullWidth
                     value={row.itemCode}
-                    disabled={isStockLoading || stockChoicesList.length === 0}
+                    disabled={isStockLoading || availableChoicesForRow.length === 0}
                     onChange={(e) => {
                       const selectedItemCode = e.target.value;
                       const matchedDbItem = stockChoicesList.find(
@@ -245,7 +270,7 @@ export default function StoresRequisitionLinesGrid({
                       }
                     }}
                   >
-                    {stockChoicesList.map((item) => (
+                    {availableChoicesForRow.map((item) => (
                       <MenuItem key={item.itemCode} value={item.itemCode}>
                         {item.description} [{item.itemCode}]
                       </MenuItem>

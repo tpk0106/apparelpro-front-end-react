@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Box,
   Paper,
@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import SendIcon from "@mui/icons-material/Send";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
 
 import GoodsReceivedNoteLinesGrid from "./goods-received-note-lines-grid";
@@ -75,24 +76,31 @@ export default function GoodsReceivedNoteCascadeWorkspace() {
   const isHeaderReady =
     !!selectedBuyer && !!selectedOrder && !!selectedPo && !!lookupResult;
 
-  useEffect(() => {
-    if (lookupResult) {
-      setLines(
-        lookupResult.lines.map((l) => ({
-          buyer: l.buyer,
-          order: l.order,
-          type: l.type,
-          style: l.style,
-          itemCode: l.itemCode,
-          unit: l.unit,
-          quantity: l.balance,
-          orderQuantity: l.orderQuantity,
-          balance: l.balance,
-          qtyInHand: l.qtyInHand,
-        })),
-      );
-    }
-  }, [lookupResult]);
+  // Populate the grid the instant a lookup succeeds, defaulting receive qty to the full
+  // outstanding balance (editable down). Adjusts state during render itself - the
+  // React-docs "adjusting state when a prop changes" pattern - rather than via
+  // useEffect, since a synchronous setState inside an effect here trips
+  // react-hooks/set-state-in-effect (an extra, avoidable cascading render pass).
+  const [syncedLookupResult, setSyncedLookupResult] = useState(lookupResult);
+  if (lookupResult !== syncedLookupResult) {
+    setSyncedLookupResult(lookupResult);
+    setLines(
+      lookupResult
+        ? lookupResult.lines.map((l) => ({
+            buyer: l.buyer,
+            order: l.order,
+            type: l.type,
+            style: l.style,
+            itemCode: l.itemCode,
+            unit: l.unit,
+            quantity: l.balance,
+            orderQuantity: l.orderQuantity,
+            balance: l.balance,
+            qtyInHand: l.qtyInHand,
+          }))
+        : [],
+    );
+  }
 
   const hasOverBalanceLine = lines.some((l) => l.quantity > l.balance);
   const isFormValid =
@@ -330,11 +338,31 @@ export default function GoodsReceivedNoteCascadeWorkspace() {
                 }}
               >
                 <Button
-                  variant="text"
-                  color="secondary"
+                  variant="outlined"
+                  color="inherit"
                   size="small"
+                  startIcon={<DeleteIcon />}
                   onClick={handleReset}
                   disabled={isSubmitting}
+                  sx={{
+                    minWidth: 190,
+                    height: 32,
+                    color: "#8B93A1",
+                    borderColor: "#8B93A1",
+                    boxShadow: (theme) => theme.shadows[2],
+                    "&:hover": {
+                      borderColor: "#8B93A1",
+                      color: "#000000 !important",
+                      backgroundColor: "rgba(139,147,161,0.15)",
+                      boxShadow: (theme) => theme.shadows[4],
+                    },
+                    "&.Mui-disabled": {
+                      color: "#8B93A1",
+                      opacity: 0.5,
+                      borderColor: "rgba(139,147,161,0.3)",
+                      boxShadow: "none",
+                    },
+                  }}
                 >
                   Cancel GRN
                 </Button>
@@ -345,6 +373,7 @@ export default function GoodsReceivedNoteCascadeWorkspace() {
                   startIcon={<SendIcon />}
                   onClick={handleCommit}
                   disabled={isSubmitting || !isFormValid || isLinesLoading}
+                  sx={{ minWidth: 190, height: 32 }}
                 >
                   Confirm All Entries
                 </Button>

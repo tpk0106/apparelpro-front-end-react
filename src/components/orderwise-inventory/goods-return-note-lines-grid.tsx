@@ -95,22 +95,15 @@ export default function GoodsReturnNoteLinesGrid({
         Cell: ({ row }) => (
           <Chip
             size="small"
-            variant={row.original.isOverReturnable ? "filled" : "outlined"}
-            color={row.original.isOverReturnable ? "error" : "default"}
+            variant="filled"
+            color={row.original.isOverReturnable ? "error" : "primary"}
             label={row.original.maxReturnableQuantity.toLocaleString()}
             sx={{
-              // Default chip text otherwise inherits the theme's black text.primary,
-              // which is invisible against this dark table — hardcode explicit colors
-              // (same fix pattern as the STRN/Stock Movement report tiles).
-              color: "#F4F6F8",
-              borderColor: "#8B93A1",
-              "& .MuiChip-label": { color: "#F4F6F8" },
-              transition: "background-color 0.15s ease, color 0.15s ease",
-              "&:hover": {
-                backgroundColor: "#60a5fa",
-                borderColor: "#60a5fa",
-                "& .MuiChip-label": { color: "#FFFFFF" },
-              },
+              // Always filled (not just on hover) so the max-returnable qty is
+              // legible at a glance; red still flags an over-returnable line.
+              // White ring makes the pill pop against the row's own blue tones.
+              border: "1px solid #FFFFFF",
+              "& .MuiChip-label": { color: "#FFFFFF" },
             }}
           />
         ),

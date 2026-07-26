@@ -20,6 +20,7 @@ import Grid from "@mui/material/Grid";
 
 import { AddCircleOutlined } from "@mui/icons-material";
 import SendIcon from "@mui/icons-material/Send";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
 
 // 1. Ensure you import your fresh lines spreadsheet component grid at the top:
@@ -453,22 +454,44 @@ export default function StoresRequisitionWorkspace() {
           }}
         >
           <Button
-            variant="text"
-            color="secondary"
+            variant="outlined"
+            color="inherit"
             size="small"
+            startIcon={<DeleteIcon />}
             onClick={handleResetForm}
             disabled={isSubmitting}
+            sx={{
+              minWidth: 190,
+              height: 32,
+              color: "#8B93A1",
+              borderColor: "#8B93A1",
+              boxShadow: (theme) => theme.shadows[2],
+              "&:hover": {
+                borderColor: "#8B93A1",
+                color: "#000000 !important",
+                backgroundColor: "rgba(139,147,161,0.15)",
+                boxShadow: (theme) => theme.shadows[4],
+              },
+              "&.Mui-disabled": {
+                color: "#8B93A1",
+                opacity: 0.5,
+                borderColor: "rgba(139,147,161,0.3)",
+                boxShadow: "none",
+              },
+            }}
           >
             Cancel Note
           </Button>
           <Button
             variant="contained"
-            color="success"
+            color="primary"
             size="small"
             startIcon={<SendIcon />}
             onClick={handleRequestCommit}
             disabled={isSubmitting || !isFormValid}
             sx={{
+              minWidth: 190,
+              height: 32,
               "&.Mui-disabled": {
                 backgroundColor: "rgba(139,147,161,0.15)",
                 color: "#8B93A1",

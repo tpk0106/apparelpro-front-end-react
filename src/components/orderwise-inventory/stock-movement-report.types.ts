@@ -25,6 +25,10 @@ export interface StockMovementReportLine {
   receivedQuantity: number;
   requisitionedQuantity: number;
   issuedQuantity: number;
+  // Real data, not a placeholder — mirrors OrderwiseStockMaster.ReturnedQuantity,
+  // populated by the Goods Return Note (RTN) module. Feeds into balanceQuantity
+  // on the backend the same way receivedQuantity does (both inbound).
+  returnedQuantity: number;
   // Placeholder columns — always 0 today. Stock Transfer, Supplier Return and Stock
   // Adjustment Note modules don't exist yet in Order Wise Inventory. Once they're built
   // and start posting OrderwiseStockTransaction rows with TransactionType "TI"/"TO"/"SR"/"AJ",

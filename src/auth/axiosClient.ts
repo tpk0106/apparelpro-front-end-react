@@ -173,6 +173,17 @@ class AxiosInterceptor {
             appError.message = data;
           } else if (data.message) {
             appError.message = data.message;
+          } else if (data.error) {
+            // Several controllers return BadRequest(new { Error = ex.Message })
+            // for business-rule failures (e.g. "Deficit Block: Attempted to
+            // exceed balance quantity...", "Invalid Basis Code..."). ASP.NET
+            // Core's default camelCase JSON policy serializes that C# "Error"
+            // property as a lowercase "error" key, which this parser never
+            // checked - so every one of those specific, actionable server
+            // messages was silently discarded in favor of the generic fallback
+            // below. Confirmed present in GIN, GRN, PartShipment, RTN, STRN,
+            // StyleApproval, StylewiseEvent, and SupplierPO controllers.
+            appError.message = data.error;
           } else if (data.title) {
             appError.message = data.title;
           }

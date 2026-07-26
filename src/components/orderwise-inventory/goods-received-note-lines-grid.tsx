@@ -96,19 +96,15 @@ export default function GoodsReceivedNoteLinesGrid({
         Cell: ({ row }) => (
           <Chip
             size="small"
-            variant={row.original.isOverBalance ? "filled" : "outlined"}
-            color={row.original.isOverBalance ? "error" : "default"}
+            variant="filled"
+            color={row.original.isOverBalance ? "error" : "primary"}
             label={row.original.balance.toLocaleString()}
             sx={{
-              color: "#FFFFFF !important",
-              borderColor: "#8B93A1",
-              "& .MuiChip-label": { color: "#FFFFFF !important" },
-              transition: "background-color 0.15s ease, color 0.15s ease",
-              "&:hover": {
-                backgroundColor: "#60a5fa",
-                borderColor: "#60a5fa",
-                "& .MuiChip-label": { color: "#FFFFFF !important" },
-              },
+              // Always filled (not just on hover) so the available qty is legible
+              // at a glance; red still flags an over-balance line. White ring
+              // makes the pill pop against the row's own blue tones.
+              border: "1px solid #FFFFFF",
+              "& .MuiChip-label": { color: "#FFFFFF" },
             }}
           />
         ),

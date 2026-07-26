@@ -999,7 +999,7 @@ export const useGetAllPurchaseOrdersByBuyerCode = (
 ) => {
   // console.log("isBuyerAndOrderSupplied :", isBuyerAndOrderSupplied);
   return useQuery<string[], Error>({
-    queryKey: ["pos", "buyerCode"],
+    queryKey: ["pos", buyerCode],
     queryFn: async () => {
       const response: AxiosResponse<string[]> =
         await loadPurchaseOrdersByBuyerCode(buyerCode);

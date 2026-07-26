@@ -1,8 +1,22 @@
-import { useEffect, useState } from "react";
-import { Box, Paper, Typography, TextField, Button, Alert, Divider } from "@mui/material";
+import { useState } from "react";
+import {
+  Box,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Alert,
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+} from "@mui/material";
 import Grid from "@mui/material/Grid";
 import SendIcon from "@mui/icons-material/Send";
 import SearchIcon from "@mui/icons-material/Search";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
 
 import GoodsIssueNoteLinesGrid from "./goods-issue-note-lines-grid";
@@ -20,6 +34,16 @@ export default function GoodsIssueNoteWorkspace() {
     new Date().toISOString().split("T")[0],
   );
   const [lines, setLines] = useState<GinLineItemRow[]>([]);
+
+  // Replaces window.confirm() with in-app MUI dialogs, and gives commit failures
+  // a persistent inline home instead of only a transient toast - per project
+  // convention: no native browser alert/confirm boxes, and all errors must be
+  // displayed inline. Two separate dialogs: the normal commit confirmation, and
+  // the manager-override re-confirmation triggered by a 409 from the server.
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [isOverrideDialogOpen, setIsOverrideDialogOpen] = useState(false);
+  const [overrideMessage, setOverrideMessage] = useState<string | null>(null);
+  const [commitErrorMessage, setCommitErrorMessage] = useState<string | null>(null);
 
   const {
     data: lookupResult,
@@ -41,40 +65,51 @@ export default function GoodsIssueNoteWorkspace() {
   };
 
   // Populate the grid the instant a lookup succeeds, defaulting issue qty to the full
-  // remaining balance (editable down). Deliberately useEffect, not useMemo — the zip
-  // design used useMemo to trigger this setState side effect, which works today but
-  // violates useMemo's purity contract; useEffect is the correct hook for syncing
-  // external query data into local editable state.
-  useEffect(() => {
-    if (lookupResult) {
-      setLines(
-        lookupResult.lines.map((l) => ({
-          stockCode: l.stockCode,
-          itemCode: l.itemCode,
-          storeCode: l.storeCode,
-          unit: l.unit,
-          quantity: l.balanceToReceive,
-          balanceToReceive: l.balanceToReceive,
-          qtyInHand: l.qtyInHand,
-          strnBalance: l.strnBalance,
-        })),
-      );
-    }
-  }, [lookupResult]);
+  // remaining balance (editable down). Adjusts state during render itself - the
+  // React-docs "adjusting state when a prop changes" pattern - rather than via
+  // useEffect, since a synchronous setState inside an effect here trips
+  // react-hooks/set-state-in-effect (an extra, avoidable cascading render pass).
+  const [syncedLookupResult, setSyncedLookupResult] = useState(lookupResult);
+  if (lookupResult !== syncedLookupResult) {
+    setSyncedLookupResult(lookupResult);
+    setLines(
+      lookupResult
+        ? lookupResult.lines.map((l) => ({
+            stockCode: l.stockCode,
+            itemCode: l.itemCode,
+            description: l.description,
+            storeCode: l.storeCode,
+            unit: l.unit,
+            quantity: l.balanceToReceive,
+            balanceToReceive: l.balanceToReceive,
+            qtyInHand: l.qtyInHand,
+            strnBalance: l.strnBalance,
+          }))
+        : [],
+    );
+  }
 
   const hasOverBalanceLine = lines.some(
     (l) => l.quantity > Math.min(l.balanceToReceive, l.qtyInHand),
   );
+  // A line at 0 means "not issued in this delivery" - a valid partial-issue skip,
+  // not an error - same convention as GRN/RTN/STRN. At least one line must still
+  // be positive, and no line may be negative or exceed its available-to-issue
+  // ceiling.
   const isFormValid =
     isHeaderReady &&
     lines.length > 0 &&
-    lines.every((l) => l.quantity > 0 && l.quantity <= Math.min(l.balanceToReceive, l.qtyInHand));
+    lines.some((l) => l.quantity > 0) &&
+    lines.every(
+      (l) => l.quantity >= 0 && l.quantity <= Math.min(l.balanceToReceive, l.qtyInHand),
+    );
 
   const handleReset = () => {
     setStrnNumberInput("");
     setLookupStrnNumber("");
     setLines([]);
     setTransactionDate(new Date().toISOString().split("T")[0]);
+    setCommitErrorMessage(null);
   };
 
   const submit = async (overrideExactConsumptionCheck: boolean) => {
@@ -116,15 +151,11 @@ export default function GoodsIssueNoteWorkspace() {
       // caller's role, so a non-manager gets the same 409 again rather than a bypass.
       if (appError.status === 409) {
         toast.dismiss(toastId);
-        if (
-          window.confirm(
-            `${appError.message}\n\nA manager override is required to proceed. Confirm override and re-submit?`,
-          )
-        ) {
-          await submit(true);
-        }
+        setOverrideMessage(appError.message);
+        setIsOverrideDialogOpen(true);
         return;
       }
+      setCommitErrorMessage(appError?.message ?? "Failed to post Goods Issue Note.");
       toast.update(toastId, {
         render: `🛑 ${appError?.message ?? "Failed to post Goods Issue Note."}`,
         type: "error",
@@ -135,23 +166,30 @@ export default function GoodsIssueNoteWorkspace() {
     }
   };
 
-  const handleCommit = async () => {
+  // Validation gate - replaces window.confirm() with the MUI dialog below, per
+  // project convention (no native browser confirm/alert boxes).
+  const handleRequestCommit = () => {
     if (!isFormValid) {
       toast.warning("Resolve the outstanding validation issues before confirming.");
       return;
     }
-    if (
-      !window.confirm(
-        "Confirm all entries and post this Goods Issue Note?\n\nThis decrements the stores stock ledger and closes the balance against the selected STRN. Proceed?",
-      )
-    )
-      return;
+    setCommitErrorMessage(null);
+    setIsConfirmDialogOpen(true);
+  };
+
+  const handleConfirmCommit = async () => {
+    setIsConfirmDialogOpen(false);
     await submit(false);
+  };
+
+  const handleConfirmOverride = async () => {
+    setIsOverrideDialogOpen(false);
+    await submit(true);
   };
 
   return (
     <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa" }}>
+      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#fafafa" }}>
         <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
           Goods Issue Note (GIN) — Direct STRN Entry
         </Typography>
@@ -203,6 +241,16 @@ export default function GoodsIssueNoteWorkspace() {
           </Alert>
         )}
 
+        {commitErrorMessage && (
+          <Alert
+            severity="error"
+            sx={{ mb: 2 }}
+            onClose={() => setCommitErrorMessage(null)}
+          >
+            {commitErrorMessage}
+          </Alert>
+        )}
+
         {!isHeaderReady ? (
           <Alert severity="info" variant="outlined">
             Enter a known STRN number and click Look Up to load its outstanding material
@@ -228,27 +276,119 @@ export default function GoodsIssueNoteWorkspace() {
                 proceed.
               </Alert>
             )}
-
-            {lines.length > 0 && (
-              <Box sx={{ gap: 2, mt: 3, pt: 2, borderTop: "1px dashed rgba(139,147,161,0.3)", display: "flex", justifyContent: "flex-end" }}>
-                <Button variant="text" color="secondary" size="small" onClick={handleReset} disabled={isSubmitting}>
-                  Cancel GIN
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  startIcon={<SendIcon />}
-                  onClick={handleCommit}
-                  disabled={isSubmitting || !isFormValid}
-                >
-                  Confirm All Entries
-                </Button>
-              </Box>
-            )}
           </Box>
         )}
+
+        {/* Always rendered from initial page load, never hidden behind header
+            or line-count checks. Only ever enabled/disabled via isFormValid. */}
+        <Box sx={{ gap: 2, mt: 3, pt: 2, borderTop: "1px dashed rgba(139,147,161,0.3)", display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            size="small"
+            startIcon={<DeleteIcon />}
+            onClick={handleReset}
+            disabled={isSubmitting}
+            sx={{
+              minWidth: 190,
+              height: 32,
+              color: "#8B93A1",
+              borderColor: "#8B93A1",
+              boxShadow: (theme) => theme.shadows[2],
+              "&:hover": {
+                borderColor: "#8B93A1",
+                color: "#000000 !important",
+                backgroundColor: "rgba(139,147,161,0.15)",
+                boxShadow: (theme) => theme.shadows[4],
+              },
+              "&.Mui-disabled": {
+                color: "#8B93A1",
+                opacity: 0.5,
+                borderColor: "rgba(139,147,161,0.3)",
+                boxShadow: "none",
+              },
+            }}
+          >
+            Cancel GIN
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            startIcon={<SendIcon />}
+            onClick={handleRequestCommit}
+            disabled={isSubmitting || !isFormValid}
+            sx={{
+              minWidth: 190,
+              height: 32,
+              "&.Mui-disabled": {
+                backgroundColor: "rgba(139,147,161,0.15)",
+                color: "#8B93A1",
+                border: "1px solid rgba(139,147,161,0.4)",
+              },
+            }}
+          >
+            Confirm All Entries
+          </Button>
+        </Box>
       </Paper>
+
+      {/* Replaces window.confirm() with an in-app MUI dialog, per project
+          convention: no native browser alert/confirm boxes. */}
+      <Dialog
+        open={isConfirmDialogOpen}
+        onClose={() => setIsConfirmDialogOpen(false)}
+        aria-labelledby="gin-confirm-dialog-title"
+        slotProps={{ paper: { sx: { backgroundColor: "#141922" } } }}
+      >
+        <DialogTitle id="gin-confirm-dialog-title" sx={{ color: "#F4F6F8" }}>
+          Confirm Goods Issue Note
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: "#F4F6F8" }}>
+            Confirm all entries and post this Goods Issue Note? This decrements the
+            stores stock ledger and closes the balance against the selected STRN.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsConfirmDialogOpen(false)} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmCommit} variant="contained" color="primary" autoFocus>
+            Confirm & Post
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Manager-override re-confirmation, triggered by a 409
+          (ExactConsumptionOverrideRequiredException) from the server. Replaces
+          the old window.confirm() override prompt. */}
+      <Dialog
+        open={isOverrideDialogOpen}
+        onClose={() => setIsOverrideDialogOpen(false)}
+        aria-labelledby="gin-override-dialog-title"
+        slotProps={{ paper: { sx: { backgroundColor: "#141922" } } }}
+      >
+        <DialogTitle id="gin-override-dialog-title" sx={{ color: "#F4F6F8" }}>
+          Manager Override Required
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: "#F4F6F8" }}>
+            {overrideMessage}
+            <br />
+            <br />
+            A manager override is required to proceed. Confirm override and re-submit?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsOverrideDialogOpen(false)} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmOverride} variant="contained" color="primary" autoFocus>
+            Confirm Override
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

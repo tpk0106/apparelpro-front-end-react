@@ -284,7 +284,7 @@ export default function StockMovementReportWorkspace() {
             >
               <LegendItem
                 color="#0ca30c"
-                label="Inbound (Received / Transfer In)"
+                label="Inbound (Received / Returned / Transfer In)"
               />
               <LegendItem
                 color="#d03b3b"

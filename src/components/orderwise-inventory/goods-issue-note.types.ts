@@ -9,6 +9,7 @@ export interface GinHeaderModel {
 export interface GinLineItemRow {
   stockCode: string;
   itemCode: string;
+  description: string;
   storeCode: string;
   unit: string;
   quantity: number;
@@ -39,6 +40,7 @@ export interface GinMutationResponse {
 export interface GinIssuableStrnLine {
   stockCode: string;
   itemCode: string;
+  description: string;
   storeCode: string;
   unit: string;
   balanceToReceive: number;

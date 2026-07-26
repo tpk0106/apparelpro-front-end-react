@@ -54,6 +54,7 @@ export default function GoodsIssueNoteLinesGrid({
   const columns = useMemo<MRT_ColumnDef<GinLineItemRowView>[]>(
     () => [
       { accessorKey: "itemCode", header: "Item Code", size: 130 },
+      { accessorKey: "description", header: "Description", size: 170 },
       { accessorKey: "storeCode", header: "Basis", size: 80 },
       { accessorKey: "unit", header: "Unit", size: 80 },
       {
@@ -77,7 +78,7 @@ export default function GoodsIssueNoteLinesGrid({
             type="number"
             size="small"
             variant="standard"
-            value={row.original.quantity === 0 ? "" : row.original.quantity}
+            value={row.original.quantity}
             error={row.original.isOverBalance}
             onChange={(e) => handleUpdateQuantity(row.index, e.target.value)}
             slotProps={{
@@ -94,9 +95,16 @@ export default function GoodsIssueNoteLinesGrid({
         Cell: ({ row }) => (
           <Chip
             size="small"
-            variant={row.original.isOverBalance ? "filled" : "outlined"}
-            color={row.original.isOverBalance ? "error" : "default"}
+            variant="filled"
+            color={row.original.isOverBalance ? "error" : "primary"}
             label={row.original.availableToIssue.toLocaleString()}
+            sx={{
+              // Always filled (not just on hover) so the available qty is legible
+              // at a glance; red still flags an over-balance line. White ring
+              // makes the pill pop against the row's own blue tones.
+              border: "1px solid #FFFFFF",
+              "& .MuiChip-label": { color: "#FFFFFF" },
+            }}
           />
         ),
       },
