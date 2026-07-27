@@ -30,6 +30,7 @@ import GoodsReturnNoteWorkspace from "./components/orderwise-inventory/goods-ret
 import GoodsTransferNoteWorkspace from "./components/orderwise-inventory/goods-transfer-note-workspace";
 import SupplierReturnNoteWorkspace from "./components/orderwise-inventory/supplier-return-note-workspace";
 import DamagedGoodsNoteWorkspace from "./components/orderwise-inventory/damaged-goods-note-workspace";
+import StockAdjustmentNoteWorkspace from "./components/orderwise-inventory/stock-adjustment-note-workspace";
 import StockMovementReportWorkspace from "./components/orderwise-inventory/stock-movement-report-workspace";
 import StrnPrintReportWorkspace from "./components/reports-orderwise-inventory/strn-print-report-workspace";
 import Suppliers from "./components/references/supplier/supplier.component";
@@ -98,6 +99,7 @@ function App() {
         <Route index path="gtn" element={<GoodsTransferNoteWorkspace />} />
         <Route index path="supplier-return-note" element={<SupplierReturnNoteWorkspace />} />
         <Route index path="dgn" element={<DamagedGoodsNoteWorkspace />} />
+        <Route index path="san" element={<StockAdjustmentNoteWorkspace />} />
         <Route
           index
           path="stock-movement-report"

@@ -239,6 +239,10 @@ export const APPARELPRO_ENDPOINTS = {
       DAMAGEABLE_STOCK: "api/orderwise-inventory-dgn/damageable-stock",
       COMMIT: "api/orderwise-inventory-dgn/commit",
     },
+    SAN: {
+      ADJUSTABLE_STOCK: "api/orderwise-inventory-san/adjustable-stock",
+      COMMIT: "api/orderwise-inventory-san/commit",
+    },
     STOCK_MOVEMENT_REPORT: {
       HEADER: "api/stock-movement-reports/header",
       LINES: "api/stock-movement-reports/lines",
