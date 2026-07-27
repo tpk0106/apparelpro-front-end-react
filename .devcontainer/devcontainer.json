@@ -1,0 +1,19 @@
+{
+  "name": "ApparelPro Frontend (React + TypeScript + Vite + Tailwind)",
+  "dockerComposeFile": ["../../../ApparelPro/docker-compose.yml"],
+  "service": "frontend",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.vscode-typescript-next"
+      ]
+    }
+  },
+  "forwardPorts": [5173],
+  "postCreateCommand": "npm install"
+}

@@ -177,7 +177,7 @@ export const navbarData = [
         pinned: false,
       },
       {
-        routerLink: "srn",
+        routerLink: "supplier-return-note",
         icon: null,
         label: "Supplier Return    Note",
         pinned: false,
@@ -262,7 +262,7 @@ export const navbarData = [
         pinned: false,
       },
       {
-        routerLink: "srn",
+        routerLink: "supplier-return-note",
         icon: null,
         label: "Supplier Return Note",
         pinned: false,

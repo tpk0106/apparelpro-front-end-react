@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Chip, Typography } from "@mui/material";
 import {
   MaterialReactTable,
   type MRT_ColumnDef,
@@ -54,21 +54,24 @@ function QuantityCell({
     return <span>{value.toLocaleString()}</span>;
   }
   return (
-    <Box
-      component="span"
+    // Same "filled chip, white ring" convention already used for Max Returnable
+    // (SRN) / Max Transferable (GTN) / Max Damageable (DGN) — now applied here
+    // too so quantity badges look consistent across every Orderwise Inventory
+    // screen, not just a plain tinted box.
+    <Chip
+      size="small"
+      variant="filled"
+      label={value.toLocaleString()}
       sx={{
-        display: "inline-block",
-        px: 1,
-        py: 0.25,
-        borderRadius: "10px",
+        height: 22,
         fontWeight: 700,
-        fontSize: "0.8rem",
-        backgroundColor: `${color}29`,
-        color,
+        fontSize: "0.72rem",
+        backgroundColor: color,
+        border: "1.5px solid #FFFFFF",
+        borderRadius: "11px",
+        "& .MuiChip-label": { color: "#FFFFFF", px: 1 },
       }}
-    >
-      {value.toLocaleString()}
-    </Box>
+    />
   );
 }
 
@@ -91,25 +94,25 @@ export default function StockMovementReportGrid({
         // STRN Print Report and because a hidden tooltip isn't discoverable.
         accessorKey: "itemCode",
         header: "Item Code",
-        size: 175,
+        size: 165,
       },
-      { accessorKey: "description", header: "Description", size: 170 },
+      { accessorKey: "description", header: "Description", size: 150 },
       {
         accessorKey: "unit",
         header: "Unit",
-        size: 45,
+        size: 40,
         enableSorting: false,
       },
       {
         accessorKey: "orderedQuantity",
         header: "Ordered",
-        size: 80,
+        size: 68,
         Cell: ({ cell }) => <QuantityCell value={cell.getValue<number>()} />,
       },
       {
         accessorKey: "receivedQuantity",
         header: "Received (GRN)",
-        size: 95,
+        size: 82,
         Cell: ({ cell }) => (
           <QuantityCell value={cell.getValue<number>()} color={INBOUND} />
         ),
@@ -117,13 +120,13 @@ export default function StockMovementReportGrid({
       {
         accessorKey: "requisitionedQuantity",
         header: "Requisitioned (SRN)",
-        size: 100,
+        size: 88,
         Cell: ({ cell }) => <QuantityCell value={cell.getValue<number>()} />,
       },
       {
         accessorKey: "issuedQuantity",
         header: "Issued (GIN)",
-        size: 85,
+        size: 72,
         Cell: ({ cell }) => (
           <QuantityCell value={cell.getValue<number>()} color={OUTBOUND} />
         ),
@@ -131,7 +134,7 @@ export default function StockMovementReportGrid({
       {
         accessorKey: "returnedQuantity",
         header: "Returned (RTN)",
-        size: 95,
+        size: 82,
         Cell: ({ cell }) => (
           <QuantityCell value={cell.getValue<number>()} color={INBOUND} />
         ),
@@ -139,7 +142,7 @@ export default function StockMovementReportGrid({
       {
         accessorKey: "transferInQuantity",
         header: "Transfer In *",
-        size: 80,
+        size: 68,
         Cell: ({ cell }) => (
           <QuantityCell value={cell.getValue<number>()} placeholder />
         ),
@@ -147,7 +150,7 @@ export default function StockMovementReportGrid({
       {
         accessorKey: "transferOutQuantity",
         header: "Transfer Out *",
-        size: 80,
+        size: 68,
         Cell: ({ cell }) => (
           <QuantityCell value={cell.getValue<number>()} placeholder />
         ),
@@ -155,7 +158,7 @@ export default function StockMovementReportGrid({
       {
         accessorKey: "supplierReturnQuantity",
         header: "Supplier Return *",
-        size: 90,
+        size: 78,
         Cell: ({ cell }) => (
           <QuantityCell value={cell.getValue<number>()} placeholder />
         ),
@@ -163,7 +166,7 @@ export default function StockMovementReportGrid({
       {
         accessorKey: "lastAdjustmentQuantity",
         header: "Last Adjustment *",
-        size: 90,
+        size: 78,
         Cell: ({ cell }) => (
           <QuantityCell value={cell.getValue<number>()} placeholder />
         ),
@@ -171,7 +174,7 @@ export default function StockMovementReportGrid({
       {
         accessorKey: "damagedQuantity",
         header: "Damaged",
-        size: 80,
+        size: 68,
         Cell: ({ cell }) => (
           <QuantityCell value={cell.getValue<number>()} color={DISCREPANCY} />
         ),
@@ -179,7 +182,7 @@ export default function StockMovementReportGrid({
       {
         accessorKey: "balanceQuantity",
         header: "Balance",
-        size: 85,
+        size: 72,
         Cell: ({ cell }) => (
           <Typography
             component="span"
@@ -213,7 +216,7 @@ export default function StockMovementReportGrid({
     muiTableHeadCellProps: {
       sx: {
         fontSize: "0.72rem",
-        padding: "6px 4px",
+        padding: "6px 3px",
         "& .Mui-TableHeadCell-Content-Wrapper": {
           whiteSpace: "normal",
           overflow: "visible",
@@ -233,7 +236,7 @@ export default function StockMovementReportGrid({
     muiTableBodyCellProps: {
       sx: {
         fontSize: "0.72rem",
-        padding: "4px 4px",
+        padding: "4px 3px",
       },
     },
 
@@ -266,7 +269,7 @@ export default function StockMovementReportGrid({
     // overflowX stays as a safety net only: with the trimmed sizes and font
     // this shouldn't be needed on a normal desktop viewport, but it keeps any
     // remaining overflow contained to the table instead of the whole page.
-    <Box sx={{ mx: { xs: 1, md: 2 }, overflowX: "auto" }}>
+    <Box sx={{ mx: { xs: 1, md: 1 }, overflowX: "auto" }}>
       <MaterialReactTable table={table} />
     </Box>
   );

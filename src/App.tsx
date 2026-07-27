@@ -27,6 +27,9 @@ import GoodsIssueNoteCascadeWorkspace from "./components/orderwise-inventory/goo
 import GoodsReceivedNoteWorkspace from "./components/orderwise-inventory/goods-received-note-workspace";
 import GoodsReceivedNoteCascadeWorkspace from "./components/orderwise-inventory/goods-received-note-cascade-workspace";
 import GoodsReturnNoteWorkspace from "./components/orderwise-inventory/goods-return-note-workspace";
+import GoodsTransferNoteWorkspace from "./components/orderwise-inventory/goods-transfer-note-workspace";
+import SupplierReturnNoteWorkspace from "./components/orderwise-inventory/supplier-return-note-workspace";
+import DamagedGoodsNoteWorkspace from "./components/orderwise-inventory/damaged-goods-note-workspace";
 import StockMovementReportWorkspace from "./components/orderwise-inventory/stock-movement-report-workspace";
 import StrnPrintReportWorkspace from "./components/reports-orderwise-inventory/strn-print-report-workspace";
 import Suppliers from "./components/references/supplier/supplier.component";
@@ -92,6 +95,9 @@ function App() {
           element={<GoodsReceivedNoteCascadeWorkspace />}
         />
         <Route index path="rtn" element={<GoodsReturnNoteWorkspace />} />
+        <Route index path="gtn" element={<GoodsTransferNoteWorkspace />} />
+        <Route index path="supplier-return-note" element={<SupplierReturnNoteWorkspace />} />
+        <Route index path="dgn" element={<DamagedGoodsNoteWorkspace />} />
         <Route
           index
           path="stock-movement-report"

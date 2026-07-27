@@ -227,6 +227,18 @@ export const APPARELPRO_ENDPOINTS = {
       RETURNABLE_STOCK: "api/orderwise-inventory-rtn/returnable-stock",
       COMMIT: "api/orderwise-inventory-rtn/commit",
     },
+    GTN: {
+      TRANSFERABLE_STOCK: "api/orderwise-inventory-gtn/transferable-stock",
+      COMMIT: "api/orderwise-inventory-gtn/commit",
+    },
+    SRN: {
+      RETURNABLE_STOCK: "api/orderwise-inventory-srn/returnable-stock",
+      COMMIT: "api/orderwise-inventory-srn/commit",
+    },
+    DGN: {
+      DAMAGEABLE_STOCK: "api/orderwise-inventory-dgn/damageable-stock",
+      COMMIT: "api/orderwise-inventory-dgn/commit",
+    },
     STOCK_MOVEMENT_REPORT: {
       HEADER: "api/stock-movement-reports/header",
       LINES: "api/stock-movement-reports/lines",
