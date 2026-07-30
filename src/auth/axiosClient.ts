@@ -7,6 +7,7 @@ import axios, {
 import { APPARELPRO_ENDPOINTS } from "../api/api-configurations";
 import type { TokenAPIModel } from "../interfaces/definitions";
 import GlobalRouter from "./globalRouter";
+import GlobalAccessDeniedNotifier from "./accessDeniedNotifier";
 
 // 1. Export standard AppError shape for TanStack React Query error generics
 export interface AppError {
@@ -152,7 +153,10 @@ class AxiosInterceptor {
         // NEW FEATURE: Centralised C# Error Parsing Engine
         // ==========================================
         const appError: AppError = {
-          message: "An unexpected backend error occurred.",
+          message:
+            status === 403
+              ? "You do not have permission to perform this action. Contact your administrator if you believe this is incorrect."
+              : "An unexpected backend error occurred.",
           status: status,
         };
 
@@ -187,6 +191,14 @@ class AxiosInterceptor {
           } else if (data.title) {
             appError.message = data.title;
           }
+        }
+
+        // Guaranteed, unmissable signal on every 403 - independent of whether
+        // the calling page has any error UI wired up for this specific
+        // request. This is what was missing: a role-authorization failure on
+        // an initial data-load query previously failed with no visible cue.
+        if (status === 403) {
+          GlobalAccessDeniedNotifier.notify(appError.message);
         }
 
         return Promise.reject(appError);

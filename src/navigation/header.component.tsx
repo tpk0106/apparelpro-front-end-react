@@ -94,14 +94,18 @@ const Header = () => {
       case "Production Control":
         passValue = 6;
         break;
-      case "Reports - Orderwise Inventory":
+      case "Reports - Orderwise Inventory Notes":
         passValue = 7;
         break;
+      case "Reports - Orderwise Inventory":
+        passValue = 8;
+        break;
+
       // case "Reports - General Inventory":
       //   passValue = 8;
       //   break;
       case "Reports - Order Management":
-        passValue = 8;
+        passValue = 9;
         break;
     }
     if (open === passValue) {
@@ -207,6 +211,11 @@ const Header = () => {
                                      shadow-gray-900 border border-gray-700"
                           >
                             {navbarData.map((menu) => {
+                              if (menu.routerLink.trim().length == 0) {
+                                return (
+                                  <div className="h-3 border-gray-900 bg-gray-700 m-2 rounded-md"></div>
+                                );
+                              }
                               counter++;
 
                               return (

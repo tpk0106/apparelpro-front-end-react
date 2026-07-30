@@ -141,7 +141,7 @@
       DOES_UNIT_EXIST: "api/item-feature/list/does-unit-exist/",
       POST: "api/item-feature",
       DELETE: "api/item-feature/",
-      PUT: "api/item-feature",
+      PUT: "api/item-feature/",
       PATCH: "api/item-feature",
     },
   },

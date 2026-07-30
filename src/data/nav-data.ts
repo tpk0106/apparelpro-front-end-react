@@ -132,12 +132,12 @@ export const navbarData = [
         label: "Style-wise Events",
         pinned: false,
       },
-      {
-        routerLink: "reports",
-        icon: "../assets/order-management/Order-Management.png",
-        label: "Reports",
-        pinned: false,
-      },
+      // {
+      //   routerLink: "reports",
+      //   icon: "../assets/order-management/Order-Management.png",
+      //   label: "Reports",
+      //   pinned: false,
+      // },
     ],
     tag: "ordermanagement",
   },
@@ -351,6 +351,80 @@ export const navbarData = [
     tag: "productioncontrol",
   },
   {
+    routerLink: "",
+    icon: "",
+    label: "",
+    subMenus: [],
+  },
+  {
+    routerLink: "orderwise-inventory-notes-reports",
+    icon: "../assets/production/Inventory-Management.png",
+    label: "Reports - Orderwise Inventory Notes",
+    subMenus: [
+      {
+        routerLink: "strn-print",
+        icon: null,
+        label: "Stores Requisition Note - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "gin-print",
+        icon: null,
+        label: "Goods Issue Note - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "grn-print",
+        icon: null,
+        label: "Goods Received Note - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "rtn-print",
+        icon: null,
+        label: "Goods Return Note - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "gtn-print",
+        icon: null,
+        label: "Goods Transfer Note - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "srn-print",
+        icon: null,
+        label: "Supplier Return Note - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "dgn-print",
+        icon: null,
+        label: "Damaged Goods Note - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "ain-print",
+        icon: null,
+        label: "Additional issue Note - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "dtn-print",
+        icon: null,
+        label: "Direct Transfer Note - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "san-print",
+        icon: null,
+        label: "Stock Adjustments Note - Print",
+        pinned: false,
+      },
+    ],
+    tag: "orderwise-inventory-notes-reports",
+  },
+  {
     routerLink: "orderwise-inventory-reports",
     icon: "../assets/production/Inventory-Management.png",
     label: "Reports - Orderwise Inventory",
@@ -361,12 +435,7 @@ export const navbarData = [
         label: "Stock Movement Report (for an Order)",
         pinned: true,
       },
-      {
-        routerLink: "strn-print-report",
-        icon: null,
-        label: "Stores Requisition Note - Print Report",
-        pinned: false,
-      },
+
       {
         routerLink: "stockValuation",
         icon: null,

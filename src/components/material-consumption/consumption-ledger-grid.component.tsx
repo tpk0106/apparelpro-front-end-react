@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -19,6 +19,7 @@ import type { AppError } from "../../auth/axiosClient";
 
 import EditIcon from "@mui/icons-material/Edit"; // Add this icon import
 import { useApparelProTable } from "../../themes/useApparelProTable";
+import ConfirmDialog from "../common/confirm-dialog";
 
 interface LedgerGridProps {
   styleContext: StyleContext;
@@ -98,9 +99,12 @@ export default function ConsumptionLedgerGrid({
         Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
       },
       {
-        accessorKey: "supplierCode",
+        // Show the resolved supplier name rather than the raw numeric
+        // SupplierCode - SupplierCode is still sent to the backend on
+        // edit/delete, just not shown as its own column anymore.
+        accessorKey: "supplierName",
         header: "Supplier",
-        size: 90,
+        size: 130,
       },
     ],
     [],
@@ -109,14 +113,23 @@ export default function ConsumptionLedgerGrid({
   // ... Inside your main MaterialConsumptionGrid function component body:
   const { mutateAsync: deleteLineItem } = useDeleteConsumptionEntryMutation();
 
-  // 2. Enforce the strict Clipper Cascading Delete Verification Guard Hook
+  // 2. Enforce the strict Clipper Cascading Delete Verification Guard Hook -
+  // now via the shared ConfirmDialog instead of window.confirm(), per project
+  // convention (no native browser alert/confirm boxes). The IconButton just
+  // stages the row; the dialog's Confirm button runs the actual delete.
+  const [rowPendingDelete, setRowPendingDelete] =
+    useState<StyleMaterialConsumptionLedgerRow | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDeleteEntry = async (row: StyleMaterialConsumptionLedgerRow) => {
-    const confirmation = window.confirm(
-      `Are you sure you want to delete this consumption assignment ledger entry for [${row.description}] (Item ${row.itemCode})?`,
-    );
-    if (!confirmation) return;
+  const handleRequestDelete = (row: StyleMaterialConsumptionLedgerRow) => {
+    setRowPendingDelete(row);
+  };
 
+  const handleConfirmDelete = async () => {
+    if (!rowPendingDelete) return;
+    const row = rowPendingDelete;
+
+    setIsDeleting(true);
     // Initialise your standard loading toaster
     const toastId = toast.loading("Processing record removal, please wait...");
 
@@ -153,41 +166,11 @@ export default function ConsumptionLedgerGrid({
         isLoading: false,
         autoClose: 4000,
       });
+    } finally {
+      setIsDeleting(false);
+      setRowPendingDelete(null);
     }
   };
-  // const handleDeleteEntry = async (row: StyleMaterialConsumptionLedgerRow) => {
-  //   const confirmation = window.confirm(
-  //     `Are you sure you want to delete this consumption assignment ledger entry for item [${row.itemCode}]?`,
-  //   );
-  //   if (!confirmation) return;
-
-  //   try {
-  //     // Build the verification query scope URL string matching your exact transactional constraints
-  //     const deleteUrl = `api/material-consumption/delete-entry?buyerCode=${row.buyerCode}&order=${encodeURIComponent(row.order)}&typeCode=${row.typeCode}&styleCode=${encodeURIComponent(row.styleCode)}&stockCode=${row.stockCode}&itemCode=${row.itemCode}&color=${encodeURIComponent(row.color)}&size=${encodeURIComponent(row.size)}`;
-
-  //     const response = await fetch(deleteUrl, { method: "DELETE" });
-
-  //     if (response.status === 400) {
-  //       // Handle PO already raised error state safely from C# backend interception rules
-  //       const errorJson = await response.json();
-  //       alert(
-  //         `Deletion Aborted: ${errorJson.message || "A Purchase Order has already been raised for this material line item. Modifications are blocked."}`,
-  //       );
-  //       return;
-  //     }
-
-  //     if (!response.ok) throw new Error("Network transaction failed.");
-
-  //     alert(
-  //       "Ledger line record removed and quantities adjusted downstream successfully.",
-  //     );
-  //     onRefresh(); // Re-trigger the RTK Cache query invalidate to update the bottom screen rows instantly
-  //   } catch (err: unknown) {
-  //     alert(
-  //       "Failed to complete the record delete transaction request on SQL Server.",
-  //     );
-  //   }
-  // };
 
   const table = useApparelProTable<StyleMaterialConsumptionLedgerRow>({
     columns,
@@ -221,7 +204,7 @@ export default function ConsumptionLedgerGrid({
         <Tooltip title="Delete entry line and adjust inventory totals">
           <IconButton
             color="error"
-            onClick={() => handleDeleteEntry(row.original)}
+            onClick={() => handleRequestDelete(row.original)}
           >
             <DeleteIcon />
           </IconButton>
@@ -249,6 +232,28 @@ export default function ConsumptionLedgerGrid({
       ) : (
         <MaterialReactTable table={table} />
       )}
+
+      <ConfirmDialog
+        open={!!rowPendingDelete}
+        title="Delete Consumption Ledger Entry"
+        message={
+          rowPendingDelete ? (
+            <>
+              Are you sure you want to delete this consumption assignment
+              ledger entry for <strong>{rowPendingDelete.description}</strong>{" "}
+              (Item {rowPendingDelete.itemCode})? This action cannot be
+              undone.
+            </>
+          ) : (
+            ""
+          )
+        }
+        confirmLabel="Delete"
+        confirmColor="error"
+        isConfirming={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setRowPendingDelete(null)}
+      />
     </Box>
   );
 }

@@ -13,6 +13,7 @@ import {
 import Grid from "@mui/material/Grid";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import { toast } from "react-toastify";
 import type {
   StyleContext,
   MaterialSelection,
@@ -289,6 +290,18 @@ export default function ConsumptionEntryForm({
 
       <Card variant="outlined" sx={{ p: 3, backgroundColor: "#fff" }}>
         <Grid container spacing={2}>
+          {editingRow &&
+            (featureMap?.feature1 ||
+              featureMap?.feature2 ||
+              featureMap?.feature3 ||
+              featureMap?.feature4) && (
+              <Grid size={12}>
+                <Alert severity="info" sx={{ py: 0.5 }}>
+                  Feature values are locked while editing — start a new entry
+                  to change the material variant.
+                </Alert>
+              </Grid>
+            )}
           {/* Group 1: Dynamic Features Section */}
           {featureMap?.feature1 && (
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -300,6 +313,7 @@ export default function ConsumptionEntryForm({
                 onChange={(e) =>
                   handleInputChange("feature1", e.target.value.toUpperCase())
                 }
+                disabled={!!editingRow}
                 // 🚀 THE FIX: Enforces a maximum length constraint right inside the text input box!
                 slotProps={{
                   htmlInput: {
@@ -320,6 +334,7 @@ export default function ConsumptionEntryForm({
                 onChange={(e) =>
                   handleInputChange("feature2", e.target.value.toUpperCase())
                 }
+                disabled={!!editingRow}
                 // 🚀 THE FIX: Enforces a maximum length constraint right inside the text input box!
                 slotProps={{
                   htmlInput: {
@@ -340,6 +355,7 @@ export default function ConsumptionEntryForm({
                 onChange={(e) =>
                   handleInputChange("feature3", e.target.value.toUpperCase())
                 }
+                disabled={!!editingRow}
                 // 🚀 THE FIX: Enforces a maximum length constraint right inside the text input box!
                 slotProps={{
                   htmlInput: {
@@ -360,6 +376,7 @@ export default function ConsumptionEntryForm({
                 onChange={(e) =>
                   handleInputChange("feature4", e.target.value.toUpperCase())
                 }
+                disabled={!!editingRow}
                 // 🚀 THE FIX: Enforces a maximum length constraint right inside the text input box!
                 slotProps={{
                   htmlInput: {
@@ -645,44 +662,56 @@ export default function ConsumptionEntryForm({
             }
             disabled={calculatedTotal === null || isSaving}
             onClick={async () => {
+              console.log("ready to save form :", form.feature1);
+              console.log("ready to save form :", form.feature2);
+              const payload = {
+                buyerCode: styleContext.buyerCode,
+                order: styleContext.order,
+                typeCode: styleContext.typeCode,
+                styleCode: styleContext.styleCode,
+                color: form.garmentColor || "",
+                size: form.garmentSize || "",
+                stockCode: selectedMaterial.stockCode,
+                itemCode: selectedMaterial.itemCode,
+                feature1: form.feature1,
+                feature2: form.feature2,
+                feature3: form.feature3,
+                feature4: form.feature4,
+                consumptionUnit: form.consumptionUnit,
+                quantityPerGarment: Number(form.quantityPerGarment) || 0,
+                percentageAllowance: Number(form.allowancePercentage) || 0,
+                itemUnit: form.finalItemUnit,
+                totalConsumption: calculatedTotal || 0,
+                supplierCode: form.supplierCode,
+                unitPrice: Number(form.unitPrice) || 0,
+
+                // FIXED: Dynamically pulls and passes the explicit currency code selected in the master header dropdown!
+                currency: styleContext.currencyCode,
+              };
+
+              const toastId = toast.loading(
+                "Saving material consumption entry...",
+              );
               try {
-                console.log("ready to save form :", form.feature1);
-                console.log("ready to save form :", form.feature2);
-                const payload = {
-                  buyerCode: styleContext.buyerCode,
-                  order: styleContext.order,
-                  typeCode: styleContext.typeCode,
-                  styleCode: styleContext.styleCode,
-                  color: form.garmentColor || "",
-                  size: form.garmentSize || "",
-                  stockCode: selectedMaterial.stockCode,
-                  itemCode: selectedMaterial.itemCode,
-                  feature1: form.feature1,
-                  feature2: form.feature2,
-                  feature3: form.feature3,
-                  feature4: form.feature4,
-                  consumptionUnit: form.consumptionUnit,
-                  quantityPerGarment: Number(form.quantityPerGarment) || 0,
-                  percentageAllowance: Number(form.allowancePercentage) || 0,
-                  itemUnit: form.finalItemUnit,
-                  totalConsumption: calculatedTotal || 0,
-                  supplierCode: form.supplierCode,
-                  unitPrice: Number(form.unitPrice) || 0,
-
-                  // FIXED: Dynamically pulls and passes the explicit currency code selected in the master header dropdown!
-                  currency: styleContext.currencyCode,
-                };
-
                 await saveEntry(payload);
-                alert(
-                  "Material ledger entry saved and synchronized with SQL Server successfully!",
-                );
+                toast.update(toastId, {
+                  render: "✓ Material ledger entry saved successfully!",
+                  type: "success",
+                  isLoading: false,
+                  autoClose: 4000,
+                  closeButton: true,
+                });
                 onCommitSuccess();
               } catch (err: unknown) {
                 console.log(err);
-                alert(
-                  "Failed to save material consumption entry. Verify database connectivity rules.",
-                );
+                toast.update(toastId, {
+                  render:
+                    "🛑 Failed to save material consumption entry. Verify database connectivity rules.",
+                  type: "error",
+                  isLoading: false,
+                  autoClose: 5000,
+                  closeButton: true,
+                });
               }
             }}
           >

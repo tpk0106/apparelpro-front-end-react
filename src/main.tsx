@@ -12,6 +12,7 @@ import { store } from "./sagaStore/sagaStore.ts";
 import { apparelProDarkTheme, blueTheme } from "./themes/themes.ts";
 import { ThemeProvider } from "@mui/material";
 import { ToastContainer } from "react-toastify";
+import AccessDeniedDialog from "./components/common/access-denied-dialog";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ createRoot(document.getElementById("root")!).render(
               autoClose={3000}
               theme="colored"
             />
+            <AccessDeniedDialog />
             <App />
           </ThemeProvider>
         </BrowserRouter>

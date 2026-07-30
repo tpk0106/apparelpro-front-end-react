@@ -477,14 +477,11 @@ export const useDeleteItemFeatureMutation = () => {
 
   return useMutation<void, Error, string>({
     mutationFn: async (featureCode: string) => {
-      await removeItemFeature(featureCode);
+      removeItemFeature(featureCode);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["item-features"] });
       toast.success("Item Feature deleted successfully");
-    },
-    onError: (error) => {
-      toast.error(`Delete failed: ${error.message}`);
     },
   });
 };

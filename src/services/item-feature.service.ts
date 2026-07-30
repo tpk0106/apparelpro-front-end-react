@@ -31,11 +31,11 @@ const updateEditItemFeature = async (
   existingItemFeature: ItemFeature,
 ) => {
   return await client.put(
-    APPARELPRO_ENDPOINTS.REFERENCE_SECTION.UNIT.PUT,
+    APPARELPRO_ENDPOINTS.REFERENCE_SECTION.ITEM_FEATURE.PUT,
     existingItemFeature,
     {
       params: {
-        code: code,
+        featureCode: code,
       },
     },
   );

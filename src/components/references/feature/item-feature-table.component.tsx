@@ -9,7 +9,7 @@ import {
   type MRT_Row,
   type MRT_TableOptions,
 } from "material-react-table";
-import { Box, Button, darken, IconButton, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import type { PaginationData } from "../../../interfaces/definitions";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
@@ -20,6 +20,7 @@ import {
 } from "../../../tanstack-hooks/custom-hooks";
 import { useApparelProTable } from "../../../themes/useApparelProTable";
 import type { ItemFeature } from "../../../interfaces/references/ItemFeature";
+import ConfirmDialog from "../../common/confirm-dialog";
 
 interface Props {
   columns: MRT_ColumnDef<ItemFeature>[];
@@ -58,7 +59,11 @@ const ItemFeatureTable = ({
   // 1. Consume mutations cleanly
   const { mutateAsync: createItemFeature } = useCreateItemFeatureMutation();
   const { mutateAsync: updateItemFeature } = useUpdateItemFeatureMutation();
-  const { mutateAsync: deleteItemFeature } = useDeleteItemFeatureMutation();
+  const { mutateAsync: deleteItemFeature, isPending: isDeleting } =
+    useDeleteItemFeatureMutation();
+  const [rowToDelete, setRowToDelete] = useState<MRT_Row<ItemFeature> | null>(
+    null,
+  );
 
   // 2. Your save hooks remain highly intuitive
   const handleCreateItemFeature: MRT_TableOptions<ItemFeature>["onCreatingRowSave"] =
@@ -95,9 +100,17 @@ const ItemFeatureTable = ({
 
   //DELETE action
   const openDeleteConfirmModal = (row: MRT_Row<ItemFeature>) => {
-    if (window.confirm("Are you sure you want to delete this Item Feature?")) {
-      deleteItemFeature(row.original.featureCode);
-    }
+    setRowToDelete(row);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!rowToDelete) return;
+    await deleteItemFeature(rowToDelete.original.featureCode);
+    setRowToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setRowToDelete(null);
   };
 
   //  CRUD Operations
@@ -188,7 +201,21 @@ const ItemFeatureTable = ({
     ),
   });
 
-  return <MaterialReactTable table={table} />;
+  return (
+    <>
+      <MaterialReactTable table={table} />
+      <ConfirmDialog
+        open={!!rowToDelete}
+        title="Delete Item Feature"
+        message={`Are you sure you want to delete "${rowToDelete?.original.description}"?`}
+        confirmLabel="Delete"
+        confirmColor="error"
+        isConfirming={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
+    </>
+  );
 };
 
 export default ItemFeatureTable;

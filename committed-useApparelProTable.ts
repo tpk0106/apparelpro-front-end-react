@@ -102,12 +102,11 @@ export function useApparelProTable<TData extends MRT_RowData>(
             // otherwise stays MUI's default dark color and becomes unreadable
             // against black. Force those to stay legible on hover.
             "& .MuiInputBase-input, & .MuiSelect-select": {
-              color: isEditing || isCreating ? "#000000 !important" : "#FFFFFF !important",
-              caretColor: isEditing || isCreating ? "#000000 !important" : "#FFFFFF !important",
+              color: "#FFFFFF !important",
             },
             "& .MuiInput-underline:before, & .MuiInput-underline:after, & .MuiInputBase-root:before, & .MuiInputBase-root:after":
               {
-                borderColor: isEditing || isCreating ? "#000000 !important" : "#FFFFFF !important",
+                borderColor: "#FFFFFF !important",
               },
           },
 

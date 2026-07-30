@@ -157,6 +157,7 @@ export interface StyleMaterialConsumptionLedgerRow {
   itemUnit: string;
   totalConsumption: number;
   supplierCode: string;
+  supplierName: string;
 }
 
 export interface ConsumptionEntryPayload {

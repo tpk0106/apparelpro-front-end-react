@@ -391,6 +391,13 @@ const apparelProDarkTheme = createTheme({
             "&.Mui-focused": {
               color: "#6366F1", // Deep rich indigo accent when actively focused
             },
+            // Locked/disabled field label state (e.g. Feature1-4 while editing an
+            // existing Material Consumption ledger row) - default MUI disabled label
+            // color is tuned for light backgrounds and is effectively invisible here.
+            "&.Mui-disabled": {
+              color: "#5A6270",
+              WebkitTextFillColor: "unset",
+            },
           },
 
           // Softer Dark Surface Input Field Container Mapping
@@ -418,6 +425,27 @@ const apparelProDarkTheme = createTheme({
                 color: "#8B93A1",
                 "&:hover": { color: "#F4F6F8" },
               },
+
+            // Locked/disabled field content state - Chrome/Safari render disabled
+            // input text via -webkit-text-fill-color, ignoring plain `color`, so
+            // both must be set or the text stays invisible against this dark theme.
+            "&.Mui-disabled": {
+              color: "#C9CFD9",
+              WebkitTextFillColor: "#C9CFD9",
+              "& fieldset": {
+                borderColor: "rgba(139, 147, 161, 0.18)",
+              },
+            },
+            // The color/-webkit-text-fill-color rule above lands on the wrapping
+            // root div - it only reaches the actual text by CSS inheritance, which
+            // the browser's own `input:disabled` UA style (higher specificity than
+            // an inherited value) wins over. Target the real <input> element
+            // directly so this rule's specificity actually beats the UA default.
+            "& .MuiOutlinedInput-input.Mui-disabled": {
+              color: "#C9CFD9",
+              WebkitTextFillColor: "#C9CFD9",
+              opacity: 1,
+            },
           },
         },
       },
