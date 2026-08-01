@@ -1,4 +1,4 @@
-﻿export const APPARELPRO_ENDPOINTS = {
+export const APPARELPRO_ENDPOINTS = {
   REFERENCE_SECTION: {
     CURRENCY: {
       GET: "api/currency/list",
@@ -118,10 +118,12 @@
       GET_BY_ADDRESS_ID_PAGINATION: "api/address/list/byAddressId/",
       GET_BY_ADDRESS_ID: "api/address/list/addressId/",
       GET_BY_BUYER_CODE: "api/address/list/buyerCode/",
+      GET_BY_BANK_CODE: "api/address/list/bankCode/",
       DOES_BANK_EXIST: "api/address/list/does-bank-exist/",
       POST: "api/address",
       DELETE: "api/address/",
-      UPDATE_BY_BUYER_CODE_AND_ADDRESS_ID: "api/address",
+      UPDATE_BY_BUYER_CODE_AND_ADDRESS_ID: "api/address/buyerCode/addressId",
+      UPDATE_BY_BANK_CODE_AND_ADDRESS_ID: "api/address/bank",
       PUT: "api/address/buyerCode/addressId",
       PATCH: "api/address",
     },
@@ -134,15 +136,6 @@
       DELETE: "api/portDestination/",
       PUT: "api/portDestination/",
       PATCH: "api/portDestination",
-    },
-    ITEM_FEATURE: {
-      GET: "api/item-feature/list",
-      GET_BY_PAGINATION: "api/item-feature/list",
-      DOES_UNIT_EXIST: "api/item-feature/list/does-unit-exist/",
-      POST: "api/item-feature",
-      DELETE: "api/item-feature/",
-      PUT: "api/item-feature",
-      PATCH: "api/item-feature",
     },
   },
   REGISTRATION: {
@@ -222,26 +215,6 @@
       RECEIVABLE_LINES: "api/orderwise-inventory-grn/receivable-lines",
       COMMIT: "api/orderwise-inventory-grn/commit",
       PENDING_POS: "api/orderwise-inventory-grn/pending-pos",
-    },
-    RTN: {
-      RETURNABLE_STOCK: "api/orderwise-inventory-rtn/returnable-stock",
-      COMMIT: "api/orderwise-inventory-rtn/commit",
-    },
-    GTN: {
-      TRANSFERABLE_STOCK: "api/orderwise-inventory-gtn/transferable-stock",
-      COMMIT: "api/orderwise-inventory-gtn/commit",
-    },
-    SRN: {
-      RETURNABLE_STOCK: "api/orderwise-inventory-srn/returnable-stock",
-      COMMIT: "api/orderwise-inventory-srn/commit",
-    },
-    DGN: {
-      DAMAGEABLE_STOCK: "api/orderwise-inventory-dgn/damageable-stock",
-      COMMIT: "api/orderwise-inventory-dgn/commit",
-    },
-    SAN: {
-      ADJUSTABLE_STOCK: "api/orderwise-inventory-san/adjustable-stock",
-      COMMIT: "api/orderwise-inventory-san/commit",
     },
     STOCK_MOVEMENT_REPORT: {
       HEADER: "api/stock-movement-reports/header",

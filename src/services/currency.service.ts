@@ -44,12 +44,7 @@ const updateEditCurrency = async (code: string, updateCurrency: Currency) => {
 
 const removeCurrency = async (code: string) => {
   return await client.delete(
-    APPARELPRO_ENDPOINTS.REFERENCE_SECTION.CURRENCY.DELETE,
-    {
-      params: {
-        code: code,
-      },
-    },
+    APPARELPRO_ENDPOINTS.REFERENCE_SECTION.CURRENCY.DELETE + code,
   );
 };
 

@@ -66,7 +66,7 @@ const ItemFeatures = () => {
           </Box>
         ),
 
-        muiEditTextFieldProps: ({ cell }) => ({
+        muiEditTextFieldProps: () => ({
           type: "text",
           //   required: true,
           style: { textTransform: "uppercase" },

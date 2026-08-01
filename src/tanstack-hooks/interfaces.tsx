@@ -13,6 +13,17 @@ interface UpdateAddressPayload {
   addressToUpdate: Address;
 }
 
+interface DeleteBankAddressPayload {
+  id: number;
+  addressId: string;
+}
+
+interface UpdateBankAddressPayload {
+  bankCode: string;
+  addressId: string;
+  addressToUpdate: Address;
+}
+
 interface UpdateBasisPayload {
   code: string;
   basisToUpdate: Basis;
@@ -44,6 +55,8 @@ interface SupplierServiceModel {
 export type {
   DeleteAddressPayload,
   UpdateAddressPayload,
+  DeleteBankAddressPayload,
+  UpdateBankAddressPayload,
   UpdateBasisPayload,
   DeleteBasisPayload,
   DeleteStylePayload,

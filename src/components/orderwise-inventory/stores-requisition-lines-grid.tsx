@@ -145,10 +145,6 @@ export default function StoresRequisitionLinesGrid({
     // Skip validation until both basic coordinates are explicitly entered into the cells
     if (rawCode.length < 3 || basisCode === "") return;
 
-    // Separate the category stock code (first 2 chars) from the item code tracking parameters safely
-    // const stockPrefix = rawCode.substring(0, 2);
-    // const mainItemCode = rawCode.substring(2);
-
     try {
       // Trigger the imperative stock-balance check against OrderwiseStocks
       const stockDetails = await triggerStockCheck({
@@ -229,7 +225,9 @@ export default function StoresRequisitionLinesGrid({
                     variant="standard"
                     fullWidth
                     value={row.itemCode}
-                    disabled={isStockLoading || availableChoicesForRow.length === 0}
+                    disabled={
+                      isStockLoading || availableChoicesForRow.length === 0
+                    }
                     onChange={(e) => {
                       const selectedItemCode = e.target.value;
                       const matchedDbItem = stockChoicesList.find(
@@ -289,9 +287,14 @@ export default function StoresRequisitionLinesGrid({
                       selectedChoice && (
                         <Typography
                           variant="caption"
-                          sx={{ mt: 0.5, display: "block", color: "text.secondary" }}
+                          sx={{
+                            mt: 0.5,
+                            display: "block",
+                            color: "text.secondary",
+                          }}
                         >
-                          Ordered: {selectedChoice.orderedQuantity.toLocaleString()}{" "}
+                          Ordered:{" "}
+                          {selectedChoice.orderedQuantity.toLocaleString()}{" "}
                           {selectedChoice.unit}
                         </Typography>
                       )

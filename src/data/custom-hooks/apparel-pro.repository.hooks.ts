@@ -42,6 +42,7 @@ import {
 import type { Country } from "../../interfaces/references/Country";
 import {
   createCountryStart,
+  deleteCountryStart,
   loadAllCountriesStart,
   updateCountryStart,
 } from "../../sagaStore/country/country.action";
@@ -553,6 +554,39 @@ export const useUpdateCountry = (pagination: MRT_PaginationState) => {
         type: "active",
         exact: true,
       });
+    },
+  });
+};
+
+export const useDeleteCountry = (pagination: MRT_PaginationState) => {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  return useMutation({
+    mutationFn: async (code: string) => {
+      const response = dispatch(deleteCountryStart(code));
+      return response;
+    },
+
+    onMutate: (code: string) => {
+      queryClient.setQueryData(
+        ["countries", pagination.pageSize, pagination.pageIndex],
+        (prevCountries: Country[]) =>
+          prevCountries?.filter((country: Country) => country.code !== code),
+      );
+    },
+
+    onSettled: () => {
+      return (
+        queryClient.invalidateQueries({
+          queryKey: ["countries"],
+          refetchType: "all",
+        }),
+        queryClient.refetchQueries({
+          queryKey: ["countries", pagination.pageSize, pagination.pageIndex],
+          type: "active",
+          exact: true,
+        })
+      );
     },
   });
 };

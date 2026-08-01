@@ -1,10 +1,10 @@
 import { useState } from "react";
 import {
-  useCreateCurrencyMutation,
-  useDeleteCurrencyMutation,
-  useUpdateCurrencyMutation,
+  useCreateBankAddressMutation,
+  useDeleteBankAddressMutation,
+  useUpdateBankAddressMutation,
 } from "../../../tanstack-hooks/custom-hooks";
-import type { Currency } from "../../../interfaces/references/Currency";
+
 import {
   MaterialReactTable,
   type MRT_ColumnDef,
@@ -13,80 +13,105 @@ import {
   type MRT_TableOptions,
 } from "material-react-table";
 import { Box, Button, IconButton, Tooltip } from "@mui/material";
-import type { PaginationData } from "../../../interfaces/definitions";
+import {
+  type CreateAddressAPIModel,
+  type PaginationData,
+} from "../../../interfaces/definitions";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
+import type { Address } from "../../../interfaces/references/Address";
+import type {
+  DeleteBankAddressPayload,
+  UpdateBankAddressPayload,
+} from "../../../tanstack-hooks/interfaces";
 import { useApparelProTable } from "../../../themes/useApparelProTable";
 import ConfirmDialog from "../../common/confirm-dialog";
 
 interface Props {
-  columns: MRT_ColumnDef<Currency>[];
-  data: Currency[];
+  columns: MRT_ColumnDef<Address>[];
+  data: Address[];
   itemsCount: number;
   isError: boolean;
   isLoading: boolean;
   paginate: PaginationData;
   pagination: MRT_PaginationState;
   setPagination: React.Dispatch<React.SetStateAction<MRT_PaginationState>>;
+  bankCode: string;
 }
 
-const CurrencyTable = ({
+const BankAddressesTable = ({
   columns,
   data,
   itemsCount,
   isError,
-
   pagination,
   setPagination,
+  bankCode,
 }: Props) => {
   const [, setValidationErrors] = useState<Record<string, string | undefined>>(
     {},
   );
 
-  const [rowToDelete, setRowToDelete] = useState<MRT_Row<Currency> | null>(
-    null,
-  );
+  const [addressId, setAddressId] = useState<string>(null);
+  const [rowToDelete, setRowToDelete] = useState<MRT_Row<Address> | null>(null);
 
   const validationRequired = (value: string) => !value?.length;
-  const validateCurrency = ({ name, code, countryCode }: Currency) => {
-    console.log("validation :", validationRequired(name));
+  const validationRequiredForAddressType = (value: number) => value > 0;
+  const validateBankAddress = ({
+    streetAddress,
+    city,
+    postCode,
+    state,
+    countryCode,
+    addressType,
+  }: Address) => {
     return {
-      name: validationRequired(name) ? "Currency Name required" : "",
-      code: validationRequired(code) ? "Currency Code required" : "",
-      countryCode: validationRequired(countryCode)
-        ? "Country for this Currency required"
+      streetAddress: validationRequired(streetAddress || "")
+        ? "Street Address required"
+        : "",
+      city: validationRequired(city || "") ? "City required" : "",
+      postCode: validationRequired(postCode || "") ? "Postcode required" : "",
+      state: validationRequired(state || "") ? "State required" : "",
+      countryCode: validationRequired(countryCode || "")
+        ? "Country for this Bank required"
+        : "",
+      addressType: !validationRequiredForAddressType(addressType)
+        ? "Address Type required"
         : "",
     };
   };
 
   // 1. Consume mutations cleanly
-  const { mutateAsync: createCurrency } = useCreateCurrencyMutation();
-  const { mutateAsync: updateCurrency } = useUpdateCurrencyMutation();
-  const { mutateAsync: deleteCurrency, isPending: isDeletingCurrency } =
-    useDeleteCurrencyMutation();
+  const { mutateAsync: createBankAddress } = useCreateBankAddressMutation();
+  const { mutateAsync: handleUpdateBankAddress } =
+    useUpdateBankAddressMutation();
+  const { mutateAsync: deleteBankAddress, isPending: isDeletingBankAddress } =
+    useDeleteBankAddressMutation();
 
   // 2. Your save hooks remain highly intuitive
-  const handleCreateCurrency: MRT_TableOptions<Currency>["onCreatingRowSave"] =
+  const handleCreateBankAddress: MRT_TableOptions<Address>["onCreatingRowSave"] =
     async ({ values, table }) => {
-      console.log("save");
-      values = { ...values, id: 0 };
-      const newValidationErrors = validateCurrency(values);
+      values = { ...values, id: 0, bankCode: bankCode }; // update passed bankCode with final payload to save
+      const newValidationErrors = validateBankAddress(values);
       if (Object.values(newValidationErrors).some((error) => error)) {
-        console.log("validation err: ", newValidationErrors);
         setValidationErrors(newValidationErrors);
         return;
       }
       setValidationErrors({});
 
       // Fires mutationFn, runs network call, invalidates cache automatically on success!
-      await createCurrency(values);
+      const createAddressAPIModel: CreateAddressAPIModel = {
+        ...values,
+        default: true,
+      };
+      await createBankAddress(createAddressAPIModel);
       table.setCreatingRow(null);
     };
 
-  const handleSaveCurrency: MRT_TableOptions<Currency>["onEditingRowSave"] =
+  const handleSaveBankAddress: MRT_TableOptions<Address>["onEditingRowSave"] =
     async ({ values, table }) => {
       values = { ...values, id: 0 };
-      const newValidationErrors = validateCurrency(values);
+      const newValidationErrors = validateBankAddress(values);
       if (Object.values(newValidationErrors).some((error) => error)) {
         setValidationErrors(newValidationErrors);
         return;
@@ -94,18 +119,27 @@ const CurrencyTable = ({
       setValidationErrors({});
 
       // Fires mutationFn, runs network call, invalidates cache automatically on success!
-      await updateCurrency(values);
-      table.setCreatingRow(null);
+      const updateAddress: UpdateBankAddressPayload = {
+        bankCode: bankCode,
+        addressId: addressId,
+        addressToUpdate: values,
+      };
+      await handleUpdateBankAddress(updateAddress);
+      table.setEditingRow(null); //exit editing mode
     };
 
   //DELETE action
-  const openDeleteConfirmModal = (row: MRT_Row<Currency>) => {
+  const openDeleteConfirmModal = (row: MRT_Row<Address>) => {
     setRowToDelete(row);
   };
 
   const handleConfirmDelete = async () => {
     if (!rowToDelete) return;
-    await deleteCurrency(rowToDelete.original.code);
+    const deleteAddressPayload: DeleteBankAddressPayload = {
+      id: rowToDelete.original.id,
+      addressId: rowToDelete.original.addressId,
+    };
+    await deleteBankAddress(deleteAddressPayload);
     setRowToDelete(null);
   };
 
@@ -115,7 +149,7 @@ const CurrencyTable = ({
 
   //  CRUD Operations
 
-  const table = useApparelProTable<Currency>({
+  const table = useApparelProTable<Address>({
     columns,
     data: data,
 
@@ -126,6 +160,9 @@ const CurrencyTable = ({
         pageIndex: pagination.pageIndex,
         pageSize: pagination.pageSize,
       },
+      columnVisibility: {
+        addressId: false,
+      },
     },
 
     // Display mode configuration
@@ -134,7 +171,7 @@ const CurrencyTable = ({
 
     enableExpandAll: false,
 
-    // Pagination configuration
+    // pagination
     rowCount: itemsCount,
     manualPagination: true,
     paginationDisplayMode: "pages",
@@ -148,16 +185,15 @@ const CurrencyTable = ({
 
     enableEditing: true,
 
-    // 🚀 CHANGE THIS: Map directly to the incoming prop variables
     state: {
-      pagination: pagination, // Uses the prop passed from Currencies.tsx
+      pagination: pagination,
       showAlertBanner: isError,
     },
 
     onCreatingRowCancel: () => setValidationErrors({}),
-    onCreatingRowSave: handleCreateCurrency,
+    onCreatingRowSave: handleCreateBankAddress,
     onEditingRowCancel: () => setValidationErrors({}),
-    onEditingRowSave: handleSaveCurrency,
+    onEditingRowSave: handleSaveBankAddress,
 
     muiExpandButtonProps: ({ row, table }) => ({
       onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }),
@@ -180,14 +216,19 @@ const CurrencyTable = ({
           table.setCreatingRow(true);
         }}
       >
-        New Currency
+        New Bank Address
       </Button>
     ),
 
     renderRowActions: ({ row }) => (
       <Box sx={{ display: "flex", gap: "1rem" }}>
         <Tooltip title="Edit">
-          <IconButton onClick={() => table.setEditingRow(row)}>
+          <IconButton
+            onClick={() => {
+              table.setEditingRow(row);
+              setAddressId(row.original.addressId);
+            }}
+          >
             <ModeEditOutlinedIcon />
           </IconButton>
         </Tooltip>
@@ -202,14 +243,14 @@ const CurrencyTable = ({
 
   return (
     <>
-      <MaterialReactTable table={table} />;
+      <MaterialReactTable table={table} />
       <ConfirmDialog
         open={!!rowToDelete}
+        title="Delete Address"
+        message="Are you sure you want to delete this address?"
         confirmLabel="Delete"
         confirmColor="error"
-        title={"Delete Currency"}
-        message={`Are you sure you want to delete "${rowToDelete?.original.name}"?`}
-        isConfirming={isDeletingCurrency}
+        isConfirming={isDeletingBankAddress}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />
@@ -217,4 +258,4 @@ const CurrencyTable = ({
   );
 };
 
-export default CurrencyTable;
+export default BankAddressesTable;

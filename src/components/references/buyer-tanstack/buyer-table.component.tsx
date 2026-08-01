@@ -20,6 +20,7 @@ import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
 import BuyerAddresses from "../address-tanstack/buyer-address.component";
 import { useApparelProTable } from "../../../themes/useApparelProTable";
+import ConfirmDialog from "../../common/confirm-dialog";
 
 interface Props {
   columns: MRT_ColumnDef<Buyer>[];
@@ -46,6 +47,7 @@ const BuyerTable = ({
   >({});
 
   const [buyerCode, setBuyerCode] = useState<number>(null);
+  const [rowToDelete, setRowToDelete] = useState<MRT_Row<Buyer> | null>(null);
   const validationRequired = (value: string) => !value?.length;
   const validateBuyer = ({ name }: Buyer) => {
     console.log("validation :", validationRequired(name));
@@ -103,9 +105,17 @@ const BuyerTable = ({
 
   //DELETE action
   const openDeleteConfirmModal = (row: MRT_Row<Buyer>) => {
-    if (window.confirm("Are you sure you want to delete this Garment Type?")) {
-      deleteBuyer(row.original.buyerCode);
-    }
+    setRowToDelete(row);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!rowToDelete) return;
+    await deleteBuyer(rowToDelete.original.buyerCode);
+    setRowToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setRowToDelete(null);
   };
 
   //  CRUD Operations
@@ -364,7 +374,21 @@ const BuyerTable = ({
     },
   });
 
-  return <MaterialReactTable table={table} />;
+  return (
+    <>
+      <MaterialReactTable table={table} />
+      <ConfirmDialog
+        open={!!rowToDelete}
+        title="Delete Buyer"
+        message={`Are you sure you want to delete "${rowToDelete?.original.name}"?`}
+        confirmLabel="Delete"
+        confirmColor="error"
+        isConfirming={isDeletingBuyer}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
+    </>
+  );
 };
 
 export default BuyerTable;

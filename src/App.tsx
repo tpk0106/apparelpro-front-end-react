@@ -34,9 +34,7 @@ import StockAdjustmentNoteWorkspace from "./components/orderwise-inventory/stock
 import StockMovementReportWorkspace from "./components/orderwise-inventory/stock-movement-report-workspace";
 import StrnPrintReportWorkspace from "./components/reports-orderwise-inventory/strn-print-report-workspace";
 import Suppliers from "./components/references/supplier/supplier.component";
-import ItemFeatures from "./components/references/feature/item-feature.component";
-// import Styles from "./components/order-management/styles.component";
-// import MaterialConsumption from "./components/material-consumption/material-consumption.component";
+import ItemFeatures from "./components/references/item-feature/item-feature.component";
 
 function App() {
   const location = useLocation();
@@ -97,7 +95,11 @@ function App() {
         />
         <Route index path="rtn" element={<GoodsReturnNoteWorkspace />} />
         <Route index path="gtn" element={<GoodsTransferNoteWorkspace />} />
-        <Route index path="supplier-return-note" element={<SupplierReturnNoteWorkspace />} />
+        <Route
+          index
+          path="supplier-return-note"
+          element={<SupplierReturnNoteWorkspace />}
+        />
         <Route index path="dgn" element={<DamagedGoodsNoteWorkspace />} />
         <Route index path="san" element={<StockAdjustmentNoteWorkspace />} />
         <Route
@@ -105,11 +107,7 @@ function App() {
           path="stock-movement-report"
           element={<StockMovementReportWorkspace />}
         />
-        <Route
-          index
-          path="strn-print-report"
-          element={<StrnPrintReportWorkspace />}
-        />
+        <Route index path="strn-print" element={<StrnPrintReportWorkspace />} />
       </Route>
     </Routes>
   );

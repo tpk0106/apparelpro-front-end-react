@@ -54,14 +54,20 @@ import {
   loadAllAddressesForBuyerCode,
   removeBuyerAddress,
   updateBuyerAddress,
+  createNewBankAddress,
+  loadAllAddressesForBankCode,
+  removeBankAddress,
+  updateBankAddress,
 } from "../services/address.serice";
 import type {
   DeleteAddressPayload,
+  DeleteBankAddressPayload,
   DeleteBasisPayload,
   DeleteStylePayload,
   PurchaseOrderPayload,
   SupplierServiceModel,
   UpdateAddressPayload,
+  UpdateBankAddressPayload,
   UpdateBasisPayload,
   UpdateStylePayload,
 } from "./interfaces";
@@ -158,7 +164,7 @@ export const useUpdateGarmentTypeMutation = () => {
       await updateEditGarmentType(updatedCurrency.id, updatedCurrency);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["currencies"] });
+      queryClient.invalidateQueries({ queryKey: ["garmentTypes"] });
       toast.success("GarmentType updated successfully");
     },
     onError: (error) => {
@@ -176,8 +182,11 @@ export const useDeleteGarmentTypeMutation = () => {
       await removeGarmentType(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["currencies"] });
+      queryClient.invalidateQueries({ queryKey: ["garmentTypes"] });
       toast.success("GarmentType deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
     },
   });
 };
@@ -404,11 +413,14 @@ export const useDeleteUnitMutation = () => {
 
   return useMutation<void, Error, string>({
     mutationFn: async (code: string) => {
-      removeUnit(code);
+      await removeUnit(code);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["units"] });
       toast.success("Unit deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
     },
   });
 };
@@ -736,6 +748,78 @@ export const useDeleteBuyerAddressMutation = () => {
   });
 };
 
+// bank address
+
+export const useGetBankAddressesByBankCode = (
+  bankCode: string,
+  paginate: PaginationData,
+) => {
+  return useQuery<PaginationAPIModel<Address>, Error>({
+    queryKey: ["bankAddresses", paginate.pageIndex, paginate.pageSize],
+    queryFn: async () => {
+      const response: AxiosResponse<PaginationAPIModel<Address>> =
+        await loadAllAddressesForBankCode(bankCode, paginate);
+      return response.data;
+    },
+    placeholderData: (previousData) => previousData, // Keeps old page data visible while loading the next page (smooth transitions)
+  });
+};
+
+export const useCreateBankAddressMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, CreateAddressAPIModel>({
+    mutationFn: async (newBankAddress: CreateAddressAPIModel) => {
+      await createNewBankAddress(newBankAddress);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bankAddresses"] });
+      toast.success("Bank Address created successfully");
+    },
+    onError: (error) => {
+      toast.error(`Creation failed: ${error.message}`);
+    },
+  });
+};
+
+export const useUpdateBankAddressMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<AxiosResponse<any>, Error, UpdateBankAddressPayload>({
+    mutationFn: async (updatedBankAddressPayload) => {
+      return await updateBankAddress(
+        updatedBankAddressPayload.bankCode,
+        updatedBankAddressPayload.addressId,
+        { ...updatedBankAddressPayload.addressToUpdate },
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bankAddresses"] });
+      toast.success("Bank Address updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Update failed: ${error.message}`);
+    },
+  });
+};
+
+export const useDeleteBankAddressMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, DeleteBankAddressPayload>({
+    mutationFn: async ({ id, addressId }) => {
+      await removeBankAddress(id, addressId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bankAddresses"] });
+      toast.success("Bank Address deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
+    },
+  });
+};
+
 // basis
 
 export const useGetBasis = (paginate: PaginationData) => {
@@ -798,13 +882,14 @@ export const useDeleteBasisMutation = () => {
   // Update generics: <TData, TError, TVariables, TContext>
   return useMutation<void, Error, DeleteBasisPayload>({
     mutationFn: async ({ code }) => {
-      // Don't forget to await if removeBuyerAddress is asynchronous!
       await removeBasis(code);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["buyers"] });
-      // Note: You might want to update this text to "Address deleted successfully"
-      toast.success("Buyer deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["basises"] });
+      toast.success("Basis deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
     },
   });
 };

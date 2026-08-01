@@ -21,6 +21,8 @@ import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
 import type { Bank } from "../../../interfaces/references/Bank";
 import { useApparelProTable } from "../../../themes/useApparelProTable";
+import ConfirmDialog from "../../common/confirm-dialog";
+import BankAddresses from "../address-tanstack/bank-address.component";
 
 //import { darken, lighten } from '@mui/material/styles';
 
@@ -49,8 +51,15 @@ const BankTable = ({
     Record<string, string | undefined>
   >({});
 
+  const [rowToDelete, setRowToDelete] = useState<MRT_Row<Bank> | null>(null);
+
   const validationRequired = (value: string) => !value?.length;
-  const validateCurrency = ({ name, bankCode, currencyCode }: Bank) => {
+  const validateCurrency = ({
+    name,
+    bankCode,
+    currencyCode,
+    swiftCode,
+  }: Bank) => {
     console.log("validation :", validationRequired(name));
     return {
       name: validationRequired(name) ? "Bank Name required" : "",
@@ -58,6 +67,7 @@ const BankTable = ({
       countryCode: validationRequired(currencyCode)
         ? "Bank for this Bank required"
         : "",
+      swiftCode: validationRequired(swiftCode) ? "Swift Code required" : "",
     };
   };
 
@@ -99,14 +109,22 @@ const BankTable = ({
 
       // Fires mutationFn, runs network call, invalidates cache automatically on success!
       await updateBank(values);
-      table.setCreatingRow(null);
+      table.setEditingRow(null);
     };
 
   //DELETE action
   const openDeleteConfirmModal = (row: MRT_Row<Bank>) => {
-    if (window.confirm("Are you sure you want to delete this Bank?")) {
-      deleteBank(row.original.bankCode);
-    }
+    setRowToDelete(row);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!rowToDelete) return;
+    await deleteBank(rowToDelete.original.bankCode);
+    setRowToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setRowToDelete(null);
   };
 
   //  CRUD Operations
@@ -446,9 +464,37 @@ const BankTable = ({
         </Tooltip>
       </Box>
     ),
+
+    muiExpandButtonProps: ({ row, table }) => ({
+      onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }), //only 1 detail panel open at a time
+      sx: {
+        transform: row.getIsExpanded() ? "rotate(180deg)" : "rotate(-90deg)",
+        transition: "transform 0.2s",
+      },
+    }),
+
+    renderDetailPanel: ({ row }) => (
+      <Box sx={{ margin: "0", fontSize: "50%", width: "100%" }}>
+        <BankAddresses bankCode={row.original.bankCode} />
+      </Box>
+    ),
   });
 
-  return <MaterialReactTable table={table} />;
+  return (
+    <>
+      <MaterialReactTable table={table} />
+      <ConfirmDialog
+        open={!!rowToDelete}
+        title="Delete Bank"
+        message={`Are you sure you want to delete "${rowToDelete?.original.bankCode}"?`}
+        confirmLabel="Delete"
+        confirmColor="error"
+        isConfirming={isDeletingBank}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
+    </>
+  );
 };
 
 export default BankTable;

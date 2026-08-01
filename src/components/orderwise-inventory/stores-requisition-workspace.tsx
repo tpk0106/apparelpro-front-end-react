@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import {
   Box,
-  // Card,
   TextField,
   Typography,
   Button,
@@ -16,7 +15,6 @@ import {
   DialogActions,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
-// import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
 import { AddCircleOutlined } from "@mui/icons-material";
 import SendIcon from "@mui/icons-material/Send";
@@ -30,7 +28,6 @@ import StoresRequisitionLinesGrid from "./stores-requisition-lines-grid";
 import {
   type RequisitionLineItemRow,
   type StockItemAvailabilityDetails,
-  // type RequisitionHeaderModel,
 } from "./orderwise-inventory.types";
 import { useCreateSTRNMutation } from "../../tanstack-hooks/orderwise-inventory-strn.hooks";
 import type { AppError } from "../../auth/axiosClient";
@@ -41,11 +38,7 @@ import {
   useGetAllPurchaseOrdersByBuyerCode,
 } from "../../tanstack-hooks/custom-hooks";
 import type { Buyer } from "../../interfaces/references/Buyer";
-import {
-  useGetAllDepartmentsQuery,
-  // useGetDepartmentsPagedQuery,
-} from "../../tanstack-hooks/common.hooks";
-// import type { Department } from "../../interfaces/references/Department";
+import { useGetAllDepartmentsQuery } from "../../tanstack-hooks/common.hooks";
 
 export default function StoresRequisitionWorkspace() {
   // 1. Central Transaction Mutation Hook
@@ -119,16 +112,6 @@ export default function StoresRequisitionWorkspace() {
     hasAnyPositiveQuantity &&
     lineItems.every((item) => item.quantity >= 0) &&
     !hasAnyExceededBalance;
-  // 1. DYNAMIC DATA LOOKUP: Pulls your seeded od_dept table records directly from SQL Server!
-  // const { data: departmentsPageData, isLoading: isDeptsLoading } =
-  //   useGetDepartmentsPagedQuery({
-  //     pageIndex: 0,
-  //     pageSize: 999,
-  //     sortColumn: "name",
-  //     sortOrder: "asc",
-  //     filterColumn: null,
-  //     filterQuery: null,
-  //   });
 
   //1. DYNAMIC DATA LOOKUP: Pulls your seeded od_dept table records directly from SQL Server!
   const { data: dbDepartments = [], isLoading: isDeptsLoading } =
@@ -242,27 +225,6 @@ export default function StoresRequisitionWorkspace() {
     }
   };
 
-  // const handleResetForm = () => {
-  //   setSelectedBuyer(null);
-  //   setSelectedOrder("");
-  //   setSelectedDept("STR");
-  //   setLineItems([]);
-  //   setTransactionDate(new Date().toISOString().split("T")[0]);
-  // };
-
-  // const handleAddBlankRow = () => {
-  //   setLineItems((prev) => [
-  //     ...prev,
-  //     {
-  //       stockCode: "",
-  //       itemCode: "",
-  //       storeCode: selectedDept,
-  //       unit: "PCS",
-  //       quantity: 0,
-  //     },
-  //   ]);
-  // };
-
   return (
     <Box sx={{ width: "100%", p: 1 }}>
       <Paper
@@ -277,7 +239,7 @@ export default function StoresRequisitionWorkspace() {
           variant="h5"
           sx={{ fontWeight: "bold", color: "#1a237e", mb: 3 }}
         >
-          Stores Requisition Note (STRN) Data Entry Dashboard
+          Stores Requisition Note (STRN) Dashboard
         </Typography>
 
         {/* SECTION 1: DOCUMENT HEADER DATA CAPTURE TRACK PANEL */}
@@ -404,13 +366,13 @@ export default function StoresRequisitionWorkspace() {
               </Typography>
 
               <Button
-                variant="outlined"
+                variant="contained"
                 color="primary"
                 size="small"
                 startIcon={<AddCircleOutlined />}
                 onClick={handleAddBlankRow}
               >
-                [Ins] Append Material Allocation Line Item Row
+                Add Material Allocation Item
               </Button>
             </Box>
 

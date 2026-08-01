@@ -21,10 +21,11 @@ import type { Country } from "../../../interfaces/references/Country";
 import HourglassFullOutlinedIcon from "@mui/icons-material/HourglassFullOutlined";
 import {
   useCreateCountry,
-  useDeleteCurrency,
+  useDeleteCountry,
   useUpdateCountry,
 } from "../../../data/custom-hooks/apparel-pro.repository.hooks";
 import { useApparelProTable } from "../../../themes/useApparelProTable";
+import ConfirmDialog from "../../common/confirm-dialog";
 
 interface Props {
   columns: MRT_ColumnDef<Country>[];
@@ -50,6 +51,10 @@ const CountryTable = ({
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
+
+  const [rowToDelete, setRowToDelete] = useState<MRT_Row<Country> | null>(
+    null,
+  );
 
   const validationRequired = (value: string) => !value?.length;
   const validateCountry = ({ name, code, flag }: Country) => {
@@ -115,14 +120,22 @@ const CountryTable = ({
 
   //DELETE action
   const openDeleteConfirmModal = (row: MRT_Row<Country>) => {
-    if (window.confirm("Are you sure you want to delete this Garment Type?")) {
-      deleteCountry(row.original.id);
-    }
+    setRowToDelete(row);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!rowToDelete) return;
+    await deleteCountry(rowToDelete.original.code);
+    setRowToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setRowToDelete(null);
   };
 
   // call DELETE hook
-  const { mutateAsync: deleteCountry, isPending: isDeletingCurrency } =
-    useDeleteCurrency(pagination);
+  const { mutateAsync: deleteCountry, isPending: isDeletingCountry } =
+    useDeleteCountry(pagination);
   //
 
   const table = useApparelProTable<Country>({
@@ -277,7 +290,21 @@ const CountryTable = ({
     ),
   });
 
-  return <MaterialReactTable table={table} />;
+  return (
+    <>
+      <MaterialReactTable table={table} />
+      <ConfirmDialog
+        open={!!rowToDelete}
+        title="Delete Country"
+        message={`Are you sure you want to delete "${rowToDelete?.original.name}"?`}
+        confirmLabel="Delete"
+        confirmColor="error"
+        isConfirming={isDeletingCountry}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
+    </>
+  );
 };
 
 export default CountryTable;

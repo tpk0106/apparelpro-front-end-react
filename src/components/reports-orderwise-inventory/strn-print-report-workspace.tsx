@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
+
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import SearchIcon from "@mui/icons-material/Search";
 import { toast } from "react-toastify";
@@ -19,6 +20,7 @@ import {
   useDownloadStrnPrintPdfMutation,
 } from "../../tanstack-hooks/strn-print-report.hooks";
 import type { AppError } from "../../auth/axiosClient";
+import { format, parseISO } from "date-fns";
 
 export default function StrnPrintReportWorkspace() {
   const [strnNumberInput, setStrnNumberInput] = useState<string>("");
@@ -72,10 +74,7 @@ export default function StrnPrintReportWorkspace() {
         >
           <Box>
             <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-              Stores Requisition Note — Print Report
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Legacy reference: in_strn2.prg
+              Stores Requisition Note — Print
             </Typography>
           </Box>
           <Button
@@ -126,43 +125,121 @@ export default function StrnPrintReportWorkspace() {
           </Alert>
         ) : (
           <>
-            <Grid container spacing={2} sx={{ mb: 2.5 }}>
+            {/* <Grid
+              container
+              spacing={2}
+              wrap="nowrap"
+              sx={{
+                mb: 2.5,
+                width: "100%", // Extends the row to fill the entire horizontal space
+                "& .MuiGrid-root": {
+                  whiteSpace: "nowrap", // Forces all text inside the grid blocks to stay on one line
+                  overflow: "hidden", // Cuts off text safely if it runs out of room
+                  textOverflow: "ellipsis", // Adds '...' instead of breaking to a new line
+                },
+              }}
+            >
+            
+              <Grid size={{ xs: "auto" }} sx={{ minWidth: "10%" }}>
+                <InfoTile
+                  label="SRN No"
+                  value={details?.header.strnNumber}
+                  loading={isLoading}
+                />
+              </Grid>
+
+              <Grid size="grow">
+                <InfoTile
+                  label="Buyer"
+                  value={details?.header.buyerName}
+                  loading={isLoading}
+                />
+              </Grid>
+
+              <Grid size="grow">
+                <InfoTile
+                  label="Order No"
+                  value={details?.header.order}
+                  loading={isLoading}
+                />
+              </Grid>
+
+              <Grid size="grow">
+                <InfoTile
+                  label="To Department"
+                  value={details?.header.departmentCode}
+                  loading={isLoading}
+                />
+              </Grid>
+
+              <Grid size="grow">
+                <InfoTile
+                  label="Date"
+                  value={
+                    details?.header?.transactionDate &&
+                    format(
+                      parseISO(details?.header?.transactionDate),
+                      "dd-MMM-yyyy",
+                    )
+                  }
+                  loading={isLoading}
+                />
+              </Grid>
+            </Grid> */}
+
+            <Grid
+              container
+              spacing={2}
+              sx={{ mb: 2.5, flexDirection: "row" }}
+              wrap="nowrap"
+            >
               <InfoTile
                 label="SRN No"
                 value={details?.header.strnNumber}
                 loading={isLoading}
               />
+
+              {/* <Grid sx={{ width: "200%" }}> */}
               <InfoTile
                 label="Buyer"
                 value={details?.header.buyerName}
                 loading={isLoading}
               />
+              {/* </Grid> */}
+              {/* <Grid sx={{ width: "100%" }}> */}
               <InfoTile
                 label="Order No"
                 value={details?.header.order}
                 loading={isLoading}
               />
+              {/* </Grid> */}
+              {/* <Grid sx={{ width: "100%" }}> */}
               <InfoTile
                 label="To Department"
                 value={details?.header.departmentCode}
                 loading={isLoading}
               />
+              {/* </Grid> */}
+              {/* <Grid sx={{ width: "100%" }}> */}
+              <InfoTile
+                label="Date"
+                value={
+                  details?.header?.transactionDate &&
+                  format(
+                    parseISO(details?.header?.transactionDate),
+                    "dd-MMM-yyyy",
+                  )
+                }
+                loading={isLoading}
+              />
+              {/* </Grid> */}
             </Grid>
-
             <StrnPrintReportGrid
               data={details?.lines ?? []}
               isLoading={isLoading}
               isError={isError}
             />
-
             <Divider sx={{ my: 2 }} />
-            <Typography variant="caption" sx={{ color: "#8B93A1" }}>
-              Department is shown as its stored code; a name lookup can be
-              added later if needed. The printed date/time always reflects the
-              moment this PDF is generated, matching the legacy in_strn2.prg
-              behaviour of reprinting with today's date rather than the
-              original transaction date.
-            </Typography>
           </>
         )}
       </Paper>
@@ -180,7 +257,7 @@ function InfoTile({
   loading: boolean;
 }) {
   return (
-    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+    <Grid size={{ xs: 12, sm: 6, md: 3, lg: 12 }}>
       <Paper variant="outlined" sx={{ p: 1.75, borderRadius: 2 }}>
         {/* Explicit hex instead of color="text.secondary": the same theme-prop
             resolution silently fell back to text.primary's near-black (#000000)

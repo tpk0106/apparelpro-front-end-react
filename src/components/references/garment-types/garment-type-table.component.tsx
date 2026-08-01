@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   MaterialReactTable,
-  useMaterialReactTable,
   type MRT_ColumnDef,
   type MRT_PaginationState,
   type MRT_Row,
@@ -16,14 +15,13 @@ import type { PaginationData } from "../../../interfaces/definitions";
 
 import type { GarmentType } from "../../../interfaces/references/GarmentType";
 
-// import PendingOutlinedIcon from "@mui/icons-material/PendingOutlined";
-// import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
-import HourglassFullOutlinedIcon from "@mui/icons-material/HourglassFullOutlined";
 import {
   useCreateGarmentType,
   useDeleteGarmentType,
   useUpdateGarmentType,
 } from "../../../data/custom-hooks/apparel-pro.repository.hooks";
+import { useApparelProTable } from "../../../themes/useApparelProTable";
+import ConfirmDialog from "../../common/confirm-dialog";
 
 interface Props {
   columns: MRT_ColumnDef<GarmentType>[];
@@ -45,7 +43,6 @@ const GarmentTypeTable = ({
   setGarmentTypeComponentPaginationState,
   itemsCount,
   isError,
-  isLoading,
 }: Props) => {
   const [pagination, setPagination] = useState<MRT_PaginationState>({
     pageIndex: 0,
@@ -61,10 +58,12 @@ const GarmentTypeTable = ({
     filterQuery: null,
   };
 
-  const [validationErrors, setValidationErrors] = useState<
-    Record<string, string | undefined>
-  >({});
-
+  const [, setValidationErrors] = useState<Record<string, string | undefined>>(
+    {},
+  );
+  const [rowToDelete, setRowToDelete] = useState<MRT_Row<GarmentType> | null>(
+    null,
+  );
   const validationRequired = (value: string) => !value?.length;
   const validateGarmentType = ({ typeName }: GarmentType) => {
     return {
@@ -95,8 +94,10 @@ const GarmentTypeTable = ({
     };
 
   //call CREATE hook
-  const { mutateAsync: createGarmentType, isPending: isCreatingGarmentType } =
-    useCreateGarmentType(pagination, paginate);
+  const { mutateAsync: createGarmentType } = useCreateGarmentType(
+    pagination,
+    paginate,
+  );
 
   // UPDATE action
   const handleSaveGarmentType: MRT_TableOptions<GarmentType>["onEditingRowSave"] =
@@ -119,20 +120,26 @@ const GarmentTypeTable = ({
     };
 
   //call UPDATE hook
-  const { mutateAsync: updateGarmentType, isPending: isUpdatingCurrency } =
-    useUpdateGarmentType(pagination);
-
-  //DELETE action
-  const openDeleteConfirmModal = (row: MRT_Row<GarmentType>) => {
-    if (window.confirm("Are you sure you want to delete this Garment Type?")) {
-      deleteGarmentType(row.original.id);
-    }
-  };
+  const { mutateAsync: updateGarmentType } = useUpdateGarmentType(pagination);
 
   // call DELETE hook
-  const { mutateAsync: deleteGarmentType, isPending: isDeletingCurrency } =
+  const { mutateAsync: deleteGarmentType, isPending: isDeletingGarmentType } =
     useDeleteGarmentType(pagination);
   //
+
+  const openDeleteConfirmModal = (row: MRT_Row<GarmentType>) => {
+    setRowToDelete(row);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!rowToDelete) return;
+    await deleteGarmentType(rowToDelete.original.id);
+    setRowToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setRowToDelete(null);
+  };
 
   // Pagination
   const handlePaginationChange = (updater: unknown) => {
@@ -149,7 +156,7 @@ const GarmentTypeTable = ({
   };
   // end of Pagination
 
-  const table = useMaterialReactTable({
+  const table = useApparelProTable<GarmentType>({
     columns,
     data: data,
     initialState: { density: "compact" },
@@ -247,50 +254,6 @@ const GarmentTypeTable = ({
       }),
     },
 
-    renderCaption: () => {
-      return (isLoading && (
-        <div className="text1-red-600 flex justify-center border1-2 border1-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-          <div className="bg-gray-50 z-40 w-full h-full absolute top-5 left-10 opacity-90">
-            <div className="w-[85%] h-[70%] border-2 border1-red-400 p-20  m-auto">
-              <HourglassFullOutlinedIcon />
-              {/* <PendingOutlinedIcon />
-            <RefreshOutlinedIcon /> */}
-            </div>
-          </div>
-        </div>
-      )) ||
-        (isUpdatingCurrency && (
-          <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-            <div className="flex-col flex justify-center font-bold text-lg">
-              <div>Updating Supplier.....</div>
-            </div>
-          </div>
-        )) ||
-        (isCreatingGarmentType && (
-          <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-            <div className="flex-col flex justify-center font-bold text-lg">
-              <div>Creating new Supplier....</div>
-            </div>
-          </div>
-        )) ||
-        (isDeletingCurrency && (
-          <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-            <div className="flex-col flex justify-center">
-              <div>Deleting Supplier.....</div>
-            </div>
-          </div>
-        )) ||
-        (validationErrors && validationErrors.typeName) ? (
-        <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-          <div className="flex-col flex justify-center">
-            <div>{validationErrors.typeName}</div>
-          </div>
-        </div>
-      ) : (
-        ""
-      );
-    },
-
     renderTopToolbarCustomActions: ({ table }) => (
       <Button
         variant="contained"
@@ -318,7 +281,21 @@ const GarmentTypeTable = ({
     ),
   });
 
-  return <MaterialReactTable table={table} />;
+  return (
+    <>
+      <MaterialReactTable table={table} />
+      <ConfirmDialog
+        open={!!rowToDelete}
+        title="Delete Garment Type"
+        message={`Are you sure you want to delete "${rowToDelete?.original.typeName}"?`}
+        confirmLabel="Delete"
+        confirmColor="error"
+        isConfirming={isDeletingGarmentType}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
+    </>
+  );
 };
 
 export default GarmentTypeTable;

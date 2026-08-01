@@ -38,13 +38,12 @@ const ItemFeatureTable = ({
   data,
   itemsCount,
   isError,
-  isLoading,
   pagination,
   setPagination,
 }: Props) => {
-  const [validationErrors, setValidationErrors] = useState<
-    Record<string, string | undefined>
-  >({});
+  const [, setValidationErrors] = useState<Record<string, string | undefined>>(
+    {},
+  );
 
   const validationRequired = (value: string) => !value?.length;
   const validateItemFeature = ({ description, featureCode }: ItemFeature) => {
@@ -134,7 +133,6 @@ const ItemFeatureTable = ({
 
     enableExpandAll: false,
 
-    // pagination
     // Pagination configuration
     rowCount: itemsCount,
     manualPagination: true,
@@ -149,7 +147,6 @@ const ItemFeatureTable = ({
 
     enableEditing: true,
 
-    // 🚀 CHANGE THIS: Map directly to the incoming prop variables
     state: {
       pagination: pagination, // Uses the prop passed from Currencies.tsx
       showAlertBanner: isError,
@@ -164,7 +161,7 @@ const ItemFeatureTable = ({
       onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }),
     }),
 
-    muiTableBodyRowProps: ({ row, table }) => ({
+    muiTableBodyRowProps: ({ table }) => ({
       hover: !table.getState().editingRow,
       sx: {
         "& .MuiInputBase-input": {

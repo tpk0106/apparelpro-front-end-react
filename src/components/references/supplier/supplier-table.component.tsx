@@ -22,6 +22,7 @@ import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
 import BuyerAddresses from "../address-tanstack/buyer-address.component";
 import { useApparelProTable } from "../../../themes/useApparelProTable";
+import ConfirmDialog from "../../common/confirm-dialog";
 
 interface Props {
   columns: MRT_ColumnDef<Supplier>[];
@@ -48,6 +49,9 @@ const SupplierTable = ({
   >({});
 
   const [buyerCode, setBuyerCode] = useState<number>(null);
+  const [rowToDelete, setRowToDelete] = useState<MRT_Row<Supplier> | null>(
+    null,
+  );
   const validationRequired = (value: string) => !value?.length;
   const validateBuyer = ({ name }: Supplier) => {
     console.log("validation :", validationRequired(name));
@@ -59,7 +63,8 @@ const SupplierTable = ({
   // 1. Consume mutations cleanly
   const { mutateAsync: createSupplier } = useCreateSupplierMutation();
   const { mutateAsync: updateSupplier } = useUpdateSupplierMutation();
-  const { mutateAsync: deleteSupplier } = useDeleteSupplierMutation();
+  const { mutateAsync: deleteSupplier, isPending: isDeletingSupplier } =
+    useDeleteSupplierMutation();
 
   // 2. Your save hooks remain highly intuitive
   const handleCreateBuyer: MRT_TableOptions<Supplier>["onCreatingRowSave"] =
@@ -100,9 +105,17 @@ const SupplierTable = ({
 
   //DELETE action
   const openDeleteConfirmModal = (row: MRT_Row<Supplier>) => {
-    if (window.confirm("Are you sure you want to delete this Garment Type?")) {
-      deleteSupplier(row.original.supplierCode);
-    }
+    setRowToDelete(row);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!rowToDelete) return;
+    await deleteSupplier(rowToDelete.original.supplierCode);
+    setRowToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setRowToDelete(null);
   };
 
   //  CRUD Operations
@@ -236,7 +249,21 @@ const SupplierTable = ({
     },
   });
 
-  return <MaterialReactTable table={table} />;
+  return (
+    <>
+      <MaterialReactTable table={table} />
+      <ConfirmDialog
+        open={!!rowToDelete}
+        title="Delete Supplier"
+        message={`Are you sure you want to delete "${rowToDelete?.original.name}"?`}
+        confirmLabel="Delete"
+        confirmColor="error"
+        isConfirming={isDeletingSupplier}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
+    </>
+  );
 };
 
 export default SupplierTable;

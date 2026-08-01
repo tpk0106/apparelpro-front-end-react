@@ -1,25 +1,13 @@
 import { useState, useMemo } from "react";
 import type { MRT_ColumnDef, MRT_PaginationState } from "material-react-table";
-import {
-  DEFAULT_ADDREES_MAP,
-  type PaginationData,
-} from "../../../interfaces/definitions";
-import BasisTable from "./basis-table.component";
+import { Box, ThemeProvider, Typography } from "@mui/material";
 
+import { type PaginationData } from "../../../interfaces/definitions";
+import BasisTable from "./basis-table.component";
 // Import your new hooks
 import { useGetBasis } from "../../../tanstack-hooks/custom-hooks";
-
 import type { Basis } from "../../../interfaces/references/Basis";
-import {
-  Box,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-  ThemeProvider,
-  Typography,
-} from "@mui/material";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
-// import type { Currency } from "../../../interfaces/references/Currency";
 
 const Basises = () => {
   const [validationErrors, setValidationErrors] =
@@ -52,7 +40,6 @@ const Basises = () => {
   // Extract pure items, safely falling back to empty arrays
   const allBasises = BasisPageData?.items || [];
   const BasisesTotal = BasisPageData?.totalItems || 0;
-  // const currencies = currencyPageData?.items || [];
 
   const columns = useMemo<MRT_ColumnDef<Basis>[]>(
     () => [
@@ -115,6 +102,12 @@ const Basises = () => {
           required: true,
           error: !!validationErrors?.code,
           style: { textTransform: "uppercase" },
+          // Code is nvarchar(3) in the DB (BasisConfig.cs HasMaxLength(3)) -
+          // enforce the same limit here so the input can't be typed past it.
+          // NOTE: MUI v9 removed the legacy `inputProps` shorthand from
+          // TextField - it's silently ignored now. The current API is
+          // `slotProps.htmlInput`, which actually reaches the <input> element.
+          slotProps: { htmlInput: { maxLength: 3 } },
 
           onBlur: (event) => {
             const validationError = validationRequired(
@@ -136,10 +129,13 @@ const Basises = () => {
         enableColumnActions: false,
         enableSorting: false,
         enableColumnFilter: false,
+        editVariant: "select",
+        editSelectOptions: [
+          { label: "Yes", value: true },
+          { label: "No", value: false },
+        ],
         Cell: ({ cell }) => {
-          console.log("Radio button Values : ", cell.getValue());
           const value = cell.getValue() ? "Yes" : "No";
-          console.log("Radio button Values : ", value);
           return (
             <Box
               sx={{
@@ -154,109 +150,16 @@ const Basises = () => {
             </Box>
           );
         },
-        muiEditTextFieldProps: ({ cell }) => ({
+        muiEditTextFieldProps: {
           select: true,
-          required: true,
-          error: !!validationErrors?.default,
-          helperText: validationErrors?.default,
-
-          children: (
-            <Box>
-              <RadioGroup
-                row
-                // name={
-                //   cell.getValue() === DEFAULT_ADDREES_MAP["Yes"] ? "Yes" : "No"
-                // }
-                value={
-                  cell.getValue() === DEFAULT_ADDREES_MAP["Yes"] ? "Yes" : "No"
-                }
-                className="flex justify-around rounded-md"
-              >
-                <FormControlLabel
-                  value={"Yes"}
-                  control={<Radio />}
-                  label="Yes"
-                  className={"p-1"}
-                />
-                <FormControlLabel
-                  value={"No"}
-                  control={<Radio />}
-                  label="No"
-                  className={"p-1"}
-                />
-              </RadioGroup>
-            </Box>
-          ),
-
-          onChange: (event) => {
-            const rawRadioValue = event.target.value;
-
-            console.log("radio value :", rawRadioValue);
-            console.log("event value :", event.target.value);
-          },
-
-          // onChange: (event) => {
-          //   const rawRadioValue = cell.getValue(),
-          //   event.currentTarget?.value,
-          // },
-
-          onBlur: (event) => {
-            const validationError = validationRequired(
-              event.currentTarget?.value,
-            )
-              ? "required"
-              : undefined;
-            setValidationErrors({
-              ...validationErrors,
-              [cell.id]: validationError,
-            });
-          },
-        }),
+        },
       },
-      // {
-      //   accessorKey: "valueAdd",
-      //   header: "Value Add",
-      //   size: 100,
-      //   enableEditing: true,
-      //   enableSorting: false,
-
-      //   Cell: ({ renderedCellValue }) => (
-      //     <Box
-      //       sx={{
-      //         display: "flex",
-      //       }}
-      //     >
-      //       <span>{renderedCellValue?.toString().toUpperCase()}</span>
-      //     </Box>
-      //   ),
-
-      //   muiEditTextFieldProps: ({ cell }) => ({
-      //     type: "text",
-      //     required: true,
-      //     error: !!validationErrors?.valueAdd,
-      //     style: { textTransform: "uppercase" },
-
-      //     onBlur: (event) => {
-      //       const validationError = validationRequired(
-      //         event.currentTarget.value,
-      //       )
-      //         ? "required"
-      //         : undefined;
-      //       setValidationErrors({
-      //         ...validationErrors,
-      //         [cell.id]: validationError,
-      //       });
-      //     },
-      //   }),
-      // },
     ],
     [validationErrors],
   );
 
-  // ... keep your columns array layout exactly the same as before ...
-
   return (
-    <div className="flex flex-col w-[40%] mx-auto justify-around mt-10">
+    <div className="flex flex-col w-[50%] min-w-[700px] mx-auto justify-around mt-10">
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
           <Typography color="black">Basis</Typography>

@@ -137,6 +137,64 @@ const Banks = () => {
         }),
       },
       {
+        accessorKey: "swiftCode",
+        header: "Swift Code",
+        size: 120,
+        enableEditing: true,
+        enableSorting: false,
+
+        Cell: ({ renderedCellValue }) => (
+          <Box
+            sx={{
+              display: "flex",
+            }}
+          >
+            <span>{renderedCellValue?.toString().toUpperCase()}</span>
+          </Box>
+        ),
+
+        muiEditTextFieldProps: ({ cell }) => ({
+          type: "text",
+          required: true,
+          style: { textTransform: "uppercase" },
+          error: !!validationErrors?.swiftCode,
+          helperText: validationErrors?.swiftCode,
+
+          onBlur: (event) => {
+            const validationError = validationRequired(
+              event.currentTarget.value,
+            )
+              ? "required"
+              : undefined;
+            setValidationErrors({
+              ...validationErrors,
+              [cell.id]: validationError,
+            });
+          },
+        }),
+      },
+      {
+        accessorKey: "loanLimit",
+        header: "Loan Limit",
+        size: 120,
+        enableEditing: true,
+        enableSorting: false,
+
+        Cell: ({ renderedCellValue }) => (
+          <Box
+            sx={{
+              display: "flex",
+            }}
+          >
+            <span>{renderedCellValue}</span>
+          </Box>
+        ),
+
+        muiEditTextFieldProps: {
+          type: "number",
+        },
+      },
+      {
         accessorKey: "currencyCode",
         header: "Currency",
         size: 50,

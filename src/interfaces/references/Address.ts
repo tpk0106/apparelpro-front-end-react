@@ -12,4 +12,5 @@ export interface Address {
   addressType: AddressType;
   default: boolean;
   buyerCode: number;
+  bankCode?: string | null;
 }

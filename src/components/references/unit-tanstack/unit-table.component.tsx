@@ -20,6 +20,7 @@ import {
   useUpdateUnitMutation,
 } from "../../../tanstack-hooks/custom-hooks";
 import { useApparelProTable } from "../../../themes/useApparelProTable";
+import ConfirmDialog from "../../common/confirm-dialog";
 
 interface Props {
   columns: MRT_ColumnDef<Unit>[];
@@ -45,6 +46,8 @@ const UnitTable = ({
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
+
+  const [rowToDelete, setRowToDelete] = useState<MRT_Row<Unit> | null>(null);
 
   const validationRequired = (value: string) => !value?.length;
   const validateUnit = ({ description, code }: Unit) => {
@@ -103,9 +106,17 @@ const UnitTable = ({
 
   //DELETE action
   const openDeleteConfirmModal = (row: MRT_Row<Unit>) => {
-    if (window.confirm("Are you sure you want to delete this Garment Type?")) {
-      deleteUnit(row.original.id);
-    }
+    setRowToDelete(row);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!rowToDelete) return;
+    await deleteUnit(rowToDelete.original.code);
+    setRowToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setRowToDelete(null);
   };
 
   //  CRUD Operations
@@ -257,7 +268,21 @@ const UnitTable = ({
     ),
   });
 
-  return <MaterialReactTable table={table} />;
+  return (
+    <>
+      <MaterialReactTable table={table} />
+      <ConfirmDialog
+        open={!!rowToDelete}
+        title="Delete Unit"
+        message={`Are you sure you want to delete "${rowToDelete?.original.code}"?`}
+        confirmLabel="Delete"
+        confirmColor="error"
+        isConfirming={isDeletingUnit}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
+    </>
+  );
 };
 
 export default UnitTable;

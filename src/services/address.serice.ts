@@ -83,10 +83,66 @@ const updateBuyerAddress = async (
   );
 };
 
+const loadAllAddressesForBankCode = async (
+  bankCode: string,
+  data: PaginationData,
+) => {
+  return await client.get(
+    APPARELPRO_ENDPOINTS.REFERENCE_SECTION.ADDRESS.GET_BY_BANK_CODE,
+    {
+      params: {
+        bankCode: bankCode,
+        pageNumber: data.pageIndex,
+        pageSize: data.pageSize,
+        sortColumn: data.sortColumn,
+        sortOrder: data.sortOrder,
+        filterColumn: data.filterColumn,
+        filterQuery: data.filterQuery,
+      },
+    },
+  );
+};
+
+const createNewBankAddress = async (
+  createAddressAPIModel: CreateAddressAPIModel,
+) => {
+  return await client.post(
+    APPARELPRO_ENDPOINTS.REFERENCE_SECTION.ADDRESS.POST,
+    createAddressAPIModel,
+  );
+};
+
+// `id` is the Address row's own primary key (Address.Id), not the bank's
+// business code — matches the generic backend route [HttpDelete("{id}/{addressId}")].
+const removeBankAddress = async (id: number, addressId: string) => {
+  return await client.delete(
+    APPARELPRO_ENDPOINTS.REFERENCE_SECTION.ADDRESS.DELETE +
+      id +
+      "/" +
+      addressId,
+  );
+};
+
+const updateBankAddress = async (
+  bankCode: string,
+  addressId: string,
+  updateAddressAPIModel: Address,
+) => {
+  return await client.put(
+    APPARELPRO_ENDPOINTS.REFERENCE_SECTION.ADDRESS
+      .UPDATE_BY_BANK_CODE_AND_ADDRESS_ID + `/${bankCode}/${addressId}`,
+    updateAddressAPIModel,
+  );
+};
+
 export {
   loadAllAddressesForBuyerCode,
   updateAddress,
   createNewBuyerAddress,
   removeBuyerAddress,
   updateBuyerAddress,
+  loadAllAddressesForBankCode,
+  createNewBankAddress,
+  removeBankAddress,
+  updateBankAddress,
 };

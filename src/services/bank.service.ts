@@ -49,12 +49,9 @@ const createNewBank = async (newBank: Bank) => {
   );
 };
 
-const deleteBank = async (bankId: string) => {
+const deleteBank = async (code: string) => {
   return await client.delete(
-    APPARELPRO_ENDPOINTS.REFERENCE_SECTION.BANK.DELETE,
-    {
-      params: { bankId: bankId },
-    },
+    APPARELPRO_ENDPOINTS.REFERENCE_SECTION.BANK.DELETE + code,
   );
 };
 

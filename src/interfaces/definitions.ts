@@ -150,6 +150,7 @@ interface CreateAddressAPIModel {
   // country: string;
   default: boolean;
   buyerCode?: number;
+  bankCode?: string;
 }
 
 interface CreateCurrencyConversionAPIModel {

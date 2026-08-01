@@ -63,11 +63,6 @@ export const navbarData = [
         label: "Country wise Dest./Port",
         pinned: false,
       },
-      // {
-      //   routerLink: "garment-type",
-      //   icon: null,
-      //   label: "Garment Type",
-      // },
       {
         routerLink: "item-feature",
         icon: null,
@@ -80,12 +75,6 @@ export const navbarData = [
         label: "Order Item Feature",
         pinned: false,
       },
-      // {
-      //   routerLink: "style-details",
-      //   icon: null,
-      //   label: "Style Details",
-      //   pinned: true,
-      // },
     ],
     tag: "ordermanagementref",
   },
@@ -132,12 +121,6 @@ export const navbarData = [
         label: "Style-wise Events",
         pinned: false,
       },
-      // {
-      //   routerLink: "reports",
-      //   icon: "../assets/order-management/Order-Management.png",
-      //   label: "Reports",
-      //   pinned: false,
-      // },
     ],
     tag: "ordermanagement",
   },
