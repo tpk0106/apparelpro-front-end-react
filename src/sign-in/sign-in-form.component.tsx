@@ -4,6 +4,7 @@ import { z } from "zod";
 import {
   Box,
   Button,
+  CircularProgress,
   FormControl,
   IconButton,
   InputAdornment,
@@ -23,7 +24,7 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import { asideMenuTitleTypographyTheme } from "../themes/themes";
 import { useNavigate } from "react-router-dom";
 import { USER_CREDENTIALS } from "../interfaces/definitions";
-import { getCurrentUser } from "../sagaStore/user/user.selector";
+import { getCurrentUser, getIsLoading } from "../sagaStore/user/user.selector";
 
 const SignInForm = () => {
   const signInForm: LoginRequest = {
@@ -43,6 +44,7 @@ const SignInForm = () => {
   const dispatch = useDispatch();
   // Inside your actual Sign-In Form Page component (e.g., SignInPage.tsx)
   const currUser = useSelector(getCurrentUser);
+  const isLoading = useSelector(getIsLoading);
 
   useEffect(() => {
     dispatch(resetSignInState());
@@ -212,8 +214,12 @@ const SignInForm = () => {
               color="primary"
               type="submit"
               className="mt-8"
+              disabled={isLoading}
+              startIcon={
+                isLoading ? <CircularProgress size={18} color="inherit" /> : null
+              }
             >
-              Login
+              {isLoading ? "Logging in..." : "Login"}
             </Button>
           </FormControl>
         </Box>

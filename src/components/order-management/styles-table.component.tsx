@@ -210,8 +210,17 @@ const StyleTable = ({
 
     try {
       setValidationErrors({});
-      // Keep the existing primary database key ID intact
-      const payload = { ...values, id: row.original.id };
+      // Inject only the specific fields the edit form doesn't expose as columns
+      // (order, buyerCode) -- NOT the whole row. row.original.orderDate doesn't
+      // match the strict yyyy-MM-dd shape the backend's non-nullable `DateOnly`
+      // OrderDate property expects, and spreading it in fails deserialization of
+      // the entire request body (OrderDate isn't even read by this endpoint).
+      const payload = {
+        ...values,
+        id: row.original.id,
+        buyerCode: row.original.buyerCode,
+        order: row.original.order,
+      };
 
       const updateStylePayload: UpdateStylePayload = {
         styleCode: payload.styleCode,

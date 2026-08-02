@@ -1,4 +1,4 @@
-﻿import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosResponse } from "axios";
 
 import type {
@@ -79,12 +79,14 @@ import {
 } from "../services/basis.service";
 import type { Basis } from "../interfaces/references/Basis";
 import type { Style } from "../interfaces/OrderManagement/Style";
+import type { StyleTotals } from "../interfaces/OrderManagement/StyleTotals";
 import {
   createNewStyle,
   deleteStyle,
   loadStyles,
   loadStylesByScope,
   loadStylesByBuyerOrder,
+  loadStyleTotals,
   updateEditStyle,
 } from "../services/style.service";
 import type PurchaseOrder from "../interfaces/OrderManagement/PurchaseOrder";
@@ -259,6 +261,9 @@ export const useDeleteCurrencyMutation = () => {
       queryClient.invalidateQueries({ queryKey: ["currencies"] });
       toast.success("Currency deleted successfully");
     },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
+    },
   });
 };
 
@@ -348,6 +353,9 @@ export const useDeleteBankMutation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["banks"] });
       toast.success("Bank deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
     },
   });
 };
@@ -565,11 +573,14 @@ export const useDeleteBuyerMutation = () => {
 
   return useMutation<void, Error, number>({
     mutationFn: async (buyerCode: number) => {
-      removeBuyer(buyerCode);
+      await removeBuyer(buyerCode);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["buyers"] });
       toast.success("Buyer deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
     },
   });
 };
@@ -634,11 +645,14 @@ export const useDeleteSupplierMutation = () => {
 
   return useMutation<void, Error, number>({
     mutationFn: async (supplierCode: number) => {
-      removeSupplier(supplierCode);
+      await removeSupplier(supplierCode);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["suppliers"] });
       toast.success("Supplier deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
     },
   });
 };
@@ -744,6 +758,9 @@ export const useDeleteBuyerAddressMutation = () => {
       queryClient.invalidateQueries({ queryKey: ["buyers"] });
       // Note: You might want to update this text to "Address deleted successfully"
       toast.success("Buyer deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
     },
   });
 };
@@ -1026,6 +1043,8 @@ export const useCreateStyleMutation = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["styles"] });
+      // Keep the Order Confirmation Styles grid's live "TOTAL" header in sync
+      queryClient.invalidateQueries({ queryKey: ["styleTotals"] });
       toast.success("Style created successfully");
     },
     onError: (error) => {
@@ -1047,6 +1066,8 @@ export const useUpdateStyleMutation = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["styles"] });
+      // Keep the Order Confirmation Styles grid's live "TOTAL" header in sync
+      queryClient.invalidateQueries({ queryKey: ["styleTotals"] });
       toast.success("Style updated successfully");
     },
     onError: (error) => {
@@ -1069,9 +1090,33 @@ export const useDeleteStyleMutation = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["styles"] });
-      // Note: You might want to update this text to "Address deleted successfully"
-      toast.success("Buyer deleted successfully");
+      // Keep the Order Confirmation Styles grid's live "TOTAL" header in sync
+      queryClient.invalidateQueries({ queryKey: ["styleTotals"] });
+      toast.success("Style deleted successfully");
     },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
+    },
+  });
+};
+
+// Live running total for the Order Confirmation Styles grid header - see
+// loadStyleTotals in style.service.ts / GetStyleTotalsAsync on the backend.
+export const useGetStyleTotalsQuery = (
+  buyerCode: number,
+  order: string,
+  enabled: boolean,
+) => {
+  return useQuery<StyleTotals, Error>({
+    queryKey: ["styleTotals", buyerCode, order],
+    queryFn: async () => {
+      const response: AxiosResponse<StyleTotals> = await loadStyleTotals(
+        buyerCode,
+        order,
+      );
+      return response.data;
+    },
+    enabled,
   });
 };
 
@@ -1145,6 +1190,11 @@ import {
   updateEditItemFeature,
 } from "../services/item-feature.service";
 // Path to your client file
+import type { SystemParameter } from "../interfaces/system-configuration/SystemParameter";
+import {
+  loadSystemParameters,
+  updateSystemParameter,
+} from "../services/system-parameter.service";
 
 export const useCreateColorSizeBreakdownDetailsMutation = () => {
   const queryClient = useQueryClient();
@@ -1171,6 +1221,40 @@ export const useCreateColorSizeBreakdownDetailsMutation = () => {
       // You now have Intellisense autocompletion here!
       // 'error.message' automatically holds clean strings like "Matrix data payload can not be empty."
       toast.error(`Creation failed: ${error.message}`);
+    },
+  });
+};
+
+// system parameters (Settings screen)
+
+export const useGetSystemParametersQuery = () => {
+  return useQuery<SystemParameter[], Error>({
+    queryKey: ["systemParameters"],
+    queryFn: async () => {
+      const response: AxiosResponse<SystemParameter[]> =
+        await loadSystemParameters();
+      return response.data;
+    },
+  });
+};
+
+export const useUpdateSystemParameterMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    void,
+    Error,
+    { parameterKey: string; value: string }
+  >({
+    mutationFn: async ({ parameterKey, value }) => {
+      await updateSystemParameter(parameterKey, value);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["systemParameters"] });
+      toast.success("Setting updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Update failed: ${error.message}`);
     },
   });
 };

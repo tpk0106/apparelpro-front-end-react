@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Backdrop,
   Box,
   Button,
@@ -17,6 +18,7 @@ import { format, isValid, parse, parseISO } from "date-fns";
 
 import {
   useCreateOrderMutation,
+  useGetAllPurchaseOrdersByBuyerCode,
   useGetBasis,
   useGetBuyersQuery,
   useGetCountriesQuery,
@@ -50,6 +52,30 @@ const poSchema = z.object({
 });
 
 type PoFormData = z.infer<typeof poSchema>;
+
+// Shared label styling for every SelectList on this form, so its label
+// behaves the same way (muted -> filled/blue -> focused/indigo) as the
+// plain TextFields already do via the app's theme - scoped to just this
+// form via SelectList's optional labelSx prop, not a global change.
+const selectLabelSx = {
+  color: "#8B93A1",
+  "&.MuiInputLabel-shrink": { color: "#005B96", fontWeight: 600 },
+  "&.Mui-focused": { color: "#6366F1" },
+};
+
+// Dropdown popup styling for every SelectList on this form, matching the
+// Order field's Autocomplete dropdown (#0D1117) so every dropdown on this
+// screen looks consistent -- passed via SelectList's optional menuSx/
+// menuItemSx props, which default to the component's original white/black
+// styling everywhere else it's used (e.g. the sign-up form).
+const selectMenuSx = {
+  backgroundColor: "#0D1117",
+  color: "#F4F6F8",
+};
+const selectMenuItemSx = {
+  color: "#F4F6F8",
+  "&:hover": { backgroundColor: "rgba(139, 147, 161, 0.12)", color: "#F4F6F8" },
+};
 
 // Explicitly pass the schema type
 // const treeErrors = z.treeifyError<typeof poSchema>(error);
@@ -189,6 +215,19 @@ const OrderConfirmationRoutine = () => {
     [garmentTypesPageData?.items],
   );
 
+  // Buyer's existing order numbers, for the searchable "PO number" combo below.
+  // Backend already returns the buyer's distinct order numbers -- this hook existed but
+  // was never wired into this screen (see custom-hooks.ts).
+  const { data: buyerOrdersData, isFetching: isFetchingBuyerOrders } =
+    useGetAllPurchaseOrdersByBuyerCode(
+      poFormData.buyerCode,
+      poFormData.buyerCode > 0,
+    );
+  const orderOptions = useMemo(
+    () => buyerOrdersData ?? [],
+    [buyerOrdersData],
+  );
+
   // 4. Fetch Existing Order Configuration
   // Only query the API if both keys are filled. Stops network layout spamming.
   // 2. Fetch Existing Order Configuration safely
@@ -235,13 +274,28 @@ const OrderConfirmationRoutine = () => {
           ? format(parsedDate, "yyyy-MM-dd")
           : format(new Date(), "yyyy-MM-dd");
 
-        return {
+        const updatedState = {
           ...prev,
           ...existingPO,
           orderDate: finalStringDate,
           //   description: existingPO.description ?? "",
+          // Legacy Clipper DBF CHAR-field data can carry trailing/leading whitespace that
+          // the newer reference-data tables (Currency/Unit/Basis codes) don't have --
+          // trimming here means a stray space doesn't break the SelectList's exact string
+          // match against its options and leave the control looking empty.
+          countryCode: (existingPO.countryCode ?? "").trim(),
+          currencyCode: (existingPO.currencyCode ?? "").trim(),
+          unitCode: (existingPO.unitCode ?? "").trim(),
+          basisCode: (existingPO.basisCode ?? "").trim(),
           season: existingPO.season ?? "",
         };
+        // Re-validate now that fields that were blank when Buyer/Order were first
+        // selected (garmentType, countryCode, currencyCode, unitCode, basisCode, ...)
+        // are populated from the loaded order -- otherwise the "Please select X"
+        // messages from that earlier, still-blank validation pass linger on screen
+        // even though the fields are now correctly filled in.
+        setErrors(validateForm(updatedState));
+        return updatedState;
       });
     }, 0);
 
@@ -285,8 +339,25 @@ const OrderConfirmationRoutine = () => {
       name === "buyerCode" || name === "garmentType" ? Number(value) : value;
 
     setPoFormData((prev) => {
-      const updatedState = { ...prev, [name]: parsedValue };
+      // Switching buyers invalidates whatever order/order-details are on screen -- the
+      // order list and its details are buyer-scoped, so carrying over a previous buyer's
+      // order number here would either mis-lookup or silently mix data between buyers.
+      // Reset everything else back to a blank "new order" state.
+      const updatedState =
+        name === "buyerCode"
+          ? { ...orderFormData, buyerCode: parsedValue as number }
+          : { ...prev, [name]: parsedValue };
       setErrors(validateForm(updatedState)); // Validate in step with latest state payload
+      return updatedState;
+    });
+  };
+
+  // 5b. Order combo handler (Autocomplete freeSolo -- both typing and picking an
+  // existing option from the buyer's order list funnel through here)
+  const handleOrderChange = (newValue: string) => {
+    setPoFormData((prev) => {
+      const updatedState = { ...prev, order: newValue };
+      setErrors(validateForm(updatedState));
       return updatedState;
     });
   };
@@ -387,7 +458,7 @@ const OrderConfirmationRoutine = () => {
                 className="flex flex-col gap-4"
               >
                 <div className="flex w-full justify-around p-0 m-0">
-                  <div className="w-[30%] mt-2">
+                  <div className="w-[30%] mt-1">
                     <FormControl fullWidth error>
                       <SelectList
                         data={buyers}
@@ -397,6 +468,10 @@ const OrderConfirmationRoutine = () => {
                         labelKey="name"
                         valueKey="buyerCode"
                         handleSelectedChange={handleSelectedChange}
+                        size="small"
+                        labelSx={selectLabelSx}
+                        menuSx={selectMenuSx}
+                        menuItemSx={selectMenuItemSx}
                       />
                       {errors.buyerCode && (
                         <div className="text-red-500 text-[.7em] mt-1">
@@ -409,15 +484,41 @@ const OrderConfirmationRoutine = () => {
                       />
                     </FormControl>
                   </div>
-                  <div className="w-[30%]">
-                    <TextField
-                      name="order"
-                      label="PO number"
-                      margin="normal"
-                      size="small"
+                  <div className="w-[30%] mt-1">
+                    <Autocomplete
+                      freeSolo
+                      disabled={!poFormData.buyerCode}
+                      loading={isFetchingBuyerOrders}
+                      options={orderOptions}
                       value={poFormData.order}
-                      onChange={handleChange}
-                      className="w-[95%]"
+                      inputValue={poFormData.order}
+                      onChange={(_, newValue) =>
+                        handleOrderChange(newValue ?? "")
+                      }
+                      onInputChange={(_, newValue) =>
+                        handleOrderChange(newValue)
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          name="order"
+                          label="PO number"
+                          margin="dense"
+                          size="small"
+                          autoComplete="off"
+                          className="w-[95%]"
+                          helperText={
+                            !poFormData.buyerCode
+                              ? "Select a buyer first"
+                              : poFormData.order &&
+                                  orderOptions.includes(poFormData.order)
+                                ? "Existing order"
+                                : poFormData.order
+                                  ? "New order"
+                                  : undefined
+                          }
+                        />
+                      )}
                     />
                     {errors.order && (
                       <div className="text-red-500 text-[.7em] mt-1">
@@ -426,7 +527,7 @@ const OrderConfirmationRoutine = () => {
                     )}
                     <ValidationErrorDisplay error={error} fieldName="order" />
                   </div>
-                  <div className="w-[30%]">
+                  <div className="w-[30%] mt-1">
                     <FormControl fullWidth error>
                       <SelectList
                         data={garmentTypes}
@@ -436,6 +537,10 @@ const OrderConfirmationRoutine = () => {
                         labelKey="typeName"
                         valueKey="id"
                         handleSelectedChange={handleSelectedChange}
+                        size="small"
+                        labelSx={selectLabelSx}
+                        menuSx={selectMenuSx}
+                        menuItemSx={selectMenuItemSx}
                       />
                       {errors.buyerCode && (
                         <div className="text-red-500 text-[.7em] mt-1">
@@ -461,7 +566,7 @@ const OrderConfirmationRoutine = () => {
                     />
                   </div> */}
 
-                  <div className="flex w-[30%] mt-2">
+                  <div className="flex w-[30%] mt-1">
                     <FormControl fullWidth>
                       <SelectList
                         data={countries}
@@ -471,6 +576,10 @@ const OrderConfirmationRoutine = () => {
                         labelKey="name"
                         valueKey="code"
                         handleSelectedChange={handleSelectedChange}
+                        size="small"
+                        labelSx={selectLabelSx}
+                        menuSx={selectMenuSx}
+                        menuItemSx={selectMenuItemSx}
                       />
                       {errors.countryCode && (
                         <div className="text-red-500 text-[.7em] mt-1">
@@ -479,7 +588,7 @@ const OrderConfirmationRoutine = () => {
                       )}
                     </FormControl>
                   </div>
-                  <div className="w-[30%] mt-2">
+                  <div className="w-[30%] mt-1">
                     <FormControl fullWidth>
                       <SelectList
                         data={units}
@@ -489,6 +598,10 @@ const OrderConfirmationRoutine = () => {
                         labelKey="description"
                         valueKey="code"
                         handleSelectedChange={handleSelectedChange}
+                        size="small"
+                        labelSx={selectLabelSx}
+                        menuSx={selectMenuSx}
+                        menuItemSx={selectMenuItemSx}
                       />
                       {errors.unitCode && (
                         <div className="text-red-500 text-[.7em] mt-1">
@@ -500,22 +613,22 @@ const OrderConfirmationRoutine = () => {
                 </div>
 
                 <div className="flex w-full justify-around p-0 m-0 border1-4 border1-red-600">
-                  <div className="w-[45%] mt-2">
+                  <div className="w-[45%] mt-1">
                     <TextField
                       name="totalQuantity"
                       label="Total Quantity"
-                      margin="normal"
+                      margin="dense"
                       size="small"
                       value={poFormData.totalQuantity || ""}
                       onChange={handleChange}
                     />
                   </div>
-                  <div className="w-[45%] mt-2">
+                  <div className="w-[45%] mt-1">
                     <TextField
                       fullWidth
                       name="orderDate"
                       label="Order Date"
-                      margin="normal"
+                      margin="dense"
                       size="small"
                       type="date"
                       value={poFormData.orderDate}
@@ -530,18 +643,19 @@ const OrderConfirmationRoutine = () => {
                 </div>
 
                 <div className="flex w-full justify-around p-0 m-0 border1-4 border1-red-600">
-                  <div className="w-[30%]">
+                  <div className="w-[30%] mt-1">
                     <TextField
                       fullWidth
                       name="season"
                       label="Season"
-                      margin="normal"
+                      margin="dense"
                       size="small"
+                      autoComplete="off"
                       value={poFormData.season}
                       onChange={handleChange}
                     />
                   </div>
-                  <div className="w-[30%] mt-2">
+                  <div className="w-[30%] mt-1">
                     <FormControl fullWidth>
                       <SelectList
                         data={currencies}
@@ -551,6 +665,10 @@ const OrderConfirmationRoutine = () => {
                         labelKey="name"
                         valueKey="code"
                         handleSelectedChange={handleSelectedChange}
+                        size="small"
+                        labelSx={selectLabelSx}
+                        menuSx={selectMenuSx}
+                        menuItemSx={selectMenuItemSx}
                       />
                       {errors.currencyCode && (
                         <div className="text-red-500 text-[.7em] mt-1">
@@ -559,7 +677,7 @@ const OrderConfirmationRoutine = () => {
                       )}
                     </FormControl>
                   </div>
-                  <div className="w-[30%] mt-2">
+                  <div className="w-[30%] mt-1">
                     <FormControl fullWidth>
                       <SelectList
                         data={basises}
@@ -569,6 +687,10 @@ const OrderConfirmationRoutine = () => {
                         labelKey="description"
                         valueKey="code"
                         handleSelectedChange={handleSelectedChange}
+                        size="small"
+                        labelSx={selectLabelSx}
+                        menuSx={selectMenuSx}
+                        menuItemSx={selectMenuItemSx}
                       />
                       {errors.basisCode && (
                         <div className="text-red-500 text-[.7em] mt-1">

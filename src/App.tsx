@@ -35,6 +35,7 @@ import StockMovementReportWorkspace from "./components/orderwise-inventory/stock
 import StrnPrintReportWorkspace from "./components/reports-orderwise-inventory/strn-print-report-workspace";
 import Suppliers from "./components/references/supplier/supplier.component";
 import ItemFeatures from "./components/references/item-feature/item-feature.component";
+import SettingsPage from "./components/settings/settings.component";
 
 function App() {
   const location = useLocation();
@@ -108,6 +109,7 @@ function App() {
           element={<StockMovementReportWorkspace />}
         />
         <Route index path="strn-print" element={<StrnPrintReportWorkspace />} />
+        <Route index path="settings" element={<SettingsPage />} />
       </Route>
     </Routes>
   );

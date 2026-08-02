@@ -4,6 +4,8 @@ import {
   Select,
   MenuItem,
   type SelectChangeEvent,
+  type SxProps,
+  type Theme,
 } from "@mui/material";
 
 type SelectListProps<T> = {
@@ -15,6 +17,16 @@ type SelectListProps<T> = {
   labelKey: keyof T;
   valueKey: keyof T;
   handleSelectedChange: (event: SelectChangeEvent<string>) => void;
+  // Optional - defaults preserve existing behavior everywhere this component
+  // is already used, so only screens that opt in are affected.
+  size?: "small" | "medium";
+  labelSx?: SxProps<Theme>;
+  // Optional overrides for the dropdown popup's background and each option's
+  // text/hover colors. Both default to the component's original white/black
+  // styling below, so the sign-up form (the only other screen using
+  // SelectList, on a light theme) sees zero visual change unless it opts in.
+  menuSx?: SxProps<Theme>;
+  menuItemSx?: SxProps<Theme>;
 };
 
 const SelectList = <T,>({
@@ -26,11 +38,15 @@ const SelectList = <T,>({
   valueKey,
   disabled,
   handleSelectedChange,
+  size,
+  labelSx,
+  menuSx,
+  menuItemSx,
 }: SelectListProps<T>) => {
   return (
-    <FormControl fullWidth variant="outlined" sx={{ mb: 0 }}>
+    <FormControl fullWidth variant="outlined" size={size} sx={{ mb: 0 }}>
       {/* The Label component that sits on the border */}
-      <InputLabel id={`${name}-label`} sx={{ color: "gray" }}>
+      <InputLabel id={`${name}-label`} sx={labelSx ?? { color: "gray" }}>
         {label}
       </InputLabel>
 
@@ -38,10 +54,20 @@ const SelectList = <T,>({
         labelId={`${name}-label`}
         id={name}
         name={name}
-        value={value || ""}
+        // MUI matches the Select's `value` against each MenuItem's `value` with strict
+        // equality. MenuItem values here are always stringified (see itemValue below), so
+        // the Select's own value must be normalized to a string too -- otherwise a numeric
+        // `value` (e.g. Garment Type's id) never matches its own stringified MenuItem and
+        // the control renders as empty even though the underlying data is set correctly.
+        value={
+          value === undefined || value === null || value === ""
+            ? ""
+            : String(value)
+        }
         onChange={handleSelectedChange}
         label={label} // CRITICAL: This carves out the gap in the border
         disabled={disabled}
+        size={size}
         sx={{
           backgroundColor: "white",
           color: "black", // Ensures selected text is visible
@@ -58,6 +84,7 @@ const SelectList = <T,>({
               sx: {
                 backgroundColor: "white",
                 color: "black",
+                ...menuSx,
               },
             },
           },
@@ -75,6 +102,7 @@ const SelectList = <T,>({
                 sx={{
                   color: "black", // Force text color to black
                   "&:hover": { backgroundColor: "#3b82f6", color: "white" },
+                  ...menuItemSx,
                 }}
               >
                 {itemLabel}

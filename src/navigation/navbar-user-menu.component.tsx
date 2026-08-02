@@ -23,6 +23,7 @@ import {
   getCurrentUser,
   getCurrentUserDetails,
 } from "../sagaStore/user/user.selector";
+import { isAdministrator } from "../auth/jwt.util";
 
 const NavBarUserMenu = () => {
   const navigate = useNavigate();
@@ -30,6 +31,11 @@ const NavBarUserMenu = () => {
 
   const updatingProfileUserEmail = useSelector(getCurrentUser);
   const userDetails = useSelector(getCurrentUserDetails);
+
+  // Settings is Administrator-only - hidden from the menu entirely for every
+  // other role. Computed fresh on each render (not memoized/stateful) so it
+  // automatically reflects whichever token is current after a login/logout.
+  const isAdmin = isAdministrator();
 
   // 🚀 2. Create a silent mutable ref flag (starts as false)
   const shouldRedirectRef = useRef(false);
@@ -67,6 +73,10 @@ const NavBarUserMenu = () => {
     }
   }
 
+  function handleOpenSettings(event: React.MouseEvent<HTMLElement>): void {
+    navigate("/settings");
+  }
+
   function handleLogout(event: React.MouseEvent<HTMLElement>): void {
     dispatch(signOutStart());
     navigate("/sign-in");
@@ -86,7 +96,14 @@ const NavBarUserMenu = () => {
               <Menu.Item className={styles.MenuItem} onClick={handleUpdateUser}>
                 Update
               </Menu.Item>
-              <Menu.Item className={styles.MenuItem}>Settings</Menu.Item>
+              {isAdmin && (
+                <Menu.Item
+                  className={styles.MenuItem}
+                  onClick={handleOpenSettings}
+                >
+                  Settings
+                </Menu.Item>
+              )}
               <Menu.Item className={styles.MenuItem}>Favorites</Menu.Item>
               <Menu.Separator className={styles.MenuSeparator} />
               <Menu.Item className={styles.MenuItem} onClick={handleLogout}>

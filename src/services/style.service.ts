@@ -2,6 +2,7 @@ import { APPARELPRO_ENDPOINTS } from "../api/api-configurations";
 import { client } from "../auth/axiosClient";
 import type { PaginationData } from "../interfaces/definitions";
 import type { Style } from "../interfaces/OrderManagement/Style";
+import type { StyleTotals } from "../interfaces/OrderManagement/StyleTotals";
 import type { PaginationAPIModel } from "../interfaces/references/ApiResult";
 
 const loadStylesByScope = async (params: {
@@ -72,6 +73,18 @@ const deleteStyle = async (styleCode: string) => {
   );
 };
 
+// Live running total for the Order Confirmation Styles grid header (see
+// GetStyleTotalsAsync on the backend - sum of every style's quantity,
+// converted into the order's unit, plus the order's own Total Quantity).
+const loadStyleTotals = async (buyerCode: number, order: string) => {
+  return await client.get<StyleTotals>(
+    APPARELPRO_ENDPOINTS.ORDER_MANAGEMENT.STYLE_DETAILS.GET_STYLE_TOTALS,
+    {
+      params: { buyerCode, order },
+    },
+  );
+};
+
 const updateEditStyle = async (styleCode: string, existingStyle: Style) => {
   return await client.put(
     APPARELPRO_ENDPOINTS.ORDER_MANAGEMENT.STYLE_DETAILS.PUT,
@@ -87,6 +100,7 @@ export {
   loadStyles,
   loadStylesByScope,
   loadStylesByBuyerOrder,
+  loadStyleTotals,
   createNewStyle,
   updateEditStyle,
   deleteStyle,

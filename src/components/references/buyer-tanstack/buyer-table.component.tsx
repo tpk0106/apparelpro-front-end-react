@@ -8,13 +8,12 @@ import {
 import type { Buyer } from "../../../interfaces/references/Buyer";
 import {
   MaterialReactTable,
-  useMaterialReactTable,
   type MRT_ColumnDef,
   type MRT_PaginationState,
   type MRT_Row,
   type MRT_TableOptions,
 } from "material-react-table";
-import { Box, Button, darken, IconButton, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import type { PaginationData } from "../../../interfaces/definitions";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
@@ -38,13 +37,12 @@ const BuyerTable = ({
   data,
   itemsCount,
   isError,
-  isLoading,
   pagination,
   setPagination,
 }: Props) => {
-  const [validationErrors, setValidationErrors] = useState<
-    Record<string, string | undefined>
-  >({});
+  const [, setValidationErrors] = useState<Record<string, string | undefined>>(
+    {},
+  );
 
   const [buyerCode, setBuyerCode] = useState<number>(null);
   const [rowToDelete, setRowToDelete] = useState<MRT_Row<Buyer> | null>(null);
@@ -57,10 +55,8 @@ const BuyerTable = ({
   };
 
   // 1. Consume mutations cleanly
-  const { mutateAsync: createBuyer, isPending: isCreatingBuyer } =
-    useCreateBuyerMutation();
-  const { mutateAsync: updateBuyer, isPending: isUpdatingBuyer } =
-    useUpdateBuyerMutation();
+  const { mutateAsync: createBuyer } = useCreateBuyerMutation();
+  const { mutateAsync: updateBuyer } = useUpdateBuyerMutation();
   const { mutateAsync: deleteBuyer, isPending: isDeletingBuyer } =
     useDeleteBuyerMutation();
 
@@ -142,7 +138,6 @@ const BuyerTable = ({
 
     enableExpandAll: false,
 
-    // pagination
     // Pagination configuration
     rowCount: itemsCount,
     manualPagination: true,
@@ -168,7 +163,7 @@ const BuyerTable = ({
     onEditingRowCancel: () => setValidationErrors({}),
     onEditingRowSave: handleSaveBuyer,
 
-    muiTableBodyRowProps: ({ row, table }) => ({
+    muiTableBodyRowProps: ({ table }) => ({
       hover: !table.getState().editingRow,
       sx: {
         "& .MuiInputBase-input": {
@@ -177,122 +172,6 @@ const BuyerTable = ({
         },
       },
     }),
-
-    // muiExpandButtonProps: ({ row, table }) => ({
-    //   onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }),
-    // }),
-
-    // muiTopToolbarProps: {
-    //   sx: () => ({
-    //     backgroundColor: "rgb(96 165 250)",
-    //     boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
-    //   }),
-    // },
-
-    // // Cell styling
-    // muiTableHeadCellProps: {
-    //   sx: {
-    //     fontSize: "0.8rem",
-    //     fontWeight: "600",
-    //     backgroundColor: "#fff",
-    //     // color: "#42a5f5",
-    //     // color: "#000",
-    //     boxShadow: "0 -5px 3px -3px black, 0 5px 3px -3px ",
-    //   },
-    // },
-
-    // // table body
-    // muiTableBodyProps: {
-    //   sx: {
-    //     fontSize: "0.5rem",
-    //   },
-    // },
-
-    // muiTableBodyRowProps: ({ row, table }) => ({
-    //   hover: !table.getState().editingRow,
-    //   sx: {
-    //     opacity:
-    //       !table.getState().editingRow ||
-    //       table.getState().editingRow?.id === row.id ||
-    //       table.getState().creatingRow
-    //         ? 1
-    //         : 0.4,
-    //     backgroundColor:
-    //       Number(row?.id) % 2 === 0 ||
-    //       table.getState().editingRow?.id === row.id
-    //         ? darken("#4B9CD3", 0)
-    //         : darken("#7CB9E8", 0),
-    //     "&:hover td": {
-    //       borderTop: "1px solid #fff",
-    //       borderBottom: "1px solid #fff",
-    //       // color: "#4B9CD3",
-    //       color: "#ffffff",
-    //       backgroundColor:
-    //         table.getState().editingRow?.id === row.id ||
-    //         table.getState().creatingRow
-    //           ? "#fff"
-    //           : "#7CB9E8",
-    //     },
-    //   },
-    // }),
-
-    // muiTableFooterRowProps: {
-    //   sx: () => ({
-    //     backgroundColor: "rgb(96 165 250)",
-    //     boxShadow: "0px 0px 20px rgba(0,0,0,.5)",
-    //     boder: "5px solid red",
-    //   }),
-    // },
-
-    // renderCaption: () => {
-    //   return (isLoading && (
-    //     <div className="text1-red-600 flex justify-center border1-2 border1-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-    //       <div className="bg-gray-50 z-40 w-full h-full absolute top-5 left-10 opacity-90">
-    //         <div className="w-[85%] h-[70%] border-2 border1-red-400 p-20  m-auto">
-    //           {/* <HourglassFullOutlinedIcon /> */}
-    //           {/* <PendingOutlinedIcon />
-    //         <RefreshOutlinedIcon /> */}
-    //         </div>
-    //       </div>
-    //     </div>
-    //   )) ||
-    //     (isUpdatingBuyer && (
-    //       <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-    //         <div className="flex-col flex justify-center font-bold text-lg">
-    //           <div>Updating Supplier.....</div>
-    //         </div>
-    //       </div>
-    //     )) ||
-    //     (isCreatingBuyer && (
-    //       <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-    //         <div className="flex-col flex justify-center font-bold text-lg">
-    //           <div>Creating new Supplier....</div>
-    //         </div>
-    //       </div>
-    //     )) ||
-    //     (isDeletingBuyer && (
-    //       <div className="text-red-600 flex justify-center border-2 border-red-200 bg-red-50 w-[90%] m-auto h-auto align-middle rounded-md ">
-    //         <div className="flex-col flex justify-center">
-    //           <div>Deleting Supplier.....</div>
-    //         </div>
-    //       </div>
-    //     )) ||
-    //     validationErrors ? (
-    //     <div className="text-red-600 flex justify-center border1-2 border1-red-200 bg1-red-300 w-[90%] m-auto h-auto align-middle rounded1-md ">
-    //       <div className="flex-col flex justify-center">
-    //         <div>
-    //           {validationErrors.name
-    //             ? validationErrors.name
-    //             : validationErrors.code
-    //               ? validationErrors.code
-    //               : validationErrors?.countryCode}
-    //         </div>
-    //       </div>
-    //     </div>
-    //   ) : (
-    //     ""
-    //   );
-    // },
 
     renderTopToolbarCustomActions: ({ table }) => (
       <Button
@@ -359,15 +238,6 @@ const BuyerTable = ({
             }}
           >
             <BuyerAddresses buyerCode={row.original.buyerCode} />
-            {/* <BuyerAddresses
-                      data={addresses}
-                      columns={}
-              addressId={addressId}
-              paginate={paginate}
-              pagination={pagination}
-              currentBuyerPageNumber={pagination.pageIndex}
-              currentBuyerPageSize={pagination.pageSize}
-            /> */}
           </Box>
         </>
       );

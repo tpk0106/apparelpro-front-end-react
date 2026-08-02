@@ -137,6 +137,15 @@ export const APPARELPRO_ENDPOINTS = {
       PUT: "api/portDestination/",
       PATCH: "api/portDestination",
     },
+    ITEM_FEATURE: {
+      GET: "api/item-feature/list",
+      GET_BY_PAGINATION: "api/item-feature/list",
+      DOES_UNIT_EXIST: "api/item-feature/list/does-unit-exist/",
+      POST: "api/item-feature",
+      DELETE: "api/item-feature/",
+      PUT: "api/item-feature",
+      PATCH: "api/item-feature",
+    },
   },
   REGISTRATION: {
     USER: {
@@ -170,6 +179,7 @@ export const APPARELPRO_ENDPOINTS = {
         "api/styleDetails/list/styles",
       DOES_STYLE_EXIST: "api/styleDetails/list/does-style-exist/",
       GETBY_PONO: "api/styleDetails/list/",
+      GET_STYLE_TOTALS: "api/styleDetails/list/buyer/order/totals",
       POST: "api/styleDetails",
       DELETE: "api/styleDetails/",
       PUT: "api/styleDetails/",
@@ -216,10 +226,36 @@ export const APPARELPRO_ENDPOINTS = {
       COMMIT: "api/orderwise-inventory-grn/commit",
       PENDING_POS: "api/orderwise-inventory-grn/pending-pos",
     },
+    RTN: {
+      RETURNABLE_STOCK: "api/orderwise-inventory-rtn/returnable-stock",
+      COMMIT: "api/orderwise-inventory-rtn/commit",
+    },
+    GTN: {
+      TRANSFERABLE_STOCK: "api/orderwise-inventory-gtn/transferable-stock",
+      COMMIT: "api/orderwise-inventory-gtn/commit",
+    },
+    SRN: {
+      RETURNABLE_STOCK: "api/orderwise-inventory-srn/returnable-stock",
+      COMMIT: "api/orderwise-inventory-srn/commit",
+    },
+    DGN: {
+      DAMAGEABLE_STOCK: "api/orderwise-inventory-dgn/damageable-stock",
+      COMMIT: "api/orderwise-inventory-dgn/commit",
+    },
+    SAN: {
+      ADJUSTABLE_STOCK: "api/orderwise-inventory-san/adjustable-stock",
+      COMMIT: "api/orderwise-inventory-san/commit",
+    },
     STOCK_MOVEMENT_REPORT: {
       HEADER: "api/stock-movement-reports/header",
       LINES: "api/stock-movement-reports/lines",
       PDF: "api/stock-movement-reports/pdf",
+    },
+  },
+  SYSTEM_CONFIGURATION: {
+    SYSTEM_PARAMETER: {
+      GET: "api/system-parameters/list",
+      PUT: "api/system-parameters/",
     },
   },
   URLS: {

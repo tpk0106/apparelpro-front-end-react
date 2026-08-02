@@ -7,7 +7,6 @@ import axios, {
 import { APPARELPRO_ENDPOINTS } from "../api/api-configurations";
 import type { TokenAPIModel } from "../interfaces/definitions";
 import GlobalRouter from "./globalRouter";
-import GlobalAccessDeniedNotifier from "./accessDeniedNotifier";
 
 // 1. Export standard AppError shape for TanStack React Query error generics
 export interface AppError {
@@ -32,7 +31,7 @@ class AxiosInterceptor {
   constructor(instanceConfig: Record<string, any>) {
     this.axiosInstance = axios.create({
       ...instanceConfig,
-      timeout: 10000,
+      timeout: 30000,
     });
 
     this.initializeRequestInterceptor();
@@ -153,10 +152,7 @@ class AxiosInterceptor {
         // NEW FEATURE: Centralised C# Error Parsing Engine
         // ==========================================
         const appError: AppError = {
-          message:
-            status === 403
-              ? "You do not have permission to perform this action. Contact your administrator if you believe this is incorrect."
-              : "An unexpected backend error occurred.",
+          message: "An unexpected backend error occurred.",
           status: status,
         };
 
@@ -177,28 +173,9 @@ class AxiosInterceptor {
             appError.message = data;
           } else if (data.message) {
             appError.message = data.message;
-          } else if (data.error) {
-            // Several controllers return BadRequest(new { Error = ex.Message })
-            // for business-rule failures (e.g. "Deficit Block: Attempted to
-            // exceed balance quantity...", "Invalid Basis Code..."). ASP.NET
-            // Core's default camelCase JSON policy serializes that C# "Error"
-            // property as a lowercase "error" key, which this parser never
-            // checked - so every one of those specific, actionable server
-            // messages was silently discarded in favor of the generic fallback
-            // below. Confirmed present in GIN, GRN, PartShipment, RTN, STRN,
-            // StyleApproval, StylewiseEvent, and SupplierPO controllers.
-            appError.message = data.error;
           } else if (data.title) {
             appError.message = data.title;
           }
-        }
-
-        // Guaranteed, unmissable signal on every 403 - independent of whether
-        // the calling page has any error UI wired up for this specific
-        // request. This is what was missing: a role-authorization failure on
-        // an initial data-load query previously failed with no visible cue.
-        if (status === 403) {
-          GlobalAccessDeniedNotifier.notify(appError.message);
         }
 
         return Promise.reject(appError);

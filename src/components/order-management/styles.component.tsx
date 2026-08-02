@@ -4,6 +4,7 @@ import type { PaginationData } from "../../interfaces/definitions";
 
 import {
   useGetGarmentTypes,
+  useGetStyleTotalsQuery,
   useGetStylesByBuyerOrder,
   useGetUnits,
 } from "../../tanstack-hooks/custom-hooks";
@@ -67,6 +68,11 @@ const Styles = ({
     isLoading,
     isError,
   } = useGetStylesByBuyerOrder(buyerCode, order, paginate);
+  const { data: styleTotals } = useGetStyleTotalsQuery(
+    buyerCode,
+    order,
+    !!buyerCode && !!order,
+  );
   const { data: unitsPageData } = useGetUnits({
     pageIndex: 0,
     pageSize: 999,
@@ -132,11 +138,11 @@ const Styles = ({
             MenuProps: {
               PaperProps: {
                 sx: {
-                  backgroundColor: "#ffffff !important",
-                  "& .MuiMenuItem-root": { color: "#000000 !important" },
+                  backgroundColor: "#0D1117 !important",
+                  "& .MuiMenuItem-root": { color: "#F4F6F8 !important" },
                   "& .Mui-selected": {
-                    backgroundColor: "#e3f2fd !important",
-                    color: "#000000 !important",
+                    backgroundColor: "rgba(99, 102, 241, 0.24) !important",
+                    color: "#F4F6F8 !important",
                   },
                 },
               },
@@ -148,7 +154,7 @@ const Styles = ({
             <MenuItem key={type.id} value={type.id}>
               <Typography
                 variant="body2"
-                sx={{ color: "#000000", fontWeight: 600 }}
+                sx={{ color: "#F4F6F8", fontWeight: 600 }}
               >
                 {type.typeName}
               </Typography>
@@ -231,11 +237,11 @@ const Styles = ({
             MenuProps: {
               PaperProps: {
                 sx: {
-                  backgroundColor: "#ffffff !important",
-                  "& .MuiMenuItem-root": { color: "#000000 !important" },
+                  backgroundColor: "#0D1117 !important",
+                  "& .MuiMenuItem-root": { color: "#F4F6F8 !important" },
                   "& .Mui-selected": {
-                    backgroundColor: "#e3f2fd !important",
-                    color: "#000000 !important",
+                    backgroundColor: "rgba(99, 102, 241, 0.24) !important",
+                    color: "#F4F6F8 !important",
                   },
                 },
               },
@@ -245,7 +251,7 @@ const Styles = ({
           // Keeps key code cached in state values, while giving the user a descriptive layout label string
           children: units.map((u) => (
             <MenuItem key={u.code} value={u.code}>
-              <Typography variant="body2" sx={{ color: "#000000" }}>
+              <Typography variant="body2" sx={{ color: "#F4F6F8" }}>
                 <strong>{u.code}</strong> - {u.description}
               </Typography>
             </MenuItem>
@@ -335,7 +341,18 @@ const Styles = ({
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
           <Typography color="blue-gray" className="text-center flex flex-col">
             <span>UNIT : {mainOrderUnit}</span>
-            <span>TOTAL</span>
+            <span
+              className={
+                styleTotals?.exceedsOrderQuantity
+                  ? "text-red-600 font-bold"
+                  : undefined
+              }
+            >
+              {styleTotals
+                ? `TOTAL : ${styleTotals.totalQuantity.toLocaleString()} / ${styleTotals.orderTotalQuantity.toLocaleString()} ${styleTotals.mainUnit}`
+                : "TOTAL : \u2014"}
+              {styleTotals?.exceedsOrderQuantity && " \u26a0 Exceeds Order Quantity"}
+            </span>
           </Typography>
         </ThemeProvider>
       </div>

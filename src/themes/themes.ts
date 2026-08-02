@@ -293,7 +293,7 @@ const apparelProDarkTheme = createTheme({
         slotProps: {
           paper: {
             sx: {
-              backgroundColor: "#141922 !important", // Solid deep slate card background surface
+              backgroundColor: "#0D1117 !important", // Matches the Autocomplete dropdown surface (input/dropdown token) for a consistent near-black background across every dropdown
               backgroundImage: "none !important",
               opacity: "1 !important", // 🚀 FIXED: Completely kill all transparent blending bugs
               border: "1px solid rgba(139, 147, 161, 0.2) !important",
