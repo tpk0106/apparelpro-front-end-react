@@ -408,136 +408,146 @@ export default function SupplierPOHeaderSelector({
           />
         </Grid>
 
-        {/* Input 7: Buyer Selector */}
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Autocomplete
-            options={buyersList}
-            getOptionLabel={(option: Buyer) => option.name || ""}
-            value={selectedBuyer}
-            onChange={(_: SyntheticEvent, val: Buyer | null) => {
-              setSelectedBuyer(val);
-              setSelectedOrder(null);
-              setSelectedType(null);
-              setSelectedStyle(null);
-              verifyAndBroadcastContext(
-                purchaseNumber,
-                selectedSupplier,
-                selectedBasis,
-                selectedCurrency,
-                val,
-                null,
-                null,
-                null,
-              );
-            }}
-            loading={isBuyersLoading}
-            isOptionEqualToValue={(option, value) =>
-              option.buyerCode === value?.buyerCode
-            }
-            renderInput={(params) => (
-              <TextField {...params} label="Filter Target Buyer" size="small" />
-            )}
-          />
-        </Grid>
+        {/* Buyer/Order/Type/Style Identification Row - grouped into its own nested
+            Grid container (2026-08-03) so these 4 fields always render together on
+            one row regardless of how the preceding fields above happen to fill out
+            their own rows - previously Buyer+Order landed on one row (packed in
+            alongside the Proforma Invoice fields) while Type+Style spilled onto a
+            separate, half-empty row underneath. */}
+        <Grid size={{ xs: 12 }}>
+          <Grid container spacing={2}>
+          {/* Input 7: Buyer Selector */}
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Autocomplete
+              options={buyersList}
+              getOptionLabel={(option: Buyer) => option.name || ""}
+              value={selectedBuyer}
+              onChange={(_: SyntheticEvent, val: Buyer | null) => {
+                setSelectedBuyer(val);
+                setSelectedOrder(null);
+                setSelectedType(null);
+                setSelectedStyle(null);
+                verifyAndBroadcastContext(
+                  purchaseNumber,
+                  selectedSupplier,
+                  selectedBasis,
+                  selectedCurrency,
+                  val,
+                  null,
+                  null,
+                  null,
+                );
+              }}
+              loading={isBuyersLoading}
+              isOptionEqualToValue={(option, value) =>
+                option.buyerCode === value?.buyerCode
+              }
+              renderInput={(params) => (
+                <TextField {...params} label="Filter Target Buyer" size="small" />
+              )}
+            />
+          </Grid>
 
-        {/* Input 8: Purchase Order Contract Scope Selection */}
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Autocomplete
-            options={ordersList}
-            getOptionLabel={(option: string) => option || ""}
-            disabled={!selectedBuyer}
-            value={selectedOrder}
-            onChange={(_: SyntheticEvent, val: string | null) => {
-              setSelectedOrder(val);
-              setSelectedType(null);
-              setSelectedStyle(null);
-              verifyAndBroadcastContext(
-                purchaseNumber,
-                selectedSupplier,
-                selectedBasis,
-                selectedCurrency,
-                selectedBuyer,
-                val,
-                null,
-                null,
-              );
-            }}
-            loading={isOrdersLoading}
-            isOptionEqualToValue={(option, value) => option === value}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Filter Target Buyer Order"
-                size="small"
-              />
-            )}
-          />
-        </Grid>
+          {/* Input 8: Purchase Order Contract Scope Selection */}
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Autocomplete
+              options={ordersList}
+              getOptionLabel={(option: string) => option || ""}
+              disabled={!selectedBuyer}
+              value={selectedOrder}
+              onChange={(_: SyntheticEvent, val: string | null) => {
+                setSelectedOrder(val);
+                setSelectedType(null);
+                setSelectedStyle(null);
+                verifyAndBroadcastContext(
+                  purchaseNumber,
+                  selectedSupplier,
+                  selectedBasis,
+                  selectedCurrency,
+                  selectedBuyer,
+                  val,
+                  null,
+                  null,
+                );
+              }}
+              loading={isOrdersLoading}
+              isOptionEqualToValue={(option, value) => option === value}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Filter Target Buyer Order"
+                  size="small"
+                />
+              )}
+            />
+          </Grid>
 
-        {/* Input 9: Garment Type Dropdown */}
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Autocomplete
-            options={globalTypesList}
-            getOptionLabel={(option: GarmentTypeServiceModel) =>
-              option.typeName || ""
-            }
-            disabled={!selectedOrder}
-            value={selectedType}
-            onChange={(
-              _: SyntheticEvent,
-              val: GarmentTypeServiceModel | null,
-            ) => {
-              setSelectedType(val);
-              setSelectedStyle(null);
-              verifyAndBroadcastContext(
-                purchaseNumber,
-                selectedSupplier,
-                selectedBasis,
-                selectedCurrency,
-                selectedBuyer,
-                selectedOrder,
-                val,
-                null,
-              );
-            }}
-            loading={isTypesLoading}
-            isOptionEqualToValue={(option, value) => option.id === value?.id}
-            renderInput={(params) => (
-              <TextField {...params} label="Select Garment Type" size="small" />
-            )}
-          />
-        </Grid>
+          {/* Input 9: Garment Type Dropdown */}
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Autocomplete
+              options={globalTypesList}
+              getOptionLabel={(option: GarmentTypeServiceModel) =>
+                option.typeName || ""
+              }
+              disabled={!selectedOrder}
+              value={selectedType}
+              onChange={(
+                _: SyntheticEvent,
+                val: GarmentTypeServiceModel | null,
+              ) => {
+                setSelectedType(val);
+                setSelectedStyle(null);
+                verifyAndBroadcastContext(
+                  purchaseNumber,
+                  selectedSupplier,
+                  selectedBasis,
+                  selectedCurrency,
+                  selectedBuyer,
+                  selectedOrder,
+                  val,
+                  null,
+                );
+              }}
+              loading={isTypesLoading}
+              isOptionEqualToValue={(option, value) => option.id === value?.id}
+              renderInput={(params) => (
+                <TextField {...params} label="Select Garment Type" size="small" />
+              )}
+            />
+          </Grid>
 
-        {/* Input 10: Style Code Selection */}
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Autocomplete
-            options={stylesList}
-            disabled={!selectedType}
-            getOptionLabel={(option: Style) =>
-              option.styleCode
-                ? `${option.styleCode} (${Number(option.quantity) || 0})`
-                : ""
-            }
-            value={selectedStyle}
-            onChange={(_: SyntheticEvent, val: Style | null) => {
-              setSelectedStyle(val);
-              verifyAndBroadcastContext(
-                purchaseNumber,
-                selectedSupplier,
-                selectedBasis,
-                selectedCurrency,
-                selectedBuyer,
-                selectedOrder,
-                selectedType,
-                val,
-              );
-            }}
-            loading={isStylesLoading}
-            isOptionEqualToValue={(option, value) => option.id === value?.id}
-            renderInput={(params) => (
-              <TextField {...params} label="Select Active Style" size="small" />
-            )}
-          />
+          {/* Input 10: Style Code Selection */}
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Autocomplete
+              options={stylesList}
+              disabled={!selectedType}
+              getOptionLabel={(option: Style) =>
+                option.styleCode
+                  ? `${option.styleCode} (${Number(option.quantity) || 0})`
+                  : ""
+              }
+              value={selectedStyle}
+              onChange={(_: SyntheticEvent, val: Style | null) => {
+                setSelectedStyle(val);
+                verifyAndBroadcastContext(
+                  purchaseNumber,
+                  selectedSupplier,
+                  selectedBasis,
+                  selectedCurrency,
+                  selectedBuyer,
+                  selectedOrder,
+                  selectedType,
+                  val,
+                );
+              }}
+              loading={isStylesLoading}
+              isOptionEqualToValue={(option, value) => option.id === value?.id}
+              renderInput={(params) => (
+                <TextField {...params} label="Select Active Style" size="small" />
+              )}
+            />
+          </Grid>
+          </Grid>
         </Grid>
       </Grid>
     </Card>

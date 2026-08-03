@@ -158,6 +158,8 @@ export interface StyleMaterialConsumptionLedgerRow {
   totalConsumption: number;
   supplierCode: string;
   supplierName: string;
+  unitPrice: number;
+  currency: string;
 }
 
 export interface ConsumptionEntryPayload {
@@ -173,6 +175,7 @@ export interface ConsumptionEntryPayload {
   feature2: string;
   feature3: string;
   feature4: string;
+  description: string;
   consumptionUnit: string;
   quantityPerGarment: number;
   percentageAllowance: number;
@@ -181,6 +184,31 @@ export interface ConsumptionEntryPayload {
   supplierCode: string;
   unitPrice: number;
   currency: string;
+
+  // Populated only when editing an EXISTING ledger row and the merchandiser
+  // changed Colour/Size in the form - lets the backend clean up the old row
+  // under the ORIGINAL Colour/Size instead of leaving an orphaned duplicate
+  // (see MaterialConsumptionService.SaveMaterialConsumptionEntryAsync). Leave
+  // undefined for a normal new-entry save.
+  originalColor?: string;
+  originalSize?: string;
+}
+
+export interface CopyMaterialsFromStylePayload {
+  sourceBuyerCode: number;
+  sourceOrder: string;
+  sourceTypeCode: number;
+  sourceStyleCode: string;
+  targetBuyerCode: number;
+  targetOrder: string;
+  targetTypeCode: number;
+  targetStyleCode: string;
+}
+
+export interface CopyMaterialsFromStyleResult {
+  copiedCount: number;
+  skippedCount: number;
+  skippedItemDescriptions: string[];
 }
 
 // Strictly types the local form baseline capture parameters
@@ -189,6 +217,7 @@ export interface FormInputs {
   feature2: string;
   feature3: string;
   feature4: string;
+  description: string;
   garmentColor: string;
   garmentSize: string;
   consumptionUnit: string;

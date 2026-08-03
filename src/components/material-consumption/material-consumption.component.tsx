@@ -69,9 +69,9 @@ export default function MaterialConsumption() {
     <Box sx={{ width: "100%", p: 1 }}>
       <Typography
         variant="h5"
-        sx={{ fontWeight: "bold", color: "#1a237e", mb: 2 }}
+        sx={{ fontWeight: "bold", color: "#1a237e", mb: 1, textAlign: "center" }}
       >
-        Material Consumption Master Ledger
+        Material Consumption Details
       </Typography>
 
       <ConsumptionScopeHeader onScopeChange={handleScopeContextChange} />
@@ -89,7 +89,35 @@ export default function MaterialConsumption() {
             </Grid> */}
 
             <Grid size={{ xs: 12, md: 4 }}>
-              <Paper elevation={2} sx={{ p: 2, minHeight: "420px" }}>
+              <Paper
+                elevation={2}
+                sx={{
+                  p: 2,
+                  height: "480px",
+                  // Fixed height so expanding a material category scrolls
+                  // within this panel instead of growing it (and shifting
+                  // the whole layout) - matches the form panel's height.
+                  // The panel itself never scrolls (overflow: hidden) - only
+                  // the MaterialMasterList table's own internal scroll region
+                  // (set via muiTableContainerProps) scrolls, avoiding the
+                  // confusing double-scrollbar of both this Paper and the
+                  // table scrolling at once.
+                  overflow: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    mb: 1,
+                    color: "#ffffff",
+                  }}
+                >
+                  Main Materials
+                </Typography>
                 {/* Pass the loaded catalog array directly down as a prop */}
                 <MaterialMasterList
                   catalogGroups={catalogGroups}
@@ -103,10 +131,7 @@ export default function MaterialConsumption() {
               </Paper>
             </Grid>
             <Grid size={{ xs: 12, md: 8 }}>
-              <Paper
-                elevation={2}
-                sx={{ p: 2, minHeight: "420px", height: "100%" }}
-              >
+              <Paper elevation={2} sx={{ p: 2, minHeight: "480px" }}>
                 {activeSelection ? (
                   <ConsumptionEntryForm
                     styleContext={scopeContext}
@@ -139,12 +164,13 @@ export default function MaterialConsumption() {
           </Grid>
 
           {/* Bottom Panel: The Consolidated Continuous Spreadsheet Data Log */}
-          <Paper elevation={3} sx={{ p: 2, mt: 3 }}>
+          <Paper elevation={3} sx={{ p: 2, mt: 2 }}>
             <ConsumptionLedgerGrid
               styleContext={scopeContext}
               ledgerData={currentLedger}
               isLoading={isLedgerLoading}
               onRefresh={() => refetch()}
+              editingRow={editingRow}
               // 3. Mount the click handler to push selected rows straight up into edit state
               onEditRowSelect={(row) => {
                 // Instantly focus the left selection category context

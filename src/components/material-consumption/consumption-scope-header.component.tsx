@@ -147,19 +147,7 @@ export default function ConsumptionScopeHeader({
   };
 
   return (
-    <Card variant="outlined" sx={{ p: 2, mb: 3, backgroundColor: "#fafafa" }}>
-      <Typography
-        variant="caption"
-        sx={{
-          fontWeight: "bold",
-          color: "text.secondary",
-          mb: 1,
-          display: "block",
-        }}
-      >
-        PRODUCTION LEAD REPRESENTATION CONTEXT SELECTOR
-      </Typography>
-
+    <Card variant="outlined" sx={{ p: 2, mb: 2, backgroundColor: "#fafafa" }}>
       {/* Expanded grid spacing wrapper for clean 5-column or double-row rendering */}
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>

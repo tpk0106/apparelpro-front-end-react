@@ -4,8 +4,16 @@ import {
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from "material-react-table";
-import { Box, IconButton, Tooltip, Typography, Alert } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Tooltip,
+  Typography,
+  Alert,
+  Button,
+} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import type {
   StyleContext,
   StyleMaterialConsumptionLedgerRow,
@@ -20,6 +28,7 @@ import type { AppError } from "../../auth/axiosClient";
 import EditIcon from "@mui/icons-material/Edit"; // Add this icon import
 import { useApparelProTable } from "../../themes/useApparelProTable";
 import ConfirmDialog from "../common/confirm-dialog";
+import CopyFromStyleDialog from "./copy-from-style-dialog.component";
 
 interface LedgerGridProps {
   styleContext: StyleContext;
@@ -27,6 +36,7 @@ interface LedgerGridProps {
   isLoading: boolean;
   onRefresh: () => void;
   onEditRowSelect: (row: StyleMaterialConsumptionLedgerRow) => void; // 1. Add this prop interface route
+  editingRow: StyleMaterialConsumptionLedgerRow | null; // Highlights the row currently loaded in the form
 }
 
 export default function ConsumptionLedgerGrid({
@@ -35,67 +45,108 @@ export default function ConsumptionLedgerGrid({
   isLoading,
   onRefresh,
   onEditRowSelect,
+  editingRow,
 }: LedgerGridProps) {
+  // Shared match check for "is this the row currently loaded into the edit
+  // form" - used both for the row-level highlight and, since a column's own
+  // muiTableBodyCellProps completely replaces (not merges with) the
+  // table-level default, for the two columns below that define their own
+  // cell props (otherwise those two columns' cells would never pick up the
+  // highlight while every other column's cell did).
+  const isEditingRowMatch = (
+    row: StyleMaterialConsumptionLedgerRow,
+  ): boolean =>
+    !!editingRow &&
+    row.stockCode === editingRow.stockCode &&
+    row.itemCode === editingRow.itemCode &&
+    (row.color || "") === (editingRow.color || "") &&
+    (row.size || "") === (editingRow.size || "") &&
+    row.feature1 === editingRow.feature1 &&
+    row.feature2 === editingRow.feature2 &&
+    row.feature3 === editingRow.feature3 &&
+    row.feature4 === editingRow.feature4;
+
   // 1. Define the Columns structure matching your exact PascalCase property dictionary names
   const columns = useMemo<MRT_ColumnDef<StyleMaterialConsumptionLedgerRow>[]>(
     () => [
       {
         // Material name/description instead of the raw 4-char ItemCode -
         // ItemCode is still sent to the backend on edit/delete, just not
-        // shown as its own column anymore.
+        // shown as its own column anymore. Wraps onto multiple lines instead
+        // of forcing horizontal scroll when the description is long.
         accessorKey: "description",
         header: "Material",
-        size: 190,
-        muiTableBodyCellProps: {
-          sx: { fontWeight: "bold" },
-        },
+        size: 150,
+        muiTableBodyCellProps: ({ row }) => ({
+          sx: {
+            fontWeight: "bold",
+            fontSize: "0.78rem",
+            whiteSpace: "normal",
+            wordBreak: "break-word",
+            lineHeight: 1.3,
+            ...(isEditingRowMatch(row.original) && {
+              backgroundColor: "#ffca28 !important",
+              color: "#3e2723 !important",
+            }),
+          },
+        }),
       },
       {
         // Colour + Size merged into one column to save horizontal space.
         header: "Colour / Size",
-        size: 130,
+        size: 100,
         accessorFn: (row) =>
           `${row.color || "ALL COLOURS"} / ${row.size || "ALL SIZES"}`,
       },
       {
         // Combined virtual column replicating the Clipper feature string block row summary display
         header: "Config (Ft1-4)",
-        size: 150,
+        size: 110,
         accessorFn: (row) =>
           `${row.feature1 || "-"}/${row.feature2 || "-"}/${row.feature3 || "-"}/${row.feature4 || "-"}`,
       },
       {
         accessorKey: "consumptionUnit",
         header: "C/Unit",
-        size: 65,
+        size: 55,
       },
       {
         accessorKey: "quantityPerGarment",
         header: "Qty/Garm",
-        size: 80,
+        size: 70,
         type: "number",
         Cell: ({ cell }) => cell.getValue<number>().toFixed(3),
       },
       {
         accessorKey: "percentageAllowance",
         header: "Allow.%",
-        size: 60,
+        size: 55,
         type: "number",
         Cell: ({ cell }) => `${cell.getValue<number>().toFixed(1)}%`,
       },
       {
         accessorKey: "itemUnit",
         header: "F/Unit",
-        size: 60,
+        size: 55,
       },
       {
         accessorKey: "totalConsumption",
         header: "Tot Cons.",
-        size: 70,
+        size: 65,
         type: "number",
-        muiTableBodyCellProps: {
-          sx: { fontWeight: "normal", color: "#2e7d32", textAlign: "right" },
-        },
+        muiTableBodyCellProps: ({ row }) => ({
+          sx: {
+            fontWeight: "normal",
+            fontSize: "0.78rem",
+            color: "#2e7d32",
+            textAlign: "right",
+            ...(isEditingRowMatch(row.original) && {
+              backgroundColor: "#ffca28 !important",
+              color: "#3e2723 !important",
+              fontWeight: "bold",
+            }),
+          },
+        }),
         Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
       },
       {
@@ -104,10 +155,10 @@ export default function ConsumptionLedgerGrid({
         // edit/delete, just not shown as its own column anymore.
         accessorKey: "supplierName",
         header: "Supplier",
-        size: 130,
+        size: 100,
       },
     ],
-    [],
+    [editingRow],
   );
 
   // ... Inside your main MaterialConsumptionGrid function component body:
@@ -120,6 +171,9 @@ export default function ConsumptionLedgerGrid({
   const [rowPendingDelete, setRowPendingDelete] =
     useState<StyleMaterialConsumptionLedgerRow | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // "Copy all materials from another Style" dialog state
+  const [isCopyDialogOpen, setIsCopyDialogOpen] = useState(false);
 
   const handleRequestDelete = (row: StyleMaterialConsumptionLedgerRow) => {
     setRowPendingDelete(row);
@@ -183,6 +237,45 @@ export default function ConsumptionLedgerGrid({
       pagination: { pageSize: 5, pageIndex: 0 },
       density: "compact",
     },
+    // Highlight whichever ledger row is currently loaded into the form for
+    // editing - mirrors the same amber-highlight convention already used for
+    // the active selection in the left Raw Material item table.
+    muiTableBodyRowProps: ({ row }) => {
+      const isSelected = isEditingRowMatch(row.original);
+      return {
+        sx: isSelected
+          ? {
+              backgroundColor: "#ffca28 !important",
+              borderLeft: "4px solid #e65100 !important",
+              "& td": { color: "#3e2723 !important", fontWeight: "bold" },
+            }
+          : {},
+      };
+    },
+    // Fluid grid layout: columns scale to fit the container width instead of
+    // the default fixed-pixel layout, which forced horizontal scrolling once
+    // the column sizes summed past the page's available width.
+    layoutMode: "grid",
+    muiTableContainerProps: {
+      sx: { maxWidth: "100%" },
+    },
+    // Smaller default text so more columns comfortably fit without
+    // scrolling; the Material/Tot Cons. columns set their own matching size
+    // via muiTableBodyCellProps above since a column-level override replaces
+    // rather than merges with this table-level default.
+    muiTableHeadCellProps: {
+      sx: { fontSize: "0.72rem", fontWeight: 700 },
+    },
+    muiTableBodyCellProps: ({ row }) => ({
+      sx: {
+        fontSize: "0.78rem",
+        ...(isEditingRowMatch(row.original) && {
+          backgroundColor: "#ffca28 !important",
+          color: "#3e2723 !important",
+          fontWeight: "bold",
+        }),
+      },
+    }),
 
     renderRowActions: ({ row }) => (
       <Box
@@ -215,13 +308,31 @@ export default function ConsumptionLedgerGrid({
 
   return (
     <Box sx={{ mt: 3 }}>
-      <Typography
-        variant="subtitle2"
-        // sx={{ fontWeight: "bold", mb: 1, color: "#1a237e" }}
-        sx={{ fontWeight: "bold", mb: 1, color: "#ffffff" }}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 1,
+        }}
       >
-        [ CONSOLIDATED STYLE RUNNING PRODUCTION LEDGER MATRIX ]
-      </Typography>
+        <Typography
+          variant="subtitle2"
+          sx={{ fontWeight: "bold", color: "#ffffff" }}
+        >
+          [ CONSOLIDATED STYLE RUNNING PRODUCTION LEDGER MATRIX ]
+        </Typography>
+
+        <Button
+          variant="contained"
+          color="primary"
+          size="small"
+          startIcon={<ContentCopyIcon />}
+          onClick={() => setIsCopyDialogOpen(true)}
+        >
+          Copy all materials from another Style
+        </Button>
+      </Box>
 
       {ledgerData.length === 0 && !isLoading ? (
         <Alert severity="info" variant="outlined">
@@ -232,6 +343,13 @@ export default function ConsumptionLedgerGrid({
       ) : (
         <MaterialReactTable table={table} />
       )}
+
+      <CopyFromStyleDialog
+        open={isCopyDialogOpen}
+        onClose={() => setIsCopyDialogOpen(false)}
+        targetStyleContext={styleContext}
+        onCopyComplete={onRefresh}
+      />
 
       <ConfirmDialog
         open={!!rowPendingDelete}

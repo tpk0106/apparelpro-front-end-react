@@ -3,6 +3,8 @@ import { APPARELPRO_ENDPOINTS } from "../api/api-configurations";
 import type {
   ConsumptionCalculationParams,
   ConsumptionEntryPayload,
+  CopyMaterialsFromStylePayload,
+  CopyMaterialsFromStyleResult,
   MaterialCatalogGroup,
   OrderItemServiceModel,
   StyleMaterialConsumptionLedgerRow,
@@ -64,8 +66,16 @@ const deleteConsumptionEntry = async (params: {
         styleCode: params.styleCode.trim(),
         stockCode: params.stockCode.trim(),
         itemCode: params.itemCode.trim(),
-        color: params.color.trim() === "" ? "EMPTY" : params.color.trim(),
-        size: params.size.trim() === "" ? "EMPTY" : params.size.trim(),
+        // Send the trimmed value as-is, including an empty string for a
+        // blank/universal Color or Size -- a saved row's blank Color/Size is
+        // stored as "" (see consumption-entry-form.component.tsx's save
+        // payload), never the literal text "EMPTY", so substituting that
+        // sentinel here made the backend's Color/Size match never find the
+        // row: DeleteConsumptionEntryAsync returned true on its "already
+        // deleted" branch, showing a false success toast while deleting
+        // nothing.
+        color: params.color.trim(),
+        size: params.size.trim(),
       },
     },
   );
@@ -104,6 +114,16 @@ const loadLedgerBreakdownByStyle = async (params: {
   );
 };
 
+const copyMaterialsFromStyle = async (
+  payload: CopyMaterialsFromStylePayload,
+) => {
+  return await client.post<CopyMaterialsFromStyleResult>(
+    APPARELPRO_ENDPOINTS.ORDER_MANAGEMENT.MATERIAL_CONSUMPTION
+      .COPY_FROM_STYLE,
+    payload,
+  );
+};
+
 export {
   loadDynamicFeatureHeaders,
   calculateConsumption,
@@ -112,4 +132,5 @@ export {
   loadAvailableMaterials,
   loadMaterialCatalog,
   loadLedgerBreakdownByStyle,
+  copyMaterialsFromStyle,
 };

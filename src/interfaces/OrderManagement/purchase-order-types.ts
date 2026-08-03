@@ -19,6 +19,16 @@ export interface AvailableBudgetLine {
   feature2: string;
   feature3: string;
   feature4: string;
+
+  // Informational only - the backend enforces this for real inside
+  // SaveSupplierPurchaseOrderAsync. True once this line's Style has
+  // completed Trim Sheet Approval and can actually be raised onto a P/O.
+  isStyleApproved: boolean;
+
+  // The Stock category this material belongs to (e.g. "BUTTON", "FABRIC",
+  // "ZIPPER") - resolved server-side from the ItemCode's StockCode segment.
+  // Shown as its own column next to itemCode in the picker grid.
+  mainMaterialName: string;
 }
 
 export interface PODetailItemRow {

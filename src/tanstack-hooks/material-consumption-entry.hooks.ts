@@ -14,11 +14,14 @@ import {
   loadAvailableMaterials,
   loadMaterialCatalog,
   loadLedgerBreakdownByStyle,
+  copyMaterialsFromStyle,
   type FeatureHeadersLookup,
 } from "../services/material-consumption-entry.service";
 import type {
   ConsumptionCalculationParams,
   ConsumptionEntryPayload,
+  CopyMaterialsFromStylePayload,
+  CopyMaterialsFromStyleResult,
   MaterialCatalogGroup,
   OrderItemServiceModel,
   StyleMaterialConsumptionLedgerRow,
@@ -141,6 +144,24 @@ export const useGetMaterialCatalog = (
     },
     enabled,
     staleTime: 5 * 60 * 1000, // reference/catalog data, doesn't change per-request
+  });
+};
+
+export const useCopyMaterialsFromStyleMutation = (): UseMutationResult<
+  CopyMaterialsFromStyleResult,
+  AppError,
+  CopyMaterialsFromStylePayload
+> => {
+  return useMutation<
+    CopyMaterialsFromStyleResult,
+    AppError,
+    CopyMaterialsFromStylePayload
+  >({
+    mutationFn: async (payload) => {
+      const response: AxiosResponse<CopyMaterialsFromStyleResult> =
+        await copyMaterialsFromStyle(payload);
+      return response.data;
+    },
   });
 };
 

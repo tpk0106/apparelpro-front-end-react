@@ -76,6 +76,32 @@ export default function MaterialMasterList({
     initialState: { density: "compact" },
     getRowId: (row) => row.stockCode,
 
+    // Plain list, not an interactive column-configurable grid - no
+    // show/hide columns, resizing, reordering, density toggle, or
+    // fullscreen affordances needed for a simple ledger list.
+    enableColumnFilters: false,
+    enableHiding: false,
+    enableColumnResizing: false,
+    enableColumnOrdering: false,
+    enableDensityToggle: false,
+    enableFullScreenToggle: false,
+
+    // Fill the fixed-height parent Paper (a flex column) and make this
+    // table's own container the sole scroll region, instead of both this
+    // table and the outer Paper scrolling at once.
+    muiTablePaperProps: {
+      sx: {
+        flex: 1,
+        minHeight: 0,
+        display: "flex",
+        flexDirection: "column",
+        boxShadow: "none",
+      },
+    },
+    muiTableContainerProps: {
+      sx: { flex: 1, minHeight: 0, overflowY: "auto" },
+    },
+
     // Hide the expand affordance for categories with no cataloged items.
     // row.original can be undefined for MRT's internal synthetic rows (e.g.
     // loading-skeleton placeholders), so this is defensive on purpose.
@@ -144,23 +170,56 @@ function MaterialCatalogItemsTable({
   selectedMaterial,
   onSelectMaterial,
 }: MaterialCatalogItemsTableProps) {
+  // Shared match check for "is this the currently selected item" - used both
+  // for the row-level highlight and for the itemCode column below, since a
+  // column's own muiTableBodyCellProps completely replaces (not merges with)
+  // the table-level default - otherwise that column's cell would never pick
+  // up the highlight while the Description column's cell did.
+  const isItemSelected = (item: MaterialCatalogItem): boolean =>
+    selectedMaterial?.stockCode === stockCode &&
+    selectedMaterial?.itemCode === item.itemCode;
+
   const columns = useMemo<MRT_ColumnDef<MaterialCatalogItem>[]>(
     () => [
       {
         accessorKey: "itemCode",
         header: "Item",
         size: 90,
-        muiTableBodyCellProps: {
-          sx: { fontFamily: "monospace", color: "#1a237e", fontWeight: "bold" },
-        },
+        muiTableBodyCellProps: ({ row }) => ({
+          sx: {
+            fontFamily: "monospace",
+            color: "#1a237e",
+            fontWeight: "bold",
+            ...(row.original &&
+              isItemSelected(row.original) && {
+                backgroundColor: "#ffca28 !important",
+                color: "#3e2723 !important",
+              }),
+          },
+        }),
       },
       {
         accessorKey: "description",
         header: "Material Name / Description",
         size: 220,
+        // Row-level sx alone doesn't reliably reach this cell (same
+        // replace-not-merge behavior as the itemCode column above, plus this
+        // column has no cell props of its own to begin with) - apply the
+        // highlight directly here too so the whole row is consistently
+        // highlighted, not just the Item column.
+        muiTableBodyCellProps: ({ row }) => ({
+          sx: {
+            ...(row.original &&
+              isItemSelected(row.original) && {
+                backgroundColor: "#ffca28 !important",
+                color: "#3e2723 !important",
+                fontWeight: "bold",
+              }),
+          },
+        }),
       },
     ],
-    [],
+    [selectedMaterial],
   );
 
   const table = useApparelProTable<MaterialCatalogItem>({
@@ -176,9 +235,7 @@ function MaterialCatalogItemsTable({
     initialState: { density: "compact" },
     getRowId: (row) => row.itemCode,
     muiTableBodyRowProps: ({ row }) => {
-      const isSelected =
-        selectedMaterial?.stockCode === stockCode &&
-        selectedMaterial?.itemCode === row.original?.itemCode;
+      const isSelected = !!row.original && isItemSelected(row.original);
       return {
         onClick: () => {
           if (!row.original) return;

@@ -203,6 +203,7 @@ export const APPARELPRO_ENDPOINTS = {
       SAVE_ENTRY: "api/material-consumption/save-entry",
       DELETE_ENTRY: "api/material-consumption/delete-entry",
       GET_MATERIAL_CATALOG: "api/material-consumption/catalog",
+      COPY_FROM_STYLE: "api/material-consumption/copy-from-style",
     },
     STYLE_WISE_EVENTS: {
       GET_STYLE_WISE_EVENTS_REPORT: "api/stylewise-reports/print-report",

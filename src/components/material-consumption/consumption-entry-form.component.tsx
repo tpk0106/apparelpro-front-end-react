@@ -52,6 +52,7 @@ export default function ConsumptionEntryForm({
     feature2: "",
     feature3: "",
     feature4: "",
+    description: "",
     garmentColor: "",
     garmentSize: "",
     consumptionUnit: "",
@@ -75,6 +76,7 @@ export default function ConsumptionEntryForm({
       feature2: "",
       feature3: "",
       feature4: "",
+      description: "",
       garmentColor: "",
       garmentSize: "",
       consumptionUnit: "",
@@ -104,6 +106,7 @@ export default function ConsumptionEntryForm({
         feature2: editingRow.feature2 || "",
         feature3: editingRow.feature3 || "",
         feature4: editingRow.feature4 || "",
+        description: editingRow.description || "",
         garmentColor: editingRow.color || "",
         garmentSize: editingRow.size || "",
         consumptionUnit: editingRow.consumptionUnit || "",
@@ -111,7 +114,7 @@ export default function ConsumptionEntryForm({
         allowancePercentage: String(editingRow.percentageAllowance ?? 0),
         finalItemUnit: editingRow.itemUnit || "",
         supplierCode: editingRow.supplierCode || "",
-        unitPrice: "0", // Can be expanded dynamically based on pricing table records
+        unitPrice: String(editingRow.unitPrice ?? 0),
       });
       setCalculatedTotal(editingRow.totalConsumption || 0);
     } else {
@@ -121,6 +124,7 @@ export default function ConsumptionEntryForm({
         feature2: "",
         feature3: "",
         feature4: "",
+        description: "",
         garmentColor: "",
         garmentSize: "",
         consumptionUnit: "",
@@ -297,8 +301,8 @@ export default function ConsumptionEntryForm({
               featureMap?.feature4) && (
               <Grid size={12}>
                 <Alert severity="info" sx={{ py: 0.5 }}>
-                  Feature values are locked while editing — start a new entry
-                  to change the material variant.
+                  Feature values are locked while editing — start a new entry to
+                  change the material variant.
                 </Alert>
               </Grid>
             )}
@@ -387,6 +391,20 @@ export default function ConsumptionEntryForm({
               />
             </Grid>
           )}
+
+          {/* Human-readable description shown on the Supplier PO / budget lines - the raw
+              Feature1-4 codes aren't meaningful to a supplier, so this is what should actually
+              identify the material on a purchase order. */}
+          <Grid size={12}>
+            <TextField
+              label="Description (shown on Supplier PO)"
+              placeholder='e.g. "PIQUE 58-60in Knit Fabric"'
+              size="small"
+              fullWidth
+              value={form.description}
+              onChange={(e) => handleInputChange("description", e.target.value)}
+            />
+          </Grid>
 
           {/* Group 2: Garment Constraints Filter */}
           {/* Group 2: Garment Constraints Filter (Upgraded to type-safe Select dropdown menus) */}
@@ -677,6 +695,7 @@ export default function ConsumptionEntryForm({
                 feature2: form.feature2,
                 feature3: form.feature3,
                 feature4: form.feature4,
+                description: form.description,
                 consumptionUnit: form.consumptionUnit,
                 quantityPerGarment: Number(form.quantityPerGarment) || 0,
                 percentageAllowance: Number(form.allowancePercentage) || 0,
@@ -687,13 +706,37 @@ export default function ConsumptionEntryForm({
 
                 // FIXED: Dynamically pulls and passes the explicit currency code selected in the master header dropdown!
                 currency: styleContext.currencyCode,
+
+                // Only set when editing an EXISTING row - tells the backend what
+                // Colour/Size this line was saved under originally, so it can
+                // clean up that old row if the merchandiser reselected a
+                // different Colour/Size above (see SaveMaterialConsumptionEntryAsync's
+                // Colour/Size-reselect fix). Left undefined for a brand-new entry.
+                originalColor: editingRow ? editingRow.color || "" : undefined,
+                originalSize: editingRow ? editingRow.size || "" : undefined,
               };
 
               const toastId = toast.loading(
                 "Saving material consumption entry...",
               );
               try {
-                await saveEntry(payload);
+                const success = await saveEntry(payload);
+
+                if (!success) {
+                  // Blocked: a supplier PO has already been raised against the
+                  // ORIGINAL Colour/Size line this row is being moved away from
+                  // (see SaveMaterialConsumptionEntryAsync). Nothing was saved.
+                  toast.update(toastId, {
+                    render:
+                      "🛑 Save blocked: a supplier PO has already been raised against the original Colour/Size line. Revert Colour/Size to save changes, or contact your Merchandising Manager.",
+                    type: "error",
+                    isLoading: false,
+                    autoClose: 6000,
+                    closeButton: true,
+                  });
+                  return;
+                }
+
                 toast.update(toastId, {
                   render: "✓ Material ledger entry saved successfully!",
                   type: "success",
@@ -702,6 +745,34 @@ export default function ConsumptionEntryForm({
                   closeButton: true,
                 });
                 onCommitSuccess();
+
+                // If this was a brand-new entry (not editing an existing
+                // row), reset the form back to blank for the SAME material
+                // so another new line (e.g. a different size/color of the
+                // same item) can be entered right away, without having to
+                // deselect and reselect the material category first. When
+                // editing an existing row, the parent already clears
+                // editingRow on success, which naturally resets the form via
+                // the currentRowKey effect above - no extra reset needed here.
+                if (!editingRow) {
+                  setForm({
+                    feature1: "",
+                    feature2: "",
+                    feature3: "",
+                    feature4: "",
+                    description: "",
+                    garmentColor: "",
+                    garmentSize: "",
+                    consumptionUnit: "",
+                    quantityPerGarment: "0",
+                    allowancePercentage: "0",
+                    finalItemUnit: "",
+                    supplierCode: "",
+                    unitPrice: "0",
+                  });
+                  setCalculatedTotal(null);
+                  setErrorBanner(null);
+                }
               } catch (err: unknown) {
                 console.log(err);
                 toast.update(toastId, {
@@ -715,7 +786,7 @@ export default function ConsumptionEntryForm({
               }
             }}
           >
-            {isSaving ? "Saving..." : "Commit Entry"}
+            {isSaving ? "Saving..." : "Save"}
           </Button>
         </Box>
       </Card>
