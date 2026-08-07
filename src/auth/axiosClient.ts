@@ -173,6 +173,19 @@ class AxiosInterceptor {
             appError.message = data;
           } else if (data.message) {
             appError.message = data.message;
+          } else if (data.error) {
+            // Controllers across this app commonly return `{ Error = "..." }`
+            // (StyleApprovalController, MaterialConsumptionController, etc.),
+            // which System.Text.Json's default camelCase policy serializes to
+            // `error` on the wire. This was previously unhandled here, so
+            // specific server messages (e.g. the Material Consumption "Style
+            // already approved" 403) were silently dropped in favor of the
+            // generic fallback below - checked before `data.title` since the
+            // `Error` payloads only ever carry this one field.
+            appError.message =
+              typeof data.error === "string"
+                ? data.error
+                : JSON.stringify(data.error);
           } else if (data.title) {
             appError.message = data.title;
           }

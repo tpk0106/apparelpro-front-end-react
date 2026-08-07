@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 
 // import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
-import HowToRegOutlinedIcon from "@mui/icons-material/HowToRegOutlined";
+// import HowToRegOutlinedIcon from "@mui/icons-material/HowToRegOutlined";
 import MenuIcon from "../themes/menu-icon.component";
 import verticalMenuLogo from "../assets/logos/LadyBeatriceFashionsLogo.png";
 import apparelProLogo from "../assets/logos/LingerieLogo.png";

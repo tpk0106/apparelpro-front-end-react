@@ -8,11 +8,6 @@ import {
   Button,
   Alert,
   Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import SendIcon from "@mui/icons-material/Send";
@@ -20,6 +15,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
 
 import StockAdjustmentNoteLinesGrid from "./stock-adjustment-note-lines-grid";
+import ConfirmDialog from "../common/confirm-dialog";
 import type {
   SanLineItemRow,
   SanSubmissionPayload,
@@ -87,7 +83,8 @@ export default function StockAdjustmentNoteWorkspace() {
   // full returnable balance) — SAN is a stock-take correction, so the operator should
   // only need to type over the handful of rows that are actually wrong. Adjusts state
   // during render itself, matching the established GTN/RTN/SRN/DGN convention.
-  const [syncedAdjustableStock, setSyncedAdjustableStock] = useState(adjustableStock);
+  const [syncedAdjustableStock, setSyncedAdjustableStock] =
+    useState(adjustableStock);
   if (adjustableStock !== syncedAdjustableStock) {
     setSyncedAdjustableStock(adjustableStock);
     setLines(
@@ -145,8 +142,6 @@ export default function StockAdjustmentNoteWorkspace() {
     setCommitErrorMessage(null);
   };
 
-  // Replaces window.confirm() — opens the MUI confirmation dialog instead of a
-  // native browser alert box, per project convention.
   const handleRequestCommit = () => {
     if (!adjustableStock) return;
     setCommitErrorMessage(null);
@@ -221,18 +216,18 @@ export default function StockAdjustmentNoteWorkspace() {
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
-          Stock Adjustment Note (SAN) — Buyer / Order Entry
+          Stock Adjustment Note (SAN)
         </Typography>
         <Typography
           variant="caption"
           color="text.secondary"
-          sx={{ display: "block", mb: 3 }}
+          sx={{ display: "block", mb: 3, color: "#000000" }}
         >
           SAN Number is allocated by the server on commit — it is never entered
           manually. Adjusted Qty defaults to the current quantity on hand for
-          every item; enter the true physical count only where it differs.
-          This directly overwrites the recorded stock count — only rows you
-          change are submitted.
+          every item; enter the true physical count only where it differs. This
+          directly overwrites the recorded stock count — only rows you change
+          are submitted.
         </Typography>
 
         <Grid container spacing={2}>
@@ -304,12 +299,20 @@ export default function StockAdjustmentNoteWorkspace() {
         )}
 
         {!isHeaderReady ? (
-          <Alert severity="info" variant="outlined">
+          <Alert
+            severity="info"
+            variant="outlined"
+            sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+          >
             Select a Buyer and Order to load items currently in stock that can
             be adjusted.
           </Alert>
         ) : adjustableStock.length === 0 ? (
-          <Alert severity="info" variant="outlined">
+          <Alert
+            severity="info"
+            variant="outlined"
+            sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+          >
             Nothing is currently on hand for this Buyer/Order to adjust.
           </Alert>
         ) : (
@@ -399,38 +402,21 @@ export default function StockAdjustmentNoteWorkspace() {
         )}
       </Paper>
 
-      {/* Replaces window.confirm() with an in-app MUI dialog, per project
-          convention: no native browser alert/confirm boxes. */}
-      <Dialog
+      <ConfirmDialog
         open={isConfirmDialogOpen}
-        onClose={() => setIsConfirmDialogOpen(false)}
-        aria-labelledby="san-confirm-dialog-title"
-        slotProps={{ paper: { sx: { backgroundColor: "#141922" } } }}
-      >
-        <DialogTitle id="san-confirm-dialog-title" sx={{ color: "#F4F6F8" }}>
-          Confirm Stock Adjustment Note
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: "#F4F6F8" }}>
+        title="Confirm Stock Adjustment Note"
+        message={<>
             Confirm all entries and post this Stock Adjustment Note? This
-            directly overwrites the recorded stock count for {changedLines.length}{" "}
-            item(s) for Buyer {selectedBuyer?.name} / Order {selectedOrder}.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsConfirmDialogOpen(false)} color="secondary">
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmCommit}
-            variant="contained"
-            color="primary"
-            autoFocus
-          >
-            Confirm & Post
-          </Button>
-        </DialogActions>
-      </Dialog>
+            directly overwrites the recorded stock count for{" "}
+            {changedLines.length} item(s) for Buyer {selectedBuyer?.name} /
+            Order {selectedOrder}.
+          </>}
+        confirmLabel="Confirm & Post"
+        confirmColor="primary"
+        isConfirming={isSubmitting}
+        onConfirm={handleConfirmCommit}
+        onCancel={() => setIsConfirmDialogOpen(false)}
+      />
     </Box>
   );
 }

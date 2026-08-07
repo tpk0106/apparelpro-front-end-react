@@ -595,6 +595,14 @@ export default function SupplierPurchaseOrderWorkspace() {
                           onChange={(e) =>
                             handleInputChange("refNo", e.target.value)
                           }
+                          // FIXED (2026-08-07): capped to match PODetails.RefNo's varchar(30)
+                          // column - a longer value was previously accepted here and threw a SQL
+                          // truncation error only when the Supplier PO was saved.
+                          slotProps={{
+                            htmlInput: {
+                              maxLength: 30,
+                            },
+                          }}
                         />
                       </Grid>
                       <Grid size={{ xs: 12 }}>

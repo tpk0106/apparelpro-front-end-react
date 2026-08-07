@@ -7,6 +7,7 @@ import {
   StepLabel,
   Paper,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import type { Style } from "../../interfaces/OrderManagement/Style";
 import ColorBreakdown from "./color-breakdown.component";
@@ -29,8 +30,6 @@ interface WorkspaceProps {
   isMatrixDirty: boolean;
   setIsMatrixDirty: (dirty: boolean) => void;
   onResetSelection: () => void;
-  // FIXED: Explicitly append this signature parameter to satisfy the compilation checking engine!
-  //initialColors: any[]; // Maps directly to your LocalColorRow[] data array structure
 }
 
 const steps = ["Verify Colour Groups", "Populate Size Matrix"];
@@ -44,7 +43,9 @@ export default function ColorSizeBreakdown({
   onResetSelection,
 }: WorkspaceProps) {
   const [activeStep, setActiveStep] = useState<number>(0);
-  const [configuredColors, setConfiguredColors] = useState<LocalColorRow[]>([]);
+  const [configuredColors, setConfiguredColors] = useState<LocalColorRow[]>(
+    [],
+  );
 
   // 2. Add the Matrix State Memory here at the master parent level
   const [matrixRows, setMatrixRows] = useState<MatrixRow[]>([
@@ -73,9 +74,6 @@ export default function ColorSizeBreakdown({
     ]);
   }
 
-  {
-    /* new component to pass existing colorSizeDetails from DB */
-  }
   // if existing color/size breakdown
   const { data: savedMatrixData, isLoading: isMatrixLoading } =
     useGetColorSizeSavedMatrix(
@@ -88,47 +86,15 @@ export default function ColorSizeBreakdown({
       !!selectedStyleFromGrid, // Skip query if no active style context is selected yet
     );
 
-  // const matrix1 = useMemo(() => {
-  //   if (!savedMatrixData) return [];
-
-  //   // 1. Sum up by color
-  //   const colorTotalQty = savedMatrixData.reduce<Record<string, number>>(
-  //     (acc, item) => {
-  //       if (!acc[item.color]) acc[item.color] = 0;
-  //       acc[item.color] += item.qty;
-  //       return acc;
-  //     },
-  //     {},
-  //   );
-
-  //   // 2. Map directly to your LocalColorRow format and return it
-  //   return Object.entries(colorTotalQty).map(([color, totalQty]) => ({
-  //     colorCode: color,
-  //     description: color,
-  //     allocationWeight: totalQty,
-  //   }));
-  // }, [savedMatrixData]); // matrix auto-updates safely only when data changes
-
-  {
-    /* end of new component to pass existing colorSizeDetails from DB */
-  }
-
-  {
-    /* Add this single hydration block inside ColorSizeBreakdown.tsx right after your matrix useMemo block */
-  }
-
-  /// ----------------------------------------------------------------------------------
-  // 🏛️ REBUILT COMPUTATION MODULES: REMOVED MANUALuseMemo BLOCKS FOR REACT 19 COMPILER
-  // ----------------------------------------------------------------------------------
-
   // Extract a safe, non-undefined data tracking reference baseline array
   const activeDataArray = savedMatrixData || [];
 
   // 1. Evaluate if pre-existing style records exist inside SQL Server
   const hasExistingDbEntries = activeDataArray.length > 0;
 
-  // 2. Compute your Stage 1 column allocations dynamically on the fly
-
+  // 2. Compute the existing colour allocation totals (Stage 1 data), used to
+  // pre-populate the Colour screen for a style that already has a saved
+  // matrix - see the hydration block below.
   let matrix: LocalColorRow[] = [];
   if (hasExistingDbEntries) {
     const colorTotalQty: Record<string, number> = {};
@@ -148,9 +114,13 @@ export default function ColorSizeBreakdown({
     }));
   }
 
-  // 2. FIXED HYDRATION ROUTINE: Push database records into state once on load
-  // This allows "Add Product Size Row" to append fresh items to state without being blocked!
-  const [prevHydrationKey, setPrevHydrationKey] = useState<string | null>(null);
+  // FIXED HYDRATION ROUTINE: push database records into state once per style
+  // load, for BOTH the colour screen and the size matrix screen. Previously
+  // only matrixRows was hydrated here, which is why the size screen already
+  // showed existing data correctly while the colour screen never did.
+  const [prevHydrationKey, setPrevHydrationKey] = useState<string | null>(
+    null,
+  );
   const currentHydrationKey = hasExistingDbEntries
     ? `${selectedStyleFromGrid?.styleCode}-${activeDataArray.length}`
     : "NEW";
@@ -188,157 +158,24 @@ export default function ColorSizeBreakdown({
         return rowObject;
       });
 
-      setMatrixRows(initialRows); // Hydrate your active state container cleanly!
+      setMatrixRows(initialRows); // Hydrate the size-matrix state container
+      setConfiguredColors(matrix); // FIXED: also hydrate the colour-screen state container
     }
   }
 
-  // --- AUTOMATED INTERACTION FOR MODE CONTROLS ---
-  const currentWorkingStep = hasExistingDbEntries ? 1 : activeStep;
-  const currentWorkingColors = hasExistingDbEntries ? matrix : configuredColors;
-  // FIXED: The grid now reads exclusively from your modifiable state memory loop!
+  // FIXED (2026-08-07): the step and colour source used to be forced to
+  // "Size" / the DB-derived matrix whenever an existing style had saved
+  // data, which is exactly why an existing style always skipped the Colour
+  // screen and "Back to Colour Adjustments" appeared to do nothing (it set
+  // activeStep back to 0, but this line ignored activeStep entirely and
+  // recomputed step 1 again on every render). Both new and existing styles
+  // now walk through the same two-step flow, driven purely by activeStep;
+  // the only difference is that an existing style's Colour screen starts
+  // pre-populated with its saved allocation (via the hydration above)
+  // instead of starting blank.
+  const currentWorkingStep = activeStep;
+  const currentWorkingColors = configuredColors;
   const currentWorkingRows = matrixRows;
-  // let matrix: LocalColorRow[] = [];
-  // if (hasExistingDbEntries) {
-  //   const colorTotalQty: Record<string, number> = {};
-
-  //   activeDataArray.forEach((item: ColorSizeDetailsServiceModel) => {
-  //     if (item?.color) {
-  //       const colorKey = String(item.color).toUpperCase().trim();
-  //       colorTotalQty[colorKey] =
-  //         (colorTotalQty[colorKey] || 0) + (item.qty || item.qty || 0);
-  //     }
-  //   });
-
-  //   matrix = Object.keys(colorTotalQty).map((colorName, idx) => ({
-  //     id: idx + 1,
-  //     colorCode: colorName,
-  //     description: `Allocated Production Block ${colorName}`,
-  //     allocationWeight: colorTotalQty[colorName],
-  //   }));
-  // }
-
-  // // 3. Compute your Stage 2 grid cell sizing rows dynamically on the fly
-  // let hydratedMatrixRows: MatrixRow[] = matrixRows; // Default to your normal blank input state variables array
-  // if (hasExistingDbEntries) {
-  //   const uniqueSizesInDb = Array.from(
-  //     new Set(
-  //       activeDataArray.map((item: ColorSizeDetailsServiceModel) =>
-  //         String(item?.size || "")
-  //           .trim()
-  //           .toUpperCase(),
-  //       ),
-  //     ),
-  //   );
-  //   const targetSizes =
-  //     uniqueSizesInDb.length > 0 ? uniqueSizesInDb : ["S", "M", "L", "XL"];
-
-  //   hydratedMatrixRows = targetSizes.map((sizeName) => {
-  //     const rowObject: MatrixRow = { sizeCode: sizeName };
-  //     const matchingDbRowsForSize = activeDataArray.filter(
-  //       (item: any) =>
-  //         String(item?.size || "")
-  //           .trim()
-  //           .toUpperCase() === sizeName,
-  //     );
-
-  //     matchingDbRowsForSize.forEach((item: any) => {
-  //       if (item?.color) {
-  //         rowObject[item.color] = item.qty || item.quantity || 0;
-  //       }
-  //     });
-
-  //     return rowObject;
-  //   });
-  // }
-
-  // --- AUTOMATED RUNTIME CONTEXT ASSIGNMENTS ---
-  // const currentWorkingStep = hasExistingDbEntries ? 1 : activeStep;
-  // const currentWorkingColors = hasExistingDbEntries ? matrix : configuredColors;
-  // const currentWorkingRows = hasExistingDbEntries
-  //   ? hydratedMatrixRows
-  //   : matrixRows;
-
-  // Verify if the database actually contains active rows for this style context
-  // 1. SAFE TRUTH ENGINE EVALUATION (Added a strict fallback array check to handle 'undefined')
-  // const hasExistingDbEntries = useMemo<boolean>(() => {
-  //   const recordsArray = savedMatrixData || [];
-  //   return recordsArray.length > 0;
-  // }, [savedMatrixData]);
-
-  // // 2. FIXED STAGE 1 MEMO: Clean variable extraction satisfies the React 19 Compiler!
-  // const matrix = useMemo<LocalColorRow[]>(() => {
-  //   // Structural type guard: check database state cleanly
-  //   const activeData = savedMatrixData || [];
-
-  //   if (activeData.length === 0) {
-  //     const emptyFallback: LocalColorRow[] = [];
-  //     return emptyFallback; // Early exit using a typed instance clears the compiler optimization bug!
-  //   }
-
-  //   const colorTotalQty = activeData.reduce<Record<string, number>>(
-  //     (acc, item) => {
-  //       if (!item?.color) return acc;
-  //       if (!acc[item.color]) acc[item.color] = 0;
-  //       acc[item.color] += item.qty || item.quantity || 0;
-  //       return acc;
-  //     },
-  //     {},
-  //   );
-
-  //   return Object.keys(colorTotalQty).map((color, idx) => ({
-  //     id: idx + 1,
-  //     colorCode: color,
-  //     description: `Allocated Production Block ${color}`,
-  //     allocationWeight: colorTotalQty[color],
-  //   }));
-  // }, [savedMatrixData]);
-
-  // // 3. FIXED STAGE 2 MEMO: Fully aligned type definitions with zero undefined risks
-  // const hydratedMatrixRows = useMemo<MatrixRow[]>(() => {
-  //   const activeData = savedMatrixData || [];
-
-  //   if (activeData.length === 0) {
-  //     return matrixRows; // If a fresh style context is loaded, seamlessly drop into standard blank rows
-  //   }
-
-  //   const uniqueSizesInDb = Array.from(
-  //     new Set(
-  //       activeData.map((item: any) =>
-  //         String(item?.size || "")
-  //           .trim()
-  //           .toUpperCase(),
-  //       ),
-  //     ),
-  //   );
-  //   const targetSizes =
-  //     uniqueSizesInDb.length > 0 ? uniqueSizesInDb : ["S", "M", "L", "XL"];
-
-  //   return targetSizes.map((sizeName) => {
-  //     const rowObject: MatrixRow = { sizeCode: sizeName };
-  //     const matchingDbRowsForSize = activeData.filter(
-  //       (item: any) =>
-  //         String(item?.size || "")
-  //           .trim()
-  //           .toUpperCase() === sizeName,
-  //     );
-
-  //     matchingDbRowsForSize.forEach((item: any) => {
-  //       if (item?.color) {
-  //         rowObject[item.color] = item.qty || item.quantity || 0;
-  //       }
-  //     });
-
-  //     return rowObject;
-  //   });
-  // }, [savedMatrixData, matrixRows]);
-
-  // // --- AUTOMATED INTERACTION FOR MODE CONTROLS ---
-  // // If database rows exist, override the step to show the matrix directly, otherwise let state handle it
-  // const currentWorkingStep = hasExistingDbEntries ? 1 : activeStep;
-  // const currentWorkingColors = hasExistingDbEntries ? matrix : configuredColors;
-  // const currentWorkingRows = hasExistingDbEntries
-  //   ? hydratedMatrixRows
-  //   : matrixRows;
 
   if (!selectedStyleFromGrid) {
     return (
@@ -349,6 +186,18 @@ export default function ColorSizeBreakdown({
           <strong>Grid matrix button</strong> on a style row to begin allocation
           formatting.
         </Alert>
+      </Box>
+    );
+  }
+
+  // FIXED: wait for the existing-matrix lookup to resolve before rendering
+  // the Colour/Size screens. Without this, the Colour screen could mount
+  // (and permanently capture its initial state) before the hydration above
+  // had a chance to run, showing an empty colour list for an existing style.
+  if (isMatrixLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+        <CircularProgress size={28} />
       </Box>
     );
   }
@@ -382,9 +231,6 @@ export default function ColorSizeBreakdown({
     onResetSelection();
   };
 
-  // ----------------------------------------------------------------------------------
-  // 2. LOCATE YOUR JSX TEMPLATE RETURN BLOCK AND REPLACE YOUR CONDITIONALS EXACTLY LIKE THIS:
-  // ----------------------------------------------------------------------------------
   return (
     <Box sx={{ width: "100%", mt: 1 }}>
       <Paper elevation={2} sx={{ p: 2, mb: 3, backgroundColor: "#fafafa" }}>
@@ -397,13 +243,12 @@ export default function ColorSizeBreakdown({
         </Stepper>
       </Paper>
 
-      {/* Keep your Active Working Target Green Banner Info Box completely the same... */}
+      {/* Active Working Target banner */}
       <Paper
         variant="outlined"
         sx={{
           p: 2,
           mb: 3,
-          // backgroundColor: "#f0f4c3",
           backgroundColor: "#000",
           borderColor: "#c0ca33",
           display: "flex",
@@ -451,30 +296,22 @@ export default function ColorSizeBreakdown({
         </Box>
       </Paper>
 
-      {/* PATHWAY 1: NORMAL STEPPED ROUTE (Fires only if it is a brand-new style with no data) */}
-      {!hasExistingDbEntries && currentWorkingStep === 0 && (
+      {/* Step 1 of 2: Colour allocation - for a brand-new style this starts
+          blank; for an existing style it starts pre-populated with the
+          saved matrix's colour totals (see the hydration block above). */}
+      {currentWorkingStep === 0 && (
         <ColorBreakdown
           styleCode={styleContextSanitized.styleCode}
           bulkQuantity={styleContextSanitized.quantity}
-          initialColors={currentWorkingColors}
+          colorsList={currentWorkingColors}
+          setColorsList={setConfiguredColors}
           onNextStep={handleColorConfigurationComplete}
         />
       )}
 
-      {!hasExistingDbEntries && currentWorkingStep === 1 && (
-        <SizeBreakdown
-          styleContext={styleContextSanitized}
-          selectedColors={currentWorkingColors}
-          onBackToColors={handleReturnToColors}
-          onSaveComplete={handleWorkflowComplete}
-          setIsDirty={setIsMatrixDirty}
-          matrixRows={currentWorkingRows}
-          setMatrixRows={setMatrixRows}
-        />
-      )}
-
-      {/* PATHWAY 2: DYNAMIC PRE-POPULATION ROUTE (Fires only if pre-existing entries exist in SQL Server) */}
-      {hasExistingDbEntries && (
+      {/* Step 2 of 2: Size matrix - always follows Colour, for both new and
+          existing styles. */}
+      {currentWorkingStep === 1 && (
         <SizeBreakdown
           styleContext={styleContextSanitized}
           selectedColors={currentWorkingColors}
@@ -488,102 +325,3 @@ export default function ColorSizeBreakdown({
     </Box>
   );
 }
-
-//   return (
-//     <Box sx={{ width: "100%", mt: 1 }}>
-//       <Paper elevation={2} sx={{ p: 2, mb: 3, backgroundColor: "#fafafa" }}>
-//         <Stepper activeStep={activeStep} alternativeLabel>
-//           {steps.map((label) => (
-//             <Step key={label}>
-//               <StepLabel>{label}</StepLabel>
-//             </Step>
-//           ))}
-//         </Stepper>
-//       </Paper>
-
-//       <Paper
-//         variant="outlined"
-//         sx={{
-//           p: 2,
-//           mb: 3,
-//           backgroundColor: "#f0f4c3",
-//           borderColor: "#c0ca33",
-//           display: "flex",
-//           justifyContent: "space-between",
-//           alignItems: "center",
-//         }}
-//       >
-//         <Box>
-//           <Typography
-//             variant="subtitle1"
-//             sx={{ fontWeight: "bold", color: "#2e7d32" }}
-//           >
-//             Active Working Target: Style Code [{" "}
-//             {styleContextSanitized.styleCode} ]
-//           </Typography>
-//           <Typography variant="body2" color="text.secondary">
-//             Buyer: {buyerCode} | Order Ref: {order} | Bulk Target Size:{" "}
-//             {styleContextSanitized.quantity.toLocaleString()}{" "}
-//             {selectedStyleFromGrid.unit || "Pcs"}
-//           </Typography>
-//         </Box>
-//         <Box sx={{ textAlign: "right" }}>
-//           <Typography
-//             variant="caption"
-//             sx={{ fontWeight: "bold", display: "block" }}
-//           >
-//             COLOUR MODE:{" "}
-//             {styleContextSanitized.colorRatio === "R"
-//               ? "Ratio Splitting [R]"
-//               : "Explicit Pieces [Q]"}
-//           </Typography>
-//           <Typography
-//             variant="caption"
-//             sx={{ fontWeight: "bold", display: "block" }}
-//           >
-//             SIZE MATRIX MODE:{" "}
-//             {styleContextSanitized.sizeRatio === "R"
-//               ? "Ratio Splitting [R]"
-//               : "Explicit Pieces [Q]"}
-//           </Typography>
-//         </Box>
-//       </Paper>
-
-//       {activeStep === 0 && !savedMatrixData && (
-//         <ColorBreakdown
-//           styleCode={styleContextSanitized.styleCode}
-//           bulkQuantity={styleContextSanitized.quantity}
-//           initialColors={configuredColors}
-//           onNextStep={handleColorConfigurationComplete}
-//         />
-//       )}
-
-//       {activeStep === 1 && !savedMatrixData && (
-//         <SizeBreakdown
-//           styleContext={styleContextSanitized}
-//           selectedColors={configuredColors}
-//           onBackToColors={handleReturnToColors}
-//           onSaveComplete={handleWorkflowComplete}
-//           setIsDirty={setIsMatrixDirty}
-//           // 4. Pass matrix row properties down to Step 2
-//           matrixRows={matrixRows}
-//           setMatrixRows={setMatrixRows}
-//         />
-//       )}
-
-//       {/* new component to pass existing colorSizeDetails from DB */}
-//       {savedMatrixData && matrix && (
-//         <SizeBreakdown
-//           styleContext={styleContextSanitized}
-//           selectedColors={matrix}
-//           onBackToColors={handleReturnToColors}
-//           onSaveComplete={handleWorkflowComplete}
-//           setIsDirty={setIsMatrixDirty}
-//           // 4. Pass matrix row properties down to Step 2
-//           matrixRows={matrixRows}
-//           setMatrixRows={setMatrixRows}
-//         />
-//       )}
-//     </Box>
-//   );
-// }

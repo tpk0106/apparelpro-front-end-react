@@ -9,6 +9,10 @@ import {
   CircularProgress,
   MenuItem,
   Autocomplete,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormLabel,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import CalculateIcon from "@mui/icons-material/Calculate";
@@ -33,6 +37,7 @@ import {
 } from "../../tanstack-hooks/custom-hooks";
 import type { SupplierServiceModel } from "../../tanstack-hooks/interfaces";
 import type { Unit } from "../../interfaces/references/Unit";
+import type { AppError } from "../../auth/axiosClient";
 
 interface EntryFormProps {
   styleContext: StyleContext;
@@ -66,6 +71,12 @@ export default function ConsumptionEntryForm({
   const [calculatedTotal, setCalculatedTotal] = useState<number | null>(null);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
 
+  // MANUAL CONSUMPTION ENTRY (2026-08-07): mirrors od_tpdt1.prg's "Calculate
+  // Consumptions...? Yes|No" dialog. true (default) = the normal calculated
+  // path below. false = Color/Size/Consumption Unit/Qty per Garment/%
+  // Allowance are hidden and Total Consumption becomes a direct manual input.
+  const [calculateConsumption, setCalculateConsumption] = useState<boolean>(true);
+
   const [prevMaterialId, setPrevMaterialId] = useState<string | null>(null);
   const currentMaterialId = `${selectedMaterial.stockCode}-${selectedMaterial.itemCode}`;
 
@@ -87,6 +98,7 @@ export default function ConsumptionEntryForm({
       unitPrice: "0",
     });
     setCalculatedTotal(null);
+    setCalculateConsumption(true);
     setErrorBanner(null);
   }
 
@@ -117,6 +129,10 @@ export default function ConsumptionEntryForm({
         unitPrice: String(editingRow.unitPrice ?? 0),
       });
       setCalculatedTotal(editingRow.totalConsumption || 0);
+      // MANUAL CONSUMPTION ENTRY: default to true (calculated mode) for legacy
+      // rows saved before this field existed - matches the pre-existing
+      // behavior of always showing the calculated fields.
+      setCalculateConsumption(editingRow.calculateConsumption ?? true);
     } else {
       // Default to fresh blank models for clean additions
       setForm({
@@ -135,6 +151,7 @@ export default function ConsumptionEntryForm({
         unitPrice: "0",
       });
       setCalculatedTotal(null);
+      setCalculateConsumption(true);
     }
     setErrorBanner(null);
   }
@@ -406,8 +423,47 @@ export default function ConsumptionEntryForm({
             />
           </Grid>
 
+          {/* MANUAL CONSUMPTION ENTRY (2026-08-07): mirrors od_tpdt1.prg's
+              "Calculate Consumptions...? Yes|No" dialog. "Yes" keeps today's
+              calculated flow (Group 2/3 fields below drive Total Consumption
+              via Calculate Consumption). "No" hides those fields and lets the
+              user type Total Consumption directly - for items whose
+              consumption isn't proportional to garment quantity. */}
+          <Grid size={12}>
+            <FormLabel
+              component="legend"
+              sx={{ fontSize: "0.875rem", fontWeight: 600, mb: 0.5 }}
+            >
+              Calculate Consumptions?
+            </FormLabel>
+            <RadioGroup
+              row
+              value={calculateConsumption ? "Yes" : "No"}
+              onChange={(e) => {
+                setCalculateConsumption(e.target.value === "Yes");
+                // Force a fresh Calculate / manual entry after switching modes
+                // rather than silently carrying over a value computed under
+                // the other mode.
+                setCalculatedTotal(null);
+              }}
+            >
+              <FormControlLabel
+                value="Yes"
+                control={<Radio size="small" color="primary" />}
+                label="Yes - Calculate from Garment Qty"
+              />
+              <FormControlLabel
+                value="No"
+                control={<Radio size="small" color="secondary" />}
+                label="No - Enter Total Consumption Manually"
+              />
+            </RadioGroup>
+          </Grid>
+
           {/* Group 2: Garment Constraints Filter */}
           {/* Group 2: Garment Constraints Filter (Upgraded to type-safe Select dropdown menus) */}
+          {calculateConsumption && (
+          <>
           <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               select
@@ -520,6 +576,32 @@ export default function ConsumptionEntryForm({
               }
             />
           </Grid>
+          </>
+          )}
+
+          {/* MANUAL CONSUMPTION ENTRY: legacy's "No" branch - Color/Size/
+              Consumption Unit/Qty per Garment/% Allowance are not applicable
+              (blanked server-side too, see MaterialConsumptionService), and
+              Total Consumption is entered directly instead of computed. */}
+          {!calculateConsumption && (
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField
+              label="Total Consumption (Manual Entry)"
+              type="number"
+              size="small"
+              fullWidth
+              required
+              value={calculatedTotal ?? ""}
+              onChange={(e) => {
+                const val = e.target.value;
+                setCalculatedTotal(val === "" ? null : Number(val));
+              }}
+              helperText={`Enter the total quantity required, in ${
+                form.finalItemUnit || "the selected purchase unit"
+              }.`}
+            />
+          </Grid>
+          )}
 
           {/* Group 4: Purchasing Metrics and Logistics */}
           {/* FIXED: Dynamic Purchase Unit Select Field populating from your live units list cache */}
@@ -640,19 +722,28 @@ export default function ConsumptionEntryForm({
             paddingTop: 2,
           }}
         >
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={
-              isCalculating ? <CircularProgress size={20} /> : <CalculateIcon />
-            }
-            disabled={
-              isCalculating || !form.consumptionUnit || !form.finalItemUnit
-            }
-            onClick={handleRunCalculation}
-          >
-            Calculate Consumption
-          </Button>
+          {calculateConsumption ? (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={
+                isCalculating ? <CircularProgress size={20} /> : <CalculateIcon />
+              }
+              disabled={
+                isCalculating || !form.consumptionUnit || !form.finalItemUnit
+              }
+              onClick={handleRunCalculation}
+            >
+              Calculate Consumption
+            </Button>
+          ) : (
+            <Typography
+              variant="body2"
+              sx={{ color: "text.secondary", fontStyle: "italic" }}
+            >
+              Manual entry mode - Total Consumption entered directly above.
+            </Typography>
+          )}
 
           {calculatedTotal !== null && (
             <Typography
@@ -678,17 +769,30 @@ export default function ConsumptionEntryForm({
                 <AddShoppingCartIcon />
               )
             }
-            disabled={calculatedTotal === null || isSaving}
+            disabled={
+              // Calculated mode: unchanged - must have run Calculate at least
+              // once. Manual mode: must have entered a positive Total
+              // Consumption (mirrors od_tpdt1.prg's "valid m_tot_con > 0").
+              (calculateConsumption
+                ? calculatedTotal === null
+                : !(calculatedTotal !== null && calculatedTotal > 0)) ||
+              isSaving
+            }
             onClick={async () => {
-              console.log("ready to save form :", form.feature1);
-              console.log("ready to save form :", form.feature2);
+              // console.log("ready to save form :", form.feature1);
+              // console.log("ready to save form :", form.feature2);
               const payload = {
                 buyerCode: styleContext.buyerCode,
                 order: styleContext.order,
                 typeCode: styleContext.typeCode,
                 styleCode: styleContext.styleCode,
-                color: form.garmentColor || "",
-                size: form.garmentSize || "",
+                // MANUAL CONSUMPTION ENTRY: Color/Size/Consumption Unit/Qty per
+                // Garment/% Allowance are not applicable in manual mode (see
+                // od_tpdt1.prg's "No" branch) - send blank/zero regardless of
+                // whatever the (hidden) form fields still hold, rather than
+                // relying solely on the backend to blank them.
+                color: calculateConsumption ? form.garmentColor || "" : "",
+                size: calculateConsumption ? form.garmentSize || "" : "",
                 stockCode: selectedMaterial.stockCode,
                 itemCode: selectedMaterial.itemCode,
                 feature1: form.feature1,
@@ -696,13 +800,20 @@ export default function ConsumptionEntryForm({
                 feature3: form.feature3,
                 feature4: form.feature4,
                 description: form.description,
-                consumptionUnit: form.consumptionUnit,
-                quantityPerGarment: Number(form.quantityPerGarment) || 0,
-                percentageAllowance: Number(form.allowancePercentage) || 0,
+                consumptionUnit: calculateConsumption
+                  ? form.consumptionUnit
+                  : "",
+                quantityPerGarment: calculateConsumption
+                  ? Number(form.quantityPerGarment) || 0
+                  : 0,
+                percentageAllowance: calculateConsumption
+                  ? Number(form.allowancePercentage) || 0
+                  : 0,
                 itemUnit: form.finalItemUnit,
                 totalConsumption: calculatedTotal || 0,
                 supplierCode: form.supplierCode,
                 unitPrice: Number(form.unitPrice) || 0,
+                calculateConsumption,
 
                 // FIXED: Dynamically pulls and passes the explicit currency code selected in the master header dropdown!
                 currency: styleContext.currencyCode,
@@ -738,7 +849,7 @@ export default function ConsumptionEntryForm({
                 }
 
                 toast.update(toastId, {
-                  render: "✓ Material ledger entry saved successfully!",
+                  render: "✓ Material item entry saved successfully!",
                   type: "success",
                   isLoading: false,
                   autoClose: 4000,
@@ -771,16 +882,30 @@ export default function ConsumptionEntryForm({
                     unitPrice: "0",
                   });
                   setCalculatedTotal(null);
+                  setCalculateConsumption(true);
                   setErrorBanner(null);
                 }
               } catch (err: unknown) {
-                console.log(err);
+                // saveEntry's mutationFn (useSaveConsumptionEntryMutation)
+                // rejects with the AppError shape produced by axiosClient's
+                // response interceptor - includes the real server message
+                // (e.g. "Style already approved on {date}...") rather than
+                // the previous hardcoded generic text, which showed the same
+                // unhelpful line regardless of what actually went wrong
+                // (including the 403 approval-lock case).
+                const appError = err as AppError;
+                const serverMessage =
+                  appError && typeof appError.message === "string"
+                    ? appError.message
+                    : null;
+
                 toast.update(toastId, {
-                  render:
-                    "🛑 Failed to save material consumption entry. Verify database connectivity rules.",
+                  render: serverMessage
+                    ? `🛑 ${serverMessage}`
+                    : "🛑 Failed to save material consumption entry. Verify database connectivity rules.",
                   type: "error",
                   isLoading: false,
-                  autoClose: 5000,
+                  autoClose: 6000,
                   closeButton: true,
                 });
               }
@@ -793,473 +918,3 @@ export default function ConsumptionEntryForm({
     </Box>
   );
 }
-
-// import { useState, useEffect, useMemo } from "react";
-// import {
-//   Box,
-//   Card,
-//   Typography,
-//   TextField,
-//   Button,
-//   Alert,
-//   CircularProgress,
-//   MenuItem,
-//   Autocomplete,
-// } from "@mui/material";
-// import Grid from "@mui/material/Grid";
-// import CalculateIcon from "@mui/icons-material/Calculate";
-// import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
-// import type {
-//   StyleContext,
-//   MaterialSelection,
-//   FormInputs,
-// } from "./material-consumption.types";
-
-// // Import your custom data-fetching hooks from your RTK API slice
-// import {
-//   useGetAllUnitsQuery,
-//   useGetDynamicFeatureHeadersQuery,
-//   useLazyCalculateConsumptionQuery,
-//   type UnitServiceModel,
-// } from "../../services/material-consumption.services";
-
-// // At the top of consumption-entry-form.component.tsx, import the mutation hook:
-// import {
-//   useSaveConsumptionEntryMutation, // <-- Import the new mutation hook
-// } from "../../services/material-consumption.services";
-
-// interface EntryFormProps {
-//   styleContext: StyleContext;
-//   selectedMaterial: MaterialSelection;
-//   onCommitSuccess: () => void; // <-- ADD THIS EXACT TYPE SPECIFICATION LINE HERE
-// }
-
-// export default function ConsumptionEntryForm({
-//   styleContext,
-//   selectedMaterial,
-//   onCommitSuccess,
-// }: EntryFormProps) {
-//   // 1. Core State Control using our strict FormInputs interface contract
-//   const [form, setForm] = useState<FormInputs>({
-//     feature1: "",
-//     feature2: "",
-//     feature3: "",
-//     feature4: "",
-//     garmentColor: "",
-//     garmentSize: "",
-//     consumptionUnit: "",
-//     quantityPerGarment: "0",
-//     allowancePercentage: "0",
-//     finalItemUnit: "",
-//     supplierCode: "",
-//     unitPrice: "0",
-//   });
-
-//   const [calculatedTotal, setCalculatedTotal] = useState<number | null>(null);
-//   const [errorBanner, setErrorBanner] = useState<string | null>(null);
-
-//   // ... Inside your ConsumptionEntryForm component function block:
-//   const [saveEntry, { isLoading: isSaving }] =
-//     useSaveConsumptionEntryMutation();
-
-//   // 1. Declare a state flag to track the last material ID seen during rendering
-//   const [prevMaterialId, setPrevMaterialId] = useState<string | null>(null);
-
-//   // 2. Generate a clean compound comparison string
-//   const currentMaterialId = `${selectedMaterial.stockCode}-${selectedMaterial.itemCode}`;
-
-//   // 3. IN-MEMORY RESET GUARD: Synchronously updates layout data before rendering occurs
-//   if (currentMaterialId !== prevMaterialId) {
-//     setPrevMaterialId(currentMaterialId);
-
-//     // Reset all form metrics back to blank configurations instantly
-//     setForm({
-//       feature1: "",
-//       feature2: "",
-//       feature3: "",
-//       feature4: "",
-//       garmentColor: "",
-//       garmentSize: "",
-//       consumptionUnit: "",
-//       quantityPerGarment: "0",
-//       allowancePercentage: "0",
-//       finalItemUnit: "",
-//       supplierCode: "",
-//       unitPrice: "0",
-//     });
-//     setCalculatedTotal(null);
-//     setErrorBanner(null);
-//   }
-
-//   // const [calculatedTotal, setCalculatedTotal] = useState<number | null>(null);
-//   // const [errorBanner, setErrorBanner] = useState<string | null>(null);
-
-//   // 2. Fetch the 4 dynamic layout labels from your C# endpoint via RTK Query
-//   const { data: featureMap, isLoading: isFeaturesLoading } =
-//     useGetDynamicFeatureHeadersQuery({
-//       stockCode: selectedMaterial.stockCode,
-//       itemCode: selectedMaterial.itemCode,
-//     });
-
-//   // const { data: unitConversions } = useGetAllUnitConversionsQuery();
-
-//   // Fetch Buyers Registry
-//   const { data: unitsPageData, isLoading: isUnitsLoading } =
-//     useGetAllUnitsQuery({
-//       pageIndex: 0,
-//       pageSize: 999,
-//       sortColumn: "name",
-//       sortOrder: "asc",
-//       filterColumn: null,
-//       filterQuery: null,
-//     });
-
-//   const units = useMemo<UnitServiceModel[]>(
-//     () => unitsPageData?.items || [],
-//     [unitsPageData],
-//   );
-
-//   useEffect(() => {
-//     console.log("units : ", unitsPageData?.items || []);
-//   }, [unitsPageData?.items]);
-
-//   // 3. Mount the lazy calculation hook to run our formulas on command
-//   const [triggerCalculation, { isFetching: isCalculating }] =
-//     useLazyCalculateConsumptionQuery();
-
-//   const handleInputChange = (field: keyof FormInputs, value: string) => {
-//     setForm((prev) => ({ ...prev, [field]: value }));
-//   };
-
-//   // --- Dynamic Clipper Math Execution Trigger ---
-//   const handleRunCalculation = async () => {
-//     setErrorBanner(null);
-//     try {
-//       const result = await triggerCalculation({
-//         buyerCode: styleContext.buyerCode,
-//         order: styleContext.order,
-//         typeCode: styleContext.typeCode,
-//         styleCode: styleContext.styleCode,
-//         garmentColor: form.garmentColor || undefined,
-//         garmentSize: form.garmentSize || undefined,
-//         parentOrderUnit: styleContext.parentOrderUnit,
-//         consumptionUnit: form.consumptionUnit,
-//         finalItemUnit: form.finalItemUnit,
-//         quantityPerGarment: Number(form.quantityPerGarment) || 0,
-//         allowancePercentage: Number(form.allowancePercentage) || 0,
-//       }).unwrap();
-
-//       setCalculatedTotal(result);
-//     } catch (err: unknown) {
-//       setErrorBanner(
-//         "Calculation Aborted: Verify that the required unit conversion mapping factor rules exist inside your SQL tables.",
-//       );
-//     }
-//   };
-
-//   if (isFeaturesLoading) {
-//     return (
-//       <Box
-//         sx={{
-//           display: "flex",
-//           justifyContent: "center",
-//           alignItems: "center",
-//           height: "300px",
-//         }}
-//       >
-//         <CircularProgress size={40} sx={{ mr: 2 }} />
-//         <Typography>Resolving structural data parameters...</Typography>
-//       </Box>
-//     );
-//   }
-
-//   return (
-//     <Box>
-//       <Typography
-//         variant="h6"
-//         sx={{ fontWeight: "bold", mb: 2, color: "#1a237e" }}
-//       >
-//         Selected: {selectedMaterial.description} ({selectedMaterial.stockCode}/
-//         {selectedMaterial.itemCode})
-//       </Typography>
-
-//       {errorBanner && (
-//         <Alert severity="error" sx={{ mb: 2, fontWeight: "bold" }}>
-//           {errorBanner}
-//         </Alert>
-//       )}
-
-//       <Card variant="outlined" sx={{ p: 3, backgroundColor: "#fff" }}>
-//         <Grid container spacing={2}>
-//           {/* Group 1: Dynamic Features Section (Renders ONLY if a custom metadata label exists in DB) */}
-//           {featureMap?.feature1 && (
-//             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-//               <TextField
-//                 label={`Enter ${featureMap.feature1}`}
-//                 size="small"
-//                 fullWidth
-//                 value={form.feature1}
-//                 onChange={(e) =>
-//                   handleInputChange("feature1", e.target.value.toUpperCase())
-//                 }
-//               />
-//             </Grid>
-//           )}
-//           {featureMap?.feature2 && (
-//             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-//               <TextField
-//                 label={`Enter ${featureMap.feature2}`}
-//                 size="small"
-//                 fullWidth
-//                 value={form.feature2}
-//                 onChange={(e) =>
-//                   handleInputChange("feature2", e.target.value.toUpperCase())
-//                 }
-//               />
-//             </Grid>
-//           )}
-//           {featureMap?.feature3 && (
-//             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-//               <TextField
-//                 label={`Enter ${featureMap.feature3}`}
-//                 size="small"
-//                 fullWidth
-//                 value={form.feature3}
-//                 onChange={(e) =>
-//                   handleInputChange("feature3", e.target.value.toUpperCase())
-//                 }
-//               />
-//             </Grid>
-//           )}
-//           {featureMap?.feature4 && (
-//             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-//               <TextField
-//                 label={`Enter ${featureMap.feature4}`}
-//                 size="small"
-//                 fullWidth
-//                 value={form.feature4}
-//                 onChange={(e) =>
-//                   handleInputChange("feature4", e.target.value.toUpperCase())
-//                 }
-//               />
-//             </Grid>
-//           )}
-
-//           {/* Group 2: Garment Constraints Filter (Leave blank for universal style allocations) */}
-//           <Grid size={{ xs: 12, sm: 6 }}>
-//             <TextField
-//               label="Garment Colour Code (Optional)"
-//               placeholder="Blank applies to all colours"
-//               size="small"
-//               fullWidth
-//               value={form.garmentColor}
-//               onChange={(e) =>
-//                 handleInputChange("garmentColor", e.target.value.toUpperCase())
-//               }
-//             />
-//           </Grid>
-//           <Grid size={{ xs: 12, sm: 6 }}>
-//             <TextField
-//               label="Garment Size Code (Optional)"
-//               placeholder="Blank applies to all sizes"
-//               size="small"
-//               fullWidth
-//               value={form.garmentSize}
-//               onChange={(e) =>
-//                 handleInputChange("garmentSize", e.target.value.toUpperCase())
-//               }
-//             />
-//           </Grid>
-
-//           {/* Group 3: Quantitative Pro-Rata Multipliers */}
-//           <Grid size={{ xs: 12, sm: 4 }}>
-//             <TextField
-//               select
-//               label="Consumption Unit"
-//               size="small"
-//               fullWidth
-//               // value={form.consumptionUnit}
-//               value={form.consumptionUnit}
-//               onChange={(e) =>
-//                 handleInputChange("consumptionUnit", e.target.value)
-//               }
-//             >
-//               {units &&
-//                 units.map((unit) => {
-//                   return (
-//                     <MenuItem value={unit.code}>{unit.description}</MenuItem>
-//                   );
-//                 })}
-//               <MenuItem value="PCS">PCS (Pieces)</MenuItem>
-//               <MenuItem value="YDS">YDS (Yards)</MenuItem>
-//               <MenuItem value="DZ">DZ (Dozens)</MenuItem>
-//             </TextField>
-
-//           </Grid>
-//           <Grid size={{ xs: 12, sm: 4 }}>
-//             <TextField
-//               label="Qty Per Garment"
-//               type="number"
-//               size="small"
-//               fullWidth
-//               value={form.quantityPerGarment}
-//               onChange={(e) =>
-//                 handleInputChange("quantityPerGarment", e.target.value)
-//               }
-//             />
-//           </Grid>
-//           <Grid size={{ xs: 12, sm: 4 }}>
-//             <TextField
-//               label="Waste Allowance %"
-//               type="number"
-//               size="small"
-//               fullWidth
-//               value={form.allowancePercentage}
-//               onChange={(e) =>
-//                 handleInputChange("allowancePercentage", e.target.value)
-//               }
-//             />
-//           </Grid>
-
-//           {/* Group 4: Purchasing Metrics and Logistics */}
-//           <Grid size={{ xs: 12, sm: 4 }}>
-//             <TextField
-//               select
-//               label="Final Purchase Unit"
-//               size="small"
-//               fullWidth
-//               value={form.finalItemUnit}
-//               onChange={(e) =>
-//                 handleInputChange("finalItemUnit", e.target.value)
-//               }
-//             >
-//               <MenuItem value="PCS">PCS (Pieces)</MenuItem>
-//               <MenuItem value="GRS">GRS (Gross Box)</MenuItem>
-//               <MenuItem value="DZ">DZ (Dozens)</MenuItem>
-//             </TextField>
-//           </Grid>
-//           <Grid size={{ xs: 12, sm: 4 }}>
-//             <TextField
-//               label="Supplier Code"
-//               size="small"
-//               fullWidth
-//               value={form.supplierCode}
-//               onChange={(e) =>
-//                 handleInputChange("supplierCode", e.target.value.toUpperCase())
-//               }
-//             />
-//           </Grid>
-//           <Grid size={{ xs: 12, sm: 4 }}>
-//             <TextField
-//               label="Unit Purchase Price"
-//               type="number"
-//               size="small"
-//               fullWidth
-//               value={form.unitPrice}
-//               onChange={(e) => handleInputChange("unitPrice", e.target.value)}
-//             />
-//           </Grid>
-//         </Grid>
-
-//         {/* Action Panel Actions Block */}
-//         <Box
-//           sx={{
-//             display: "flex",
-//             borderTop: "1px solid #dee2e6",
-//             justifyContent: "space-between",
-//             alignItems: "center",
-//             marginTop: 3,
-//             padding: 2,
-//           }}
-//         >
-//           <Button
-//             variant="outlined"
-//             color="primary"
-//             startIcon={
-//               isCalculating ? <CircularProgress size={20} /> : <CalculateIcon />
-//             }
-//             disabled={
-//               isCalculating || !form.consumptionUnit || !form.finalItemUnit
-//             }
-//             onClick={handleRunCalculation}
-//           >
-//             Run Consumption Math
-//           </Button>
-
-//           {/* Display Calculated Results instantly on screen layout */}
-//           {calculatedTotal !== null && (
-//             <Typography
-//               variant="h6"
-//               sx={{
-//                 fontWeight: "bold",
-//                 color: "#2e7d32",
-//                 fontFamily: "monospace",
-//               }}
-//             >
-//               Total Requirement: {calculatedTotal.toLocaleString()}{" "}
-//               {form.finalItemUnit}
-//             </Typography>
-//           )}
-
-//           <Button
-//             variant="contained"
-//             color="success"
-//             startIcon={
-//               isSaving ? (
-//                 <CircularProgress size={20} color="inherit" />
-//               ) : (
-//                 <AddShoppingCartIcon />
-//               )
-//             }
-//             disabled={calculatedTotal === null || isSaving}
-//             onClick={async () => {
-//               try {
-//                 // Build the exact vertical payload structure expected by your C# API Controller
-//                 const payload = {
-//                   buyerCode: styleContext.buyerCode,
-//                   order: styleContext.order,
-//                   typeCode: styleContext.typeCode,
-//                   styleCode: styleContext.styleCode,
-//                   color: form.garmentColor || "",
-//                   size: form.garmentSize || "",
-//                   stockCode: selectedMaterial.stockCode,
-//                   itemCode: selectedMaterial.itemCode,
-//                   feature1: form.feature1,
-//                   feature2: form.feature2,
-//                   feature3: form.feature3,
-//                   feature4: form.feature4,
-//                   consumptionUnit: form.consumptionUnit,
-//                   quantityPerGarment: Number(form.quantityPerGarment) || 0,
-//                   percentageAllowance: Number(form.allowancePercentage) || 0,
-//                   itemUnit: form.finalItemUnit,
-//                   totalConsumption: calculatedTotal || 0,
-//                   supplierCode: form.supplierCode,
-//                   unitPrice: Number(form.unitPrice) || 0,
-//                 };
-
-//                 console.log(
-//                   "Transmitting transactional ledger entry payload to C# server...",
-//                   payload,
-//                 );
-
-//                 // Execute the database insert mutation
-//                 await saveEntry(payload).unwrap();
-
-//                 alert(
-//                   "Material ledger entry saved and synchronized with SQL Server successfully!",
-//                 );
-//                 onCommitSuccess(); // Triggers the parent hook refetch to refresh the bottom grid instantly
-//               } catch (err) {
-//                 alert(
-//                   "Failed to save material consumption entry. Verify database connectivity rules.",
-//                 );
-//               }
-//             }}
-//           >
-//             {isSaving ? "Saving..." : "Commit Entry"}
-//           </Button>
-//         </Box>
-//       </Card>
-//     </Box>
-//   );
-// }

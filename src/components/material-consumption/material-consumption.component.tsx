@@ -69,7 +69,12 @@ export default function MaterialConsumption() {
     <Box sx={{ width: "100%", p: 1 }}>
       <Typography
         variant="h5"
-        sx={{ fontWeight: "bold", color: "#1a237e", mb: 1, textAlign: "center" }}
+        sx={{
+          fontWeight: "bold",
+          color: "#1a237e",
+          mb: 1,
+          textAlign: "center",
+        }}
       >
         Material Consumption Details
       </Typography>
@@ -188,10 +193,10 @@ export default function MaterialConsumption() {
         <Alert
           severity="info"
           variant="outlined"
-          sx={{ mt: 2, fontWeight: "bold" }}
+          sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
         >
           Please select a Buyer, Purchase Order, Garment Type, and Style in the
-          header above to load the consumption workspace.
+          header above to load the consumption details.
         </Alert>
       )}
     </Box>

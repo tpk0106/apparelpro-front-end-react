@@ -7,11 +7,6 @@ import {
   Button,
   Alert,
   Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import SendIcon from "@mui/icons-material/Send";
@@ -20,7 +15,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
 
 import GoodsIssueNoteLinesGrid from "./goods-issue-note-lines-grid";
-import type { GinLineItemRow, GinSubmissionPayload } from "./goods-issue-note.types";
+import ConfirmDialog from "../common/confirm-dialog";
+import type {
+  GinLineItemRow,
+  GinSubmissionPayload,
+} from "./goods-issue-note.types";
 import {
   useGetIssuableStrnLinesQuery,
   useCommitGinMutation,
@@ -43,7 +42,9 @@ export default function GoodsIssueNoteWorkspace() {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [isOverrideDialogOpen, setIsOverrideDialogOpen] = useState(false);
   const [overrideMessage, setOverrideMessage] = useState<string | null>(null);
-  const [commitErrorMessage, setCommitErrorMessage] = useState<string | null>(null);
+  const [commitErrorMessage, setCommitErrorMessage] = useState<string | null>(
+    null,
+  );
 
   const {
     data: lookupResult,
@@ -51,7 +52,8 @@ export default function GoodsIssueNoteWorkspace() {
     error: lookupError,
   } = useGetIssuableStrnLinesQuery(lookupStrnNumber, !!lookupStrnNumber);
 
-  const { mutateAsync: commitGin, isPending: isSubmitting } = useCommitGinMutation();
+  const { mutateAsync: commitGin, isPending: isSubmitting } =
+    useCommitGinMutation();
 
   const isHeaderReady = !!lookupResult;
 
@@ -101,7 +103,9 @@ export default function GoodsIssueNoteWorkspace() {
     lines.length > 0 &&
     lines.some((l) => l.quantity > 0) &&
     lines.every(
-      (l) => l.quantity >= 0 && l.quantity <= Math.min(l.balanceToReceive, l.qtyInHand),
+      (l) =>
+        l.quantity >= 0 &&
+        l.quantity <= Math.min(l.balanceToReceive, l.qtyInHand),
     );
 
   const handleReset = () => {
@@ -133,7 +137,9 @@ export default function GoodsIssueNoteWorkspace() {
       overrideExactConsumptionCheck,
     };
 
-    const toastId = toast.loading("Posting Goods Issue Note, updating stock balances...");
+    const toastId = toast.loading(
+      "Posting Goods Issue Note, updating stock balances...",
+    );
     try {
       const response = await commitGin(payload);
       toast.update(toastId, {
@@ -155,7 +161,9 @@ export default function GoodsIssueNoteWorkspace() {
         setIsOverrideDialogOpen(true);
         return;
       }
-      setCommitErrorMessage(appError?.message ?? "Failed to post Goods Issue Note.");
+      setCommitErrorMessage(
+        appError?.message ?? "Failed to post Goods Issue Note.",
+      );
       toast.update(toastId, {
         render: `🛑 ${appError?.message ?? "Failed to post Goods Issue Note."}`,
         type: "error",
@@ -170,7 +178,9 @@ export default function GoodsIssueNoteWorkspace() {
   // project convention (no native browser confirm/alert boxes).
   const handleRequestCommit = () => {
     if (!isFormValid) {
-      toast.warning("Resolve the outstanding validation issues before confirming.");
+      toast.warning(
+        "Resolve the outstanding validation issues before confirming.",
+      );
       return;
     }
     setCommitErrorMessage(null);
@@ -189,15 +199,30 @@ export default function GoodsIssueNoteWorkspace() {
 
   return (
     <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#fafafa" }}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
-          Goods Issue Note (GIN) — Direct STRN Entry
+      <Paper
+        elevation={3}
+        sx={{
+          p: 3,
+          borderTop: "4px solid #60a5fa",
+          backgroundColor: "#fafafa",
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }}
+        >
+          Goods Issue Note (GIN)
         </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 3 }}>
-          GIN Number is allocated by the server on commit — it is never entered manually.
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ display: "block", mb: 3 }}
+        >
+          GIN Number is allocated by the server on commit — it is never entered
+          manually.
         </Typography>
 
-        <Grid container spacing={2} alignItems="center">
+        <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <TextField
               label="STRN Number"
@@ -253,15 +278,25 @@ export default function GoodsIssueNoteWorkspace() {
 
         {!isHeaderReady ? (
           <Alert severity="info" variant="outlined">
-            Enter a known STRN number and click Look Up to load its outstanding material
-            balance.
+            Enter a known STRN number and click Look Up to load its outstanding
+            material balance.
           </Alert>
         ) : (
           <Box>
-            <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: "bold", textTransform: "uppercase" }}>
-                Pending Material Lines &middot; Buyer {lookupResult.buyerCode} / Order{" "}
-                {lookupResult.order} / Dept. {lookupResult.departmentCode}
+            <Box
+              sx={{
+                mb: 2,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: "bold", textTransform: "uppercase" }}
+              >
+                Pending Material Lines &middot; Buyer {lookupResult.buyerCode} /
+                Order {lookupResult.order} / Dept. {lookupResult.departmentCode}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 {lines.length} line(s) loaded from STRN {lookupStrnNumber}
@@ -272,8 +307,8 @@ export default function GoodsIssueNoteWorkspace() {
 
             {hasOverBalanceLine && (
               <Alert severity="warning" sx={{ mt: 2 }}>
-                One or more lines exceed the available balance. Reduce the issue quantity to
-                proceed.
+                One or more lines exceed the available balance. Reduce the issue
+                quantity to proceed.
               </Alert>
             )}
           </Box>
@@ -281,7 +316,16 @@ export default function GoodsIssueNoteWorkspace() {
 
         {/* Always rendered from initial page load, never hidden behind header
             or line-count checks. Only ever enabled/disabled via isFormValid. */}
-        <Box sx={{ gap: 2, mt: 3, pt: 2, borderTop: "1px dashed rgba(139,147,161,0.3)", display: "flex", justifyContent: "flex-end" }}>
+        <Box
+          sx={{
+            gap: 2,
+            mt: 3,
+            pt: 2,
+            borderTop: "1px dashed rgba(139,147,161,0.3)",
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+        >
           <Button
             variant="outlined"
             color="inherit"
@@ -333,62 +377,36 @@ export default function GoodsIssueNoteWorkspace() {
         </Box>
       </Paper>
 
-      {/* Replaces window.confirm() with an in-app MUI dialog, per project
-          convention: no native browser alert/confirm boxes. */}
-      <Dialog
+      <ConfirmDialog
         open={isConfirmDialogOpen}
-        onClose={() => setIsConfirmDialogOpen(false)}
-        aria-labelledby="gin-confirm-dialog-title"
-        slotProps={{ paper: { sx: { backgroundColor: "#141922" } } }}
-      >
-        <DialogTitle id="gin-confirm-dialog-title" sx={{ color: "#F4F6F8" }}>
-          Confirm Goods Issue Note
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: "#F4F6F8" }}>
-            Confirm all entries and post this Goods Issue Note? This decrements the
-            stores stock ledger and closes the balance against the selected STRN.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsConfirmDialogOpen(false)} color="secondary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmCommit} variant="contained" color="primary" autoFocus>
-            Confirm & Post
-          </Button>
-        </DialogActions>
-      </Dialog>
+        title="Confirm Goods Issue Note"
+        message="Confirm all entries and post this Goods Issue Note? This decrements the stores stock ledger and closes the balance against the selected STRN."
+        confirmLabel="Confirm & Post"
+        confirmColor="primary"
+        isConfirming={isSubmitting}
+        onConfirm={handleConfirmCommit}
+        onCancel={() => setIsConfirmDialogOpen(false)}
+      />
 
       {/* Manager-override re-confirmation, triggered by a 409
-          (ExactConsumptionOverrideRequiredException) from the server. Replaces
-          the old window.confirm() override prompt. */}
-      <Dialog
+          (ExactConsumptionOverrideRequiredException) from the server. */}
+      <ConfirmDialog
         open={isOverrideDialogOpen}
-        onClose={() => setIsOverrideDialogOpen(false)}
-        aria-labelledby="gin-override-dialog-title"
-        slotProps={{ paper: { sx: { backgroundColor: "#141922" } } }}
-      >
-        <DialogTitle id="gin-override-dialog-title" sx={{ color: "#F4F6F8" }}>
-          Manager Override Required
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: "#F4F6F8" }}>
+        title="Manager Override Required"
+        message={
+          <>
             {overrideMessage}
             <br />
-            <br />
-            A manager override is required to proceed. Confirm override and re-submit?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsOverrideDialogOpen(false)} color="secondary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmOverride} variant="contained" color="primary" autoFocus>
-            Confirm Override
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <br />A manager override is required to proceed. Confirm override
+            and re-submit?
+          </>
+        }
+        confirmLabel="Confirm Override"
+        confirmColor="primary"
+        isConfirming={isSubmitting}
+        onConfirm={handleConfirmOverride}
+        onCancel={() => setIsOverrideDialogOpen(false)}
+      />
     </Box>
   );
 }

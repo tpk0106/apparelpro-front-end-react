@@ -2,6 +2,7 @@ import { client } from "../auth/axiosClient";
 import { APPARELPRO_ENDPOINTS } from "../api/api-configurations";
 import type { User } from "../interfaces/register/User";
 import type { LoginRequest } from "../interfaces/login/loginRequest";
+import type { UserWithGroups } from "../interfaces/register/UserWithGroups";
 import { USER_CREDENTIALS } from "../interfaces/definitions";
 const NOTHING = "";
 
@@ -53,4 +54,35 @@ const getUserByEmailAddress = async (userEmail: string) => {
   return response.data;
 };
 
-export { register, login, logOut, getUserByEmailAddress, updateEditUser };
+// Users & Groups admin screen (2026-08-06) - these read/write AspNetUsers +
+// AspNetUserRoles directly via the backend's new Identity-backed endpoints,
+// separate from the legacy getUserByEmailAddress/updateEditUser above which
+// still operate on the disconnected legacy Users table.
+const getUsersWithGroups = async () => {
+  return await client.get<UserWithGroups[]>(
+    APPARELPRO_ENDPOINTS.REGISTRATION.USER.LIST_WITH_GROUPS,
+  );
+};
+
+const assignUserToGroup = async (userId: string, groupId: string) => {
+  return await client.post(
+    `${APPARELPRO_ENDPOINTS.REGISTRATION.USER.USER_GROUP_BASE}${userId}/groups/${groupId}`,
+  );
+};
+
+const removeUserFromGroup = async (userId: string, groupId: string) => {
+  return await client.delete(
+    `${APPARELPRO_ENDPOINTS.REGISTRATION.USER.USER_GROUP_BASE}${userId}/groups/${groupId}`,
+  );
+};
+
+export {
+  register,
+  login,
+  logOut,
+  getUserByEmailAddress,
+  updateEditUser,
+  getUsersWithGroups,
+  assignUserToGroup,
+  removeUserFromGroup,
+};

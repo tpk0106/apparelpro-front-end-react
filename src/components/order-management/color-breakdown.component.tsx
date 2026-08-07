@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Box, Button, Card, Typography, Divider, Alert } from "@mui/material";
 import ColorBreakdownTable, {
   type LocalColorRow,
@@ -7,19 +7,27 @@ import ColorBreakdownTable, {
 interface ColorBreakdownProps {
   styleCode: string;
   bulkQuantity: number;
-  initialColors: LocalColorRow[];
+  // FIXED (2026-08-07): converted from an uncontrolled component (its own
+  // useState seeded once from an "initialColors" prop) to a fully controlled
+  // one, matching the pattern SizeBreakdown already uses for matrixRows. An
+  // uncontrolled useState only reads its initial value on first mount - for
+  // an existing style, the saved colour matrix arrives asynchronously (after
+  // useGetColorSizeSavedMatrix resolves), so the old initialColors prop
+  // updated *after* this component had already mounted with an empty array,
+  // and the update was silently ignored. Being fully controlled means this
+  // component always reflects whatever the parent's state currently holds.
+  colorsList: LocalColorRow[];
+  setColorsList: React.Dispatch<React.SetStateAction<LocalColorRow[]>>;
   onNextStep: (finalColors: LocalColorRow[]) => void;
 }
 
 export default function ColorBreakdown({
   styleCode,
   bulkQuantity,
-  initialColors,
+  colorsList,
+  setColorsList,
   onNextStep,
 }: ColorBreakdownProps) {
-  // Clean, native React state management with zero background hooks or effects
-  const [colorsList, setColorsList] = useState<LocalColorRow[]>(initialColors);
-
   const currentAllocatedTotal = colorsList.reduce(
     (sum, c) => sum + (Number(c.allocationWeight) || 0),
     0,

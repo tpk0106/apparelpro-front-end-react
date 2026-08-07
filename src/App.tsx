@@ -19,6 +19,7 @@ import OrderConfirmationRoutine from "./components/order-management/order-confir
 import MaterialConsumption from "./components/material-consumption/material-consumption.component";
 import SupplierPurchaseOrderWorkspace from "./components/supplier-purchase-order-management/supplier-purchase-order-workspace";
 import StylewiseEventsWorkspace from "./components/stylewise-events/stylewise-events-workspace";
+import TrimSheetApprovalWorkspace from "./components/trim-sheet-approval/trim-sheet-approval-workspace";
 // import StyleShippingSummaryCard from "./components/part-shipment/style-shipping-summary-card";
 // import PartShipmentsWorkspace from "./components/part-shipment/part-shipments-workspace";
 import StoresRequisitionWorkspace from "./components/orderwise-inventory/stores-requisition-workspace";
@@ -33,6 +34,7 @@ import DamagedGoodsNoteWorkspace from "./components/orderwise-inventory/damaged-
 import StockAdjustmentNoteWorkspace from "./components/orderwise-inventory/stock-adjustment-note-workspace";
 import StockMovementReportWorkspace from "./components/orderwise-inventory/stock-movement-report-workspace";
 import StrnPrintReportWorkspace from "./components/reports-orderwise-inventory/strn-print-report-workspace";
+import TrimSheetReportWorkspace from "./components/trim-sheet-report/trim-sheet-report-workspace";
 import Suppliers from "./components/references/supplier/supplier.component";
 import ItemFeatures from "./components/references/item-feature/item-feature.component";
 import SettingsPage from "./components/settings/settings.component";
@@ -81,6 +83,11 @@ function App() {
           path="stylewise-events"
           element={<StylewiseEventsWorkspace />}
         />
+        <Route
+          index
+          path="trim-sheet-approval"
+          element={<TrimSheetApprovalWorkspace />}
+        />
         <Route index path="srn" element={<StoresRequisitionWorkspace />} />
         <Route index path="gin" element={<GoodsIssueNoteWorkspace />} />
         <Route
@@ -109,6 +116,11 @@ function App() {
           element={<StockMovementReportWorkspace />}
         />
         <Route index path="strn-print" element={<StrnPrintReportWorkspace />} />
+        <Route
+          index
+          path="trim-sheet-report"
+          element={<TrimSheetReportWorkspace />}
+        />
         <Route index path="settings" element={<SettingsPage />} />
       </Route>
     </Routes>

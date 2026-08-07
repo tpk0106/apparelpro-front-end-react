@@ -8,11 +8,6 @@ import {
   Button,
   Alert,
   Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import SendIcon from "@mui/icons-material/Send";
@@ -20,6 +15,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
 
 import SupplierReturnNoteLinesGrid from "./supplier-return-note-lines-grid";
+import ConfirmDialog from "../common/confirm-dialog";
 import type {
   SrnLineItemRow,
   SrnSubmissionPayload,
@@ -39,7 +35,9 @@ import type { AppError } from "../../auth/axiosClient";
 export default function SupplierReturnNoteWorkspace() {
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string>("");
-  const [selectedSupplierCode, setSelectedSupplierCode] = useState<number | "">("");
+  const [selectedSupplierCode, setSelectedSupplierCode] = useState<number | "">(
+    "",
+  );
   const [transactionDate, setTransactionDate] = useState<string>(
     new Date().toISOString().split("T")[0],
   );
@@ -91,7 +89,8 @@ export default function SupplierReturnNoteWorkspace() {
   // returnable balance (editable down). Adjusts state during render itself - the
   // React-docs "adjusting state when a prop changes" pattern - rather than via
   // useEffect, matching the established GTN/RTN convention.
-  const [syncedReturnableStock, setSyncedReturnableStock] = useState(returnableStock);
+  const [syncedReturnableStock, setSyncedReturnableStock] =
+    useState(returnableStock);
   if (returnableStock !== syncedReturnableStock) {
     setSyncedReturnableStock(returnableStock);
     setLines(
@@ -104,7 +103,8 @@ export default function SupplierReturnNoteWorkspace() {
             description: s.description,
             qtyInHand: s.qtyInHand,
             maxReturnableQuantity: s.maxReturnableQuantity,
-            netAvailableAfterOutstandingRequisitions: s.netAvailableAfterOutstandingRequisitions,
+            netAvailableAfterOutstandingRequisitions:
+              s.netAvailableAfterOutstandingRequisitions,
           }))
         : [],
     );
@@ -124,7 +124,9 @@ export default function SupplierReturnNoteWorkspace() {
     selectedSupplierCode !== "" &&
     lines.length > 0 &&
     lines.some((l) => l.quantity > 0) &&
-    lines.every((l) => l.quantity >= 0 && l.quantity <= l.maxReturnableQuantity);
+    lines.every(
+      (l) => l.quantity >= 0 && l.quantity <= l.maxReturnableQuantity,
+    );
 
   const handleBuyerChange = (buyerCode: string) => {
     const buyer =
@@ -205,7 +207,8 @@ export default function SupplierReturnNoteWorkspace() {
       handleReset();
     } catch (err) {
       const appError = err as AppError;
-      const message = appError?.message ?? "Failed to post Supplier Return Note.";
+      const message =
+        appError?.message ?? "Failed to post Supplier Return Note.";
       // Inline, persistent error — not just a transient toast — per project
       // convention: all errors must be displayed inline, no native alert box.
       setCommitErrorMessage(message);
@@ -230,7 +233,7 @@ export default function SupplierReturnNoteWorkspace() {
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
-          Supplier Return Note (SRN) — Buyer / Order / Supplier Entry
+          Supplier Return Note (SRN)
         </Typography>
         <Typography
           variant="caption"
@@ -287,7 +290,9 @@ export default function SupplierReturnNoteWorkspace() {
               label="Supplier"
               size="small"
               fullWidth
-              value={selectedSupplierCode === "" ? "" : String(selectedSupplierCode)}
+              value={
+                selectedSupplierCode === "" ? "" : String(selectedSupplierCode)
+              }
               onChange={(e) => {
                 setSelectedSupplierCode(
                   e.target.value === "" ? "" : Number(e.target.value),
@@ -336,12 +341,20 @@ export default function SupplierReturnNoteWorkspace() {
         )}
 
         {!isHeaderReady ? (
-          <Alert severity="info" variant="outlined">
+          <Alert
+            severity="info"
+            variant="outlined"
+            sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+          >
             Select a Buyer and Order to load items currently in stock and
             available to return to a supplier.
           </Alert>
         ) : returnableStock.length === 0 ? (
-          <Alert severity="info" variant="outlined">
+          <Alert
+            severity="info"
+            variant="outlined"
+            sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+          >
             Nothing is currently returnable for this Buyer/Order — there is no
             stock on hand.
           </Alert>
@@ -372,12 +385,16 @@ export default function SupplierReturnNoteWorkspace() {
                 whole action bar no longer disappears based on line count/quantity. */}
             {lines.length === 0 ? (
               <Alert severity="info" variant="outlined">
-                All lines have been removed from this return. Reset to reload the
-                original returnable lines, or there's nothing left to submit.
+                All lines have been removed from this return. Reset to reload
+                the original returnable lines, or there's nothing left to
+                submit.
               </Alert>
             ) : (
               <>
-                <SupplierReturnNoteLinesGrid lines={lines} setLines={setLines} />
+                <SupplierReturnNoteLinesGrid
+                  lines={lines}
+                  setLines={setLines}
+                />
 
                 {hasOverReturnableLine && (
                   <Alert severity="warning" sx={{ mt: 2 }}>
@@ -457,38 +474,20 @@ export default function SupplierReturnNoteWorkspace() {
         )}
       </Paper>
 
-      {/* Replaces window.confirm() with an in-app MUI dialog, per project
-          convention: no native browser alert/confirm boxes. */}
-      <Dialog
+      <ConfirmDialog
         open={isConfirmDialogOpen}
-        onClose={() => setIsConfirmDialogOpen(false)}
-        aria-labelledby="srn-confirm-dialog-title"
-        slotProps={{ paper: { sx: { backgroundColor: "#141922" } } }}
-      >
-        <DialogTitle id="srn-confirm-dialog-title" sx={{ color: "#F4F6F8" }}>
-          Confirm Supplier Return Note
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: "#F4F6F8" }}>
-            Confirm all entries and post this Supplier Return Note? This
-            reduces physical stock on hand for Buyer {selectedBuyer?.name} /
-            Order {selectedOrder}.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsConfirmDialogOpen(false)} color="secondary">
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmCommit}
-            variant="contained"
-            color="primary"
-            autoFocus
-          >
-            Confirm & Post
-          </Button>
-        </DialogActions>
-      </Dialog>
+        title="Confirm Supplier Return Note"
+        message={<>
+            Confirm all entries and post this Supplier Return Note? This reduces
+            physical stock on hand for Buyer {selectedBuyer?.name} / Order{" "}
+            {selectedOrder}.
+          </>}
+        confirmLabel="Confirm & Post"
+        confirmColor="primary"
+        isConfirming={isSubmitting}
+        onConfirm={handleConfirmCommit}
+        onCancel={() => setIsConfirmDialogOpen(false)}
+      />
     </Box>
   );
 }

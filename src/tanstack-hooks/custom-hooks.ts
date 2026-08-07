@@ -1195,6 +1195,34 @@ import {
   loadSystemParameters,
   updateSystemParameter,
 } from "../services/system-parameter.service";
+import type { Group } from "../interfaces/register/Group";
+import { loadGroups, createGroup, deleteGroup } from "../services/group.service";
+import type { UserWithGroups } from "../interfaces/register/UserWithGroups";
+import {
+  getUsersWithGroups,
+  assignUserToGroup,
+  removeUserFromGroup,
+} from "../services/userService";
+import type {
+  Permission,
+  RolePermissionMatrixRole,
+  UpdateRolePermissionsRequest,
+} from "../interfaces/register/Permission";
+import {
+  loadPermissionCatalog,
+  loadRolePermissionMatrix,
+  updateRolePermissions,
+} from "../services/permission.service";
+import type {
+  ApproveTrimSheetPayload,
+  ApproveTrimSheetResult,
+  StyleApprovalDetails,
+  TrimSheetApprovalScopeContext,
+} from "../components/trim-sheet-approval/trim-sheet-approval.types";
+import {
+  loadStyleApprovalDetails,
+  approveTrimSheet,
+} from "../services/style-approval.service";
 
 export const useCreateColorSizeBreakdownDetailsMutation = () => {
   const queryClient = useQueryClient();
@@ -1255,6 +1283,188 @@ export const useUpdateSystemParameterMutation = () => {
     },
     onError: (error) => {
       toast.error(`Update failed: ${error.message}`);
+    },
+  });
+};
+
+// groups (Settings > Users & Groups > Groups panel)
+
+export const useGetGroupsQuery = () => {
+  return useQuery<Group[], Error>({
+    queryKey: ["groups"],
+    queryFn: async () => {
+      const response: AxiosResponse<Group[]> = await loadGroups();
+      return response.data;
+    },
+  });
+};
+
+export const useCreateGroupMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<Group, Error, string>({
+    mutationFn: async (name) => {
+      const response: AxiosResponse<Group> = await createGroup(name);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      toast.success("Group created successfully");
+    },
+    onError: (error) => {
+      toast.error(`Could not create group: ${error.message}`);
+    },
+  });
+};
+
+export const useDeleteGroupMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, string>({
+    mutationFn: async (groupId) => {
+      await deleteGroup(groupId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      toast.success("Group deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Could not delete group: ${error.message}`);
+    },
+  });
+};
+
+// users with their group memberships (Settings > Users & Groups > Users panel)
+
+export const useGetUsersWithGroupsQuery = () => {
+  return useQuery<UserWithGroups[], Error>({
+    queryKey: ["usersWithGroups"],
+    queryFn: async () => {
+      const response: AxiosResponse<UserWithGroups[]> =
+        await getUsersWithGroups();
+      return response.data;
+    },
+  });
+};
+
+export const useAssignUserToGroupMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { userId: string; groupId: string }>({
+    mutationFn: async ({ userId, groupId }) => {
+      await assignUserToGroup(userId, groupId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["usersWithGroups"] });
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      toast.success("User added to group");
+    },
+    onError: (error) => {
+      toast.error(`Could not add user to group: ${error.message}`);
+    },
+  });
+};
+
+export const useRemoveUserFromGroupMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { userId: string; groupId: string }>({
+    mutationFn: async ({ userId, groupId }) => {
+      await removeUserFromGroup(userId, groupId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["usersWithGroups"] });
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      toast.success("User removed from group");
+    },
+    onError: (error) => {
+      toast.error(`Could not remove user from group: ${error.message}`);
+    },
+  });
+};
+
+// permission matrix (Settings > Users & Groups > Permission Matrix panel)
+
+export const useGetPermissionCatalogQuery = () => {
+  return useQuery<Permission[], Error>({
+    queryKey: ["permissionCatalog"],
+    queryFn: async () => {
+      const response: AxiosResponse<Permission[]> =
+        await loadPermissionCatalog();
+      return response.data;
+    },
+  });
+};
+
+export const useGetRolePermissionMatrixQuery = () => {
+  return useQuery<RolePermissionMatrixRole[], Error>({
+    queryKey: ["rolePermissionMatrix"],
+    queryFn: async () => {
+      const response: AxiosResponse<RolePermissionMatrixRole[]> =
+        await loadRolePermissionMatrix();
+      return response.data;
+    },
+  });
+};
+
+export const useUpdateRolePermissionsMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, UpdateRolePermissionsRequest>({
+    mutationFn: async (request) => {
+      await updateRolePermissions(request);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["rolePermissionMatrix"] });
+      toast.success("Permissions updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Could not update permissions: ${error.message}`);
+    },
+  });
+};
+
+// trim sheet approval (Order Management > Material Consumption > Approve Trim Sheet)
+
+export const useGetStyleApprovalDetailsQuery = (
+  scope: TrimSheetApprovalScopeContext | null,
+) => {
+  return useQuery<StyleApprovalDetails | null, AppError>({
+    queryKey: ["styleApprovalDetails", scope],
+    queryFn: async () => {
+      const response: AxiosResponse<StyleApprovalDetails | null> =
+        await loadStyleApprovalDetails(scope as TrimSheetApprovalScopeContext);
+      return response.data;
+    },
+    enabled: !!scope,
+  });
+};
+
+export const useApproveTrimSheetMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<ApproveTrimSheetResult, AppError, ApproveTrimSheetPayload>({
+    mutationFn: async (payload) => {
+      const response: AxiosResponse<ApproveTrimSheetResult> =
+        await approveTrimSheet(payload);
+      return response.data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          "styleApprovalDetails",
+          {
+            buyerCode: variables.buyerCode,
+            order: variables.order,
+            typeCode: variables.typeCode,
+            styleCode: variables.styleCode,
+          },
+        ],
+      });
+      toast.success("Trim Sheet approved successfully");
+    },
+    onError: (error) => {
+      toast.error(`Could not approve Trim Sheet: ${error.message}`);
     },
   });
 };

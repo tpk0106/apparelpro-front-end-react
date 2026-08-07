@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Box, Paper, Typography, TextField, Button, Alert, Divider } from "@mui/material";
+import {
+  Box,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Alert,
+  Divider,
+} from "@mui/material";
 import Grid from "@mui/material/Grid";
 import SendIcon from "@mui/icons-material/Send";
 import SearchIcon from "@mui/icons-material/Search";
@@ -7,7 +15,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
 
 import GoodsReceivedNoteLinesGrid from "./goods-received-note-lines-grid";
-import type { GrnLineItemRow, GrnSubmissionPayload } from "./goods-received-note.types";
+import ConfirmDialog from "../common/confirm-dialog";
+import type {
+  GrnLineItemRow,
+  GrnSubmissionPayload,
+} from "./goods-received-note.types";
 import {
   useGetReceivableLinesByPoQuery,
   useCommitGrnMutation,
@@ -21,6 +33,11 @@ export default function GoodsReceivedNoteWorkspace() {
     new Date().toISOString().split("T")[0],
   );
   const [lines, setLines] = useState<GrnLineItemRow[]>([]);
+  // FIXED (2026-08-07): replaces window.confirm() with the shared ConfirmDialog
+  // - per project convention, no native browser alert/confirm popups (see
+  // confirm-dialog.tsx and its usage in trim-sheet-approval-card.tsx for the
+  // established pattern).
+  const [isConfirmOpen, setIsConfirmOpen] = useState<boolean>(false);
 
   const {
     data: lookupResult,
@@ -28,7 +45,8 @@ export default function GoodsReceivedNoteWorkspace() {
     error: lookupError,
   } = useGetReceivableLinesByPoQuery(lookupPoNumber, !!lookupPoNumber);
 
-  const { mutateAsync: commitGrn, isPending: isSubmitting } = useCommitGrnMutation();
+  const { mutateAsync: commitGrn, isPending: isSubmitting } =
+    useCommitGrnMutation();
 
   const isHeaderReady = !!lookupResult;
 
@@ -84,19 +102,21 @@ export default function GoodsReceivedNoteWorkspace() {
     setTransactionDate(new Date().toISOString().split("T")[0]);
   };
 
-  const handleCommit = async () => {
+  const handleRequestCommit = () => {
     if (!lookupResult) return;
 
     if (!isFormValid) {
-      toast.warning("Resolve the outstanding validation issues before confirming.");
+      toast.warning(
+        "Resolve the outstanding validation issues before confirming.",
+      );
       return;
     }
-    if (
-      !window.confirm(
-        "Confirm all entries and post this Goods Received Note?\n\nThis increases physical stock on hand and reduces the outstanding P/O balance. Proceed?",
-      )
-    )
-      return;
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmCommit = async () => {
+    if (!lookupResult) return;
+    setIsConfirmOpen(false);
 
     const payload: GrnSubmissionPayload = {
       header: {
@@ -108,21 +128,24 @@ export default function GoodsReceivedNoteWorkspace() {
       lines: lines
         .filter((l) => l.quantity > 0)
         .map((l) => ({
-        buyer: l.buyer,
-        order: l.order,
-        type: l.type,
-        style: l.style,
-        itemCode: l.itemCode,
-        unit: l.unit,
-        quantity: l.quantity,
-      })),
+          buyer: l.buyer,
+          order: l.order,
+          type: l.type,
+          style: l.style,
+          itemCode: l.itemCode,
+          unit: l.unit,
+          quantity: l.quantity,
+        })),
     };
 
-    const toastId = toast.loading("Posting Goods Received Note, updating stock balances...");
+    const toastId = toast.loading(
+      "Posting Goods Received Note, updating stock balances...",
+    );
     try {
       const response = await commitGrn(payload);
       toast.update(toastId, {
-        render: response.message || "✓ Goods Received Note posted successfully!",
+        render:
+          response.message || "✓ Goods Received Note posted successfully!",
         type: "success",
         isLoading: false,
         autoClose: 4000,
@@ -145,13 +168,18 @@ export default function GoodsReceivedNoteWorkspace() {
     <Box sx={{ width: "100%", p: 1 }}>
       <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa" }}>
         <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
-          Goods Received Note (GRN) — Direct P/O Entry
+          Goods Received Note (GRN)
         </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 3 }}>
-          GRN Number is allocated by the server on commit — it is never entered manually.
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ display: "block", mb: 3 }}
+        >
+          GRN Number is allocated by the server on commit — it is never entered
+          manually.
         </Typography>
 
-        <Grid container spacing={2} alignItems="center">
+        <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <TextField
               label="P/O Number"
@@ -197,15 +225,25 @@ export default function GoodsReceivedNoteWorkspace() {
 
         {!isHeaderReady ? (
           <Alert severity="info" variant="outlined">
-            Enter a known P/O number and click Look Up to load its outstanding delivery
-            balance.
+            Enter a known P/O number and click Look Up to load its outstanding
+            delivery balance.
           </Alert>
         ) : (
           <Box>
-            <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: "bold", textTransform: "uppercase" }}>
-                Pending Material Lines &middot; Supplier {lookupResult.supplierCode} / Store{" "}
-                {lookupResult.storeCode}
+            <Box
+              sx={{
+                mb: 2,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: "bold", textTransform: "uppercase" }}
+              >
+                Pending Material Lines &middot; Supplier{" "}
+                {lookupResult.supplierCode} / Store {lookupResult.storeCode}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 {lines.length} line(s) loaded from P/O {lookupPoNumber}
@@ -216,8 +254,8 @@ export default function GoodsReceivedNoteWorkspace() {
 
             {hasOverBalanceLine && (
               <Alert severity="warning" sx={{ mt: 2 }}>
-                One or more lines exceed the outstanding P/O balance. Reduce the receive
-                quantity to proceed.
+                One or more lines exceed the outstanding P/O balance. Reduce the
+                receive quantity to proceed.
               </Alert>
             )}
           </Box>
@@ -225,7 +263,16 @@ export default function GoodsReceivedNoteWorkspace() {
 
         {/* Always rendered from initial page load, never hidden behind header
             or line-count checks. Only ever enabled/disabled via isFormValid. */}
-        <Box sx={{ gap: 2, mt: 3, pt: 2, borderTop: "1px dashed rgba(139,147,161,0.3)", display: "flex", justifyContent: "flex-end" }}>
+        <Box
+          sx={{
+            gap: 2,
+            mt: 3,
+            pt: 2,
+            borderTop: "1px dashed rgba(139,147,161,0.3)",
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+        >
           <Button
             variant="outlined"
             color="inherit"
@@ -260,7 +307,7 @@ export default function GoodsReceivedNoteWorkspace() {
             color="primary"
             size="small"
             startIcon={<SendIcon />}
-            onClick={handleCommit}
+            onClick={handleRequestCommit}
             disabled={isSubmitting || !isFormValid}
             sx={{
               minWidth: 190,
@@ -276,6 +323,17 @@ export default function GoodsReceivedNoteWorkspace() {
           </Button>
         </Box>
       </Paper>
+
+      <ConfirmDialog
+        open={isConfirmOpen}
+        title="Confirm Goods Received Note"
+        message="Confirm all entries and post this Goods Received Note? This increases physical stock on hand and reduces the outstanding P/O balance."
+        confirmLabel="Confirm & Post"
+        confirmColor="primary"
+        isConfirming={isSubmitting}
+        onConfirm={handleConfirmCommit}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
     </Box>
   );
 }

@@ -201,7 +201,13 @@ export default function SupplierPOHeaderSelector({
         supplierCode: String(updatedSupplier.supplierCode),
         storeCode: updatedBasis.code,
         proformaInvoiceNo: updatedProformaNo.trim(),
-        proformaInvoiceDate: updatedProformaDate,
+        // FIXED (2026-08-07): "" (the date TextField's empty-value state) must become
+        // null here, not travel to the backend as an empty string - System.Text.Json's
+        // DateOnly? converter rejects "" outright ("The JSON value could not be
+        // converted to System.Nullable`1[System.DateOnly]"), which was failing the
+        // entire save request (Proforma Invoice Date is optional and commonly left
+        // blank).
+        proformaInvoiceDate: updatedProformaDate || null,
         currencyCode: updatedCurrency.code,
         buyerCode: updatedBuyer.buyerCode,
         orderNumber: updatedOrder,

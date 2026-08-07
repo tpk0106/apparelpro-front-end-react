@@ -8,11 +8,6 @@ import {
   Button,
   Alert,
   Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import SendIcon from "@mui/icons-material/Send";
@@ -20,6 +15,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
 
 import GoodsIssueNoteLinesGrid from "./goods-issue-note-lines-grid";
+import ConfirmDialog from "../common/confirm-dialog";
 import type {
   GinLineItemRow,
   GinSubmissionPayload,
@@ -251,7 +247,7 @@ export default function GoodsIssueNoteCascadeWorkspace() {
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
-          Goods Issue Note (GIN) — Buyer / Order / STRN Cascade
+          Goods Issue Note (GIN)
         </Typography>
         {/* <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 3 }}>
           GIN Number is allocated by the server on commit — it is never entered manually.
@@ -343,7 +339,11 @@ export default function GoodsIssueNoteCascadeWorkspace() {
         )}
 
         {!isHeaderReady ? (
-          <Alert severity="info" variant="outlined">
+          <Alert
+            severity="info"
+            variant="outlined"
+            sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+          >
             Select a Buyer, Order and a pending STRN to load its outstanding
             material balance.
           </Alert>
@@ -443,85 +443,36 @@ export default function GoodsIssueNoteCascadeWorkspace() {
         </Box>
       </Paper>
 
-      {/* Replaces window.confirm() with an in-app MUI dialog, per project
-          convention: no native browser alert/confirm boxes. */}
-      <Dialog
+      <ConfirmDialog
         open={isConfirmDialogOpen}
-        onClose={() => setIsConfirmDialogOpen(false)}
-        aria-labelledby="gin-cascade-confirm-dialog-title"
-        slotProps={{ paper: { sx: { backgroundColor: "#141922" } } }}
-      >
-        <DialogTitle
-          id="gin-cascade-confirm-dialog-title"
-          sx={{ color: "#F4F6F8" }}
-        >
-          Confirm Goods Issue Note
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: "#F4F6F8" }}>
-            Confirm all entries and post this Goods Issue Note? This decrements
-            the stores stock ledger and closes the balance against the selected
-            STRN.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setIsConfirmDialogOpen(false)}
-            color="secondary"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmCommit}
-            variant="contained"
-            color="primary"
-            autoFocus
-          >
-            Confirm & Post
-          </Button>
-        </DialogActions>
-      </Dialog>
+        title="Confirm Goods Issue Note"
+        message="Confirm all entries and post this Goods Issue Note? This decrements the stores stock ledger and closes the balance against the selected STRN."
+        confirmLabel="Confirm & Post"
+        confirmColor="primary"
+        isConfirming={isSubmitting}
+        onConfirm={handleConfirmCommit}
+        onCancel={() => setIsConfirmDialogOpen(false)}
+      />
 
       {/* Manager-override re-confirmation, triggered by a 409
-          (ExactConsumptionOverrideRequiredException) from the server. Replaces
-          the old window.confirm() override prompt. */}
-      <Dialog
+          (ExactConsumptionOverrideRequiredException) from the server. */}
+      <ConfirmDialog
         open={isOverrideDialogOpen}
-        onClose={() => setIsOverrideDialogOpen(false)}
-        aria-labelledby="gin-cascade-override-dialog-title"
-        slotProps={{ paper: { sx: { backgroundColor: "#141922" } } }}
-      >
-        <DialogTitle
-          id="gin-cascade-override-dialog-title"
-          sx={{ color: "#F4F6F8" }}
-        >
-          Manager Override Required
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: "#F4F6F8" }}>
+        title="Manager Override Required"
+        message={
+          <>
             {overrideMessage}
             <br />
             <br />A manager override is required to proceed. Confirm override
             and re-submit?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setIsOverrideDialogOpen(false)}
-            color="secondary"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmOverride}
-            variant="contained"
-            color="primary"
-            autoFocus
-          >
-            Confirm Override
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </>
+        }
+        confirmLabel="Confirm Override"
+        confirmColor="primary"
+        isConfirming={isSubmitting}
+        onConfirm={handleConfirmOverride}
+        onCancel={() => setIsOverrideDialogOpen(false)}
+      />
     </Box>
   );
 }

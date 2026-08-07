@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Card, TextField, Typography, CircularProgress } from "@mui/material";
+import { Card, TextField } from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
 import Grid from "@mui/material/Grid";
 import type { Style } from "../../interfaces/OrderManagement/Style";
@@ -38,16 +38,14 @@ export default function ConsumptionScopeHeader({
   );
 
   // Fetch Buyers Registry
-  const { data: buyerPageData, isLoading: isBuyersLoading } = useGetBuyersQuery(
-    {
-      pageIndex: 0,
-      pageSize: 999,
-      sortColumn: "name",
-      sortOrder: "asc",
-      filterColumn: null,
-      filterQuery: null,
-    },
-  );
+  const { data: buyerPageData } = useGetBuyersQuery({
+    pageIndex: 0,
+    pageSize: 999,
+    sortColumn: "name",
+    sortOrder: "asc",
+    filterColumn: null,
+    filterQuery: null,
+  });
 
   const buyersList = useMemo<Buyer[]>(
     () => buyerPageData?.items || [],
@@ -55,15 +53,14 @@ export default function ConsumptionScopeHeader({
   );
 
   // Fetch Currencies Master Registry mapping your standard pagination variables
-  const { data: currencyPageData, isLoading: isCurrenciesLoading } =
-    useGetCurrenciesQuery({
-      pageIndex: 0,
-      pageSize: 999,
-      sortColumn: "name",
-      sortOrder: "asc",
-      filterColumn: null,
-      filterQuery: null,
-    });
+  const { data: currencyPageData } = useGetCurrenciesQuery({
+    pageIndex: 0,
+    pageSize: 999,
+    sortColumn: "name",
+    sortOrder: "asc",
+    filterColumn: null,
+    filterQuery: null,
+  });
 
   const currenciesList = useMemo<Currency[]>(
     () => currencyPageData?.items || [],
@@ -71,24 +68,21 @@ export default function ConsumptionScopeHeader({
   );
 
   // Cascade Dependent Requests
-  const { data: ordersList = [], isLoading: isOrdersLoading } =
-    useGetAllPurchaseOrdersByBuyerCode(
-      selectedBuyer?.buyerCode ?? 0,
-      !!selectedBuyer,
-    );
+  const { data: ordersList = [] } = useGetAllPurchaseOrdersByBuyerCode(
+    selectedBuyer?.buyerCode ?? 0,
+    !!selectedBuyer,
+  );
 
-  const { data: globalTypesList = [], isLoading: isTypesLoading } =
-    useGetAllGarmentTypes();
+  const { data: globalTypesList = [] } = useGetAllGarmentTypes();
 
-  const { data: stylesList = [], isLoading: isStylesLoading } =
-    useGetStylesByScope(
-      {
-        buyerCode: selectedBuyer?.buyerCode ?? 0,
-        order: selectedOrder ?? "",
-        typeCode: selectedType?.id ?? 0,
-      },
-      !!selectedBuyer && !!selectedOrder && !!selectedType,
-    );
+  const { data: stylesList = [] } = useGetStylesByScope(
+    {
+      buyerCode: selectedBuyer?.buyerCode ?? 0,
+      order: selectedOrder ?? "",
+      typeCode: selectedType?.id ?? 0,
+    },
+    !!selectedBuyer && !!selectedOrder && !!selectedType,
+  );
 
   // --- EVENT HANDLERS ---
   const handleBuyerChange = (buyerObj: Buyer | null) => {
@@ -150,7 +144,7 @@ export default function ConsumptionScopeHeader({
     <Card variant="outlined" sx={{ p: 2, mb: 2, backgroundColor: "#fafafa" }}>
       {/* Expanded grid spacing wrapper for clean 5-column or double-row rendering */}
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Autocomplete
             options={buyersList}
             getOptionLabel={(option: Buyer) => option.name || ""}
@@ -165,7 +159,7 @@ export default function ConsumptionScopeHeader({
           />
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
           <Autocomplete
             options={ordersList}
             getOptionLabel={(option: string) => option || ""}
@@ -187,7 +181,7 @@ export default function ConsumptionScopeHeader({
           <Autocomplete
             options={globalTypesList}
             getOptionLabel={(option: GarmentTypeServiceModel) =>
-              option.typeName || ""
+              option.typeName.toUpperCase() || ""
             }
             disabled={!selectedOrder}
             value={selectedType}
@@ -199,7 +193,7 @@ export default function ConsumptionScopeHeader({
           />
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
           <Autocomplete
             options={stylesList}
             disabled={!selectedType}
@@ -223,7 +217,7 @@ export default function ConsumptionScopeHeader({
             options={currenciesList}
             disabled={!selectedStyle} // Remains locked until the style profile context is active
             getOptionLabel={(option: Currency) =>
-              option.code ? `${option.code} (${option.name})` : ""
+              option.code ? `${option.code} (${option.name.toUpperCase()})` : ""
             }
             value={selectedCurrency}
             onChange={(_, val) => handleCurrencyChange(val)}

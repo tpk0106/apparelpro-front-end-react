@@ -8,11 +8,6 @@ import {
   Button,
   Alert,
   Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import SendIcon from "@mui/icons-material/Send";
@@ -20,6 +15,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
 
 import GoodsReturnNoteLinesGrid from "./goods-return-note-lines-grid";
+import ConfirmDialog from "../common/confirm-dialog";
 import type {
   RtnLineItemRow,
   RtnSubmissionPayload,
@@ -87,7 +83,8 @@ export default function GoodsReturnNoteWorkspace() {
   // React-docs "adjusting state when a prop changes" pattern - rather than via
   // useEffect, since a synchronous setState inside an effect here trips
   // react-hooks/set-state-in-effect (an extra, avoidable cascading render pass).
-  const [syncedReturnableStock, setSyncedReturnableStock] = useState(returnableStock);
+  const [syncedReturnableStock, setSyncedReturnableStock] =
+    useState(returnableStock);
   if (returnableStock !== syncedReturnableStock) {
     setSyncedReturnableStock(returnableStock);
     setLines(
@@ -117,7 +114,9 @@ export default function GoodsReturnNoteWorkspace() {
     isHeaderReady &&
     lines.length > 0 &&
     lines.some((l) => l.quantity > 0) &&
-    lines.every((l) => l.quantity >= 0 && l.quantity <= l.maxReturnableQuantity);
+    lines.every(
+      (l) => l.quantity >= 0 && l.quantity <= l.maxReturnableQuantity,
+    );
 
   const handleBuyerChange = (buyerCode: string) => {
     const buyer =
@@ -221,7 +220,7 @@ export default function GoodsReturnNoteWorkspace() {
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
-          Goods Return Note (RTN) — Buyer / Order Entry
+          Goods Return Note (RTN)
         </Typography>
         <Typography
           variant="caption"
@@ -304,12 +303,20 @@ export default function GoodsReturnNoteWorkspace() {
         )}
 
         {!isHeaderReady ? (
-          <Alert severity="info" variant="outlined">
+          <Alert
+            severity="info"
+            variant="outlined"
+            sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+          >
             Select a Buyer and Order to load items available for return
             (anything issued but not yet returned).
           </Alert>
         ) : returnableStock.length === 0 ? (
-          <Alert severity="info" variant="outlined">
+          <Alert
+            severity="info"
+            variant="outlined"
+            sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+          >
             Nothing is currently returnable for this Buyer/Order — every issued
             item has already been fully returned, or nothing has been issued
             yet.
@@ -341,8 +348,9 @@ export default function GoodsReturnNoteWorkspace() {
                 whole action bar no longer disappears based on line count/quantity. */}
             {lines.length === 0 ? (
               <Alert severity="info" variant="outlined">
-                All lines have been removed from this return. Reset to reload the
-                original returnable lines, or there's nothing left to submit.
+                All lines have been removed from this return. Reset to reload
+                the original returnable lines, or there's nothing left to
+                submit.
               </Alert>
             ) : (
               <>
@@ -420,38 +428,20 @@ export default function GoodsReturnNoteWorkspace() {
         )}
       </Paper>
 
-      {/* Replaces window.confirm() with an in-app MUI dialog, per project
-          convention: no native browser alert/confirm boxes. */}
-      <Dialog
+      <ConfirmDialog
         open={isConfirmDialogOpen}
-        onClose={() => setIsConfirmDialogOpen(false)}
-        aria-labelledby="rtn-confirm-dialog-title"
-        slotProps={{ paper: { sx: { backgroundColor: "#141922" } } }}
-      >
-        <DialogTitle id="rtn-confirm-dialog-title" sx={{ color: "#F4F6F8" }}>
-          Confirm Goods Return Note
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: "#F4F6F8" }}>
+        title="Confirm Goods Return Note"
+        message={<>
             Confirm all entries and post this Goods Return Note? This increases
             physical stock on hand and reduces the outstanding issued balance
             for Buyer {selectedBuyer?.name} / Order {selectedOrder}.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsConfirmDialogOpen(false)} color="secondary">
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmCommit}
-            variant="contained"
-            color="primary"
-            autoFocus
-          >
-            Confirm & Post
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </>}
+        confirmLabel="Confirm & Post"
+        confirmColor="primary"
+        isConfirming={isSubmitting}
+        onConfirm={handleConfirmCommit}
+        onCancel={() => setIsConfirmDialogOpen(false)}
+      />
     </Box>
   );
 }

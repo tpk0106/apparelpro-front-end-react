@@ -177,19 +177,21 @@ export default function CopyFromStyleDialog({
       maxWidth="sm"
       fullWidth
       slotProps={{
-        paper: { sx: { backgroundColor: "#141922" } },
+        paper: { sx: { backgroundColor: "#ffffff" } },
+        //  paper: { sx: { backgroundColor: "#141922" } },
       }}
     >
-      <DialogTitle sx={{ color: "#F4F6F8" }}>
+      {/* <DialogTitle sx={{ color: "#F4F6F8" }}> */}
+      <DialogTitle sx={{ color: "000000" }}>
         Copy Materials from Another Style
       </DialogTitle>
       <DialogContent>
         <Typography variant="body2" sx={{ color: "#8B93A1", mb: 2 }}>
-          Select the Buyer, Purchase Order, Garment Type and Style to copy
-          every material line from. Quantity/Garment, Price and Currency are
-          copied exactly as they are on the source style; Colour/Size are
-          copied as-is. Any item that already exists in this style is
-          skipped, so nothing already entered here gets overwritten.
+          Select the Buyer, Purchase Order, Garment Type and Style to copy every
+          material line from. Quantity/Garment, Price and Currency are copied
+          exactly as they are on the source style; Colour/Size are copied as-is.
+          Any item that already exists in this style is skipped, so nothing
+          already entered here gets overwritten.
         </Typography>
 
         <Grid container spacing={2}>
@@ -304,7 +306,9 @@ export default function CopyFromStyleDialog({
           color="primary"
           disabled={!isSourceFullySelected || isSameAsTarget || isCopying}
           startIcon={
-            isCopying ? <CircularProgress size={16} color="inherit" /> : undefined
+            isCopying ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : undefined
           }
           sx={{ minWidth: 100 }}
         >

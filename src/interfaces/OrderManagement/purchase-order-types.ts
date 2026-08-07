@@ -4,7 +4,12 @@ export interface POHeaderState {
   supplierCode: string;
   storeCode: string;
   proformaInvoiceNo: string;
-  proformaInvoiceDate: string;
+  // FIXED (2026-08-07): the backend's ProformaInvoiceDate is an optional DateOnly? -
+  // System.Text.Json's DateOnly converter rejects an empty string outright (it only
+  // accepts a valid "yyyy-MM-dd" value or JSON null), so this must be null, not "",
+  // when the operator leaves the field blank. See SelectedPOContext below, whose
+  // verifyAndBroadcastContext is where the "" -> null conversion actually happens.
+  proformaInvoiceDate: string | null;
   currencyCode: string;
 }
 
@@ -76,7 +81,9 @@ export interface SelectedPOContext {
 
   storeCode: string;
   proformaInvoiceNo: string;
-  proformaInvoiceDate: string;
+  // FIXED (2026-08-07): see POHeaderState's matching comment - null (not "") once the
+  // field is blank, otherwise the save request fails backend JSON deserialization.
+  proformaInvoiceDate: string | null;
   currencyCode: string;
   buyerCode: number;
   orderNumber: string;

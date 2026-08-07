@@ -8,11 +8,6 @@ import {
   Button,
   Alert,
   Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import SendIcon from "@mui/icons-material/Send";
@@ -20,6 +15,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
 
 import GoodsTransferNoteLinesGrid from "./goods-transfer-note-lines-grid";
+import ConfirmDialog from "../common/confirm-dialog";
 import type {
   GtnLineItemRow,
   GtnSubmissionPayload,
@@ -36,7 +32,9 @@ import type { Buyer } from "../../interfaces/references/Buyer";
 import type { AppError } from "../../auth/axiosClient";
 
 export default function GoodsTransferNoteWorkspace() {
-  const [selectedFromBuyer, setSelectedFromBuyer] = useState<Buyer | null>(null);
+  const [selectedFromBuyer, setSelectedFromBuyer] = useState<Buyer | null>(
+    null,
+  );
   const [selectedFromOrder, setSelectedFromOrder] = useState<string>("");
   const [selectedToBuyer, setSelectedToBuyer] = useState<Buyer | null>(null);
   const [selectedToOrder, setSelectedToOrder] = useState<string>("");
@@ -147,7 +145,9 @@ export default function GoodsTransferNoteWorkspace() {
     isHeaderReady &&
     lines.length > 0 &&
     lines.some((l) => l.quantity > 0) &&
-    lines.every((l) => l.quantity >= 0 && l.quantity <= l.maxTransferableQuantity);
+    lines.every(
+      (l) => l.quantity >= 0 && l.quantity <= l.maxTransferableQuantity,
+    );
 
   const handleFromBuyerChange = (buyerCode: string) => {
     const buyer =
@@ -271,7 +271,7 @@ export default function GoodsTransferNoteWorkspace() {
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
-          Goods Transfer Note (GTN) — From / To Buyer / Order Entry
+          Goods Transfer Note (GTN)
         </Typography>
         <Typography
           variant="caption"
@@ -292,7 +292,9 @@ export default function GoodsTransferNoteWorkspace() {
               label="From Buyer"
               size="small"
               fullWidth
-              value={selectedFromBuyer ? String(selectedFromBuyer.buyerCode) : ""}
+              value={
+                selectedFromBuyer ? String(selectedFromBuyer.buyerCode) : ""
+              }
               onChange={(e) => handleFromBuyerChange(e.target.value)}
               disabled={isBuyersLoading}
             >
@@ -375,8 +377,7 @@ export default function GoodsTransferNoteWorkspace() {
 
         {isFromToIdentical && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            From and To Buyer/Order must be different for a Goods Transfer
-            Note.
+            From and To Buyer/Order must be different for a Goods Transfer Note.
           </Alert>
         )}
 
@@ -398,16 +399,24 @@ export default function GoodsTransferNoteWorkspace() {
 
         {!isHeaderReady ? (
           !isFromToIdentical && (
-            <Alert severity="info" variant="outlined">
+            <Alert
+              severity="info"
+              variant="outlined"
+              sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+            >
               Select a From Buyer/Order and a different To Buyer/Order to load
               items available for transfer.
             </Alert>
           )
         ) : transferableStock.length === 0 ? (
-          <Alert severity="info" variant="outlined">
-            Nothing is currently transferable between these two Orders —
-            either the From Order has no stock on hand, or none of its items
-            also exist on the To Order yet.
+          <Alert
+            severity="info"
+            variant="outlined"
+            sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+          >
+            Nothing is currently transferable between these two Orders — either
+            the From Order has no stock on hand, or none of its items also exist
+            on the To Order yet.
           </Alert>
         ) : (
           <Box>
@@ -432,10 +441,14 @@ export default function GoodsTransferNoteWorkspace() {
             </Box>
 
             {lines.length === 0 ? (
-              <Alert severity="info" variant="outlined">
-                All lines have been removed from this transfer. Reset to
-                reload the original transferable lines, or there's nothing
-                left to submit.
+              <Alert
+                severity="info"
+                variant="outlined"
+                sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+              >
+                All lines have been removed from this transfer. Reset to reload
+                the original transferable lines, or there's nothing left to
+                submit.
               </Alert>
             ) : (
               <>
@@ -513,37 +526,21 @@ export default function GoodsTransferNoteWorkspace() {
         )}
       </Paper>
 
-      <Dialog
+      <ConfirmDialog
         open={isConfirmDialogOpen}
-        onClose={() => setIsConfirmDialogOpen(false)}
-        aria-labelledby="gtn-confirm-dialog-title"
-        slotProps={{ paper: { sx: { backgroundColor: "#141922" } } }}
-      >
-        <DialogTitle id="gtn-confirm-dialog-title" sx={{ color: "#F4F6F8" }}>
-          Confirm Goods Transfer Note
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: "#F4F6F8" }}>
+        title="Confirm Goods Transfer Note"
+        message={<>
             Confirm all entries and post this Goods Transfer Note? This moves
             physical stock from Buyer {selectedFromBuyer?.name} / Order{" "}
             {selectedFromOrder} to Buyer {selectedToBuyer?.name} / Order{" "}
             {selectedToOrder}.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsConfirmDialogOpen(false)} color="secondary">
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmCommit}
-            variant="contained"
-            color="primary"
-            autoFocus
-          >
-            Confirm & Post
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </>}
+        confirmLabel="Confirm & Post"
+        confirmColor="primary"
+        isConfirming={isSubmitting}
+        onConfirm={handleConfirmCommit}
+        onCancel={() => setIsConfirmDialogOpen(false)}
+      />
     </Box>
   );
 }

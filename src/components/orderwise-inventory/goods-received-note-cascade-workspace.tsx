@@ -15,6 +15,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
 
 import GoodsReceivedNoteLinesGrid from "./goods-received-note-lines-grid";
+import ConfirmDialog from "../common/confirm-dialog";
 import type {
   GrnLineItemRow,
   GrnSubmissionPayload,
@@ -39,6 +40,11 @@ export default function GoodsReceivedNoteCascadeWorkspace() {
     new Date().toISOString().split("T")[0],
   );
   const [lines, setLines] = useState<GrnLineItemRow[]>([]);
+  // FIXED (2026-08-07): replaces window.confirm() with the shared ConfirmDialog
+  // - per project convention, no native browser alert/confirm popups (see
+  // confirm-dialog.tsx and its usage in trim-sheet-approval-card.tsx for the
+  // established pattern).
+  const [isConfirmOpen, setIsConfirmOpen] = useState<boolean>(false);
 
   const { data: buyerPageData, isLoading: isBuyersLoading } = useGetBuyersQuery(
     {
@@ -131,7 +137,7 @@ export default function GoodsReceivedNoteCascadeWorkspace() {
     setTransactionDate(new Date().toISOString().split("T")[0]);
   };
 
-  const handleCommit = async () => {
+  const handleRequestCommit = () => {
     if (!lookupResult) return;
 
     if (!isFormValid) {
@@ -140,12 +146,12 @@ export default function GoodsReceivedNoteCascadeWorkspace() {
       );
       return;
     }
-    if (
-      !window.confirm(
-        "Confirm all entries and post this Goods Received Note?\n\nThis increases physical stock on hand and reduces the outstanding P/O balance. Proceed?",
-      )
-    )
-      return;
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmCommit = async () => {
+    if (!lookupResult) return;
+    setIsConfirmOpen(false);
 
     const payload: GrnSubmissionPayload = {
       header: {
@@ -202,7 +208,7 @@ export default function GoodsReceivedNoteCascadeWorkspace() {
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
-          Goods Received Note (GRN) — Buyer / Order / P/O Cascade
+          Goods Received Note (GRN)
         </Typography>
         <Typography
           variant="caption"
@@ -292,7 +298,11 @@ export default function GoodsReceivedNoteCascadeWorkspace() {
         <Divider sx={{ my: 3 }} />
 
         {!isHeaderReady ? (
-          <Alert severity="info" variant="outlined">
+          <Alert
+            severity="info"
+            variant="outlined"
+            sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+          >
             Select a Buyer, Order and a pending P/O to load its outstanding
             delivery balance.
           </Alert>
@@ -371,7 +381,7 @@ export default function GoodsReceivedNoteCascadeWorkspace() {
                   color="primary"
                   size="small"
                   startIcon={<SendIcon />}
-                  onClick={handleCommit}
+                  onClick={handleRequestCommit}
                   disabled={isSubmitting || !isFormValid || isLinesLoading}
                   sx={{ minWidth: 190, height: 32 }}
                 >
@@ -382,6 +392,17 @@ export default function GoodsReceivedNoteCascadeWorkspace() {
           </Box>
         )}
       </Paper>
+
+      <ConfirmDialog
+        open={isConfirmOpen}
+        title="Confirm Goods Received Note"
+        message="Confirm all entries and post this Goods Received Note? This increases physical stock on hand and reduces the outstanding P/O balance."
+        confirmLabel="Confirm & Post"
+        confirmColor="primary"
+        isConfirming={isSubmitting}
+        onConfirm={handleConfirmCommit}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
     </Box>
   );
 }

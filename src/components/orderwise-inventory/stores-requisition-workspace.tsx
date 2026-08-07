@@ -8,11 +8,6 @@ import {
   MenuItem,
   Alert,
   Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 
@@ -23,6 +18,7 @@ import { toast } from "react-toastify";
 
 // 1. Ensure you import your fresh lines spreadsheet component grid at the top:
 import StoresRequisitionLinesGrid from "./stores-requisition-lines-grid";
+import ConfirmDialog from "../common/confirm-dialog";
 
 // Import your strict typescript interfaces contract shapes
 import {
@@ -237,9 +233,14 @@ export default function StoresRequisitionWorkspace() {
       >
         <Typography
           variant="h5"
-          sx={{ fontWeight: "bold", color: "#1a237e", mb: 3 }}
+          sx={{
+            fontWeight: "bold",
+            color: "#1a237e",
+            mb: 3,
+            textAlign: "center",
+          }}
         >
-          Stores Requisition Note (STRN) Dashboard
+          Stores Requisition Note (STRN)
         </Typography>
 
         {/* SECTION 1: DOCUMENT HEADER DATA CAPTURE TRACK PANEL */}
@@ -261,7 +262,7 @@ export default function StoresRequisitionWorkspace() {
           <Grid size={{ xs: 12, sm: 6, md: 3.5 }}>
             <TextField
               select
-              label="Select Corporate Buyer"
+              label="Select Buyer"
               size="small"
               fullWidth
               value={selectedBuyer ? String(selectedBuyer.buyerCode) : ""}
@@ -286,7 +287,7 @@ export default function StoresRequisitionWorkspace() {
           <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
             <TextField
               select
-              label="Select Contract PO"
+              label="Select Order"
               size="small"
               fullWidth
               value={selectedOrder}
@@ -338,7 +339,13 @@ export default function StoresRequisitionWorkspace() {
           <Alert
             severity="info"
             variant="outlined"
-            sx={{ fontWeight: "bold", borderLeft: "4px solid #0288d1" }}
+            sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+            // sx={{
+            //   fontWeight: "bold",
+            //   borderLeft: "4px solid #0288d1",
+            //   color: "#fff",
+            //   backgroundColor: "",
+            // }}
           >
             Please select a valid Transaction Date, Corporate Buyer reference,
             Purchase Order contract tracking ID, and Issuing Department to
@@ -466,41 +473,23 @@ export default function StoresRequisitionWorkspace() {
         </Box>
       </Paper>
 
-      {/* Replaces window.confirm() with an in-app MUI dialog, per project
-          convention: no native browser alert/confirm boxes. */}
-      <Dialog
+      <ConfirmDialog
         open={isConfirmDialogOpen}
-        onClose={() => setIsConfirmDialogOpen(false)}
-        aria-labelledby="strn-confirm-dialog-title"
-        slotProps={{ paper: { sx: { backgroundColor: "#141922" } } }}
-      >
-        <DialogTitle id="strn-confirm-dialog-title" sx={{ color: "#F4F6F8" }}>
-          Confirm Stores Requisition Note
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: "#F4F6F8" }}>
-            Confirm all entries and save this Stores Requisition Note? This will
-            lock down allocated balances across your warehouse stock ledger pool
-            for Buyer {selectedBuyer?.name} / Order {selectedOrder}.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setIsConfirmDialogOpen(false)}
-            color="secondary"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmCommit}
-            variant="contained"
-            color="primary"
-            autoFocus
-          >
-            Confirm & Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+        title="Confirm Stores Requisition Note"
+        message={
+          <>
+            Confirm all entries and save this Stores Requisition Note? This
+            will lock down allocated balances across your warehouse stock
+            ledger pool for Buyer {selectedBuyer?.name} / Order{" "}
+            {selectedOrder}.
+          </>
+        }
+        confirmLabel="Confirm & Save"
+        confirmColor="primary"
+        isConfirming={isSubmitting}
+        onConfirm={handleConfirmCommit}
+        onCancel={() => setIsConfirmDialogOpen(false)}
+      />
     </Box>
   );
 }

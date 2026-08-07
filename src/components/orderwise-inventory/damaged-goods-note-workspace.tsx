@@ -8,11 +8,6 @@ import {
   Button,
   Alert,
   Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import SendIcon from "@mui/icons-material/Send";
@@ -20,6 +15,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
 
 import DamagedGoodsNoteLinesGrid from "./damaged-goods-note-lines-grid";
+import ConfirmDialog from "../common/confirm-dialog";
 import type {
   DgnLineItemRow,
   DgnSubmissionPayload,
@@ -87,7 +83,8 @@ export default function DamagedGoodsNoteWorkspace() {
   // a Damaged Goods Note should never default to writing off the entire quantity on
   // hand; the operator must deliberately enter how much was actually damaged. Adjusts
   // state during render itself, matching the established GTN/RTN/SRN convention.
-  const [syncedDamageableStock, setSyncedDamageableStock] = useState(damageableStock);
+  const [syncedDamageableStock, setSyncedDamageableStock] =
+    useState(damageableStock);
   if (damageableStock !== syncedDamageableStock) {
     setSyncedDamageableStock(damageableStock);
     setLines(
@@ -116,7 +113,9 @@ export default function DamagedGoodsNoteWorkspace() {
     isHeaderReady &&
     lines.length > 0 &&
     lines.some((l) => l.quantity > 0) &&
-    lines.every((l) => l.quantity >= 0 && l.quantity <= l.maxDamageableQuantity);
+    lines.every(
+      (l) => l.quantity >= 0 && l.quantity <= l.maxDamageableQuantity,
+    );
 
   const handleBuyerChange = (buyerCode: string) => {
     const buyer =
@@ -219,18 +218,29 @@ export default function DamagedGoodsNoteWorkspace() {
           backgroundColor: "#f9f9f9",
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
-          Damaged Goods Note (DGN) — Buyer / Order Entry
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: "bold",
+            mb: 3,
+            textAlign: "center",
+          }}
+        >
+          Damaged Goods Note (DGN)
         </Typography>
         <Typography
           variant="caption"
           color="text.secondary"
-          sx={{ display: "block", mb: 3 }}
+          sx={{
+            display: "block",
+            mb: 3,
+            color: "#008000",
+          }}
         >
           DGN Number is allocated by the server on commit — it is never entered
           manually. Damage quantity defaults to 0 for every item; enter only
-          what was actually found damaged. It cannot exceed the current
-          quantity on hand for each item.
+          what was actually found damaged. It cannot exceed the current quantity
+          on hand for each item.
         </Typography>
 
         <Grid container spacing={2}>
@@ -302,12 +312,20 @@ export default function DamagedGoodsNoteWorkspace() {
         )}
 
         {!isHeaderReady ? (
-          <Alert severity="info" variant="outlined">
+          <Alert
+            severity="info"
+            variant="outlined"
+            sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+          >
             Select a Buyer and Order to load items currently in stock that can
             be written off as damaged.
           </Alert>
         ) : damageableStock.length === 0 ? (
-          <Alert severity="info" variant="outlined">
+          <Alert
+            severity="info"
+            variant="outlined"
+            sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+          >
             Nothing is currently on hand for this Buyer/Order to write off as
             damaged.
           </Alert>
@@ -333,7 +351,11 @@ export default function DamagedGoodsNoteWorkspace() {
             </Box>
 
             {lines.length === 0 ? (
-              <Alert severity="info" variant="outlined">
+              <Alert
+                severity="info"
+                variant="outlined"
+                sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+              >
                 All lines have been removed from this note. Reset to reload the
                 original damageable lines, or there's nothing left to submit.
               </Alert>
@@ -413,38 +435,20 @@ export default function DamagedGoodsNoteWorkspace() {
         )}
       </Paper>
 
-      {/* Replaces window.confirm() with an in-app MUI dialog, per project
-          convention: no native browser alert/confirm boxes. */}
-      <Dialog
+      <ConfirmDialog
         open={isConfirmDialogOpen}
-        onClose={() => setIsConfirmDialogOpen(false)}
-        aria-labelledby="dgn-confirm-dialog-title"
-        slotProps={{ paper: { sx: { backgroundColor: "#141922" } } }}
-      >
-        <DialogTitle id="dgn-confirm-dialog-title" sx={{ color: "#F4F6F8" }}>
-          Confirm Damaged Goods Note
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: "#F4F6F8" }}>
-            Confirm all entries and post this Damaged Goods Note? This
-            reduces physical stock on hand for Buyer {selectedBuyer?.name} /
-            Order {selectedOrder}.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsConfirmDialogOpen(false)} color="secondary">
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmCommit}
-            variant="contained"
-            color="primary"
-            autoFocus
-          >
-            Confirm & Post
-          </Button>
-        </DialogActions>
-      </Dialog>
+        title="Confirm Damaged Goods Note"
+        message={<>
+            Confirm all entries and post this Damaged Goods Note? This reduces
+            physical stock on hand for Buyer {selectedBuyer?.name} / Order{" "}
+            {selectedOrder}.
+          </>}
+        confirmLabel="Confirm & Post"
+        confirmColor="primary"
+        isConfirming={isSubmitting}
+        onConfirm={handleConfirmCommit}
+        onCancel={() => setIsConfirmDialogOpen(false)}
+      />
     </Box>
   );
 }

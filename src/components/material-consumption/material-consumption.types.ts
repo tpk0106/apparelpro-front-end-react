@@ -160,6 +160,13 @@ export interface StyleMaterialConsumptionLedgerRow {
   supplierName: string;
   unitPrice: number;
   currency: string;
+
+  // Mirrors the backend's CalculateConsumption flag (see od_tpdt1.prg's
+  // "Calculate Consumptions...? Yes|No" dialog). true = Total Consumption was
+  // derived from Garment Colour/Size/Consumption Unit/Qty per Garment/%
+  // Allowance. false = Total Consumption was entered directly by the user and
+  // those driver fields are not applicable to this row.
+  calculateConsumption: boolean;
 }
 
 export interface ConsumptionEntryPayload {
@@ -184,6 +191,11 @@ export interface ConsumptionEntryPayload {
   supplierCode: string;
   unitPrice: number;
   currency: string;
+
+  // See StyleMaterialConsumptionLedgerRow.calculateConsumption - true sends
+  // the calculated-mode fields (Color/Size/ConsumptionUnit/QuantityPerGarment/
+  // PercentageAllowance), false means Total Consumption was entered manually.
+  calculateConsumption: boolean;
 
   // Populated only when editing an EXISTING ledger row and the merchandiser
   // changed Colour/Size in the form - lets the backend clean up the old row

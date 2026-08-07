@@ -156,6 +156,17 @@ export const APPARELPRO_ENDPOINTS = {
       PUT: "api/user/",
       PATCH: "api/user",
       DELETE: "api/user/",
+      // Users & Groups admin screen (2026-08-06) - reads AspNetUsers directly,
+      // unlike GET_ALL above which reads the legacy disconnected Users table.
+      LIST_WITH_GROUPS: "api/user/list-with-groups",
+      // Base path only - callers append `${userId}/groups/${groupId}` for the
+      // POST (assign) and DELETE (remove) calls.
+      USER_GROUP_BASE: "api/user/",
+    },
+    GROUP: {
+      GET: "api/groups",
+      POST: "api/groups",
+      DELETE: "api/groups/",
     },
   },
   TOKEN: {
@@ -208,6 +219,19 @@ export const APPARELPRO_ENDPOINTS = {
     STYLE_WISE_EVENTS: {
       GET_STYLE_WISE_EVENTS_REPORT: "api/stylewise-reports/print-report",
     },
+    // "Approve Trim Sheet" (Order Management -> Material Consumption ->
+    // Approve Trim Sheet). Backed by StyleApprovalController - see
+    // src/components/trim-sheet-approval/*.
+    STYLE_APPROVAL: {
+      GET_DETAILS: "api/style-approval/details",
+      APPROVE_TRIM_SHEET: "api/style-approval/approve-trim-sheet",
+    },
+    // Trim Sheet Report (Reports -> Order Management -> Trim Sheet). Backed by
+    // TrimSheetReportController - see src/components/trim-sheet-report/*.
+    TRIM_SHEET_REPORT: {
+      GET_DETAILS: "api/trim-sheet-report/details",
+      GET_PDF: "api/trim-sheet-report/pdf",
+    },
   },
   ORDER_WISE_INVENTORY: {
     STRN: {
@@ -258,6 +282,11 @@ export const APPARELPRO_ENDPOINTS = {
       GET: "api/system-parameters/list",
       PUT: "api/system-parameters/",
     },
+  },
+  PERMISSIONS: {
+    CATALOG: "api/permissions/catalog",
+    MATRIX: "api/permissions/matrix",
+    UPDATE_ROLE: "api/permissions/role",
   },
   URLS: {
     BASEURL: import.meta.env.VITE_API_BASE_URL || "https://localhost:5000/",
