@@ -45,7 +45,7 @@ import type { Unit } from "../../interfaces/references/Unit";
 import {
   useCommitSupplierPurchaseOrderMutation,
   useGetUnfulfilledBudgetLinesQuery,
-} from "../../services/supplier-purchase-order.service";
+} from "../../services/order-management/supplier-purchase-order.service";
 
 // Helper Type Guard to safely check and extract strings out of backend network errors without 'any' overrides
 function extractErrorMessage(

@@ -30,7 +30,7 @@ import {
   resetSignUpState,
   // resetSignInState,
 } from "../sagaStore/user/user.action";
-import { loadCountries } from "../services/country.service";
+import { loadCountries } from "../services/references/country.service";
 
 import type { Country } from "../interfaces/references/Country";
 import type { User } from "../interfaces/register/User";

@@ -13,7 +13,7 @@ import type { AnyAction } from "redux-saga";
 import type PurchaseOrder from "../../interfaces/OrderManagement/PurchaseOrder";
 import { loadOrderFailure, loadOrderSuccess } from "./order.action";
 import { ORDERS_ACTION_TYPES } from "./order.types";
-import { loadPurchaseOrder } from "../../services/poService";
+import { loadPurchaseOrder } from "../../services/order-management/poService";
 import type { POParameters } from "../../interfaces/definitions";
 
 export function* loadPO(

@@ -27,7 +27,7 @@ import {
   loadGarmentTypes,
   removeGarmentType,
   updateEditGarmentType,
-} from "../../services/garment-type.service";
+} from "../../services/references/garment-type.service";
 
 export function* loadAllGarmentTypes(
   action: PayloadAction<PaginationData>,

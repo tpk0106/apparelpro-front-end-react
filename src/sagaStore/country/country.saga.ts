@@ -33,7 +33,7 @@ import {
   updateEditCountry,
   removeCountry,
   createNewCountry,
-} from "../../services/country.service";
+} from "../../services/references/country.service";
 import { handleApiError } from "../../utils/errorHandler";
 import { toast } from "react-toastify";
 import type { CountryState } from "../redux-reducer-interfaces";

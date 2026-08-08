@@ -33,7 +33,7 @@ import {
   updateEditCurrency,
   removeCurrency,
   createNewCurrency,
-} from "../../services/currency.service";
+} from "../../services/references/currency.service";
 import { toast } from "react-toastify";
 import { handleApiError } from "../../utils/errorHandler";
 import type { RootState } from "../rootReducer";

@@ -16,7 +16,7 @@ import {
   loadLedgerBreakdownByStyle,
   copyMaterialsFromStyle,
   type FeatureHeadersLookup,
-} from "../services/material-consumption-entry.service";
+} from "../services/material-consumption/material-consumption-entry.service";
 import type {
   ConsumptionCalculationParams,
   ConsumptionEntryPayload,

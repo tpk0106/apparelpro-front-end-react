@@ -29,7 +29,7 @@ import type { PartShipmentRow } from "./part-shipments.types";
 import {
   useSavePartShipmentLineMutation,
   useDeletePartShipmentLineMutation,
-} from "../../services/part-shipment.service";
+} from "../../services/order-management/part-shipment.service";
 
 // Import your existing live master lookup hook for units reference validation
 import { useGetUnits } from "../../tanstack-hooks/custom-hooks";

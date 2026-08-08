@@ -5,7 +5,7 @@ import {
   verifyStockItemAvailability,
   createSTRN,
   getAvailableStockChoices,
-} from "../services/orderwise-inventory-strn.service";
+} from "../services/orderwise-inventory/orderwise-inventory-strn.service";
 import type {
   StockItemAvailabilityDetails,
   RequisitionSubmissionPayload,
@@ -57,11 +57,7 @@ export const useGetAvailableStockChoicesQuery = (
   enabled: boolean,
 ) => {
   return useQuery<StockLookupRow[], AppError>({
-    queryKey: [
-      "orderwiseInventoryStrnChoices",
-      params.buyerCode,
-      params.order,
-    ],
+    queryKey: ["orderwiseInventoryStrnChoices", params.buyerCode, params.order],
     queryFn: async () => {
       const response: AxiosResponse<StockLookupRow[]> =
         await getAvailableStockChoices(params);

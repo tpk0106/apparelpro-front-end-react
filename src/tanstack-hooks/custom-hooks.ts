@@ -16,38 +16,38 @@ import {
   loadAllGarmentTypes,
   removeGarmentType,
   updateEditGarmentType,
-} from "../services/garment-type.service";
+} from "../services/references/garment-type.service";
 import { toast } from "react-toastify";
 import {
   createNewCurrency,
   loadCurrencies,
   removeCurrency,
   updateEditCurrency,
-} from "../services/currency.service";
+} from "../services/references/currency.service";
 import type { Currency } from "../interfaces/references/Currency";
 import type { Country } from "../interfaces/references/Country";
-import { loadCountries } from "../services/country.service";
+import { loadCountries } from "../services/references/country.service";
 import type { Bank } from "../interfaces/references/Bank";
 import {
   createNewBank,
   deleteBank,
   loadBanks,
   updateEditBank,
-} from "../services/bank.service";
+} from "../services/references/bank.service";
 import type { Unit } from "../interfaces/references/Unit";
 import {
   createNewUnit,
   loadUnits,
   removeUnit,
   updateEditUnit,
-} from "../services/unit.service";
+} from "../services/references/unit.service";
 import type { Buyer } from "../interfaces/references/Buyer";
 import {
   createNewBuyer,
   loadBuyers,
   removeBuyer,
   updateEditBuyer,
-} from "../services/buyerService";
+} from "../services/references/buyerService";
 import type { Address } from "../interfaces/references/Address";
 import {
   createNewBuyerAddress,
@@ -76,7 +76,7 @@ import {
   loadBasises,
   removeBasis,
   updateEditBasis,
-} from "../services/basis.service";
+} from "../services/references/basis.service";
 import type { Basis } from "../interfaces/references/Basis";
 import type { Style } from "../interfaces/OrderManagement/Style";
 import type { StyleTotals } from "../interfaces/OrderManagement/StyleTotals";
@@ -88,26 +88,26 @@ import {
   loadStylesByBuyerOrder,
   loadStyleTotals,
   updateEditStyle,
-} from "../services/style.service";
+} from "../services/order-management/style.service";
 import type PurchaseOrder from "../interfaces/OrderManagement/PurchaseOrder";
 import {
   createNewPO,
   loadPurchaseOrder,
   loadPurchaseOrdersByBuyerCode,
-} from "../services/poService";
+} from "../services/order-management/poService";
 
 import {
   createNewColorSizeBreakdownDetails,
   loadStyleDimensions,
   loadSavedColorSizeMatrix,
-} from "../services/color-size-breakdown-details.service";
+} from "../services/material-consumption/color-size-breakdown-details.service";
 import {
   createNewSupplier,
   loadSuppliers,
   loadSuppliersLookup,
   removeSupplier,
   updateEditSupplier,
-} from "../services/supplier.service";
+} from "../services/references/supplier.service";
 import type { ColorSizeDetailsServiceModel } from "../components/material-consumption/material-consumption.types";
 
 // 1. THE FETCH HOOK (Replaces loadAllCurrencies Saga & Reducer)
@@ -1188,7 +1188,7 @@ import {
   loadItemFeatures,
   removeItemFeature,
   updateEditItemFeature,
-} from "../services/item-feature.service";
+} from "../services/references/item-feature.service";
 // Path to your client file
 import type { SystemParameter } from "../interfaces/system-configuration/SystemParameter";
 import {
@@ -1196,7 +1196,11 @@ import {
   updateSystemParameter,
 } from "../services/system-parameter.service";
 import type { Group } from "../interfaces/register/Group";
-import { loadGroups, createGroup, deleteGroup } from "../services/group.service";
+import {
+  loadGroups,
+  createGroup,
+  deleteGroup,
+} from "../services/authorization/group.service";
 import type { UserWithGroups } from "../interfaces/register/UserWithGroups";
 import {
   getUsersWithGroups,
@@ -1212,17 +1216,17 @@ import {
   loadPermissionCatalog,
   loadRolePermissionMatrix,
   updateRolePermissions,
-} from "../services/permission.service";
+} from "../services/authorization/permission.service";
 import type {
   ApproveTrimSheetPayload,
   ApproveTrimSheetResult,
   StyleApprovalDetails,
   TrimSheetApprovalScopeContext,
-} from "../components/trim-sheet-approval/trim-sheet-approval.types";
+} from "../components/order-management/trim-sheet-approval/trim-sheet-approval.types";
 import {
   loadStyleApprovalDetails,
   approveTrimSheet,
-} from "../services/style-approval.service";
+} from "../services/order-management/style-approval.service";
 
 export const useCreateColorSizeBreakdownDetailsMutation = () => {
   const queryClient = useQueryClient();
@@ -1269,11 +1273,7 @@ export const useGetSystemParametersQuery = () => {
 export const useUpdateSystemParameterMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    void,
-    Error,
-    { parameterKey: string; value: string }
-  >({
+  return useMutation<void, Error, { parameterKey: string; value: string }>({
     mutationFn: async ({ parameterKey, value }) => {
       await updateSystemParameter(parameterKey, value);
     },
@@ -1443,28 +1443,30 @@ export const useGetStyleApprovalDetailsQuery = (
 export const useApproveTrimSheetMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<ApproveTrimSheetResult, AppError, ApproveTrimSheetPayload>({
-    mutationFn: async (payload) => {
-      const response: AxiosResponse<ApproveTrimSheetResult> =
-        await approveTrimSheet(payload);
-      return response.data;
+  return useMutation<ApproveTrimSheetResult, AppError, ApproveTrimSheetPayload>(
+    {
+      mutationFn: async (payload) => {
+        const response: AxiosResponse<ApproveTrimSheetResult> =
+          await approveTrimSheet(payload);
+        return response.data;
+      },
+      onSuccess: (_, variables) => {
+        queryClient.invalidateQueries({
+          queryKey: [
+            "styleApprovalDetails",
+            {
+              buyerCode: variables.buyerCode,
+              order: variables.order,
+              typeCode: variables.typeCode,
+              styleCode: variables.styleCode,
+            },
+          ],
+        });
+        toast.success("Trim Sheet approved successfully");
+      },
+      onError: (error) => {
+        toast.error(`Could not approve Trim Sheet: ${error.message}`);
+      },
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: [
-          "styleApprovalDetails",
-          {
-            buyerCode: variables.buyerCode,
-            order: variables.order,
-            typeCode: variables.typeCode,
-            styleCode: variables.styleCode,
-          },
-        ],
-      });
-      toast.success("Trim Sheet approved successfully");
-    },
-    onError: (error) => {
-      toast.error(`Could not approve Trim Sheet: ${error.message}`);
-    },
-  });
+  );
 };

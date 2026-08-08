@@ -34,7 +34,7 @@ import {
   loadBuyers,
   removeBuyer,
   updateEditBuyer,
-} from "../../services/buyerService";
+} from "../../services/references/buyerService";
 
 export function* loadAllBuyers(
   action: PayloadAction<PaginationData>,

@@ -5,7 +5,7 @@ import {
   getIssuableStrnLines,
   commitGIN,
   getPendingStrnsByOrder,
-} from "../services/goods-issue-note.service";
+} from "../services/orderwise-inventory/goods-issue-note.service";
 import type {
   GinStrnLookupResult,
   GinSubmissionPayload,
@@ -14,11 +14,15 @@ import type {
 } from "../components/orderwise-inventory/goods-issue-note.types";
 
 // Direct-entry lookup: fires once the user has typed a known STRN number
-export const useGetIssuableStrnLinesQuery = (strnNumber: string, enabled: boolean) => {
+export const useGetIssuableStrnLinesQuery = (
+  strnNumber: string,
+  enabled: boolean,
+) => {
   return useQuery<GinStrnLookupResult, AppError>({
     queryKey: ["ginIssuableLines", strnNumber],
     queryFn: async () => {
-      const response: AxiosResponse<GinStrnLookupResult> = await getIssuableStrnLines(strnNumber);
+      const response: AxiosResponse<GinStrnLookupResult> =
+        await getIssuableStrnLines(strnNumber);
       return response.data;
     },
     enabled,
@@ -33,7 +37,8 @@ export const useGetPendingStrnsByOrderQuery = (
   return useQuery<GinPendingStrn[], AppError>({
     queryKey: ["ginPendingStrns", params.buyerCode, params.order],
     queryFn: async () => {
-      const response: AxiosResponse<GinPendingStrn[]> = await getPendingStrnsByOrder(params);
+      const response: AxiosResponse<GinPendingStrn[]> =
+        await getPendingStrnsByOrder(params);
       return response.data;
     },
     enabled,
@@ -44,7 +49,8 @@ export const useCommitGinMutation = () => {
   const queryClient = useQueryClient();
   return useMutation<GinMutationResponse, AppError, GinSubmissionPayload>({
     mutationFn: async (payload) => {
-      const response: AxiosResponse<GinMutationResponse> = await commitGIN(payload);
+      const response: AxiosResponse<GinMutationResponse> =
+        await commitGIN(payload);
       return response.data;
     },
     onSuccess: () => {

@@ -43,8 +43,15 @@ export default function ColorSizeBreakdown({
   onResetSelection,
 }: WorkspaceProps) {
   const [activeStep, setActiveStep] = useState<number>(0);
-  const [configuredColors, setConfiguredColors] = useState<LocalColorRow[]>(
-    [],
+  const [configuredColors, setConfiguredColors] = useState<LocalColorRow[]>([]);
+
+  // FIXED (2026-08-07): tracks which colour codes were already saved for
+  // this style before this session started (captured once, at hydration -
+  // see below), as distinct from colours added locally via "Add Product
+  // Colour" and not yet saved. Used to gate the Delete action per row -
+  // see color-breakdown-table.component.tsx.
+  const [existingColorCodes, setExistingColorCodes] = useState<Set<string>>(
+    new Set(),
   );
 
   // 2. Add the Matrix State Memory here at the master parent level
@@ -64,6 +71,7 @@ export default function ColorSizeBreakdown({
     setPrevStyleId(currentStyleId);
     setActiveStep(0);
     setConfiguredColors([]);
+    setExistingColorCodes(new Set());
 
     // 3. Reset sizes back to blank base values ONLY when switching to an entirely different style
     setMatrixRows([
@@ -98,18 +106,29 @@ export default function ColorSizeBreakdown({
   let matrix: LocalColorRow[] = [];
   if (hasExistingDbEntries) {
     const colorTotalQty: Record<string, number> = {};
+    // FIXED (2026-08-07): previously this only tallied quantities and then
+    // fabricated a placeholder description ("Allocated Production Block
+    // ...") on every reload, silently discarding whatever the user had
+    // actually typed into the Colour Description field. Now captures the
+    // real saved description per colour (every size row for a given colour
+    // carries the same description, so the first non-blank one found wins).
+    const colorDescriptions: Record<string, string> = {};
     activeDataArray.forEach((item: ColorSizeDetailsServiceModel) => {
       if (item?.color) {
         const colorKey = String(item.color).toUpperCase().trim();
         colorTotalQty[colorKey] =
           (colorTotalQty[colorKey] || 0) + (item.qty || 0);
+
+        if (!colorDescriptions[colorKey] && item.description) {
+          colorDescriptions[colorKey] = item.description;
+        }
       }
     });
 
     matrix = Object.keys(colorTotalQty).map((colorName, idx) => ({
       id: idx + 1,
       colorCode: colorName,
-      description: `Allocated Production Block ${colorName}`,
+      description: colorDescriptions[colorName] || "",
       allocationWeight: colorTotalQty[colorName],
     }));
   }
@@ -118,9 +137,7 @@ export default function ColorSizeBreakdown({
   // load, for BOTH the colour screen and the size matrix screen. Previously
   // only matrixRows was hydrated here, which is why the size screen already
   // showed existing data correctly while the colour screen never did.
-  const [prevHydrationKey, setPrevHydrationKey] = useState<string | null>(
-    null,
-  );
+  const [prevHydrationKey, setPrevHydrationKey] = useState<string | null>(null);
   const currentHydrationKey = hasExistingDbEntries
     ? `${selectedStyleFromGrid?.styleCode}-${activeDataArray.length}`
     : "NEW";
@@ -160,6 +177,7 @@ export default function ColorSizeBreakdown({
 
       setMatrixRows(initialRows); // Hydrate the size-matrix state container
       setConfiguredColors(matrix); // FIXED: also hydrate the colour-screen state container
+      setExistingColorCodes(new Set(matrix.map((c) => c.colorCode)));
     }
   }
 
@@ -176,6 +194,12 @@ export default function ColorSizeBreakdown({
   const currentWorkingStep = activeStep;
   const currentWorkingColors = configuredColors;
   const currentWorkingRows = matrixRows;
+
+  // A style with an approvedDate is locked - its already-saved colours
+  // (existingColorCodes) must stay intact, so their Delete action is
+  // hidden. A colour added locally and not yet saved can still be removed
+  // regardless of the style's approval state.
+  const isStyleApproved = !!selectedStyleFromGrid?.approvedDate;
 
   if (!selectedStyleFromGrid) {
     return (
@@ -305,6 +329,8 @@ export default function ColorSizeBreakdown({
           bulkQuantity={styleContextSanitized.quantity}
           colorsList={currentWorkingColors}
           setColorsList={setConfiguredColors}
+          existingColorCodes={existingColorCodes}
+          isStyleApproved={isStyleApproved}
           onNextStep={handleColorConfigurationComplete}
         />
       )}

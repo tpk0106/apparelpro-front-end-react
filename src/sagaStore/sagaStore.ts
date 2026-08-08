@@ -15,9 +15,9 @@ import storageModule from "redux-persist/lib/storage";
 const storage = (storageModule as any).default || storageModule;
 
 import reduxLogger from "redux-logger";
-import { supplierPurchaseOrderApi } from "../services/supplier-purchase-order.service";
-import { stylewiseEventApi } from "../services/stylewise-event.services";
-import { partShipmentApi } from "../services/part-shipment.service";
+import { supplierPurchaseOrderApi } from "../services/order-management/supplier-purchase-order.service";
+import { stylewiseEventApi } from "../services/order-management/stylewise-event.services";
+import { partShipmentApi } from "../services/order-management/part-shipment.service";
 const logger = (reduxLogger as any).default || reduxLogger;
 
 declare global {

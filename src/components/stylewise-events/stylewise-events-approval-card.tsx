@@ -15,7 +15,7 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import type { SerializedError } from "@reduxjs/toolkit";
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { toast, type Id } from "react-toastify";
-import { useApproveStyleEventsMutation } from "../../services/sylewise.events.service";
+import { useApproveStyleEventsMutation } from "../../services/order-management/sylewise.events.service";
 
 import type { StylewiseEventRow } from "./stylewise-events.types";
 

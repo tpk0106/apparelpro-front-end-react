@@ -4,7 +4,7 @@ import type { AppError } from "../auth/axiosClient";
 import {
   getReturnableStockByBuyerOrder,
   commitRTN,
-} from "../services/goods-return-note.service";
+} from "../services/orderwise-inventory/goods-return-note.service";
 import type {
   RtnReturnableStockRow,
   RtnSubmissionPayload,
@@ -31,7 +31,8 @@ export const useCommitRtnMutation = () => {
   const queryClient = useQueryClient();
   return useMutation<RtnMutationResponse, AppError, RtnSubmissionPayload>({
     mutationFn: async (payload) => {
-      const response: AxiosResponse<RtnMutationResponse> = await commitRTN(payload);
+      const response: AxiosResponse<RtnMutationResponse> =
+        await commitRTN(payload);
       return response.data;
     },
     onSuccess: () => {

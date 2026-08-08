@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Button, Card, Typography, Divider, Alert } from "@mui/material";
 import ColorBreakdownTable, {
   type LocalColorRow,
 } from "./color-breakdown-table.component";
+import InfoDialog from "../common/info-dialog";
 
 interface ColorBreakdownProps {
   styleCode: string;
@@ -18,6 +19,8 @@ interface ColorBreakdownProps {
   // component always reflects whatever the parent's state currently holds.
   colorsList: LocalColorRow[];
   setColorsList: React.Dispatch<React.SetStateAction<LocalColorRow[]>>;
+  existingColorCodes: Set<string>;
+  isStyleApproved: boolean;
   onNextStep: (finalColors: LocalColorRow[]) => void;
 }
 
@@ -26,6 +29,8 @@ export default function ColorBreakdown({
   bulkQuantity,
   colorsList,
   setColorsList,
+  existingColorCodes,
+  isStyleApproved,
   onNextStep,
 }: ColorBreakdownProps) {
   const currentAllocatedTotal = colorsList.reduce(
@@ -37,10 +42,16 @@ export default function ColorBreakdown({
   const isSetupInvalid =
     colorsList.length === 0 || hasZeroWeights || totalQuantityMismatched;
 
+  // FIXED (2026-08-07): replaces window.alert() with the shared InfoDialog -
+  // per project convention, no native browser alert/confirm popups.
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null,
+  );
+
   const handleProceed = () => {
     if (isSetupInvalid) {
-      alert(
-        `Validation Guard: Total allocated pieces (${currentAllocatedTotal}) must equal the Style total (${bulkQuantity}) exactly.`,
+      setValidationMessage(
+        `Total allocated pieces (${currentAllocatedTotal}) must equal the Style total (${bulkQuantity}) exactly.`,
       );
       return;
     }
@@ -108,7 +119,12 @@ export default function ColorBreakdown({
         </Alert>
       )}
 
-      <ColorBreakdownTable colors={colorsList} setColors={setColorsList} />
+      <ColorBreakdownTable
+        colors={colorsList}
+        setColors={setColorsList}
+        existingColorCodes={existingColorCodes}
+        isStyleApproved={isStyleApproved}
+      />
 
       <Box
         sx={{ display: "flex", justifyContent: "flex-end", marginTop: "3px" }}
@@ -124,6 +140,14 @@ export default function ColorBreakdown({
           Generate Size Distribution Matrix →
         </Button>
       </Box>
+
+      <InfoDialog
+        open={!!validationMessage}
+        title="Validation Guard"
+        message={validationMessage}
+        severity="error"
+        onClose={() => setValidationMessage(null)}
+      />
     </Card>
   );
 }

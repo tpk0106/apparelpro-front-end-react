@@ -29,7 +29,7 @@ import {
   loadPortDestinations,
   removePortDestination,
   updateEditPortDestination,
-} from "../../services/port-destination.service";
+} from "../../services/references/port-destination.service";
 
 export function* loadAllPortDestinations(
   action: PayloadAction<PaginationData>,

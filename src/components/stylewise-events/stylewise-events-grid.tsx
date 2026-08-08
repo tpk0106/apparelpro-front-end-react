@@ -27,7 +27,7 @@ import {
   useUpdateStylewiseEventLineMutation,
   useDeleteStylewiseEventLineMutation,
   useAddCustomStylewiseEventLineMutation,
-} from "../../services/stylewise-event.services";
+} from "../../services/order-management/stylewise-event.services";
 import { APPARELPRO_ENDPOINTS } from "../../api/api-configurations";
 
 interface GridProps {

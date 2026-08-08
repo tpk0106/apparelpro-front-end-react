@@ -226,6 +226,12 @@ export const APPARELPRO_ENDPOINTS = {
       GET_DETAILS: "api/style-approval/details",
       APPROVE_TRIM_SHEET: "api/style-approval/approve-trim-sheet",
     },
+    // Order Detail Report (Reports -> Order Management -> Order Detail). Backed by
+    // OrderDetailReportController - see src/components/order-detail-report/*.
+    ORDER_DETAIL_REPORT: {
+      GET_DETAILS: "api/order-detail-report/details",
+      GET_PDF: "api/order-detail-report/pdf",
+    },
     // Trim Sheet Report (Reports -> Order Management -> Trim Sheet). Backed by
     // TrimSheetReportController - see src/components/trim-sheet-report/*.
     TRIM_SHEET_REPORT: {

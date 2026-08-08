@@ -4,7 +4,7 @@ import type { AppError } from "../auth/axiosClient";
 import {
   getStrnPrintDetails,
   downloadStrnPrintPdf,
-} from "../services/strn-print-report.service";
+} from "../services/reports/orderwise-inventory/strn-print-report.service";
 import type { StrnPrintReportDetails } from "../components/reports-orderwise-inventory/strn-print-report.types";
 
 export const useGetStrnPrintDetailsQuery = (

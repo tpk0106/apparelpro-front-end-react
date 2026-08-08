@@ -1,7 +1,8 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Box, Button, Card, Typography, Divider } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import SizeBreakdownTable from "./size-breakdown-table.component";
+import InfoDialog from "../common/info-dialog";
 import type { LocalColorRow } from "./color-breakdown-table.component";
 import type { MatrixRow } from "./color-size-breakdown.component"; // Import type from parent
 import { useCreateColorSizeBreakdownDetailsMutation } from "../../tanstack-hooks/custom-hooks";
@@ -46,6 +47,26 @@ export default function SizeBreakdown({
   const { mutateAsync: createNewColorSizeBreakdownDetails } =
     useCreateColorSizeBreakdownDetailsMutation();
 
+  // FIXED (2026-08-07): replaces window.alert() with the shared InfoDialog -
+  // per project convention, no native browser alert/confirm popups. The
+  // success case must still wait for the user to click OK before calling
+  // onSaveComplete() (which resets/exits the workspace) - see
+  // handleCloseNotice below - matching the original blocking alert()
+  // behaviour where onSaveComplete() only ran after the user dismissed it.
+  const [notice, setNotice] = useState<{
+    title: string;
+    message: string;
+    severity: "error" | "success";
+  } | null>(null);
+
+  const handleCloseNotice = () => {
+    const wasSuccess = notice?.severity === "success";
+    setNotice(null);
+    if (wasSuccess) {
+      onSaveComplete();
+    }
+  };
+
   const handleVerifyAndSubmit = async () => {
     const totalColorWeights = selectedColors.reduce(
       (sum, c) => sum + c.allocationWeight,
@@ -55,9 +76,11 @@ export default function SizeBreakdown({
     for (const col of selectedColors) {
       const enteredColumnSum = columnTotals[col.colorCode];
       if (enteredColumnSum === 0) {
-        alert(
-          `Validation Error: Total size weights for colour ${col.colorCode} cannot be zero.`,
-        );
+        setNotice({
+          title: "Validation Error",
+          message: `Total size weights for colour ${col.colorCode} cannot be zero.`,
+          severity: "error",
+        });
         return;
       }
 
@@ -69,12 +92,14 @@ export default function SizeBreakdown({
       if (isExplicitPieceMode) {
         // Enforce strict piece target balance reconciliation audits
         if (enteredColumnSum !== col.allocationWeight) {
-          alert(
-            `Quantity Mismatch Error for Colour [${col.colorCode}]!\n\n` +
+          setNotice({
+            title: `Quantity Mismatch Error for Colour [${col.colorCode}]`,
+            message:
               `Expected Matrix Budget Sum: ${col.allocationWeight} Pcs\n` +
               `Actual Grid Entered Total: ${enteredColumnSum} Pcs\n\n` +
               `Please balance your size columns before executing database updates.`,
-          );
+            severity: "error",
+          });
           return;
         }
 
@@ -137,6 +162,11 @@ export default function SizeBreakdown({
           size: row.sizeCode as string,
           ratio: Number(targetRatio.toFixed(2)),
           quantity: Number(targetQty.toFixed(2)),
+          // FIXED (2026-08-07): the description entered in Stage 1 was never
+          // included in the save payload, so it was silently dropped on
+          // every save. Denormalized onto every size row for this colour,
+          // matching how colorCode itself is already denormalized here.
+          description: col.description || "",
         });
       }
     }
@@ -160,13 +190,21 @@ export default function SizeBreakdown({
       console.log("Syncing matrix params", fullPayload.params);
       console.log("Syncing matrix data...", fullPayload.payload);
       createNewColorSizeBreakdownDetails(fullPayload);
-      alert(
-        "Breakdown matrix synced with SQL Server database via EF Core transaction successfully!",
-      );
-      onSaveComplete();
+      setNotice({
+        title: "Save Successful",
+        message:
+          "Breakdown matrix synced with SQL Server database via EF Core transaction successfully!",
+        severity: "success",
+      });
+      // onSaveComplete() now runs from handleCloseNotice, once the user
+      // acknowledges the dialog above - see the comment on the notice state.
     } catch (err) {
       console.log(err);
-      alert("Failed to submit allocation matrix data.");
+      setNotice({
+        title: "Save Failed",
+        message: "Failed to submit allocation matrix data.",
+        severity: "error",
+      });
     }
   };
 
@@ -233,6 +271,14 @@ export default function SizeBreakdown({
           [Esc] Save Breakdown Matrix
         </Button>
       </Box>
+
+      <InfoDialog
+        open={!!notice}
+        title={notice?.title ?? ""}
+        message={notice?.message ?? ""}
+        severity={notice?.severity ?? "info"}
+        onClose={handleCloseNotice}
+      />
     </Card>
   );
 }

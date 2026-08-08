@@ -16,6 +16,8 @@ import {
   TextField,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import InfoDialog from "../common/info-dialog";
+import ConfirmDialog from "../common/confirm-dialog";
 
 import type { LocalColorRow } from "./color-breakdown-table.component";
 import type { MatrixRow } from "./color-size-breakdown.component";
@@ -105,6 +107,40 @@ export default function SizeBreakdownTable({
   setIsDirty,
   unit,
 }: TableProps) {
+  // FIXED (2026-08-07): replaces window.alert() with the shared InfoDialog -
+  // per project convention, no native browser alert/confirm popups.
+  const [duplicateSizeMessage, setDuplicateSizeMessage] = useState<
+    string | null
+  >(null);
+
+  // FIXED (2026-08-07): replaces window.prompt() with the shared ConfirmDialog -
+  // per project convention, no native browser prompt popups.
+  const [isAddSizeDialogOpen, setIsAddSizeDialogOpen] = useState(false);
+  const [newSizeLabelInput, setNewSizeLabelInput] = useState("");
+
+  const handleConfirmAddSize = () => {
+    const cleanLabel = newSizeLabelInput.toUpperCase().trim();
+    setIsAddSizeDialogOpen(false);
+    if (!cleanLabel) return;
+
+    if (matrixRows.some((r) => r.sizeCode === cleanLabel)) {
+      setDuplicateSizeMessage(
+        "This size label notation already exists inside the active workspace.",
+      );
+      return;
+    }
+
+    const blankRow: MatrixRow = { sizeCode: cleanLabel };
+    selectedColors.forEach((c) => {
+      blankRow[c.colorCode] = 0;
+    });
+    setMatrixRows((prev) => [...prev, blankRow]);
+  };
+
+  const handleCancelAddSize = () => {
+    setIsAddSizeDialogOpen(false);
+  };
+
   // 2. Map structural grid blueprints
   const columns = useMemo<MRT_ColumnDef<MatrixRow>[]>(() => {
     const generatedColumns: MRT_ColumnDef<MatrixRow>[] = [
@@ -157,24 +193,8 @@ export default function SizeBreakdownTable({
           color="info"
           startIcon={<AddIcon />}
           onClick={() => {
-            const newLabel = prompt(
-              "Enter New Product Size Extension (e.g. 32, 34, L, XL):",
-            );
-            if (!newLabel) return;
-
-            const cleanLabel = newLabel.toUpperCase().trim();
-            if (matrixRows.some((r) => r.sizeCode === cleanLabel)) {
-              alert(
-                "This size label notation already exists inside the active workspace.",
-              );
-              return;
-            }
-
-            const blankRow: MatrixRow = { sizeCode: cleanLabel };
-            selectedColors.forEach((c) => {
-              blankRow[c.colorCode] = 0;
-            });
-            setMatrixRows((prev) => [...prev, blankRow]);
+            setNewSizeLabelInput("");
+            setIsAddSizeDialogOpen(true);
           }}
         >
           Add Product Size Row
@@ -217,6 +237,53 @@ export default function SizeBreakdownTable({
           </TableBody>
         </Table>
       </TableContainer>
+
+      <InfoDialog
+        open={!!duplicateSizeMessage}
+        title="Duplicate Size Label"
+        message={duplicateSizeMessage}
+        severity="warning"
+        onClose={() => setDuplicateSizeMessage(null)}
+      />
+
+      <ConfirmDialog
+        open={isAddSizeDialogOpen}
+        title="Add Product Size Row"
+        message={
+          <TextField
+            autoFocus
+            fullWidth
+            label="Size Label"
+            placeholder="e.g. 32, 34, L, XL"
+            value={newSizeLabelInput}
+            onChange={(e) =>
+              setNewSizeLabelInput(e.target.value.toUpperCase())
+            }
+            slotProps={{
+              htmlInput: {
+                maxLength: 10,
+                style: { textTransform: "uppercase" },
+              },
+            }}
+            sx={{
+              mt: 1,
+              // FIXED (2026-08-07): same dark-on-dark input contrast issue
+              // as the Add Colour dialog - see the matching comment there.
+              "& .MuiOutlinedInput-root": { backgroundColor: "#FFFFFF" },
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleConfirmAddSize();
+              }
+            }}
+          />
+        }
+        confirmLabel="Add"
+        confirmColor="primary"
+        onConfirm={handleConfirmAddSize}
+        onCancel={handleCancelAddSize}
+      />
     </Box>
   );
 }

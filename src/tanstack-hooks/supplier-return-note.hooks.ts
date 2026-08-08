@@ -4,7 +4,7 @@ import type { AppError } from "../auth/axiosClient";
 import {
   getReturnableStockByBuyerOrder,
   commitSRN,
-} from "../services/supplier-return-note.service";
+} from "../services/order-management/supplier-return-note.service";
 import type {
   SrnReturnableStockRow,
   SrnSubmissionPayload,
@@ -33,7 +33,8 @@ export const useCommitSrnMutation = () => {
   const queryClient = useQueryClient();
   return useMutation<SrnMutationResponse, AppError, SrnSubmissionPayload>({
     mutationFn: async (payload) => {
-      const response: AxiosResponse<SrnMutationResponse> = await commitSRN(payload);
+      const response: AxiosResponse<SrnMutationResponse> =
+        await commitSRN(payload);
       return response.data;
     },
     onSuccess: () => {

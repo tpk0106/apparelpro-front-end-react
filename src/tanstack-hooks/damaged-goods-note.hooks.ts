@@ -4,7 +4,7 @@ import type { AppError } from "../auth/axiosClient";
 import {
   getDamageableStockByBuyerOrder,
   commitDGN,
-} from "../services/damaged-goods-note.service";
+} from "../services/orderwise-inventory/damaged-goods-note.service";
 import type {
   DgnDamageableStockRow,
   DgnSubmissionPayload,
@@ -31,7 +31,8 @@ export const useCommitDgnMutation = () => {
   const queryClient = useQueryClient();
   return useMutation<DgnMutationResponse, AppError, DgnSubmissionPayload>({
     mutationFn: async (payload) => {
-      const response: AxiosResponse<DgnMutationResponse> = await commitDGN(payload);
+      const response: AxiosResponse<DgnMutationResponse> =
+        await commitDGN(payload);
       return response.data;
     },
     onSuccess: () => {

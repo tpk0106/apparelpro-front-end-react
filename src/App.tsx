@@ -19,7 +19,7 @@ import OrderConfirmationRoutine from "./components/order-management/order-confir
 import MaterialConsumption from "./components/material-consumption/material-consumption.component";
 import SupplierPurchaseOrderWorkspace from "./components/supplier-purchase-order-management/supplier-purchase-order-workspace";
 import StylewiseEventsWorkspace from "./components/stylewise-events/stylewise-events-workspace";
-import TrimSheetApprovalWorkspace from "./components/trim-sheet-approval/trim-sheet-approval-workspace";
+import TrimSheetApprovalWorkspace from "./components/order-management/trim-sheet-approval/trim-sheet-approval-workspace";
 // import StyleShippingSummaryCard from "./components/part-shipment/style-shipping-summary-card";
 // import PartShipmentsWorkspace from "./components/part-shipment/part-shipments-workspace";
 import StoresRequisitionWorkspace from "./components/orderwise-inventory/stores-requisition-workspace";
@@ -33,11 +33,13 @@ import SupplierReturnNoteWorkspace from "./components/orderwise-inventory/suppli
 import DamagedGoodsNoteWorkspace from "./components/orderwise-inventory/damaged-goods-note-workspace";
 import StockAdjustmentNoteWorkspace from "./components/orderwise-inventory/stock-adjustment-note-workspace";
 import StockMovementReportWorkspace from "./components/orderwise-inventory/stock-movement-report-workspace";
-import StrnPrintReportWorkspace from "./components/reports-orderwise-inventory/strn-print-report-workspace";
-import TrimSheetReportWorkspace from "./components/trim-sheet-report/trim-sheet-report-workspace";
+
+import OrderDetailReportWorkspace from "./components/reports/order-management/order-detail-report/order-detail-report-workspace";
+import TrimSheetReportWorkspace from "./components/reports/orderwise-inventory/trim-sheet-report/trim-sheet-report-workspace";
 import Suppliers from "./components/references/supplier/supplier.component";
 import ItemFeatures from "./components/references/item-feature/item-feature.component";
 import SettingsPage from "./components/settings/settings.component";
+import StrnPrintReportWorkspace from "./components/reports/orderwise-inventory/strn/strn-print-report-workspace";
 
 function App() {
   const location = useLocation();
@@ -120,6 +122,11 @@ function App() {
           index
           path="trim-sheet-report"
           element={<TrimSheetReportWorkspace />}
+        />
+        <Route
+          index
+          path="order-detail-report"
+          element={<OrderDetailReportWorkspace />}
         />
         <Route index path="settings" element={<SettingsPage />} />
       </Route>

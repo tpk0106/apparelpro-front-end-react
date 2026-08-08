@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Box, Paper, Typography, Alert } from "@mui/material";
 import StylewiseEventsHeader from "./stylewise-events-header";
 import StylewiseEventsGrid from "././stylewise-events-grid";
-import { useGetStylewiseEventsChecklistQuery } from "../../services/stylewise-event.services";
+import { useGetStylewiseEventsChecklistQuery } from "../../services/order-management/stylewise-event.services";
 import type { SelectedHeaderContext } from "../stylewise-events/stylewise-events.types";
 import StylewiseEventsApprovalCard from "./stylewise-events-approval-card";
 

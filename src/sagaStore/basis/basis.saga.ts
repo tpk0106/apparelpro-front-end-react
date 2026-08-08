@@ -28,7 +28,7 @@ import {
   loadBasises,
   removeBasis,
   updateEditBasis,
-} from "../../services/basis.service";
+} from "../../services/references/basis.service";
 
 export function* loadAllBasises(
   action: PayloadAction<PaginationData>,

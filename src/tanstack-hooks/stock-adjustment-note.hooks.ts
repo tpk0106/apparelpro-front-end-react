@@ -4,7 +4,7 @@ import type { AppError } from "../auth/axiosClient";
 import {
   getAdjustableStockByBuyerOrder,
   commitSAN,
-} from "../services/stock-adjustment-note.service";
+} from "../services/orderwise-inventory/stock-adjustment-note.service";
 import type {
   SanAdjustableStockRow,
   SanSubmissionPayload,
@@ -31,7 +31,8 @@ export const useCommitSanMutation = () => {
   const queryClient = useQueryClient();
   return useMutation<SanMutationResponse, AppError, SanSubmissionPayload>({
     mutationFn: async (payload) => {
-      const response: AxiosResponse<SanMutationResponse> = await commitSAN(payload);
+      const response: AxiosResponse<SanMutationResponse> =
+        await commitSAN(payload);
       return response.data;
     },
     onSuccess: () => {

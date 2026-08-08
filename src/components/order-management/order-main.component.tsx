@@ -74,13 +74,13 @@ const OrderMain = ({ buyerCode, order, mainOrderUnit }: OrderMainProps) => {
     setValue(newValue);
   };
 
-  if (!buyerCode || !order) {
-    return (
-      <Box sx={{ padding: "2px" }}>
-        Please select a valid Buyer and Order to display details.
-      </Box>
-    );
-  }
+  // if (!buyerCode || !order) {
+  //   return (
+  //     <Box sx={{ padding: "2px" }}>
+  //       Please select a valid Buyer and Order to display details.
+  //     </Box>
+  //   );
+  // }
 
   return (
     <div className="w-full mt-5">
@@ -136,7 +136,7 @@ const OrderMain = ({ buyerCode, order, mainOrderUnit }: OrderMainProps) => {
 
       {/* Panel 0: Master Styles Registry Grid Layout Sheet */}
       <CustomTabPanel value={value} index={0}>
-        {mainOrderUnit && (
+        {mainOrderUnit && buyerCode && order ? (
           <Styles
             buyerCode={buyerCode}
             order={order}
@@ -148,13 +148,20 @@ const OrderMain = ({ buyerCode, order, mainOrderUnit }: OrderMainProps) => {
               setValue(2); // Automatically bounce the user directly to Tab 2 (Color/Size)
             }}
           />
+        ) : (
+          <Box sx={{ padding: "2px" }}>
+            <Alert severity="info" variant="filled" sx={{ fontWeight: "bold" }}>
+              Please select a valid Buyer and Order in Order confirmation
+              routine (above) to display style details.
+            </Alert>
+          </Box>
         )}
       </CustomTabPanel>
 
       {/* Panel 1: Shipping Records Allocation Management Shell (FIXED WORKFLOW) */}
       <CustomTabPanel value={value} index={1}>
         <Box sx={{ padding: "2px" }}>
-          {selectedStyle ? (
+          {selectedStyle && buyerCode && order ? (
             <PartShipmentsWorkspace
               buyerCode={buyerCode}
               order={order}
@@ -168,32 +175,45 @@ const OrderMain = ({ buyerCode, order, mainOrderUnit }: OrderMainProps) => {
               selectedStyle={selectedStyle}
             />
           ) : (
-            <Alert
-              severity="warning"
-              variant="outlined"
-              sx={{ fontWeight: "bold" }}
-            >
-              ⚠️ Access Refused: Please return to the [Style Details]
-              spreadsheet panel tab and click a style row item to initialize its
-              shipment allocation tracking logs.
-            </Alert>
+            <Box sx={{ padding: "3px" }}>
+              <Alert
+                severity="info"
+                variant="filled"
+                sx={{ fontWeight: "bold" }}
+              >
+                ⚠️ Access Refused: Please return to the [Style Details]
+                spreadsheet panel tab and click a style row item to initialize
+                its shipment allocation tracking logs.
+              </Alert>
+            </Box>
           )}
         </Box>
       </CustomTabPanel>
 
       {/* Panel 2: Color and Size Breakdown Execution Workspace */}
       <CustomTabPanel value={value} index={2}>
-        <ColorSizeBreakdown
-          buyerCode={buyerCode}
-          order={order}
-          selectedStyleFromGrid={selectedStyle}
-          onResetSelection={() => {
-            setSelectedStyle(null);
-            setValue(0); // Return operator cleanly back to main overview table upon save confirmation
-          }}
-          setIsMatrixDirty={setIsMatrixDirty}
-          isMatrixDirty={isMatrixDirty}
-        />
+        {buyerCode && order && selectedStyle ? (
+          <ColorSizeBreakdown
+            buyerCode={buyerCode}
+            order={order}
+            selectedStyleFromGrid={selectedStyle}
+            onResetSelection={() => {
+              setSelectedStyle(null);
+              setValue(0); // Return operator cleanly back to main overview table upon save confirmation
+            }}
+            setIsMatrixDirty={setIsMatrixDirty}
+            isMatrixDirty={isMatrixDirty}
+          />
+        ) : (
+          <Box sx={{ padding: "3px" }}>
+            <Alert severity="info" variant="filled">
+              No Style context selected. Please return to the{" "}
+              <strong>[Style Details]</strong> tab and click the{" "}
+              <strong>Grid matrix button</strong> on a style row to begin
+              allocation formatting.
+            </Alert>
+          </Box>
+        )}
       </CustomTabPanel>
     </div>
   );

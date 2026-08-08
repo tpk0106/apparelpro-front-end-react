@@ -530,7 +530,7 @@ export const navbarData = [
     icon: "../assets/order-management/Order-Management.png",
     label: "Reports - Order Management",
     subMenus: [
-      { routerLink: "Order Detail", icon: null, label: "Order Detail" },
+      { routerLink: "order-detail-report", icon: null, label: "Order Detail" },
       { routerLink: "Colour/Size", icon: null, label: "Colour/Size" },
       {
         routerLink: "Scheduled Shipments",

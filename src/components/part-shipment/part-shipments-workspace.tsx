@@ -3,7 +3,7 @@ import { Box, Paper, Typography, Alert } from "@mui/material";
 import StyleShippingSummaryCard from "./style-shipping-summary-card";
 import PartShipmentsGrid from "./part-shipments-grid";
 
-import { useGetPartShipmentsLedgerQuery } from "../../services/part-shipment.service";
+import { useGetPartShipmentsLedgerQuery } from "../../services/order-management/part-shipment.service";
 import type { Style } from "../../interfaces/OrderManagement/Style";
 
 interface WorkspaceProps {

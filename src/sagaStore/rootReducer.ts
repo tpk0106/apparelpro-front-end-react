@@ -14,9 +14,9 @@ import { basisReducer } from "./basis/basis.reducer";
 import { currencyConversionReducer } from "./currency-conversion/currency-conversion.reducer";
 import { currencyExchangeReducer } from "./currency-exchange/currency-exchange.reducer";
 
-import { supplierPurchaseOrderApi } from "../services/supplier-purchase-order.service";
-import { stylewiseEventApi } from "../services/stylewise-event.services";
-import { partShipmentApi } from "../services/part-shipment.service";
+import { supplierPurchaseOrderApi } from "../services/order-management/supplier-purchase-order.service";
+import { stylewiseEventApi } from "../services/order-management/stylewise-event.services";
+import { partShipmentApi } from "../services/order-management/part-shipment.service";
 
 export const rootReducer = combineReducers({
   user: userReducer,

@@ -26,7 +26,7 @@ import {
   loadCurrencyConversions,
   removeCurrencyConversion,
   updateEditCurrencyConversion,
-} from "../../services/currency-conversion.service";
+} from "../../services/references/currency-conversion.service";
 import { CURRENCY_CONVERSIONS_ACTION_TYPES } from "./currency-conversion.types";
 
 export function* loadAllCurrencyConversions(

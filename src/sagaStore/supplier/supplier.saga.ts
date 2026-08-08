@@ -26,7 +26,7 @@ import {
   loadSuppliers,
   removeSupplier,
   updateEditSupplier,
-} from "../../services/supplier.service";
+} from "../../services/references/supplier.service";
 import { SUPPLIERS_ACTION_TYPES } from "./supplier.types";
 
 export function* loadAllSuppliers(

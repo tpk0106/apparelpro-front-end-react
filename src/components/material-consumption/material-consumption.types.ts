@@ -84,6 +84,7 @@ export interface ColorSizeDetailsServiceModel {
   size: string;
   ratio: number;
   qty: number;
+  description?: string;
 }
 
 export interface OrderItemFeatureServiceModel {

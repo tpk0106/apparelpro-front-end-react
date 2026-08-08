@@ -5,8 +5,8 @@ import {
   getTrimSheetReportDetails,
   downloadTrimSheetReportPdf,
   type TrimSheetReportQueryParams,
-} from "../services/trim-sheet-report.service";
-import type { TrimSheetReportDetails } from "../components/trim-sheet-report/trim-sheet-report.types";
+} from "../services/order-management/trim-sheet-report.service";
+import type { TrimSheetReportDetails } from "../components/reports/orderwise-inventory/trim-sheet-report/trim-sheet-report.types";
 
 export const useGetTrimSheetReportDetailsQuery = (
   params: TrimSheetReportQueryParams,

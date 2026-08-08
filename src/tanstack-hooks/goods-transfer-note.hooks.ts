@@ -4,7 +4,7 @@ import type { AppError } from "../auth/axiosClient";
 import {
   getTransferableStock,
   commitGTN,
-} from "../services/goods-transfer-note.service";
+} from "../services/orderwise-inventory/goods-transfer-note.service";
 import type {
   GtnTransferableStockRow,
   GtnSubmissionPayload,

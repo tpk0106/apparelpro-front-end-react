@@ -5,7 +5,7 @@ import {
   getReceivableLinesByPo,
   commitGRN,
   getPendingPosByOrder,
-} from "../services/goods-received-note.service";
+} from "../services/orderwise-inventory/goods-received-note.service";
 import type {
   GrnPoLookupResult,
   GrnSubmissionPayload,
@@ -14,11 +14,15 @@ import type {
 } from "../components/orderwise-inventory/goods-received-note.types";
 
 // Direct-entry lookup: fires once the user has typed a known PO number
-export const useGetReceivableLinesByPoQuery = (poNumber: string, enabled: boolean) => {
+export const useGetReceivableLinesByPoQuery = (
+  poNumber: string,
+  enabled: boolean,
+) => {
   return useQuery<GrnPoLookupResult, AppError>({
     queryKey: ["grnReceivableLines", poNumber],
     queryFn: async () => {
-      const response: AxiosResponse<GrnPoLookupResult> = await getReceivableLinesByPo(poNumber);
+      const response: AxiosResponse<GrnPoLookupResult> =
+        await getReceivableLinesByPo(poNumber);
       return response.data;
     },
     enabled,
@@ -33,7 +37,8 @@ export const useGetPendingPosByOrderQuery = (
   return useQuery<GrnPendingPo[], AppError>({
     queryKey: ["grnPendingPos", params.buyerCode, params.order],
     queryFn: async () => {
-      const response: AxiosResponse<GrnPendingPo[]> = await getPendingPosByOrder(params);
+      const response: AxiosResponse<GrnPendingPo[]> =
+        await getPendingPosByOrder(params);
       return response.data;
     },
     enabled,
@@ -44,7 +49,8 @@ export const useCommitGrnMutation = () => {
   const queryClient = useQueryClient();
   return useMutation<GrnMutationResponse, AppError, GrnSubmissionPayload>({
     mutationFn: async (payload) => {
-      const response: AxiosResponse<GrnMutationResponse> = await commitGRN(payload);
+      const response: AxiosResponse<GrnMutationResponse> =
+        await commitGRN(payload);
       return response.data;
     },
     onSuccess: () => {

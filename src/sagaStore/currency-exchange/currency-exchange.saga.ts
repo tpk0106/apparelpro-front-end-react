@@ -20,7 +20,7 @@ import {
   loadCurrencyExchanges,
   removeCurrencyExchange,
   updateEditCurrencyExchange,
-} from "../../services/currency-exchange.service";
+} from "../../services/references/currency-exchange.service";
 import {
   createCurrencyExchangeFailure,
   createCurrencyExchangeSuccess,

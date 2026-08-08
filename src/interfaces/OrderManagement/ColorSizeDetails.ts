@@ -8,4 +8,5 @@ export default interface ColorSizeBreakdownDetails {
   size: string;
   quantity: number;
   ratio: number;
+  description?: string;
 }

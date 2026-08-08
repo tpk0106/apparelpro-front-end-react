@@ -6,7 +6,7 @@ import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 
 // Import your unified network tracking service hook and interfaces cleanly
-import { useGetStyleShippingSummaryQuery } from "../../services/part-shipment.service";
+import { useGetStyleShippingSummaryQuery } from "../../services/order-management/part-shipment.service";
 
 interface SummaryCardProps {
   buyerCode: number;

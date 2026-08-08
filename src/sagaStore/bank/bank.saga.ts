@@ -25,7 +25,7 @@ import {
   createNewBank,
   // deleteBank,
   updateEditBank,
-} from "../../services/bank.service";
+} from "../../services/references/bank.service";
 import type { PaginationData } from "../../interfaces/definitions";
 import type { PaginationAPIModel } from "../../interfaces/references/ApiResult";
 import { BANK_ACTION_TYPES } from "./bank.types";

@@ -5,7 +5,7 @@ import {
   getStockMovementReportHeader,
   getStockMovementReportLines,
   downloadStockMovementReportPdf,
-} from "../services/stock-movement-report.service";
+} from "../services/reports/orderwise-inventory/stock-movement-report.service";
 import type {
   StockMovementReportHeader,
   StockMovementReportLine,
@@ -46,8 +46,9 @@ export const useGetStockMovementReportLinesQuery = (
       params.filterQuery,
     ],
     queryFn: async () => {
-      const response: AxiosResponse<PaginationAPIModel<StockMovementReportLine>> =
-        await getStockMovementReportLines(params);
+      const response: AxiosResponse<
+        PaginationAPIModel<StockMovementReportLine>
+      > = await getStockMovementReportLines(params);
       return response.data;
     },
     enabled,
