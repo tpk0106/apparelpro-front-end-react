@@ -71,12 +71,12 @@ export default function TrimSheetReportDisplay({ report }: Props) {
         <Grid container spacing={2}>
           <HeaderField
             label="Buyer"
-            value={`${report.buyerCode} - ${report.buyerName || "N/A"}`}
+            value={report.buyerName || String(report.buyerCode)}
           />
           <HeaderField label="Order" value={report.order} />
           <HeaderField
             label="Garment Type"
-            value={`${report.typeCode} - ${report.typeName || "N/A"}`}
+            value={report.typeName || String(report.typeCode)}
           />
           <HeaderField label="Style" value={report.styleCode} />
           <HeaderField label="Unit" value={report.unit} />

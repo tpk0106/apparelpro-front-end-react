@@ -34,10 +34,16 @@ import DamagedGoodsNoteWorkspace from "./components/orderwise-inventory/damaged-
 import StockAdjustmentNoteWorkspace from "./components/orderwise-inventory/stock-adjustment-note-workspace";
 import StockMovementReportWorkspace from "./components/orderwise-inventory/stock-movement-report-workspace";
 
+import ColorSizeReportWorkspace from "./components/reports/order-management/color-size-report/color-size-report-workspace";
+import PurchaseOrderListReportWorkspace from "./components/reports/order-management/purchase-order-list-report/purchase-order-list-report-workspace";
+import OutstandingPurchaseOrderListReportWorkspace from "./components/reports/order-management/outstanding-purchase-order-list-report/outstanding-purchase-order-list-report-workspace";
 import OrderDetailReportWorkspace from "./components/reports/order-management/order-detail-report/order-detail-report-workspace";
 import TrimSheetReportWorkspace from "./components/reports/orderwise-inventory/trim-sheet-report/trim-sheet-report-workspace";
 import Suppliers from "./components/references/supplier/supplier.component";
 import ItemFeatures from "./components/references/item-feature/item-feature.component";
+import OrderItemFeatures from "./components/references/order-item-feature/order-item-feature.component";
+import AdditionalCosts from "./components/references/additional-cost/additional-cost.component";
+import GarmentAdditionalCostPage from "./components/garment-additional-cost/garment-additional-cost.component";
 import SettingsPage from "./components/settings/settings.component";
 import StrnPrintReportWorkspace from "./components/reports/orderwise-inventory/strn/strn-print-report-workspace";
 
@@ -65,6 +71,9 @@ function App() {
         <Route index path="country" element={<Country />} />
         <Route index path="unit" element={<Units />} />
         <Route index path="item-feature" element={<ItemFeatures />} />
+        <Route index path="order-item-feature" element={<OrderItemFeatures />} />
+        <Route index path="additional-cost" element={<AdditionalCosts />} />
+        <Route index path="additional" element={<GarmentAdditionalCostPage />} />
         <Route index path="buyers" element={<Buyers />} />
         <Route index path="garment-type" element={<GarmentTypes />} />
         <Route index path="basis" element={<Basises />} />
@@ -127,6 +136,21 @@ function App() {
           index
           path="order-detail-report"
           element={<OrderDetailReportWorkspace />}
+        />
+        <Route
+          index
+          path="color-size-report"
+          element={<ColorSizeReportWorkspace />}
+        />
+        <Route
+          index
+          path="purchase-order-list-report"
+          element={<PurchaseOrderListReportWorkspace />}
+        />
+        <Route
+          index
+          path="outstanding-purchase-order-list-report"
+          element={<OutstandingPurchaseOrderListReportWorkspace />}
         />
         <Route index path="settings" element={<SettingsPage />} />
       </Route>

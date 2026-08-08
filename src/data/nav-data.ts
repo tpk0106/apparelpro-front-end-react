@@ -75,6 +75,12 @@ export const navbarData = [
         label: "Order Item Feature",
         pinned: false,
       },
+      {
+        routerLink: "additional-cost",
+        icon: null,
+        label: "Additional Cost",
+        pinned: false,
+      },
     ],
     tag: "ordermanagementref",
   },
@@ -531,7 +537,7 @@ export const navbarData = [
     label: "Reports - Order Management",
     subMenus: [
       { routerLink: "order-detail-report", icon: null, label: "Order Detail" },
-      { routerLink: "Colour/Size", icon: null, label: "Colour/Size" },
+      { routerLink: "color-size-report", icon: null, label: "Colour/Size" },
       {
         routerLink: "Scheduled Shipments",
         icon: null,
@@ -586,18 +592,8 @@ export const navbarData = [
         label: "Monthly Actual Shipments",
         pinned: false,
       },
-      {
-        routerLink: "List of P/O's",
-        icon: null,
-        label: "List of P/O's",
-        pinned: false,
-      },
-      {
-        routerLink: "List of Outstanding P/O's",
-        icon: null,
-        label: "List of Outstanding P/O's",
-        pinned: false,
-      },
+      { routerLink: "purchase-order-list-report", icon: null, label: "List of P/O's" },
+      { routerLink: "outstanding-purchase-order-list-report", icon: null, label: "List of Outstanding P/O's" },
       {
         routerLink: "Post Order Cost Sheet",
         icon: null,

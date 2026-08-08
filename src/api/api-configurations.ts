@@ -146,6 +146,18 @@ export const APPARELPRO_ENDPOINTS = {
       PUT: "api/item-feature",
       PATCH: "api/item-feature",
     },
+    ORDER_ITEM_FEATURE: {
+      GET_BY_PAGINATION: "api/order-item-feature/list",
+      POST: "api/order-item-feature",
+      PUT: "api/order-item-feature",
+      DELETE: "api/order-item-feature",
+    },
+    ADDITIONAL_COST: {
+      GET_BY_PAGINATION: "api/additional-cost/list",
+      POST: "api/additional-cost",
+      PUT: "api/additional-cost",
+      DELETE: "api/additional-cost",
+    },
   },
   REGISTRATION: {
     USER: {
@@ -216,6 +228,15 @@ export const APPARELPRO_ENDPOINTS = {
       GET_MATERIAL_CATALOG: "api/material-consumption/catalog",
       COPY_FROM_STYLE: "api/material-consumption/copy-from-style",
     },
+    // Additional Costs per Garment (Order Management -> Material Consumption ->
+    // Additional Costs per Garment). Backed by GarmentAdditionalCostController.
+    GARMENT_ADDITIONAL_COST: {
+      GET_BY_STYLE: "api/garment-additional-cost/list",
+      SAVE_ENTRY: "api/garment-additional-cost",
+      DELETE_ENTRY: "api/garment-additional-cost",
+      GET_REPORT: "api/garment-additional-cost/report/details",
+      GET_REPORT_PDF: "api/garment-additional-cost/report/pdf",
+    },
     STYLE_WISE_EVENTS: {
       GET_STYLE_WISE_EVENTS_REPORT: "api/stylewise-reports/print-report",
     },
@@ -232,11 +253,32 @@ export const APPARELPRO_ENDPOINTS = {
       GET_DETAILS: "api/order-detail-report/details",
       GET_PDF: "api/order-detail-report/pdf",
     },
+    // Colour/Size Report (Reports -> Order Management -> Colour/Size). Backed by
+    // ColorSizeReportController - see src/components/reports/order-management/color-size-report/*.
+    COLOR_SIZE_REPORT: {
+      GET_DETAILS: "api/color-size-report/details",
+      GET_PDF: "api/color-size-report/pdf",
+    },
     // Trim Sheet Report (Reports -> Order Management -> Trim Sheet). Backed by
     // TrimSheetReportController - see src/components/trim-sheet-report/*.
     TRIM_SHEET_REPORT: {
       GET_DETAILS: "api/trim-sheet-report/details",
       GET_PDF: "api/trim-sheet-report/pdf",
+    },
+    // Purchase Order List Report (Reports -> Order Management -> List of P/O's).
+    // Backed by PurchaseOrderListReportController - see
+    // src/components/reports/order-management/purchase-order-list-report/*.
+    PURCHASE_ORDER_LIST_REPORT: {
+      GET_PO_NUMBERS: "api/purchase-order-list-report/po-numbers",
+      GET_DETAILS: "api/purchase-order-list-report/details",
+      GET_PDF: "api/purchase-order-list-report/pdf",
+    },
+    // Outstanding Purchase Order List Report (Reports -> Order Management -> List of
+    // Outstanding P/O's). Backed by OutstandingPurchaseOrderListReportController - see
+    // src/components/reports/order-management/outstanding-purchase-order-list-report/*.
+    OUTSTANDING_PURCHASE_ORDER_LIST_REPORT: {
+      GET_DETAILS: "api/outstanding-purchase-order-list-report/details",
+      GET_PDF: "api/outstanding-purchase-order-list-report/pdf",
     },
   },
   ORDER_WISE_INVENTORY: {

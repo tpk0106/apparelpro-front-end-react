@@ -509,6 +509,145 @@ export const useDeleteItemFeatureMutation = () => {
   });
 };
 
+// Order Item Feature
+
+export const useGetOrderItemFeatures = (paginate: PaginationData) => {
+  return useQuery<PaginationAPIModel<OrderItemFeature>, Error>({
+    queryKey: ["order-item-features", paginate.pageIndex, paginate.pageSize],
+    queryFn: async () => {
+      const response: AxiosResponse<PaginationAPIModel<OrderItemFeature>> =
+        await loadOrderItemFeatures(paginate);
+      return response.data;
+    },
+    placeholderData: (previousData) => previousData,
+  });
+};
+
+export const useCreateOrderItemFeatureMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, OrderItemFeature>({
+    mutationFn: async (newOrderItemFeature: OrderItemFeature) => {
+      await createNewOrderItemFeature(newOrderItemFeature);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["order-item-features"] });
+      toast.success("Order Item Feature created successfully");
+    },
+    onError: (error) => {
+      toast.error(`Creation failed: ${error.message}`);
+    },
+  });
+};
+
+export const useUpdateOrderItemFeatureMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, OrderItemFeature>({
+    mutationFn: async (updatedOrderItemFeature: OrderItemFeature) => {
+      await updateEditOrderItemFeature(
+        updatedOrderItemFeature.stockCode,
+        updatedOrderItemFeature.itemCode,
+        updatedOrderItemFeature,
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["order-item-features"] });
+      toast.success("Order Item Feature updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Update failed: ${error.message}`);
+    },
+  });
+};
+
+export const useDeleteOrderItemFeatureMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { stockCode: string; itemCode: string }>({
+    mutationFn: async ({ stockCode, itemCode }) => {
+      await removeOrderItemFeature(stockCode, itemCode);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["order-item-features"] });
+      toast.success("Order Item Feature deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
+    },
+  });
+};
+
+//
+
+// Additional Cost
+
+export const useGetAdditionalCosts = (paginate: PaginationData) => {
+  return useQuery<PaginationAPIModel<AdditionalCost>, Error>({
+    queryKey: ["additional-costs", paginate.pageIndex, paginate.pageSize],
+    queryFn: async () => {
+      const response: AxiosResponse<PaginationAPIModel<AdditionalCost>> =
+        await loadAdditionalCosts(paginate);
+      return response.data;
+    },
+    placeholderData: (previousData) => previousData,
+  });
+};
+
+export const useCreateAdditionalCostMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, AdditionalCost>({
+    mutationFn: async (newAdditionalCost: AdditionalCost) => {
+      await createNewAdditionalCost(newAdditionalCost);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["additional-costs"] });
+      toast.success("Additional Cost created successfully");
+    },
+    onError: (error) => {
+      toast.error(`Creation failed: ${error.message}`);
+    },
+  });
+};
+
+export const useUpdateAdditionalCostMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, AdditionalCost>({
+    mutationFn: async (updatedAdditionalCost: AdditionalCost) => {
+      await updateEditAdditionalCost(
+        updatedAdditionalCost.code,
+        updatedAdditionalCost,
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["additional-costs"] });
+      toast.success("Additional Cost updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Update failed: ${error.message}`);
+    },
+  });
+};
+
+export const useDeleteAdditionalCostMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { code: string }>({
+    mutationFn: async ({ code }) => {
+      await removeAdditionalCost(code);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["additional-costs"] });
+      toast.success("Additional Cost deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
+    },
+  });
+};
+
 //
 
 // Buyer
@@ -1189,6 +1328,20 @@ import {
   removeItemFeature,
   updateEditItemFeature,
 } from "../services/references/item-feature.service";
+import type { OrderItemFeature } from "../interfaces/references/OrderItemFeature";
+import {
+  createNewOrderItemFeature,
+  loadOrderItemFeatures,
+  removeOrderItemFeature,
+  updateEditOrderItemFeature,
+} from "../services/references/order-item-feature.service";
+import type { AdditionalCost } from "../interfaces/references/AdditionalCost";
+import {
+  createNewAdditionalCost,
+  loadAdditionalCosts,
+  removeAdditionalCost,
+  updateEditAdditionalCost,
+} from "../services/references/additional-cost.service";
 // Path to your client file
 import type { SystemParameter } from "../interfaces/system-configuration/SystemParameter";
 import {

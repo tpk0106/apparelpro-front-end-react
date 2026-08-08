@@ -56,7 +56,7 @@ export default function OrderDetailReportDisplay({ report }: Props) {
         <Grid container spacing={2}>
           <HeaderField
             label="Buyer"
-            value={`${report.buyerCode} - ${report.buyerName || "N/A"}`}
+            value={report.buyerName || String(report.buyerCode)}
           />
           <HeaderField label="Order" value={report.order} />
           <HeaderField
@@ -79,7 +79,7 @@ export default function OrderDetailReportDisplay({ report }: Props) {
               Style: {style.styleCode}
             </Typography>
             <Typography variant="caption" sx={{ color: "text.secondary" }}>
-              Type: {style.typeCode} - {style.typeName || "N/A"} &nbsp;|&nbsp;
+              Type: {style.typeName || String(style.typeCode)} &nbsp;|&nbsp;
               Qty: {formatQuantity(style.quantity)} {style.unit} &nbsp;|&nbsp;
               Unit Price: {formatMoney(style.unitPrice)} {currency}
             </Typography>
