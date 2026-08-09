@@ -25,7 +25,14 @@ const garmentTypeReducer = (
         isLoading: false,
         success: true,
         error: null,
-        paginationAPIResult: payload.data ? payload.data : payload,
+        // NOTE (2026-08-09): was `payload.data ? payload.data : payload` -
+        // PaginationAPIModel<T>.data is a single T, not the paginated
+        // envelope, so that ternary leaked a GarmentType | PaginationAPIModel
+        // union into GarmentTypeState. This reducer branch is unreachable
+        // from any live UI (superseded by the TanStack Query garment-type
+        // hooks) but is still type-checked, so pin it to the full payload,
+        // matching the declared PaginationAPIModel<GarmentType> shape.
+        paginationAPIResult: payload,
       };
     case GARMENT_TYPES_ACTION_TYPES.LOAD_ALL_GARMENT_TYPES_FAILURE:
       return {

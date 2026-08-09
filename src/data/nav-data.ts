@@ -76,9 +76,33 @@ export const navbarData = [
         pinned: false,
       },
       {
+        routerLink: "garment-type-items",
+        icon: null,
+        label: "Garment Type Item Requirements",
+        pinned: false,
+      },
+      {
         routerLink: "additional-cost",
         icon: null,
         label: "Additional Cost",
+        pinned: false,
+      },
+      {
+        routerLink: "sub-contractor",
+        icon: null,
+        label: "Sub Contractor",
+        pinned: false,
+      },
+      {
+        routerLink: "stock-reference",
+        icon: null,
+        label: "Stock Reference",
+        pinned: false,
+      },
+      {
+        routerLink: "order-item-catalog",
+        icon: null,
+        label: "Order Items Catalog",
         pinned: false,
       },
     ],

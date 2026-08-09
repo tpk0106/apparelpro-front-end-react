@@ -52,7 +52,7 @@ const BankAddressesTable = ({
     {},
   );
 
-  const [addressId, setAddressId] = useState<string>(null);
+  const [addressId, setAddressId] = useState<string>("");
   const [rowToDelete, setRowToDelete] = useState<MRT_Row<Address> | null>(null);
 
   const validationRequired = (value: string) => !value?.length;

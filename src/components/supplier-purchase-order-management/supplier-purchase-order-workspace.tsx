@@ -95,7 +95,7 @@ export default function SupplierPurchaseOrderWorkspace() {
     useCommitSupplierPurchaseOrderMutation();
 
   // Fetch master system units for our order unit dropdown selector
-  const { data: unitsPageData, isLoading: isUnitsLoading } = useGetUnits({
+  const { data: unitsPageData } = useGetUnits({
     pageIndex: 0,
     pageSize: 999,
     sortColumn: "code",
@@ -108,7 +108,7 @@ export default function SupplierPurchaseOrderWorkspace() {
     [unitsPageData],
   );
 
-  const { data: unfulfilledBudgetDetails, isLoading } =
+  const { data: unfulfilledBudgetDetails } =
     useGetUnfulfilledBudgetLinesQuery({
       buyerCode: poContext?.buyerCode || 0,
       order: poContext?.orderNumber || "",

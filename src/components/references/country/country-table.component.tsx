@@ -1,14 +1,13 @@
 import { useState } from "react";
 import {
   MaterialReactTable,
-  useMaterialReactTable,
   type MRT_ColumnDef,
   type MRT_PaginationState,
   type MRT_Row,
   type MRT_TableOptions,
 } from "material-react-table";
 
-import { Box, Button, darken, IconButton, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
 
@@ -18,7 +17,6 @@ import type { Country } from "../../../interfaces/references/Country";
 
 // import PendingOutlinedIcon from "@mui/icons-material/PendingOutlined";
 // import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
-import HourglassFullOutlinedIcon from "@mui/icons-material/HourglassFullOutlined";
 import {
   useCreateCountry,
   useDeleteCountry,
@@ -43,12 +41,11 @@ const CountryTable = ({
   data,
   itemsCount,
   isError,
-  isLoading,
   paginate,
   pagination,
   setPagination,
 }: Props) => {
-  const [validationErrors, setValidationErrors] = useState<
+  const [, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
 
@@ -57,7 +54,7 @@ const CountryTable = ({
   );
 
   const validationRequired = (value: string) => !value?.length;
-  const validateCountry = ({ name, code, flag }: Country) => {
+  const validateCountry = ({ name, code }: Country) => {
     return {
       name: validationRequired(name) ? "Country Name required" : "",
       code: validationRequired(code) ? "Country Code required" : "",
@@ -90,8 +87,7 @@ const CountryTable = ({
     };
 
   //call CREATE hook
-  const { mutateAsync: createCountry, isPending: isCreatingCurrency } =
-    useCreateCountry(paginate);
+  const { mutateAsync: createCountry } = useCreateCountry(paginate);
 
   // UPDATE action
   const handleSaveCurrency: MRT_TableOptions<Country>["onEditingRowSave"] =
@@ -115,8 +111,7 @@ const CountryTable = ({
     };
 
   //call UPDATE hook
-  const { mutateAsync: updateCountry, isPending: isUpdatingCurrency } =
-    useUpdateCountry(pagination);
+  const { mutateAsync: updateCountry } = useUpdateCountry(pagination);
 
   //DELETE action
   const openDeleteConfirmModal = (row: MRT_Row<Country>) => {
@@ -213,7 +208,7 @@ const CountryTable = ({
     //   }),
     // },
 
-    muiTableBodyRowProps: ({ row, table }) => ({
+    muiTableBodyRowProps: ({ table }) => ({
       hover: !table.getState().editingRow,
       sx: {
         "& .MuiInputBase-input": {

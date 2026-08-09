@@ -1846,8 +1846,11 @@ export const useDeleteCurrencyConversion = (
           prevCurrencyConversions?.filter(
             (currencyConversion: CurrencyConversion) =>
               currencyConversion.fromCurrency !== params.fromCurrencyCode &&
-              currencyConversion.toCurrency !== params.toCurrencyCode &&
-              currencyConversion.date !== params.date,
+              currencyConversion.toCurrency !== params.toCurrencyCode,
+            // NOTE (2026-08-09): CurrencyConversion no longer has a `date` field -
+            // that was copy-pasted from Currency Exchange's shape. Dropped from
+            // this comparison; this dead (pre-TanStack) hook isn't wired to any
+            // live UI, this file is not imported anywhere in App.tsx's route tree.
           ),
       );
     },
@@ -2012,12 +2015,18 @@ export const useDeleteCurrencyExchange = (pagination: MRT_PaginationState) => {
     onMutate: (params: deleteCurrencyExchangeParams) => {
       queryClient.setQueryData(
         ["currencyExchanges", pagination.pageSize, pagination.pageIndex],
-        (prevCurrencyExchanges: CurrencyConversion[]) =>
+        // NOTE (2026-08-09): this was mistyped as CurrencyConversion[] - a
+        // Currency Exchange row never had .fromCurrency/.toCurrency/.date (its
+        // real fields are baseCurrency/quoteCurrency/exchangeDate). It only
+        // type-checked before because CurrencyConversion happened to share the
+        // .date field name; fixed to the correct type/fields while here. Dead
+        // (pre-TanStack) hook, not wired to any live UI.
+        (prevCurrencyExchanges: CurrencyExchange[]) =>
           prevCurrencyExchanges?.filter(
-            (currencyExchanges: CurrencyConversion) =>
-              currencyExchanges.fromCurrency !== params.baseCurrency &&
-              currencyExchanges.toCurrency !== params.quoteCurrency &&
-              currencyExchanges.date !== params.exchangeDate,
+            (currencyExchange: CurrencyExchange) =>
+              currencyExchange.baseCurrency !== params.baseCurrency &&
+              currencyExchange.quoteCurrency !== params.quoteCurrency &&
+              currencyExchange.exchangeDate !== params.exchangeDate,
           ),
       );
     },

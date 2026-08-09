@@ -157,7 +157,10 @@ const SignupForm = () => {
             state: user.address.state || "",
             countryCode: user.address.countryCode || "",
             addressType: user.address.addressType,
-            // country: user.address.country || "",
+            // Address only stores countryCode (ISO code), not a separate
+            // country display name, so this can't be backfilled from the
+            // existing user record.
+            country: "",
           }
         : null,
     };

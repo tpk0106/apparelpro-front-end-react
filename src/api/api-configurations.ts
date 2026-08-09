@@ -81,16 +81,16 @@ export const APPARELPRO_ENDPOINTS = {
       DELETE: "api/currencyExchange/",
     },
     CURRENCY_CONVERSION: {
+      // Rebuilt 2026-08-09 to match the real CurrencyConversionController - no
+      // date dimension (that was copy-pasted from Currency Exchange). PUT takes
+      // From/To straight from the request body, so there's no query-param
+      // variant needed here.
       GET: "api/currencyConversion/list",
       GET_BY_PAGINATION: "api/currencyConversion/list",
-      GET_BY_DATE: "api/currencyConversion/list/byDate",
-      GET_CURRENCY_EXCHANGES_BY_BASE_CURRENCY:
-        "api/currencyConversion/list/baseCurrency",
-      GET_CURRENCY_EXCHANGES_BY_BASE_CURRENCY_AND_QUOTE_CURRENCY_ON_DATE:
-        "api/list/{baseCurrency}/{quoteCurrency}/{date}",
+      GET_BY_FROM_TO: "api/currencyConversion/list/",
       POST: "api/currencyConversion",
-      PUT: "api/currencyConversion/",
-      DELETE: "api/currencyConversion/{baseCurrency}/{quoteCurrency}/{date}",
+      PUT: "api/currencyConversion",
+      DELETE: "api/currencyConversion/",
     },
     BANK: {
       GET_BY_PAGINATION: "api/bank/list",
@@ -152,11 +152,39 @@ export const APPARELPRO_ENDPOINTS = {
       PUT: "api/order-item-feature",
       DELETE: "api/order-item-feature",
     },
+    GARMENT_TYPE_ITEMS: {
+      GET_BY_TYPE: "api/garment-type-items/list",
+      POST: "api/garment-type-items",
+      DELETE: "api/garment-type-items",
+    },
     ADDITIONAL_COST: {
       GET_BY_PAGINATION: "api/additional-cost/list",
       POST: "api/additional-cost",
       PUT: "api/additional-cost",
       DELETE: "api/additional-cost",
+    },
+    // Sub Contractor (2026-08-09) - minimal Code+Name reference, built to resolve
+    // the AIN (Additional Issue Note) Zero-Assumption gap: od_scref had no modern
+    // entity anywhere in the app. Backed by SubContractorController.
+    SUB_CONTRACTOR: {
+      GET_BY_PAGINATION: "api/sub-contractor/list",
+      GETBY_CODE: "api/sub-contractor/list/",
+      DOES_SUB_CONTRACTOR_EXIST: "api/sub-contractor/list/does-exist/",
+      POST: "api/sub-contractor",
+      DELETE: "api/sub-contractor",
+      PUT: "api/sub-contractor",
+    },
+    STOCK: {
+      GET_BY_PAGINATION: "api/stock/list",
+      POST: "api/stock",
+      PUT: "api/stock",
+      DELETE: "api/stock",
+    },
+    ORDER_ITEM_CATALOG: {
+      GET_BY_PAGINATION: "api/order-item-catalog/list",
+      POST: "api/order-item-catalog",
+      PUT: "api/order-item-catalog",
+      DELETE: "api/order-item-catalog",
     },
   },
   REGISTRATION: {
@@ -236,6 +264,14 @@ export const APPARELPRO_ENDPOINTS = {
       DELETE_ENTRY: "api/garment-additional-cost",
       GET_REPORT: "api/garment-additional-cost/report/details",
       GET_REPORT_PDF: "api/garment-additional-cost/report/pdf",
+    },
+    // Sub Contracts (Order Management -> D. Sub Contracts). Backed by
+    // SubContractController. Legacy od_subc1.dbf, single flat per-Style list -
+    // no report/PDF phase yet.
+    SUB_CONTRACT: {
+      GET_BY_STYLE: "api/sub-contract/list",
+      SAVE_ENTRY: "api/sub-contract",
+      DELETE_ENTRY: "api/sub-contract",
     },
     STYLE_WISE_EVENTS: {
       GET_STYLE_WISE_EVENTS_REPORT: "api/stylewise-reports/print-report",
@@ -318,6 +354,13 @@ export const APPARELPRO_ENDPOINTS = {
     SAN: {
       ADJUSTABLE_STOCK: "api/orderwise-inventory-san/adjustable-stock",
       COMMIT: "api/orderwise-inventory-san/commit",
+    },
+    // Additional Issue Note (2026-08-09) - built from legacy IN_AIN3.PRG. Backed by
+    // AINController. GetIssuableStock only takes buyerCode/order (no note-specific
+    // filter server-side) - Sub Contractor + Additional Process are validated on commit.
+    AIN: {
+      ISSUABLE_STOCK: "api/orderwise-inventory-ain/issuable-stock",
+      COMMIT: "api/orderwise-inventory-ain/commit",
     },
     STOCK_MOVEMENT_REPORT: {
       HEADER: "api/stock-movement-reports/header",

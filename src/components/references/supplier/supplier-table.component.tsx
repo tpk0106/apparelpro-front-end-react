@@ -1,11 +1,8 @@
 // Inside SupplierTable.tsx component body:
 import { useState } from "react";
 import {
-  useCreateBuyerMutation,
   useCreateSupplierMutation,
-  useDeleteBuyerMutation,
   useDeleteSupplierMutation,
-  useUpdateBuyerMutation,
   useUpdateSupplierMutation,
 } from "../../../tanstack-hooks/custom-hooks";
 import type { Supplier } from "../../../interfaces/references/Supplier";
@@ -16,7 +13,7 @@ import {
   type MRT_Row,
   type MRT_TableOptions,
 } from "material-react-table";
-import { Box, Button, darken, IconButton, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import type { PaginationData } from "../../../interfaces/definitions";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
@@ -40,15 +37,14 @@ const SupplierTable = ({
   data,
   itemsCount,
   isError,
-  isLoading,
   pagination,
   setPagination,
 }: Props) => {
-  const [validationErrors, setValidationErrors] = useState<
+  const [, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
 
-  const [buyerCode, setBuyerCode] = useState<number>(null);
+  const [buyerCode, setBuyerCode] = useState<number>(0);
   const [rowToDelete, setRowToDelete] = useState<MRT_Row<Supplier> | null>(
     null,
   );
@@ -168,7 +164,7 @@ const SupplierTable = ({
     onEditingRowCancel: () => setValidationErrors({}),
     onEditingRowSave: handleSaveBuyer,
 
-    muiTableBodyRowProps: ({ row, table }) => ({
+    muiTableBodyRowProps: ({ table }) => ({
       hover: !table.getState().editingRow,
       sx: {
         "& .MuiInputBase-input": {

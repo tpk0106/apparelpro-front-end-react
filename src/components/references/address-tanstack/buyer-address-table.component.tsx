@@ -7,13 +7,12 @@ import {
 
 import {
   MaterialReactTable,
-  useMaterialReactTable,
   type MRT_ColumnDef,
   type MRT_PaginationState,
   type MRT_Row,
   type MRT_TableOptions,
 } from "material-react-table";
-import { Box, Button, darken, IconButton, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import {
   type CreateAddressAPIModel,
   type PaginationData,
@@ -44,16 +43,15 @@ const BuyerAddressesTable = ({
   data,
   itemsCount,
   isError,
-  isLoading,
   pagination,
   setPagination,
   buyerCode,
 }: Props) => {
-  const [validationErrors, setValidationErrors] = useState<
+  const [, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
 
-  const [addressId, setAddressId] = useState<string>(null);
+  const [addressId, setAddressId] = useState<string>("");
   const validationRequired = (value: string) => !value?.length;
   const validationRequiredForAddressType = (value: number) => value > 0;
   const validateBuyerAddress = ({
@@ -81,13 +79,11 @@ const BuyerAddressesTable = ({
   };
 
   // 1. Consume mutations cleanly
-  const { mutateAsync: createBuyerAddress, isPending: isCreatingBuyerAddress } =
+  const { mutateAsync: createBuyerAddress } =
     useCreateBuyerAddressMutation();
-  const {
-    mutateAsync: handleUpdateBuyerAddress,
-    isPending: isUpdatingBuyerAddress,
-  } = useUpdateBuyerAddressMutation();
-  const { mutateAsync: deleteBuyerAddress, isPending: isDeletingBuyerAddress } =
+  const { mutateAsync: handleUpdateBuyerAddress } =
+    useUpdateBuyerAddressMutation();
+  const { mutateAsync: deleteBuyerAddress } =
     useDeleteBuyerAddressMutation();
 
   // 2. Your save hooks remain highly intuitive
@@ -290,7 +286,7 @@ const BuyerAddressesTable = ({
     //   }),
     // },
 
-    muiTableBodyRowProps: ({ row, table }) => ({
+    muiTableBodyRowProps: ({ table }) => ({
       hover: !table.getState().editingRow,
       sx: {
         "& .MuiInputBase-input": {

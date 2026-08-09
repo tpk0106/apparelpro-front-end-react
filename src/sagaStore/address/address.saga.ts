@@ -10,7 +10,7 @@ import { ADDRESS_ACTION_TYPES } from "./address.types";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import {
   createNewBuyerAddress,
-  // loadAllAddressesForBuyer,
+  loadAllAddressesForBuyerCode,
   removeBuyerAddress,
   updateAddress,
 } from "../../services/address.serice";
@@ -37,10 +37,19 @@ export function* LoadAllAddressesByAddressId(
   try {
     const { payload } = action;
 
-    const addresses: Address[] = (yield call(
-      loadAllAddressesForBuyer,
-      payload,
-    )) as Address[];
+    // NOTE (2026-08-09): this saga is not dispatched from any live UI
+    // (superseded by TanStack Query address hooks) - fixed a pre-existing
+    // reference to a function name that was never exported (loadAllAddressesForBuyer)
+    // to the real export loadAllAddressesForBuyerCode, matching its
+    // (buyerCode, pagination) signature, to unblock the build.
+    const addresses: Address[] = (yield call(loadAllAddressesForBuyerCode, Number(payload), {
+      pageIndex: 0,
+      pageSize: 999,
+      sortColumn: null,
+      sortOrder: null,
+      filterColumn: null,
+      filterQuery: null,
+    })) as Address[];
 
     yield put(loadAllAddressesForBuyerSuccess(addresses));
   } catch (error) {

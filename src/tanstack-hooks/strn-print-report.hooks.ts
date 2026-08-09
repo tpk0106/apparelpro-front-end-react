@@ -5,7 +5,8 @@ import {
   getStrnPrintDetails,
   downloadStrnPrintPdf,
 } from "../services/reports/orderwise-inventory/strn-print-report.service";
-import type { StrnPrintReportDetails } from "../components/reports-orderwise-inventory/strn-print-report.types";
+import type { StrnPrintReportDetails } from "../components/reports/orderwise-inventory/strn/strn-print-report.types";
+// import type { StrnPrintReportDetails } from "../components/reports-orderwise-inventory/strn-print-report.types";
 
 export const useGetStrnPrintDetailsQuery = (
   strnNumber: string,

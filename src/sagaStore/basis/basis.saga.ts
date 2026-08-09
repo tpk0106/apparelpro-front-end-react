@@ -51,7 +51,7 @@ export function* loadAllBasises(
         filterOrder: payload.filterQuery,
         sortColumn: payload.sortColumn,
         sortOrder: payload.sortOrder,
-        currentPage: payload.pageNumber,
+        currentPage: payload.pageIndex,
       }),
     );
   } catch (error) {
@@ -76,7 +76,7 @@ export function* updateBasis(
 ): Generator<CallEffect | PutEffect<AnyAction>, void, void> {
   try {
     const { payload } = action;
-    yield call(updateEditBasis, payload.id, payload);
+    yield call(updateEditBasis, payload.code, payload);
     yield put(updateBasisSuccess(true));
   } catch (error) {
     yield put(updateBasisFailure(error));
@@ -89,7 +89,7 @@ export function* deleteBasis(
   try {
     const { payload } = action;
     const id = payload;
-    yield call(removeBasis, id);
+    yield call(removeBasis, String(id));
     yield put(deleteBasisSuccess(true));
   } catch (error) {
     yield put(deleteBasisFailure(error));

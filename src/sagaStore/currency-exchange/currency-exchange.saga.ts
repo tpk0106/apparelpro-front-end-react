@@ -50,7 +50,7 @@ export function* loadAllCurrencyExchanges(
         filterOrder: payload.filterQuery,
         sortColumn: payload.sortColumn,
         sortOrder: payload.sortOrder,
-        currentPage: payload.pageNumber,
+        currentPage: payload.pageIndex,
       }),
     );
   } catch (error) {

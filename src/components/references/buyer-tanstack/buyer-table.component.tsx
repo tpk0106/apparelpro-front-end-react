@@ -44,7 +44,7 @@ const BuyerTable = ({
     {},
   );
 
-  const [buyerCode, setBuyerCode] = useState<number>(null);
+  const [buyerCode, setBuyerCode] = useState<number>(0);
   const [rowToDelete, setRowToDelete] = useState<MRT_Row<Buyer> | null>(null);
   const validationRequired = (value: string) => !value?.length;
   const validateBuyer = ({ name }: Buyer) => {

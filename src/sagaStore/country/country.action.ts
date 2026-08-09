@@ -52,8 +52,12 @@ const createCountryFailure = (error: unknown) => {
   return createAction(COUNTRIES_ACTION_TYPES.CREATE_COUNTRY_FAILURE, error);
 };
 
-const deleteCountryStart = (buyerCode: number) => {
-  return createAction(COUNTRIES_ACTION_TYPES.DELETE_COUNTRY_START, buyerCode);
+// NOTE (2026-08-09): parameter was mistyped/misnamed as `buyerCode: number`
+// (copy-paste from the Buyer domain) - Country's natural key is its ISO
+// `code` string, matching country.saga.ts's deleteCountry generator
+// (PayloadAction<string>) and the real DELETE endpoint (code: string).
+const deleteCountryStart = (code: string) => {
+  return createAction(COUNTRIES_ACTION_TYPES.DELETE_COUNTRY_START, code);
 };
 
 const deleteCountrySuccess = (success: boolean) => {

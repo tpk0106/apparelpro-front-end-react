@@ -1,4 +1,4 @@
-import { Box, Button, Input } from "@mui/material";
+import { Box } from "@mui/material";
 import { TextField } from "@mui/material";
 import { useState } from "react";
 
@@ -15,7 +15,7 @@ const ImageUpload = ({ setParentState }: flagData) => {
     const file = event.currentTarget?.files[0];
     setSelectedImageName(file.name);
     const reader = new FileReader();
-    const url = reader.readAsDataURL(file);
+    reader.readAsDataURL(file);
 
     reader.onloadend = () => {
       setSelectedImage(reader.result);

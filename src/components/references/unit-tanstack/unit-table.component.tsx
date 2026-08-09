@@ -4,13 +4,12 @@ import { useState } from "react";
 import type { Unit } from "../../../interfaces/references/Unit";
 import {
   MaterialReactTable,
-  useMaterialReactTable,
   type MRT_ColumnDef,
   type MRT_PaginationState,
   type MRT_Row,
   type MRT_TableOptions,
 } from "material-react-table";
-import { Box, Button, darken, IconButton, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import type { PaginationData } from "../../../interfaces/definitions";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
@@ -38,12 +37,11 @@ const UnitTable = ({
   data,
   itemsCount,
   isError,
-  isLoading,
   //    paginate,
   pagination,
   setPagination,
 }: Props) => {
-  const [validationErrors, setValidationErrors] = useState<
+  const [, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
 
@@ -58,10 +56,8 @@ const UnitTable = ({
   };
 
   // 1. Consume mutations cleanly
-  const { mutateAsync: createUnit, isPending: isCreatingUnit } =
-    useCreateUnitMutation();
-  const { mutateAsync: updateUnit, isPending: isUpdatingUnit } =
-    useUpdateUnitMutation();
+  const { mutateAsync: createUnit } = useCreateUnitMutation();
+  const { mutateAsync: updateUnit } = useUpdateUnitMutation();
   const { mutateAsync: deleteUnit, isPending: isDeletingUnit } =
     useDeleteUnitMutation();
 
@@ -231,7 +227,7 @@ const UnitTable = ({
     //   }),
     // },
 
-    muiTableBodyRowProps: ({ row, table }) => ({
+    muiTableBodyRowProps: ({ table }) => ({
       hover: !table.getState().editingRow,
       sx: {
         "& .MuiInputBase-input": {

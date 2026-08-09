@@ -10,7 +10,7 @@ import type { AnyAction } from "redux-saga";
 
 import type { PayloadAction } from "@reduxjs/toolkit";
 
-import type Bank from "../../interfaces/references/Bank";
+import type { Bank } from "../../interfaces/references/Bank";
 
 import {
   createBankFailure,

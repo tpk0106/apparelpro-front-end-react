@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import {
   MaterialReactTable,
-  useMaterialReactTable,
   type MRT_ColumnDef,
 } from "material-react-table";
 import { Box, Button, IconButton, TextField, Tooltip } from "@mui/material";

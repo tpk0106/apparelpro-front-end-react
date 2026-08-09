@@ -222,19 +222,14 @@ const AdditionalCostTable = ({
       };
     },
 
+    // Inline-edit text fields keep the dark input look instead of the shared
+    // hook's white-background edit row. muiTableBodyCellEditTextFieldProps
+    // isn't a real MRT_TableOptions prop, so these overrides live on
+    // muiTableBodyCellProps instead - the nested selectors still reach the
+    // input when a cell is in edit mode.
     muiTableBodyCellProps: {
       sx: {
         backgroundColor: "transparent !important",
-      },
-    },
-
-    // Inline-edit text fields keep the dark input look instead of the shared
-    // hook's white-background edit row.
-    muiEditRowDialogProps: {
-      sx: { backgroundColor: mockupColors.surface },
-    },
-    muiTableBodyCellEditTextFieldProps: {
-      sx: {
         "& .MuiInputBase-input": {
           color: `${mockupColors.text} !important`,
           backgroundColor: `${mockupColors.input} !important`,
@@ -243,6 +238,14 @@ const AdditionalCostTable = ({
           borderColor: `${mockupColors.border} !important`,
         },
       },
+    },
+
+    // editDisplayMode is "row" (not "modal"), so this prop has no visible
+    // effect at runtime, but MRT's type still requires a full DialogProps
+    // (including `open`) when set.
+    muiEditRowDialogProps: {
+      open: true,
+      sx: { backgroundColor: mockupColors.surface },
     },
 
     renderTopToolbarCustomActions: () => (

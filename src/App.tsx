@@ -32,6 +32,7 @@ import GoodsTransferNoteWorkspace from "./components/orderwise-inventory/goods-t
 import SupplierReturnNoteWorkspace from "./components/orderwise-inventory/supplier-return-note-workspace";
 import DamagedGoodsNoteWorkspace from "./components/orderwise-inventory/damaged-goods-note-workspace";
 import StockAdjustmentNoteWorkspace from "./components/orderwise-inventory/stock-adjustment-note-workspace";
+import AdditionalIssueNoteWorkspace from "./components/orderwise-inventory/additional-issue-note-workspace";
 import StockMovementReportWorkspace from "./components/orderwise-inventory/stock-movement-report-workspace";
 
 import ColorSizeReportWorkspace from "./components/reports/order-management/color-size-report/color-size-report-workspace";
@@ -42,8 +43,14 @@ import TrimSheetReportWorkspace from "./components/reports/orderwise-inventory/t
 import Suppliers from "./components/references/supplier/supplier.component";
 import ItemFeatures from "./components/references/item-feature/item-feature.component";
 import OrderItemFeatures from "./components/references/order-item-feature/order-item-feature.component";
+import GarmentTypeItems from "./components/references/garment-type-items/garment-type-items.component";
+import StockReference from "./components/references/stock/stock.component";
+import OrderItemCatalogPage from "./components/references/order-item-catalog/order-item-catalog.component";
+import CurrencyConversionPage from "./components/references/currency-conversion/currency-conversion.component";
 import AdditionalCosts from "./components/references/additional-cost/additional-cost.component";
+import SubContractors from "./components/references/sub-contractor/sub-contractor.component";
 import GarmentAdditionalCostPage from "./components/garment-additional-cost/garment-additional-cost.component";
+import SubContractPage from "./components/sub-contract/sub-contract.component";
 import SettingsPage from "./components/settings/settings.component";
 import StrnPrintReportWorkspace from "./components/reports/orderwise-inventory/strn/strn-print-report-workspace";
 
@@ -72,8 +79,14 @@ function App() {
         <Route index path="unit" element={<Units />} />
         <Route index path="item-feature" element={<ItemFeatures />} />
         <Route index path="order-item-feature" element={<OrderItemFeatures />} />
+        <Route index path="garment-type-items" element={<GarmentTypeItems />} />
+        <Route index path="stock-reference" element={<StockReference />} />
+        <Route index path="order-item-catalog" element={<OrderItemCatalogPage />} />
+        <Route index path="currency-conversion" element={<CurrencyConversionPage />} />
         <Route index path="additional-cost" element={<AdditionalCosts />} />
+        <Route index path="sub-contractor" element={<SubContractors />} />
         <Route index path="additional" element={<GarmentAdditionalCostPage />} />
+        <Route index path="subcont" element={<SubContractPage />} />
         <Route index path="buyers" element={<Buyers />} />
         <Route index path="garment-type" element={<GarmentTypes />} />
         <Route index path="basis" element={<Basises />} />
@@ -121,6 +134,7 @@ function App() {
         />
         <Route index path="dgn" element={<DamagedGoodsNoteWorkspace />} />
         <Route index path="san" element={<StockAdjustmentNoteWorkspace />} />
+        <Route index path="ain" element={<AdditionalIssueNoteWorkspace />} />
         <Route
           index
           path="stock-movement-report"

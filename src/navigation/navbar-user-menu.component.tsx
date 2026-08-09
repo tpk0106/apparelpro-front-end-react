@@ -59,7 +59,7 @@ const NavBarUserMenu = () => {
   }, [navigate, updatingProfileUserEmail, userDetails]);
 
   // 🚀 4. Simple, predictable button trigger
-  function handleUpdateUser(event: React.MouseEvent<HTMLElement>): void {
+  function handleUpdateUser(_event: React.MouseEvent<HTMLElement>): void {
     // Arm the silent trigger ref flag
     // Your brilliant Type Guard condition 🚀
     if (updatingProfileUserEmail) {
@@ -73,11 +73,11 @@ const NavBarUserMenu = () => {
     }
   }
 
-  function handleOpenSettings(event: React.MouseEvent<HTMLElement>): void {
+  function handleOpenSettings(_event: React.MouseEvent<HTMLElement>): void {
     navigate("/settings");
   }
 
-  function handleLogout(event: React.MouseEvent<HTMLElement>): void {
+  function handleLogout(_event: React.MouseEvent<HTMLElement>): void {
     dispatch(signOutStart());
     navigate("/sign-in");
   }

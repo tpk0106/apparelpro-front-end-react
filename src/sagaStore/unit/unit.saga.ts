@@ -47,7 +47,7 @@ export function* loadAllUnits(
         filterOrder: payload.filterQuery,
         sortColumn: payload.sortColumn,
         sortOrder: payload.sortOrder,
-        currentPage: payload.pageNumber,
+        currentPage: payload.pageIndex,
       }),
     );
   } catch (error) {
@@ -72,7 +72,7 @@ export function* updateUnit(
 ): Generator<CallEffect | PutEffect<AnyAction>, void, void> {
   try {
     const { payload } = action;
-    yield call(updateEditUnit, payload.id, payload);
+    yield call(updateEditUnit, payload.code, payload);
     yield put(updateUnitSuccess(true));
   } catch (error) {
     yield put(updateUnitFailure(error));
@@ -85,7 +85,7 @@ export function* deleteUnit(
   try {
     const { payload } = action;
     const id = payload;
-    yield call(removeUnit, id);
+    yield call(removeUnit, String(id));
     yield put(deleteUnitSuccess(true));
   } catch (error) {
     yield put(deleteUnitFailure(error));

@@ -64,9 +64,11 @@ export default function AccessDeniedDialog() {
   return (
     <Dialog
       open={isOpen}
-      disableEscapeKeyDown
       onClose={(_event, reason) => {
         // User must click OK - ignore backdrop clicks and Escape.
+        // (MUI v9 removed the disableEscapeKeyDown prop; this onClose guard
+        // already blocked both dismissal paths, so dropping the prop is a
+        // no-op behaviorally.)
         if (reason === "backdropClick" || reason === "escapeKeyDown") return;
         handleClose();
       }}

@@ -1,4 +1,4 @@
-import type Bank from "../../interfaces/references/Bank";
+import type { Bank } from "../../interfaces/references/Bank";
 import { createAction } from "../../utils/reducer/reducer.utils";
 import { BANK_ACTION_TYPES } from "./bank.types";
 

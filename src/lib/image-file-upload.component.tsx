@@ -6,7 +6,10 @@ import { useEffect, useState } from "react";
 
 // Update this type definition
 type userData = {
-  setParentState: (val: string) => void;
+  // setParentState receives the raw File object (see handleFileUpload below),
+  // not a base64 string - this component has no current consumers in the
+  // codebase, so the signature is corrected to match its actual behavior.
+  setParentState: (val: File) => void;
   currentImg?: File | string | null; // Add string and null here
 };
 

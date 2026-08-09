@@ -62,7 +62,7 @@ const OrderMain = ({ buyerCode, order, mainOrderUnit }: OrderMainProps) => {
   const [selectedStyle, setSelectedStyle] = useState<Style | null>(null);
   const [isMatrixDirty, setIsMatrixDirty] = useState<boolean>(false);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     // Intercept navigation passes if an operation layer is active and unsaved
     if (isMatrixDirty) {
       const confirmLeave = window.confirm(

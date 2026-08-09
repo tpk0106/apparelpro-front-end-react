@@ -153,14 +153,6 @@ interface CreateAddressAPIModel {
   bankCode?: string;
 }
 
-interface CreateCurrencyConversionAPIModel {
-  id: number;
-  fromCurrency: string;
-  toCurrency: string;
-  amount: number;
-  date: Date;
-}
-
 interface CreateCurrencyExchangeAPIModel {
   id: number;
   baseCurrency: string;
@@ -234,7 +226,6 @@ export type {
   UpdateBuyerAPIModel,
   UpdatePortDestinationAPIModel,
   CreateAddressAPIModel,
-  CreateCurrencyConversionAPIModel,
   CreateCurrencyExchangeAPIModel,
   POParameters,
   TokenAPIModel,

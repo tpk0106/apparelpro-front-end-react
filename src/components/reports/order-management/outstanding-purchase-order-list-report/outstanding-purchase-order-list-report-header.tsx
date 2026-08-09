@@ -79,7 +79,7 @@ export default function OutstandingPurchaseOrderListReportHeader({
         List of Outstanding P/O's - Selection Criteria
       </Typography>
 
-      <Grid container spacing={2} alignItems="center">
+      <Grid container spacing={2} sx={{ alignItems: "center" }}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <TextField
             type="date"

@@ -15,7 +15,7 @@ import {
   type MRT_Row,
   type MRT_TableOptions,
 } from "material-react-table";
-import { Box, Button, darken, IconButton, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import type { PaginationData } from "../../../interfaces/definitions";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
@@ -173,10 +173,6 @@ const BankTable = ({
     onCreatingRowSave: handleCreateCurrency,
     onEditingRowCancel: () => setValidationErrors({}),
     onEditingRowSave: handleSaveCurrency,
-
-    muiExpandButtonProps: ({ row, table }) => ({
-      onClick: () => table.setExpanded({ [row.id]: !row.getIsExpanded() }),
-    }),
 
     // // 1. Top Toolbar Workspace Header
     // muiTopToolbarProps: {

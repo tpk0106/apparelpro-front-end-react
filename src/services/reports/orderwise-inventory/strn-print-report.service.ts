@@ -1,6 +1,6 @@
 import { client } from "../../../auth/axiosClient";
 import { APPARELPRO_ENDPOINTS } from "../../../api/api-configurations";
-import type { StrnPrintReportDetails } from "../components/reports-orderwise-inventory/strn-print-report.types";
+import type { StrnPrintReportDetails } from "../../../components/reports/orderwise-inventory/strn/strn-print-report.types";
 
 const getStrnPrintDetails = async (strnNumber: string) => {
   return await client.get<StrnPrintReportDetails>(

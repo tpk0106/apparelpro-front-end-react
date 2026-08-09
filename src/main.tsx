@@ -9,7 +9,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import "./index.css";
 import App from "./App.tsx";
 import { store } from "./sagaStore/sagaStore.ts";
-import { apparelProDarkTheme, blueTheme } from "./themes/themes.ts";
+import { apparelProDarkTheme } from "./themes/themes.ts";
 import { ThemeProvider } from "@mui/material";
 import { ToastContainer } from "react-toastify";
 import AccessDeniedDialog from "./components/common/access-denied-dialog";

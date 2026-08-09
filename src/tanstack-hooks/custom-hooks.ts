@@ -578,6 +578,65 @@ export const useDeleteOrderItemFeatureMutation = () => {
   });
 };
 
+// Garment Type wise Item Requirements (RF_MENU.PRG > B. Order Management > G. Type / Item)
+
+export const useGetGarmentTypeItems = (garmentTypeId: number) => {
+  return useQuery<GarmentTypeItem[], Error>({
+    queryKey: ["garment-type-items", garmentTypeId],
+    queryFn: async () => {
+      const response: AxiosResponse<GarmentTypeItem[]> =
+        await loadGarmentTypeItems(garmentTypeId);
+      return response.data;
+    },
+    enabled: garmentTypeId > 0,
+  });
+};
+
+export const useSaveGarmentTypeItemMutation = () => {
+  const queryClient = useQueryClient();
+
+  // Backend endpoint upserts by (garmentTypeId, stockCode, itemCode) - one Save
+  // endpoint handles both create and edit, matching OD_ITM1.PRG's dbedit logic.
+  return useMutation<GarmentTypeItem, Error, SaveGarmentTypeItemPayload>({
+    mutationFn: async (payload: SaveGarmentTypeItemPayload) => {
+      const response = await saveGarmentTypeItem(payload);
+      return response.data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["garment-type-items", variables.garmentTypeId],
+      });
+      toast.success("Item requirement saved successfully");
+    },
+    onError: (error) => {
+      toast.error(`Save failed: ${error.message}`);
+    },
+  });
+};
+
+export const useDeleteGarmentTypeItemMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    void,
+    Error,
+    { garmentTypeId: number; stockCode: string; itemCode: string }
+  >({
+    mutationFn: async ({ garmentTypeId, stockCode, itemCode }) => {
+      await removeGarmentTypeItem(garmentTypeId, stockCode, itemCode);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["garment-type-items", variables.garmentTypeId],
+      });
+      toast.success("Item requirement deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
+    },
+  });
+};
+
 //
 
 // Additional Cost
@@ -641,6 +700,223 @@ export const useDeleteAdditionalCostMutation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["additional-costs"] });
       toast.success("Additional Cost deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
+    },
+  });
+};
+
+//
+
+// Sub Contractor (2026-08-09) - minimal Code+Name reference resolving the AIN
+// Zero-Assumption gap (od_scref had no modern entity anywhere in the app).
+// Lives here in custom-hooks.ts rather than a dedicated hooks file, matching the
+// Additional Cost/Basis/Unit convention for simple reference-domain screens.
+
+export const useGetSubContractors = (paginate: PaginationData) => {
+  return useQuery<PaginationAPIModel<SubContractor>, Error>({
+    queryKey: ["sub-contractors", paginate.pageIndex, paginate.pageSize],
+    queryFn: async () => {
+      const response: AxiosResponse<PaginationAPIModel<SubContractor>> =
+        await loadSubContractors(paginate);
+      return response.data;
+    },
+    placeholderData: (previousData) => previousData,
+  });
+};
+
+export const useCreateSubContractorMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, SubContractor>({
+    mutationFn: async (newSubContractor: SubContractor) => {
+      await createNewSubContractor(newSubContractor);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sub-contractors"] });
+      toast.success("Sub Contractor created successfully");
+    },
+    onError: (error) => {
+      toast.error(`Creation failed: ${error.message}`);
+    },
+  });
+};
+
+export const useUpdateSubContractorMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, SubContractor>({
+    mutationFn: async (updatedSubContractor: SubContractor) => {
+      await updateEditSubContractor(
+        updatedSubContractor.code,
+        updatedSubContractor,
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sub-contractors"] });
+      toast.success("Sub Contractor updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Update failed: ${error.message}`);
+    },
+  });
+};
+
+export const useDeleteSubContractorMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { code: string }>({
+    mutationFn: async ({ code }) => {
+      await removeSubContractor(code);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sub-contractors"] });
+      toast.success("Sub Contractor deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
+    },
+  });
+};
+
+//
+
+// Stock Reference (RF_MENU.PRG > C. Inventory Control > A. Stock Reference)
+
+export const useGetStocks = (paginate: PaginationData) => {
+  return useQuery<PaginationAPIModel<Stock>, Error>({
+    queryKey: ["stocks", paginate.pageIndex, paginate.pageSize],
+    queryFn: async () => {
+      const response: AxiosResponse<PaginationAPIModel<Stock>> =
+        await loadStocks(paginate);
+      return response.data;
+    },
+    placeholderData: (previousData) => previousData,
+  });
+};
+
+export const useCreateStockMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, Stock>({
+    mutationFn: async (newStock: Stock) => {
+      await createNewStock(newStock);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stocks"] });
+      toast.success("Stock Reference created successfully");
+    },
+    onError: (error) => {
+      toast.error(`Creation failed: ${error.message}`);
+    },
+  });
+};
+
+export const useUpdateStockMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, Stock>({
+    mutationFn: async (updatedStock: Stock) => {
+      await updateEditStock(updatedStock.stockCode, updatedStock);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stocks"] });
+      toast.success("Stock Reference updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Update failed: ${error.message}`);
+    },
+  });
+};
+
+export const useDeleteStockMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { stockCode: string }>({
+    mutationFn: async ({ stockCode }) => {
+      await removeStock(stockCode);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["stocks"] });
+      toast.success("Stock Reference deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
+    },
+  });
+};
+
+//
+
+// Order Items Catalog (od_itm master list - Stock/Item entered via [F1] help in
+// legacy, e.g. OD_AITM1.PRG)
+
+export const useGetOrderItemCatalog = (paginate: PaginationData) => {
+  return useQuery<PaginationAPIModel<OrderItemCatalog>, Error>({
+    queryKey: ["order-item-catalog", paginate.pageIndex, paginate.pageSize],
+    queryFn: async () => {
+      const response: AxiosResponse<PaginationAPIModel<OrderItemCatalog>> =
+        await loadOrderItemCatalog(paginate);
+      return response.data;
+    },
+    placeholderData: (previousData) => previousData,
+  });
+};
+
+export const useCreateOrderItemCatalogMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, OrderItemCatalog>({
+    mutationFn: async (newOrderItemCatalog: OrderItemCatalog) => {
+      await createNewOrderItemCatalog(newOrderItemCatalog);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["order-item-catalog"] });
+      // Also used to populate the material catalog picker (Garment Type Item
+      // Requirements, Additional Cost per Garment) - refresh that too.
+      queryClient.invalidateQueries({ queryKey: ["materialCatalog"] });
+      toast.success("Order Item Catalog entry created successfully");
+    },
+    onError: (error) => {
+      toast.error(`Creation failed: ${error.message}`);
+    },
+  });
+};
+
+export const useUpdateOrderItemCatalogMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, OrderItemCatalog>({
+    mutationFn: async (updatedOrderItemCatalog: OrderItemCatalog) => {
+      await updateEditOrderItemCatalog(
+        updatedOrderItemCatalog.stockCode,
+        updatedOrderItemCatalog.itemCode,
+        updatedOrderItemCatalog,
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["order-item-catalog"] });
+      queryClient.invalidateQueries({ queryKey: ["materialCatalog"] });
+      toast.success("Order Item Catalog entry updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Update failed: ${error.message}`);
+    },
+  });
+};
+
+export const useDeleteOrderItemCatalogMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { stockCode: string; itemCode: string }>({
+    mutationFn: async ({ stockCode, itemCode }) => {
+      await removeOrderItemCatalog(stockCode, itemCode);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["order-item-catalog"] });
+      queryClient.invalidateQueries({ queryKey: ["materialCatalog"] });
+      toast.success("Order Item Catalog entry deleted successfully");
     },
     onError: (error) => {
       toast.error(`Delete failed: ${error.message}`);
@@ -1335,6 +1611,15 @@ import {
   removeOrderItemFeature,
   updateEditOrderItemFeature,
 } from "../services/references/order-item-feature.service";
+import type {
+  GarmentTypeItem,
+  SaveGarmentTypeItemPayload,
+} from "../interfaces/references/GarmentTypeItem";
+import {
+  loadGarmentTypeItems,
+  saveGarmentTypeItem,
+  removeGarmentTypeItem,
+} from "../services/references/garment-type-item.service";
 import type { AdditionalCost } from "../interfaces/references/AdditionalCost";
 import {
   createNewAdditionalCost,
@@ -1342,6 +1627,34 @@ import {
   removeAdditionalCost,
   updateEditAdditionalCost,
 } from "../services/references/additional-cost.service";
+import type { SubContractor } from "../interfaces/references/SubContractor";
+import {
+  createNewSubContractor,
+  loadSubContractors,
+  removeSubContractor,
+  updateEditSubContractor,
+} from "../services/references/sub-contractor.service";
+import type { Stock } from "../interfaces/references/Stock";
+import {
+  createNewStock,
+  loadStocks,
+  removeStock,
+  updateEditStock,
+} from "../services/references/stock.service";
+import type { OrderItemCatalog } from "../interfaces/references/OrderItemCatalog";
+import {
+  createNewOrderItemCatalog,
+  loadOrderItemCatalog,
+  removeOrderItemCatalog,
+  updateEditOrderItemCatalog,
+} from "../services/references/order-item-catalog.service";
+import type { CurrencyConversion } from "../interfaces/references/CurrencyConversion";
+import {
+  createNewCurrencyConversion,
+  loadCurrencyConversions,
+  removeCurrencyConversion,
+  updateEditCurrencyConversion,
+} from "../services/references/currency-conversion.service";
 // Path to your client file
 import type { SystemParameter } from "../interfaces/system-configuration/SystemParameter";
 import {
@@ -1622,4 +1935,71 @@ export const useApproveTrimSheetMutation = () => {
       },
     },
   );
+};
+
+// Currency Conversion (od_conv-style flat From/To rate table - Reference Data >
+// General > Currency Conversion). Rebuilt 2026-08-09: the old service/hooks here
+// were dead pre-TanStack scaffolding wired to a broken backend endpoint.
+
+export const useGetCurrencyConversions = (paginate: PaginationData) => {
+  return useQuery<PaginationAPIModel<CurrencyConversion>, Error>({
+    queryKey: ["currency-conversion", paginate.pageIndex, paginate.pageSize],
+    queryFn: async () => {
+      const response: AxiosResponse<PaginationAPIModel<CurrencyConversion>> =
+        await loadCurrencyConversions(paginate);
+      return response.data;
+    },
+    placeholderData: (previousData) => previousData,
+  });
+};
+
+export const useCreateCurrencyConversionMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, CurrencyConversion>({
+    mutationFn: async (newCurrencyConversion: CurrencyConversion) => {
+      await createNewCurrencyConversion(newCurrencyConversion);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["currency-conversion"] });
+      toast.success("Currency Conversion rate created successfully");
+    },
+    onError: (error) => {
+      toast.error(`Creation failed: ${error.message}`);
+    },
+  });
+};
+
+export const useUpdateCurrencyConversionMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, CurrencyConversion>({
+    mutationFn: async (updatedCurrencyConversion: CurrencyConversion) => {
+      await updateEditCurrencyConversion(updatedCurrencyConversion);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["currency-conversion"] });
+      toast.success("Currency Conversion rate updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Update failed: ${error.message}`);
+    },
+  });
+};
+
+export const useDeleteCurrencyConversionMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { fromCurrency: string; toCurrency: string }>({
+    mutationFn: async ({ fromCurrency, toCurrency }) => {
+      await removeCurrencyConversion(fromCurrency, toCurrency);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["currency-conversion"] });
+      toast.success("Currency Conversion rate deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
+    },
+  });
 };

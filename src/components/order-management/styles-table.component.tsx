@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import {
   useCreateStyleMutation,
   useDeleteStyleMutation,
@@ -7,13 +7,12 @@ import {
 
 import {
   MaterialReactTable,
-  useMaterialReactTable,
   type MRT_ColumnDef,
   type MRT_PaginationState,
   type MRT_Row,
   type MRT_TableOptions,
 } from "material-react-table";
-import { Box, Button, darken, IconButton, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import type { PaginationData } from "../../interfaces/definitions";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
@@ -65,7 +64,7 @@ const StyleTable = ({
   // validationErrors,
   setValidationErrors,
   onSelectStyleForBreakdown,
-  activeSelectedStyle,
+  activeSelectedStyle: _activeSelectedStyle,
 }: Props) => {
   // 1. Ensure validationErrors is initialized cleanly as an empty object
   // const [validationErrors, setValidationErrors] = useState<
