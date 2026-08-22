@@ -18,6 +18,7 @@ import type {
 import { toast } from "react-toastify";
 
 import StockMovementReportGrid from "./stock-movement-report-grid";
+import KpiTile from "../common/kpi-tile";
 import {
   useGetStockMovementReportHeaderQuery,
   useGetStockMovementReportLinesQuery,
@@ -317,42 +318,6 @@ export default function StockMovementReportWorkspace() {
         )}
       </Paper>
     </Box>
-  );
-}
-
-function KpiTile({
-  label,
-  value,
-  loading,
-  color,
-}: {
-  label: string;
-  value: number | string | undefined;
-  loading: boolean;
-  color?: string;
-}) {
-  return (
-    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-      <Paper variant="outlined" sx={{ p: 1.75, borderRadius: 2 }}>
-        {/* Same fix as StrnPrintReportWorkspace's InfoTile: this Paper has no
-            background override, so it inherits the dark theme's background.paper
-            (#141922). color="text.secondary" / the "inherit" default both silently
-            resolved to near-black here instead of the theme's actual secondary
-            color, so both are hardcoded rather than trusted a second time. */}
-        <Typography
-          variant="caption"
-          sx={{ textTransform: "uppercase", color: "#8B93A1" }}
-        >
-          {label}
-        </Typography>
-        <Typography
-          variant="h5"
-          sx={{ fontWeight: 700, color: color ?? "#F4F6F8" }}
-        >
-          {loading ? "…" : (value ?? "—")}
-        </Typography>
-      </Paper>
-    </Grid>
   );
 }
 

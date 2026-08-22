@@ -16,6 +16,8 @@ const asideMenuTitleTypographyTheme = createTheme({
         root: {
           letterSpacing: "0.7em",
           fontWeight: 600,
+          // color: "#ffffff",
+          // color: "#93c5fd",
           // shadow: "0 4px 6px rgba(255, 255, 255, 0.9)",
         },
       },

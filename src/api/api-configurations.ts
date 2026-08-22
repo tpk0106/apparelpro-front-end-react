@@ -64,6 +64,157 @@ export const APPARELPRO_ENDPOINTS = {
       PUT: "api/basis/",
       PATCH: "api/basis",
     },
+    PRODUCTION_LINE: {
+      GET_BY_PAGINATION: "api/production-line/list",
+      GETBY_CODE: "api/production-line/list/",
+      POST: "api/production-line",
+      DELETE: "api/production-line/",
+      PUT: "api/production-line",
+    },
+    OPERATION: {
+      GET_BY_PAGINATION: "api/operation/list",
+      GETBY_CODE: "api/operation/list/",
+      POST: "api/operation",
+      DELETE: "api/operation/",
+      PUT: "api/operation",
+    },
+    NON_PRODUCTIVE_HOUR_CODE: {
+      GET_BY_PAGINATION: "api/non-productive-hour-code/list",
+      GETBY_CODE: "api/non-productive-hour-code/list/",
+      POST: "api/non-productive-hour-code",
+      DELETE: "api/non-productive-hour-code/",
+      PUT: "api/non-productive-hour-code",
+    },
+    MACHINE_TYPE: {
+      GET_BY_PAGINATION: "api/machine-type/list",
+      GETBY_CODE: "api/machine-type/list/",
+      POST: "api/machine-type",
+      DELETE: "api/machine-type/",
+      PUT: "api/machine-type",
+    },
+    GARMENT_COMPONENT: {
+      GET_BY_PAGINATION: "api/garment-component/list",
+      GETBY_CODE: "api/garment-component/list/",
+      POST: "api/garment-component",
+      DELETE: "api/garment-component/",
+      PUT: "api/garment-component",
+    },
+    EMPLOYEE: {
+      GET_BY_PAGINATION: "api/employee/list",
+      GETBY_CODE: "api/employee/list/",
+      POST: "api/employee",
+      DELETE: "api/employee/",
+      PUT: "api/employee",
+    },
+    STYLE_COMPONENT_BREAKDOWN: {
+      GET_BY_STYLE: "api/style-component-breakdown/by-style",
+      BULK_SAVE: "api/style-component-breakdown/bulk-save",
+    },
+    STYLE_OPERATION_BREAKDOWN: {
+      GET_BY_STYLE: "api/style-operation-breakdown/by-style",
+      SEED_FROM_TEMPLATE: "api/style-operation-breakdown/seed-from-template",
+      BULK_SAVE: "api/style-operation-breakdown/bulk-save",
+    },
+    HOLIDAY: {
+      GET_BY_PAGINATION: "api/holiday/list",
+      POST: "api/holiday",
+      DELETE: "api/holiday/",
+    },
+    PRODUCTION_LINE_ALLOCATION: {
+      GET_BY_SHIPMENT: "api/production-line-allocation/by-shipment",
+      GET_BY_LINE: "api/production-line-allocation/by-line",
+      MANUAL: "api/production-line-allocation/manual",
+      AUTOMATIC: "api/production-line-allocation/automatic",
+      DELETE: "api/production-line-allocation",
+    },
+    ESTIMATED_PRODUCTION_LINE_ALLOCATION: {
+      GET: "api/estimated-production-line-allocation",
+      MANUAL: "api/estimated-production-line-allocation/manual",
+      AUTOMATIC: "api/estimated-production-line-allocation/automatic",
+      DELETE: "api/estimated-production-line-allocation",
+    },
+    DAILY_PRODUCTION_TIME_TICKET: {
+      GET: "api/daily-production-time-ticket",
+      BULK_SAVE: "api/daily-production-time-ticket/bulk-save",
+    },
+    ESTIMATED_PRODUCTION_ENTRY: {
+      GET_BY_LINE: "api/estimated-production-entry/by-line",
+      BULK_SAVE: "api/estimated-production-entry/bulk-save",
+    },
+    DAILY_PRODUCTION_ENTRY: {
+      GET_BY_DATE: "api/daily-production-entry/by-date",
+      BULK_SAVE: "api/daily-production-entry/bulk-save",
+    },
+    SECTION: {
+      LIST_ALL: "api/section/list/all",
+    },
+    PRODUCTION_SUMMARY_DAILY_REPORT: {
+      GET: "api/production-summary-daily-report",
+      PDF: "api/production-summary-daily-report/pdf",
+    },
+    PRODUCTION_SCHEDULE_REPORT: {
+      GET: "api/production-schedule-report",
+      PDF: "api/production-schedule-report/pdf",
+    },
+    PRODUCTION_SUMMARY_MONTHLY_REPORT: {
+      GET: "api/production-summary-monthly-report",
+      PDF: "api/production-summary-monthly-report/pdf",
+    },
+    PRODUCTION_SUMMARY_MONTHLY_OVERVIEW_REPORT: {
+      GET: "api/production-summary-monthly-overview-report",
+      PDF: "api/production-summary-monthly-overview-report/pdf",
+    },
+    PRODUCTION_SUMMARY_STYLE_WISE_REPORT: {
+      GET: "api/production-summary-style-wise-report",
+      PDF: "api/production-summary-style-wise-report/pdf",
+    },
+    PRODUCTION_SUMMARY_STYLE_WISE_DETAILED_REPORT: {
+      GET: "api/production-summary-style-wise-detailed-report",
+      PDF: "api/production-summary-style-wise-detailed-report/pdf",
+    },
+    LINE_PRODUCTION_SUMMARY_REPORT: {
+      GET: "api/line-production-summary-report",
+      PDF: "api/line-production-summary-report/pdf",
+    },
+    OPERATION_BREAKDOWN_REPORT: {
+      GET: "api/operation-breakdown-report",
+      PDF: "api/operation-breakdown-report/pdf",
+    },
+    MANPOWER_REQUIREMENT_REPORT: {
+      GET: "api/manpower-requirement-report",
+      PDF: "api/manpower-requirement-report/pdf",
+    },
+    DAILY_EMPLOYEE_EFFICIENCY_REPORT: {
+      GET: "api/daily-employee-efficiency-report",
+      PDF: "api/daily-employee-efficiency-report/pdf",
+    },
+    MONTHLY_EMPLOYEE_EFFICIENCY_REPORT: {
+      GET: "api/monthly-employee-efficiency-report",
+      PDF: "api/monthly-employee-efficiency-report/pdf",
+    },
+    LINE_EFFICIENCY_REPORT: {
+      GET: "api/line-efficiency-report",
+      PDF: "api/line-efficiency-report/pdf",
+    },
+    ESTIMATED_PRODUCTION_SCHEDULE_REPORT: {
+      GET: "api/estimated-production-schedule-report",
+      PDF: "api/estimated-production-schedule-report/pdf",
+    },
+    PRODUCTION_ANALYSIS_SUMMARY_REPORT: {
+      GET: "api/production-analysis-summary-report",
+      PDF: "api/production-analysis-summary-report/pdf",
+    },
+    PRODUCTION_PROGRESS_GRAPH: {
+      GET: "api/production-progress-graph",
+    },
+    DASHBOARD: {
+      CURRENT_STYLE: "api/dashboard/current-style",
+      PRODUCTION_PROGRESS: "api/dashboard/production-progress",
+      DAILY_TREND: "api/dashboard/daily-trend",
+      DAILY_TREND_ALL_SECTIONS: "api/dashboard/daily-trend-all-sections",
+      ORDER_MANAGEMENT_SUMMARY: "api/dashboard/order-management-summary",
+      ORDERWISE_INVENTORY_SUMMARY: "api/dashboard/orderwise-inventory-summary",
+    },
     SUBSCRIPTION: {
       GET: "api/subscription/list",
       POST: "api/subscription",
@@ -366,6 +517,12 @@ export const APPARELPRO_ENDPOINTS = {
       HEADER: "api/stock-movement-reports/header",
       LINES: "api/stock-movement-reports/lines",
       PDF: "api/stock-movement-reports/pdf",
+    },
+    STOCK_MOVEMENT_ITEM_REPORT: {
+      ITEMS: "api/stock-movement-item-reports/items",
+      HEADER: "api/stock-movement-item-reports/header",
+      LINES: "api/stock-movement-item-reports/lines",
+      PDF: "api/stock-movement-item-reports/pdf",
     },
   },
   SYSTEM_CONFIGURATION: {

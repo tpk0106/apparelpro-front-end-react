@@ -1,17 +1,13 @@
 import { useNavigate } from "react-router-dom";
-// import PowerSettingsNewOutlinedIcon from "@mui/icons-material/PowerSettingsNewOutlined";
+
 import { Button } from "@mui/material";
 import { useSelector } from "react-redux";
 
 import { getCurrentUser } from "../sagaStore/user/user.selector";
 import NavBarUserMenu from "./navbar-user-menu.component";
+import LoginIcon from "@mui/icons-material/Login";
 
 const Login = () => {
-  // export const handleLogOut = () => {
-  //   dispatch(signOutStart());
-  //   navigate("/sign-in");
-  // };
-
   const navigate = useNavigate();
 
   // 1. Read the user string ("John") straight from global Redux memory
@@ -26,23 +22,13 @@ const Login = () => {
         {!currUser ? (
           <Button
             variant="text"
-            className="hidden lg:inline-block"
+            className="hidden lg:inline-block hover:text-white"
             onClick={() => navigate("/sign-in")}
           >
-            Sign In
+            <LoginIcon className="hover:text-white" />
           </Button>
         ) : (
           <NavBarUserMenu />
-          // <Button
-          //   variant="text"
-          //   className="hidden lg:inline-block"
-          //    onClick={() => setShowMenu(true)}
-          //   // onClick={handleLogOut}
-          // >
-          //   <span>
-          //     <PowerSettingsNewOutlinedIcon className="hover:text-white" />
-          //   </span>
-          // </Button>
         )}
       </div>
     </>

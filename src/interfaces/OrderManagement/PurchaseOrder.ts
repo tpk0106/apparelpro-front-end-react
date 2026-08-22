@@ -1,7 +1,7 @@
 export default interface PurchaseOrder {
   buyerCode: number;
   order: string;
-  // description: string;
+  description?: string;
   countryCode: string;
   orderDate: Date;
   garmentType: number;

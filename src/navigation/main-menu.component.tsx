@@ -15,7 +15,7 @@ const MainMenu = () => {
         </div>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto bg-black1 bg-white">
           <Outlet />
         </div>
 

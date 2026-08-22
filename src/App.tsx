@@ -2,7 +2,22 @@ import { Routes, Route } from "react-router-dom";
 // Inside your Routes.tsx or App.tsx
 import { useLocation } from "react-router-dom";
 
-import Home from "./home/home.component";
+import DashboardHome from "./components/dashboard/dashboard.component";
+import ProductionSummaryDailyReportWorkspace from "./components/reports/production/production-summary-daily-report-workspace";
+import ProductionScheduleReportWorkspace from "./components/reports/production/production-schedule-report-workspace";
+import ProductionSummaryMonthlyReportWorkspace from "./components/reports/production/production-summary-monthly-report-workspace";
+import ProductionSummaryMonthlyOverviewReportWorkspace from "./components/reports/production/production-summary-monthly-overview-report-workspace";
+import ProductionSummaryStyleWiseReportWorkspace from "./components/reports/production/production-summary-style-wise-report-workspace";
+import ProductionSummaryStyleWiseDetailedReportWorkspace from "./components/reports/production/production-summary-style-wise-detailed-report-workspace";
+import LineProductionSummaryReportWorkspace from "./components/reports/production/line-production-summary-report-workspace";
+import OperationBreakdownReportWorkspace from "./components/reports/production/operation-breakdown-report-workspace";
+import ManpowerRequirementReportWorkspace from "./components/reports/production/manpower-requirement-report-workspace";
+import DailyEmployeeEfficiencyReportWorkspace from "./components/reports/production/daily-employee-efficiency-report-workspace";
+import MonthlyEmployeeEfficiencyReportWorkspace from "./components/reports/production/monthly-employee-efficiency-report-workspace";
+import LineEfficiencyReportWorkspace from "./components/reports/production/line-efficiency-report-workspace";
+import EstimatedProductionScheduleReportWorkspace from "./components/reports/production/estimated-production-schedule-report-workspace";
+import ProductionAnalysisSummaryReportWorkspace from "./components/reports/production/production-analysis-summary-report-workspace";
+import ProductionProgressGraph from "./components/production/production-progress-graph/production-progress-graph.component";
 import MainMenu from "./navigation/main-menu.component";
 import SignInForm from "./sign-in/sign-in-form.component";
 import SignupForm from "./sign-up/sign-up-form.component";
@@ -34,6 +49,7 @@ import DamagedGoodsNoteWorkspace from "./components/orderwise-inventory/damaged-
 import StockAdjustmentNoteWorkspace from "./components/orderwise-inventory/stock-adjustment-note-workspace";
 import AdditionalIssueNoteWorkspace from "./components/orderwise-inventory/additional-issue-note-workspace";
 import StockMovementReportWorkspace from "./components/orderwise-inventory/stock-movement-report-workspace";
+import StockMovementItemReportWorkspace from "./components/orderwise-inventory/stock-movement-item-report-workspace";
 
 import ColorSizeReportWorkspace from "./components/reports/order-management/color-size-report/color-size-report-workspace";
 import PurchaseOrderListReportWorkspace from "./components/reports/order-management/purchase-order-list-report/purchase-order-list-report-workspace";
@@ -53,6 +69,20 @@ import GarmentAdditionalCostPage from "./components/garment-additional-cost/garm
 import SubContractPage from "./components/sub-contract/sub-contract.component";
 import SettingsPage from "./components/settings/settings.component";
 import StrnPrintReportWorkspace from "./components/reports/orderwise-inventory/strn/strn-print-report-workspace";
+import ProductionLines from "./components/references/production/production-line-tanstack/production-line.component";
+import Operations from "./components/references/production/operation-tanstack/operation.component";
+import NonProductiveHourCodes from "./components/references/production/non-productive-hour-code-tanstack/non-productive-hour-code.component";
+import MachineTypes from "./components/references/production/machine-type-tanstack/machine-type.component";
+import GarmentComponents from "./components/references/production/garment-component-tanstack/garment-component.component";
+import Employees from "./components/references/production/employee-tanstack/employee.component";
+import StyleComponentBreakdownWorkspace from "./components/production/style-component-breakdown/style-component-breakdown.component";
+import StyleOperationBreakdownWorkspace from "./components/production/style-operation-breakdown/style-operation-breakdown.component";
+import Holidays from "./components/references/production/holiday-tanstack/holiday.component";
+import ProductionLineAllocationWorkspace from "./components/production/production-line-allocation/production-line-allocation.component";
+import EstimatedProductionLineAllocationWorkspace from "./components/production/estimated-production-line-allocation/estimated-production-line-allocation.component";
+import DailyProductionTimeTicketWorkspace from "./components/production/daily-production-time-ticket/daily-production-time-ticket.component";
+import EstimatedProductionEntryWorkspace from "./components/production/estimated-production-entry/estimated-production-entry.component";
+import DailyProductionEntryWorkspace from "./components/production/daily-production-entry/daily-production-entry.component";
 
 function App() {
   const location = useLocation();
@@ -66,7 +96,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<MainMenu />}>
-        <Route index path="/" element={<Home />} />
+        <Route index path="/" element={<DashboardHome />} />
         <Route index path="/sign-in" element={<SignInForm />} />
         <Route
           index
@@ -90,6 +120,131 @@ function App() {
         <Route index path="buyers" element={<Buyers />} />
         <Route index path="garment-type" element={<GarmentTypes />} />
         <Route index path="basis" element={<Basises />} />
+        <Route index path="production-line" element={<ProductionLines />} />
+        <Route index path="operation" element={<Operations />} />
+        <Route
+          index
+          path="non-productive-hour-code"
+          element={<NonProductiveHourCodes />}
+        />
+        <Route index path="machine-type" element={<MachineTypes />} />
+        <Route
+          index
+          path="garment-component"
+          element={<GarmentComponents />}
+        />
+        <Route index path="employee" element={<Employees />} />
+        <Route
+          index
+          path="style-component-breakdown"
+          element={<StyleComponentBreakdownWorkspace />}
+        />
+        <Route
+          index
+          path="style-operation-breakdown"
+          element={<StyleOperationBreakdownWorkspace />}
+        />
+        <Route index path="holiday" element={<Holidays />} />
+        <Route
+          index
+          path="production-line-allocation"
+          element={<ProductionLineAllocationWorkspace />}
+        />
+        <Route
+          index
+          path="estimated-production-line-allocation"
+          element={<EstimatedProductionLineAllocationWorkspace />}
+        />
+        <Route
+          index
+          path="daily-production-time-ticket"
+          element={<DailyProductionTimeTicketWorkspace />}
+        />
+        <Route
+          index
+          path="estimated-production-entry"
+          element={<EstimatedProductionEntryWorkspace />}
+        />
+        <Route
+          index
+          path="daily-production-entry"
+          element={<DailyProductionEntryWorkspace />}
+        />
+        <Route
+          index
+          path="production-summary-daily-report"
+          element={<ProductionSummaryDailyReportWorkspace />}
+        />
+        <Route
+          index
+          path="production-schedule-report"
+          element={<ProductionScheduleReportWorkspace />}
+        />
+        <Route
+          index
+          path="production-summary-monthly-report"
+          element={<ProductionSummaryMonthlyReportWorkspace />}
+        />
+        <Route
+          index
+          path="production-summary-monthly-overview-report"
+          element={<ProductionSummaryMonthlyOverviewReportWorkspace />}
+        />
+        <Route
+          index
+          path="production-summary-style-wise-report"
+          element={<ProductionSummaryStyleWiseReportWorkspace />}
+        />
+        <Route
+          index
+          path="production-summary-style-wise-detailed-report"
+          element={<ProductionSummaryStyleWiseDetailedReportWorkspace />}
+        />
+        <Route
+          index
+          path="line-production-summary-report"
+          element={<LineProductionSummaryReportWorkspace />}
+        />
+        <Route
+          index
+          path="operation-breakdown-report"
+          element={<OperationBreakdownReportWorkspace />}
+        />
+        <Route
+          index
+          path="manpower-requirement-report"
+          element={<ManpowerRequirementReportWorkspace />}
+        />
+        <Route
+          index
+          path="daily-employee-efficiency-report"
+          element={<DailyEmployeeEfficiencyReportWorkspace />}
+        />
+        <Route
+          index
+          path="monthly-employee-efficiency-report"
+          element={<MonthlyEmployeeEfficiencyReportWorkspace />}
+        />
+        <Route
+          index
+          path="line-efficiency-report"
+          element={<LineEfficiencyReportWorkspace />}
+        />
+        <Route
+          index
+          path="estimated-production-schedule-report"
+          element={<EstimatedProductionScheduleReportWorkspace />}
+        />
+        <Route
+          index
+          path="production-analysis-summary-report"
+          element={<ProductionAnalysisSummaryReportWorkspace />}
+        />
+        <Route
+          index
+          path="production-progress-graph"
+          element={<ProductionProgressGraph />}
+        />
         <Route index path="supplier" element={<Suppliers />} />
         <Route index path="po" element={<OrderConfirmationRoutine />} />
         <Route
@@ -139,6 +294,11 @@ function App() {
           index
           path="stock-movement-report"
           element={<StockMovementReportWorkspace />}
+        />
+        <Route
+          index
+          path="stock-movement-item"
+          element={<StockMovementItemReportWorkspace />}
         />
         <Route index path="strn-print" element={<StrnPrintReportWorkspace />} />
         <Route

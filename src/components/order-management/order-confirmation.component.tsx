@@ -46,7 +46,7 @@ const poSchema = z.object({
     .number()
     .int()
     .gt(0, "Total quantity must be greater than 0"),
-  // description: z.coerce.string().default(""),
+  description: z.coerce.string().default(""),
   season: z.string().default(""),
   orderDate: z.string().min(1, "Order date is required"), // Swapped to string to match your native HTML5 date input format perfectly
 });
@@ -89,7 +89,7 @@ const orderFormData: PoFormData = {
   basisCode: "",
   unitCode: "",
   totalQuantity: 0,
-  // description: "",
+  description: "",
   season: "",
   orderDate: format(new Date(), "yyyy-MM-dd"),
   basisValue: 0,
@@ -278,7 +278,7 @@ const OrderConfirmationRoutine = () => {
           ...prev,
           ...existingPO,
           orderDate: finalStringDate,
-          //   description: existingPO.description ?? "",
+          description: existingPO.description ?? "",
           // Legacy Clipper DBF CHAR-field data can carry trailing/leading whitespace that
           // the newer reference-data tables (Currency/Unit/Basis codes) don't have --
           // trimming here means a stray space doesn't break the SelectList's exact string
@@ -553,18 +553,19 @@ const OrderConfirmationRoutine = () => {
               </FormControl>
               <FormControl>
                 <div className="flex w-full justify-between p-0 m-0 border1-4 border1-red-600">
-                  {/* <div className="w-[30%]">
+                  <div className="w-[30%] mt-1">
                     <TextField
+                      fullWidth
                       name="description"
-                      type="text"
-                      margin="normal"
+                      label="Description"
+                      margin="dense"
                       size="small"
-                      placeholder="description"
-                      value={poFormData.description} // 🚀 Reads straight from your flat state!
-                      className="w-[95%]"
+                      autoComplete="off"
+                      slotProps={{ htmlInput: { maxLength: 30 } }}
+                      value={poFormData.description}
                       onChange={handleChange}
                     />
-                  </div> */}
+                  </div>
 
                   <div className="flex w-[30%] mt-1">
                     <FormControl fullWidth>

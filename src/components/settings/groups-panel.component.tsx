@@ -99,7 +99,9 @@ const GroupsPanel = () => {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <GroupsIcon sx={{ fontSize: 18, color: "#8B93A1" }} />
               <Box>
-                <Typography sx={{ fontSize: "13.5px", fontWeight: 500 }}>
+                <Typography
+                  sx={{ fontSize: "13.5px", fontWeight: 500, color: "#ffffff" }}
+                >
                   {group.name}
                 </Typography>
                 <Typography sx={{ fontSize: "12px", color: "text.secondary" }}>
@@ -118,7 +120,9 @@ const GroupsPanel = () => {
               <span>
                 <IconButton
                   size="small"
-                  disabled={group.memberCount > 0 || deleteGroupMutation.isPending}
+                  disabled={
+                    group.memberCount > 0 || deleteGroupMutation.isPending
+                  }
                   onClick={() => handleDeleteGroup(group.id)}
                 >
                   <DeleteOutlineIcon sx={{ fontSize: 18 }} />

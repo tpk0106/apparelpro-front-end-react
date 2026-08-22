@@ -15,6 +15,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { toast } from "react-toastify";
 
 import StrnPrintReportGrid from "./strn-print-report-grid";
+import KpiTile from "../../../common/kpi-tile";
 
 import { format, parseISO } from "date-fns";
 import {
@@ -194,35 +195,39 @@ export default function StrnPrintReportWorkspace() {
               sx={{ mb: 2.5, flexDirection: "row" }}
               wrap="nowrap"
             >
-              <InfoTile
+              <KpiTile
                 label="SRN No"
                 value={details?.header.strnNumber}
                 loading={isLoading}
+                size={{ xs: 12, sm: 6, md: 3, lg: 12 }}
               />
 
               {/* <Grid sx={{ width: "200%" }}> */}
-              <InfoTile
+              <KpiTile
                 label="Buyer"
                 value={details?.header.buyerName}
                 loading={isLoading}
+                size={{ xs: 12, sm: 6, md: 3, lg: 12 }}
               />
               {/* </Grid> */}
               {/* <Grid sx={{ width: "100%" }}> */}
-              <InfoTile
+              <KpiTile
                 label="Order No"
                 value={details?.header.order}
                 loading={isLoading}
+                size={{ xs: 12, sm: 6, md: 3, lg: 12 }}
               />
               {/* </Grid> */}
               {/* <Grid sx={{ width: "100%" }}> */}
-              <InfoTile
+              <KpiTile
                 label="To Department"
                 value={details?.header.departmentCode}
                 loading={isLoading}
+                size={{ xs: 12, sm: 6, md: 3, lg: 12 }}
               />
               {/* </Grid> */}
               {/* <Grid sx={{ width: "100%" }}> */}
-              <InfoTile
+              <KpiTile
                 label="Date"
                 value={
                   details?.header?.transactionDate &&
@@ -232,6 +237,7 @@ export default function StrnPrintReportWorkspace() {
                   )
                 }
                 loading={isLoading}
+                size={{ xs: 12, sm: 6, md: 3, lg: 12 }}
               />
               {/* </Grid> */}
             </Grid>
@@ -248,33 +254,3 @@ export default function StrnPrintReportWorkspace() {
   );
 }
 
-function InfoTile({
-  label,
-  value,
-  loading,
-}: {
-  label: string;
-  value: string | number | undefined;
-  loading: boolean;
-}) {
-  return (
-    <Grid size={{ xs: 12, sm: 6, md: 3, lg: 12 }}>
-      <Paper variant="outlined" sx={{ p: 1.75, borderRadius: 2 }}>
-        {/* Explicit hex instead of color="text.secondary": the same theme-prop
-            resolution silently fell back to text.primary's near-black (#000000)
-            for the value line below before it was hardcoded, so this label is
-            hardcoded too rather than trusting the prop against this dark
-            (#141922) card background a second time. */}
-        <Typography
-          variant="caption"
-          sx={{ textTransform: "uppercase", color: "#8B93A1" }}
-        >
-          {label}
-        </Typography>
-        <Typography variant="h6" sx={{ fontWeight: 700, color: "#F4F6F8" }}>
-          {loading ? "…" : (value ?? "—")}
-        </Typography>
-      </Paper>
-    </Grid>
-  );
-}

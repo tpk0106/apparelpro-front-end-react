@@ -30,6 +30,8 @@ import Menu from "./menu.component";
 import Login from "./login.component";
 import PinnedMenu from "./pinned-menu.component";
 
+import { USER_CREDENTIALS } from "../interfaces/definitions";
+
 const handleMouseEnter = () => {
   const ele = document.getElementById("show-mobileMenu");
   if (ele) {
@@ -49,6 +51,13 @@ const handleMouseLeave = () => {
 const Header = () => {
   const [open, setOpen] = useState(0);
   const [pinnedMenuOn, setPinnedMenuOn] = useState(false);
+
+  const [username] = useState<string | null>(
+    localStorage.getItem(USER_CREDENTIALS.USER_KEY),
+  );
+  const [userId] = useState<string | null>(
+    localStorage.getItem(USER_CREDENTIALS.USER_ID),
+  );
 
   useEffect(() => {
     const ele = document.getElementById("show-mobileMenu");
@@ -72,42 +81,25 @@ const Header = () => {
   let counter = 0;
 
   const handleChange = (event: React.SyntheticEvent) => {
-    let passValue = 0;
-
     const textContent = (event.target as HTMLElement).textContent;
-    switch (textContent) {
-      case "General":
-        passValue = 1;
-        break;
-      case "Order Management Reference":
-        passValue = 2;
-        break;
-      case "Order Management":
-        passValue = 3;
-        break;
-      case "General Inventory":
-        passValue = 4;
-        break;
-      case "Orderwise Inventory":
-        passValue = 5;
-        break;
-      case "Production Control":
-        passValue = 6;
-        break;
-      case "Reports - Orderwise Inventory Notes":
-        passValue = 7;
-        break;
-      case "Reports - Orderwise Inventory":
-        passValue = 8;
-        break;
 
-      // case "Reports - General Inventory":
-      //   passValue = 8;
-      //   break;
-      case "Reports - Order Management":
-        passValue = 9;
+    // Mirrors the exact same counting rule the render loop below uses
+    // (skip blank-routerLink divider entries, 1-index the rest) so each
+    // group's expand-index is derived from its live position in
+    // navbarData instead of a hand-maintained label switch - the switch
+    // this replaced silently broke every group after wherever a new one
+    // was inserted, since none of their indexes were bumped to match.
+    let passValue = 0;
+    let positionCounter = 0;
+    for (const menu of navbarData) {
+      if (menu.routerLink.trim().length === 0) continue;
+      positionCounter++;
+      if (menu.label === textContent) {
+        passValue = positionCounter;
         break;
+      }
     }
+
     if (open === passValue) {
       setOpen(0);
     } else {
@@ -134,14 +126,23 @@ const Header = () => {
 
               {/* login */}
 
-              <div className="flex flex-col justify-around w-[10%] m-auto align-middle">
-                <div className="flex justify-end align-middle">
+              <div className="flex items-center justify-center gap-4 ">
+                {username && localStorage.getItem(USER_CREDENTIALS.USER_ID) && (
+                  <div className="flex items-center">
+                    <span className="text-center text-sm font-semibold text-white">
+                      <span className="text-[10px]">
+                        {username} ({userId})
+                      </span>
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center">
                   <Login />
                 </div>
               </div>
 
               {/* pinned menu */}
-              <div className="flex flex-col justify-around w-[10%] m-auto align-middle">
+              <div className="flex flex-col justify-around w-[5%] m-auto align-middle">
                 <div className="flex justify-end align-middle">
                   <PinnedMenu onToggle={setPinnedMenuOn} />
                 </div>
@@ -324,14 +325,14 @@ const Header = () => {
                                 justifyContent: "center",
                               }}
                             >
-                              {/* <List className="flex justify-around bg-[#9e9e9e] h-[3.5em] w-[95%]">
+                              <List className="flex justify-around bg-[#9e9e9e] h-[3.5em] w-[95%]">
                                 <ListItem
                                   className="text-[#60a5fa] flex justify-around h-full bg-black hover:text-white 
                                                       rounded-md border-2 border-white px-4"
                                 >
-                                  <div className="flex justify-end px-2 w-[25%]">
+                                  {/* <div className="flex justify-end px-2 w-[25%]">
                                     <HowToRegOutlinedIcon className="flex w-full justify-start" />
-                                  </div>
+                                  </div> */}
                                   <Link
                                     to={"/sign-up"}
                                     className="ml-5 w-[75%] text-sm"
@@ -339,7 +340,7 @@ const Header = () => {
                                     Signup
                                   </Link>
                                 </ListItem>
-                              </List> */}
+                              </List>
                             </Box>
                           </List>
                         </Box>

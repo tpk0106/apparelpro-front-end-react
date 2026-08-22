@@ -140,6 +140,7 @@
         position: relative;
         color: white;
 
+
         @media (prefers-color-scheme: dark) {
             color: oklch(14.5% 0 0deg);
         }
@@ -188,7 +189,7 @@
 .MenuSeparator {
     margin: 0.25rem;
     height: 1px;
-    background-color: oklch(14.5% 0 0deg);
+    background-color: oklch(64.5% 0 0deg);
 
     @media (prefers-color-scheme: dark) {
         background-color: white;

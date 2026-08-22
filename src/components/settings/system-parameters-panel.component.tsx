@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import {
   Box,
+  Button,
   Typography,
   Switch,
   TextField,
@@ -13,8 +14,88 @@ import {
   useGetSystemParametersQuery,
   useUpdateSystemParameterMutation,
 } from "../../tanstack-hooks/custom-hooks";
+import { useGetAllSections } from "../../tanstack-hooks/production-reference.hooks";
+import StyleScopePicker from "../production/style-scope/style-scope-picker.component";
 import type { SystemParameter } from "../../interfaces/system-configuration/SystemParameter";
 import { isAdministrator } from "../../auth/jwt.util";
+
+// Parameters whose Value is a foreign-key-shaped code (rather than a plain
+// Text value) get a dedicated dropdown here instead of a free-text box, so
+// an admin picks by name and the underlying code stays the thing that's
+// actually stored/referenced (DailyProductionEntryService reads this value
+// straight back as a Sections.Code lookup).
+const SECTION_CODE_PARAMETER_KEYS = new Set(["ProductionContractSectionCode"]);
+
+// The four Dashboard-pin keys are interdependent (Order only makes sense for
+// a given Buyer, etc.), so they're never shown as four separate free-text
+// rows - see DashboardPinRow below, which replaces all four with one
+// Buyer/Order/Type/Style picker.
+const DASHBOARD_PIN_KEYS = [
+  "DashboardPinnedBuyerCode",
+  "DashboardPinnedOrder",
+  "DashboardPinnedTypeCode",
+  "DashboardPinnedStyleCode",
+];
+
+interface DashboardPinRowProps {
+  parameters: SystemParameter[];
+  isAdmin: boolean;
+  onSave: (parameterKey: string, value: string) => void;
+}
+
+const DashboardPinRow = ({ parameters, isAdmin, onSave }: DashboardPinRowProps) => {
+  const getValue = (key: string) => parameters.find((p) => p.parameterKey === key)?.value ?? "";
+  const pinned = {
+    buyerCode: getValue("DashboardPinnedBuyerCode"),
+    order: getValue("DashboardPinnedOrder"),
+    typeCode: getValue("DashboardPinnedTypeCode"),
+    styleCode: getValue("DashboardPinnedStyleCode"),
+  };
+  const hasPin = pinned.buyerCode && pinned.order && pinned.typeCode && pinned.styleCode;
+
+  return (
+    <Box sx={{ px: 2.5, py: 2.25 }}>
+      <Typography sx={{ fontSize: "13.5px", fontWeight: 500, color: "#F4F6F8" }}>Fallback dashboard style</Typography>
+      <Typography sx={{ fontSize: "12px", color: "text.secondary", mt: 0.5, mb: 1.5, maxWidth: 520, lineHeight: 1.5 }}>
+        Shown on the home dashboard only when no Actual Production Entry or Daily Production Time
+        Ticket rows exist yet.
+      </Typography>
+
+      {hasPin && (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
+          <Typography sx={{ fontSize: "12.5px", color: "#F4F6F8" }}>
+            Currently pinned: {pinned.buyerCode} / {pinned.order} / {pinned.typeCode} / {pinned.styleCode}
+          </Typography>
+          {isAdmin && (
+            <Button
+              size="small"
+              onClick={() => {
+                onSave("DashboardPinnedBuyerCode", "");
+                onSave("DashboardPinnedOrder", "");
+                onSave("DashboardPinnedTypeCode", "");
+                onSave("DashboardPinnedStyleCode", "");
+              }}
+            >
+              Clear
+            </Button>
+          )}
+        </Box>
+      )}
+
+      {isAdmin && (
+        <StyleScopePicker
+          onScopeChange={(scope) => {
+            if (!scope) return;
+            onSave("DashboardPinnedBuyerCode", String(scope.buyerCode));
+            onSave("DashboardPinnedOrder", scope.order);
+            onSave("DashboardPinnedTypeCode", String(scope.typeCode));
+            onSave("DashboardPinnedStyleCode", scope.styleCode);
+          }}
+        />
+      )}
+    </Box>
+  );
+};
 
 // Converts a PascalCase parameter key (e.g. "AllowOrderQuantityOverride") into a
 // readable label ("Allow Order Quantity Override") without needing a separate
@@ -56,6 +137,8 @@ const ParameterRow = ({
   onSave,
 }: ParameterRowProps) => {
   const disabled = !isAdmin || isSaving;
+  const isSectionCodeParameter = SECTION_CODE_PARAMETER_KEYS.has(parameter.parameterKey);
+  const { data: sections = [] } = useGetAllSections();
 
   return (
     <Box
@@ -148,7 +231,9 @@ const ParameterRow = ({
               }
             }}
             sx={{ width: 100 }}
-            slotProps={{ htmlInput: { style: { textAlign: "right" } } }}
+            slotProps={{
+              htmlInput: { style: { textAlign: "right", color: "#fffffF" } },
+            }}
           />
         )}
 
@@ -171,7 +256,24 @@ const ParameterRow = ({
           </TextField>
         )}
 
-        {parameter.dataType === "Text" && (
+        {parameter.dataType === "Text" && isSectionCodeParameter && (
+          <TextField
+            select
+            size="small"
+            value={parameter.value}
+            disabled={disabled}
+            onChange={(event) => onSave(parameter.parameterKey, event.target.value)}
+            sx={{ minWidth: 220 }}
+          >
+            {sections.map((section) => (
+              <MenuItem key={section.code} value={section.code}>
+                {section.description}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+
+        {parameter.dataType === "Text" && !isSectionCodeParameter && (
           <TextField
             size="small"
             defaultValue={parameter.value}
@@ -276,6 +378,7 @@ const SystemParametersPanel = () => {
                 px: 2.5,
                 borderBottom: "1px solid rgba(139, 147, 161, 0.15)",
                 backgroundColor: "rgba(96, 165, 250, 0.06)",
+                color: "#ffffff",
               }}
             >
               <Typography sx={{ fontSize: "13.5px", fontWeight: 600 }}>
@@ -283,19 +386,27 @@ const SystemParametersPanel = () => {
               </Typography>
             </Box>
 
-            {categoryParameters.map((parameter) => (
-              <ParameterRow
-                key={parameter.parameterKey}
-                parameter={parameter}
+            {category === "Dashboard" ? (
+              <DashboardPinRow
+                parameters={categoryParameters.filter((p) => DASHBOARD_PIN_KEYS.includes(p.parameterKey))}
                 isAdmin={isAdmin}
                 onSave={handleSave}
-                isSaving={
-                  updateMutation.isPending &&
-                  updateMutation.variables?.parameterKey ===
-                    parameter.parameterKey
-                }
               />
-            ))}
+            ) : (
+              categoryParameters.map((parameter) => (
+                <ParameterRow
+                  key={parameter.parameterKey}
+                  parameter={parameter}
+                  isAdmin={isAdmin}
+                  onSave={handleSave}
+                  isSaving={
+                    updateMutation.isPending &&
+                    updateMutation.variables?.parameterKey ===
+                      parameter.parameterKey
+                  }
+                />
+              ))
+            )}
           </Box>
         ),
       )}

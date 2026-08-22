@@ -477,7 +477,7 @@ const SignupForm = () => {
           component="form"
           onSubmit={handleSubmit}
           sx={{ width: "50%", padding: 4 }}
-          className="flex flex-col m-auto border rounded-md border-gray-300 shadow-xl"
+          className="flex flex-col m-auto border rounded-md border-gray-300 shadow-xl bg-white"
         >
           <ThemeProvider theme={asideMenuTitleTypographyTheme}>
             <Typography color="blue-gray" className="text-center">

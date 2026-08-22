@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { MRT_ColumnDef, MRT_PaginationState } from "material-react-table";
 import { Box, ThemeProvider, Typography } from "@mui/material";
 
@@ -16,6 +16,22 @@ import { useSelector } from "react-redux";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 
 import { useGetCountries } from "../../../api/custom-hooks";
+import StyleSelection from "../../common/style-selection.component";
+import type { SelectedScopeContext } from "../../material-consumption/material-consumption.types";
+
+const mockupColors = {
+  bg: "#0A0E14",
+  bg1: "#318CE7",
+  bg2: "#545AA7",
+  surface: "#141922",
+  border: "#232a36",
+  text: "#F4F6F8",
+  muted: "#8B93A1",
+  accent: "#93c5fd",
+  accent1: "#00ffff",
+  shadow: "#ffffff",
+  outerBackground: "#9e9e9e",
+};
 
 const Countries = () => {
   const [validationErrors, setValidationErrors] =
@@ -49,6 +65,20 @@ const Countries = () => {
   const { isLoading, isError } = useGetCountries(paginate, pagination);
   const allCountries = useSelector(SelectAllCountries);
   const CountriesTotal = useSelector(SelectCountriesTotal);
+
+  const [scopeContext, setScopeContext] = useState<SelectedScopeContext | null>(
+    null,
+  );
+
+  // Memoized callback handler tracking context alterations
+  const handleScopeContextChange = useCallback(
+    (context: SelectedScopeContext | null) => {
+      setScopeContext(context);
+      // setActiveSelection(null);
+      // setEditingRow(null); // Clear editing states on scope shift
+    },
+    [],
+  );
 
   // const isError = useSelector(isErrorState);
   // const isLoading = useSelector(isLoadingState);
@@ -197,14 +227,50 @@ const Countries = () => {
 
   return (
     <>
-      <div className="">
+      <Box
+        sx={{
+          width: "80%",
+          mx: "auto",
+          mt: 3,
+          mb: 2,
+          backgroundColor: mockupColors.bg2,
+          p: 2,
+          borderRadius: "12px",
+          boxShadow: `1px 1px 10px ${mockupColors.surface}`,
+        }}
+      >
         <div className="text-center mt-3 mx-2">
           <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-            <Typography color="black">Countries</Typography>
+            {/* <Typography color="black">Countries</Typography> */}
+            <Typography
+              sx={{
+                textAlign: "center",
+                fontSize: "20px",
+                fontWeight: 700,
+                // color: mockupColors.accent,
+                mb: 0.5,
+              }}
+            >
+              COUNTRIES
+            </Typography>
           </ThemeProvider>
         </div>
 
-        <div className="flex justify-around mt-10">
+        {/* <div className="flex justify-around mt-10"> */}
+        <StyleSelection onScopeChange={handleScopeContextChange} />
+        <Box
+          sx={{
+            display: "flex",
+            // flexalign: "justify-around",
+            // content: "center",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: mockupColors.surface,
+            border: `1px solid ${mockupColors.border}`,
+            borderRadius: "10px",
+            p: 2,
+          }}
+        >
           <CurrencyTable
             columns={columns}
             data={allCountries}
@@ -216,8 +282,9 @@ const Countries = () => {
             isError={isError}
             isLoading={isLoading}
           />
-        </div>
-      </div>
+        </Box>
+        {/* </div> */}
+      </Box>
       {isLoading && (
         <div className="flex justify-around relative1 absolute top-0 left-0 z-60 ml-170 mt-10 bg-1gray-600">
           {/* <Puff stroke="#60a5fa" /> */}

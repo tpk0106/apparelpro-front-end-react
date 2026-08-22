@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,6 +13,11 @@ import { Menu } from "@base-ui/react/menu";
 // import UndoIcon from "@mui/icons-material/Undo";
 // import RedoIcon from "@mui/icons-material/Redo";
 import PowerSettingsNewOutlinedIcon from "@mui/icons-material/PowerSettingsNewOutlined";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
+import AccountBoxOutlinedIcon from "@mui/icons-material/AccountBoxOutlined";
+
+import LogoutIcon from "@mui/icons-material/Logout";
 
 import styles from "../app.module.css";
 import {
@@ -24,6 +30,7 @@ import {
   getCurrentUserDetails,
 } from "../sagaStore/user/user.selector";
 import { isAdministrator } from "../auth/jwt.util";
+import { ListItemIcon } from "@mui/material";
 
 const NavBarUserMenu = () => {
   const navigate = useNavigate();
@@ -94,20 +101,98 @@ const NavBarUserMenu = () => {
           <Menu.Positioner sideOffset={4} alignOffset={10}>
             <Menu.Popup className={styles.MenuPopup}>
               <Menu.Item className={styles.MenuItem} onClick={handleUpdateUser}>
-                Update
+                <ListItemIcon
+                  style={{
+                    margin: "0",
+                    justifyContent: "flex-start",
+                  }}
+                >
+                  <AccountBoxOutlinedIcon />
+                </ListItemIcon>
+                <span
+                  style={{
+                    margin: "0",
+                    display: "flex",
+                    justifyItems: "start",
+                  }}
+                >
+                  Update Profile
+                </span>
               </Menu.Item>
               {isAdmin && (
                 <Menu.Item
                   className={styles.MenuItem}
                   onClick={handleOpenSettings}
+                  style={{
+                    margin: "0",
+                    display: "flex",
+                    justifyContent: "flex-start",
+                  }}
                 >
+                  <ListItemIcon>
+                    <SettingsOutlinedIcon />
+                  </ListItemIcon>
                   Settings
                 </Menu.Item>
               )}
-              <Menu.Item className={styles.MenuItem}>Favorites</Menu.Item>
-              <Menu.Separator className={styles.MenuSeparator} />
-              <Menu.Item className={styles.MenuItem} onClick={handleLogout}>
-                Logout
+              <Menu.Item
+                className={styles.MenuItem}
+                style={{
+                  margin: "0",
+                  display: "flex",
+                  justifyContent: "flex-start",
+                }}
+                // onClick={handleOpenSettings}
+              >
+                <ListItemIcon
+                  style={{
+                    margin: "0",
+                    justifyContent: "flex-start",
+                  }}
+                >
+                  <FavoriteBorderOutlinedIcon />
+                </ListItemIcon>
+                <span
+                  style={{
+                    margin: "0",
+                    display: "flex",
+                    justifyItems: "start",
+                  }}
+                >
+                  Favorites
+                </span>
+              </Menu.Item>
+
+              <Menu.Separator
+                className={`${styles.MenuSeparator} h-px my-1 bg-gray-200`}
+              />
+
+              <Menu.Item
+                className={styles.MenuItem}
+                onClick={handleLogout}
+                style={{
+                  margin: "0",
+                  display: "flex",
+                  justifyContent: "flex-start",
+                }}
+              >
+                <ListItemIcon
+                  style={{
+                    margin: "0",
+                    justifyContent: "flex-start",
+                  }}
+                >
+                  <LogoutIcon />
+                </ListItemIcon>
+                <span
+                  style={{
+                    margin: "0",
+                    display: "flex",
+                    justifyItems: "start",
+                  }}
+                >
+                  Logout
+                </span>
               </Menu.Item>
               <Menu.Separator />
             </Menu.Popup>

@@ -7,6 +7,7 @@ import axios, {
 import { APPARELPRO_ENDPOINTS } from "../api/api-configurations";
 import type { TokenAPIModel } from "../interfaces/definitions";
 import GlobalRouter from "./globalRouter";
+import GlobalAccessDeniedNotifier from "./accessDeniedNotifier";
 
 // 1. Export standard AppError shape for TanStack React Query error generics
 export interface AppError {
@@ -152,7 +153,10 @@ class AxiosInterceptor {
         // NEW FEATURE: Centralised C# Error Parsing Engine
         // ==========================================
         const appError: AppError = {
-          message: "An unexpected backend error occurred.",
+          message:
+            status === 403
+              ? "You do not have permission to perform this action. Contact your administrator if you believe this is incorrect."
+              : "An unexpected backend error occurred.",
           status: status,
         };
 
@@ -189,6 +193,19 @@ class AxiosInterceptor {
           } else if (data.title) {
             appError.message = data.title;
           }
+        }
+
+        // Route every 403 through the already-built (but never wired) global
+        // Access Denied dialog + buzzer sound (see accessDeniedNotifier.ts /
+        // access-denied-dialog.tsx, globally mounted in main.tsx) instead of
+        // leaving it to whichever screen's toast/inline Alert happens to catch
+        // it. The promise is still rejected below, so existing per-screen catch
+        // blocks keep working exactly as before (their own toast/inline Alert
+        // will show the same message too) — not removed here since some
+        // screens drive local UI state (e.g. re-enabling a submit button) off
+        // that catch block.
+        if (status === 403) {
+          GlobalAccessDeniedNotifier.notify(appError.message);
         }
 
         return Promise.reject(appError);
