@@ -29,6 +29,10 @@ interface TableProps {
   // added, not-yet-saved colour can still be removed even on an approved
   // style, since it was never part of the approved allocation.
   isStyleApproved: boolean;
+  // Drives the "Allocation Weight" column's header/hint text only - the
+  // stored field (allocationWeight) holds either a ratio or a piece count
+  // depending on the mode, same as it always has.
+  isRatioMode: boolean;
 }
 
 const ColorBreakdownTable = ({
@@ -36,6 +40,7 @@ const ColorBreakdownTable = ({
   setColors,
   existingColorCodes,
   isStyleApproved,
+  isRatioMode,
 }: TableProps) => {
   // FIXED (2026-08-07): replaces window.alert() with the shared InfoDialog -
   // per project convention, no native browser alert/confirm popups.
@@ -116,7 +121,7 @@ const ColorBreakdownTable = ({
       },
       {
         accessorKey: "allocationWeight",
-        header: "Allocation Weight (Ratio / Pieces)",
+        header: isRatioMode ? "Allocation Ratio" : "Allocation Quantity (Pcs)",
         type: "number",
         muiEditTextFieldProps: {
           type: "number",
@@ -124,7 +129,7 @@ const ColorBreakdownTable = ({
         },
       },
     ],
-    [],
+    [isRatioMode],
   );
 
   const table = useApparelProTable<LocalColorRow>({
@@ -192,6 +197,14 @@ const ColorBreakdownTable = ({
         </Button>
       </Box>
     ),
+
+    // Removes the built-in MRT toolbar icon cluster (search, column filters,
+    // show/hide columns, toggle density, toggle fullscreen) - the row action
+    // icons (Edit/Delete above) and the Add button icon are unrelated and
+    // stay as they were.
+    enableToolbarInternalActions: false,
+
+    initialState: { density: "compact" },
   });
 
   return (

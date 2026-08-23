@@ -32,8 +32,9 @@ import {
 } from "../../services/order-management/part-shipment.service";
 
 // Import your existing live master lookup hook for units reference validation
-import { useGetUnits } from "../../tanstack-hooks/custom-hooks";
+import { useGetUnits, useGetDestinations } from "../../tanstack-hooks/custom-hooks";
 import type { Unit } from "../../interfaces/references/Unit";
+import type { PortDestination } from "../../interfaces/references/PortDestination";
 
 // import { type MRT_Row, MaterialReactTable, useMaterialReactTable, type MRT_ColumnDef } from "material-react-table";
 
@@ -105,6 +106,22 @@ export default function PartShipmentsGrid({
   const systemUnits = useMemo(
     () => unitsPageData?.items || [],
     [unitsPageData],
+  );
+
+  // Fetch master Destinations to drive cell and modal dropdown selectors -
+  // Part B fix: DestinationCode used to be free text with no master data
+  // behind it at all, now it's a real FK against Destinations.Code.
+  const { data: destinationsPageData } = useGetDestinations({
+    pageIndex: 0,
+    pageSize: 999,
+    sortColumn: "code",
+    sortOrder: "asc",
+    filterColumn: null,
+    filterQuery: null,
+  });
+  const systemDestinations = useMemo(
+    () => destinationsPageData?.items || [],
+    [destinationsPageData],
   );
 
   // --- TRANS-ACTION WORKFLOW INTERCEPTORS ---
@@ -262,26 +279,21 @@ export default function PartShipmentsGrid({
         size: 70,
         Edit: ({ cell, row }) => (
           <TextField
+            select
             size="small"
             variant="standard"
+            fullWidth
             defaultValue={cell.getValue() || ""}
-            onBlur={(e) =>
-              handleCellEditBlur(
-                row,
-                "destinationCode",
-                e.target.value.toUpperCase(),
-              )
+            onChange={(e) =>
+              handleCellEditBlur(row, "destinationCode", e.target.value)
             }
-            slotProps={{
-              htmlInput: {
-                style: {
-                  fontSize: "13px",
-                  textTransform: "uppercase",
-                  maxLength: 3,
-                },
-              },
-            }}
-          />
+          >
+            {systemDestinations.map((d: PortDestination) => (
+              <MenuItem key={`${d.countryCode}-${d.code}`} value={d.code}>
+                {d.code} - {d.destinationName}
+              </MenuItem>
+            ))}
+          </TextField>
         ),
       },
       {
@@ -532,6 +544,7 @@ export default function PartShipmentsGrid({
               }}
             >
               <TextField
+                select
                 label="Dest Code"
                 size="small"
                 fullWidth
@@ -539,11 +552,16 @@ export default function PartShipmentsGrid({
                 onChange={(e) =>
                   setNewForm((p) => ({
                     ...p,
-                    destinationCode: e.target.value.toUpperCase(),
+                    destinationCode: e.target.value,
                   }))
                 }
-                slotProps={{ htmlInput: { maxLength: 3 } }}
-              />
+              >
+                {systemDestinations.map((d: PortDestination) => (
+                  <MenuItem key={`${d.countryCode}-${d.code}`} value={d.code}>
+                    {d.code} - {d.destinationName}
+                  </MenuItem>
+                ))}
+              </TextField>
               <TextField
                 type="date"
                 label="Shipping Date"

@@ -5,6 +5,22 @@ import type { Style } from "../../interfaces/OrderManagement/Style";
 import type { StyleTotals } from "../../interfaces/OrderManagement/StyleTotals";
 import type { PaginationAPIModel } from "../../interfaces/references/ApiResult";
 
+// Fetches a single style fresh from the server, bypassing whatever the
+// Style Details grid's own cached list currently holds - used wherever a
+// screen needs a style's CURRENT ColorRatio/SizeRatio (or other fields the
+// grid snapshot could go stale on) rather than the row object the user
+// happened to click, which never updates itself after that click.
+const loadStyleByBots = async (
+  buyerCode: number,
+  order: string,
+  typeCode: number,
+  styleCode: string,
+) => {
+  return await client.get<Style>(
+    `${APPARELPRO_ENDPOINTS.ORDER_MANAGEMENT.STYLE_DETAILS.GET_STYLE_BY_BUYER_ORDER_TYPE_STYLE}/${buyerCode}/${order}/${typeCode}/${styleCode}`,
+  );
+};
+
 const loadStylesByScope = async (params: {
   buyerCode: number;
   order: string;
@@ -98,6 +114,7 @@ const updateEditStyle = async (styleCode: string, existingStyle: Style) => {
 };
 export {
   loadStyles,
+  loadStyleByBots,
   loadStylesByScope,
   loadStylesByBuyerOrder,
   loadStyleTotals,

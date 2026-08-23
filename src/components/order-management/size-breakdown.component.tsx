@@ -1,11 +1,24 @@
 import React, { useMemo, useState } from "react";
-import { Box, Button, Card, Typography, Divider } from "@mui/material";
+import {
+  Box,
+  Button,
+  Card,
+  Typography,
+  Divider,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SizeBreakdownTable from "./size-breakdown-table.component";
 import InfoDialog from "../common/info-dialog";
 import type { LocalColorRow } from "./color-breakdown-table.component";
 import type { MatrixRow } from "./color-size-breakdown.component"; // Import type from parent
-import { useCreateColorSizeBreakdownDetailsMutation } from "../../tanstack-hooks/custom-hooks";
+import {
+  useCreateColorSizeBreakdownDetailsMutation,
+  useSetSizeRatioModeMutation,
+} from "../../tanstack-hooks/custom-hooks";
 import type ColorSizeBreakdownDetails from "../../interfaces/OrderManagement/ColorSizeDetails";
 import type StyleContext from "../../interfaces/OrderManagement/StyleContext";
 import type { ColorSizeBreakdownDetailsPayloadWithBody } from "../../interfaces/definitions";
@@ -19,6 +32,8 @@ interface SizeBreakdownProps {
   // 1. Accept matrix rows state directly from parent wrapper props
   matrixRows: MatrixRow[];
   setMatrixRows: React.Dispatch<React.SetStateAction<MatrixRow[]>>;
+  sizeMode: "R" | "Q";
+  setSizeMode: (mode: "R" | "Q") => void;
 }
 
 export default function SizeBreakdown({
@@ -29,7 +44,26 @@ export default function SizeBreakdown({
   setIsDirty,
   matrixRows, // 2. Consume from signature hook
   setMatrixRows,
+  sizeMode,
+  setSizeMode,
 }: SizeBreakdownProps) {
+  const { mutateAsync: setSizeRatioModeOnServer } =
+    useSetSizeRatioModeMutation();
+
+  const handleSizeModeChange = (
+    _: React.MouseEvent<HTMLElement>,
+    newMode: "R" | "Q" | null,
+  ) => {
+    if (!newMode || newMode === sizeMode) return;
+    setSizeMode(newMode);
+    setSizeRatioModeOnServer({
+      buyerCode: styleContext.buyerCode,
+      order: styleContext.order,
+      typeCode: styleContext.typeCode,
+      styleCode: styleContext.styleCode,
+      mode: newMode,
+    });
+  };
   // REMOVE the old useState initialization block that used to live here!
 
   const columnTotals = useMemo(() => {
@@ -231,11 +265,47 @@ export default function SizeBreakdown({
             boundaries.
           </Typography>
         </Box>
-        <Box sx={{ textAlign: "right" }}>
+        <Box sx={{ textAlign: "right", display: "flex", alignItems: "center", gap: 2 }}>
           <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
-            Color Mode: [{styleContext.colorRatio}] | Size Mode: [
-            {styleContext.sizeRatio}]
+            Color Mode: [{styleContext.colorRatio}]
           </Typography>
+          <ToggleButtonGroup
+            value={sizeMode}
+            exclusive
+            size="small"
+            onChange={handleSizeModeChange}
+            sx={{
+              backgroundColor: "#60a5fa",
+              borderRadius: 1,
+              p: "3px",
+              "& .MuiToggleButton-root": {
+                color: "#fff",
+                fontWeight: "bold",
+                border: "none",
+                borderRadius: "6px !important",
+                px: 2,
+                "&.Mui-selected": {
+                  backgroundColor: "#fff",
+                  color: "#1a237e",
+                  "&:hover": { backgroundColor: "#fff" },
+                },
+                "&:hover": { backgroundColor: "rgba(255,255,255,0.2)" },
+              },
+            }}
+          >
+            <ToggleButton value="Q">
+              {sizeMode === "Q" && (
+                <CheckCircleIcon sx={{ fontSize: 16, mr: 0.5 }} />
+              )}
+              Size Qty
+            </ToggleButton>
+            <ToggleButton value="R">
+              {sizeMode === "R" && (
+                <CheckCircleIcon sx={{ fontSize: 16, mr: 0.5 }} />
+              )}
+              Size Ratio
+            </ToggleButton>
+          </ToggleButtonGroup>
         </Box>
       </Box>
 
@@ -248,17 +318,25 @@ export default function SizeBreakdown({
         columnTotals={columnTotals}
         setIsDirty={setIsDirty}
         unit={styleContext.unit}
+        isColorRatioMode={styleContext.colorRatio === "R"}
       />
 
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          marginTop: "4px",
+          marginTop: "24px",
         }}
       >
-        <Button variant="outlined" color="secondary" onClick={onBackToColors}>
-          ← Back to Color Adjustments
+        <Button
+          variant="contained"
+          size="large"
+          color="primary"
+          startIcon={<ArrowBackIcon />}
+          onClick={onBackToColors}
+          sx={{ px: 4, fontWeight: "bold" }}
+        >
+          Back to Color Adjustments
         </Button>
         <Button
           variant="contained"

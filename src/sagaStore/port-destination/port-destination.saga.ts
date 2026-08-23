@@ -90,7 +90,7 @@ export function* updatePortDestination(
     const { payload } = action;
     yield call(
       updateEditPortDestination,
-      payload.id,
+      payload.code,
       payload.countryCode,
       payload,
     );
@@ -109,7 +109,7 @@ export function* onUpdatePortDestination() {
 }
 
 type deletePortDestinationPara = {
-  id: number;
+  code: string;
   countryCode: string;
 };
 
@@ -117,8 +117,8 @@ export function* deletePortDestination(
   action: PayloadAction<deletePortDestinationPara>,
 ): Generator<CallEffect | PutEffect<Action>, void, boolean> {
   try {
-    const { id, countryCode } = action.payload;
-    yield call(removePortDestination, id, countryCode);
+    const { code, countryCode } = action.payload;
+    yield call(removePortDestination, code, countryCode);
 
     yield put(deletePortDestinationSuccess(true));
   } catch (error) {

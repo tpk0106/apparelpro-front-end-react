@@ -4,17 +4,7 @@ import {
   useMaterialReactTable,
   type MRT_ColumnDef,
 } from "material-react-table";
-import {
-  Box,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-  Paper,
-  TextField,
-} from "@mui/material";
+import { Box, Button, TextField } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import InfoDialog from "../common/info-dialog";
 import ConfirmDialog from "../common/confirm-dialog";
@@ -30,6 +20,9 @@ interface TableProps {
   columnTotals: Record<string, number>;
   setIsDirty: (dirty: boolean) => void;
   unit: string;
+  // Stage 1's mode - col.allocationWeight is a Ratio (not a Pcs count) when
+  // true, so the column header must say "Ratio" instead of appending unit.
+  isColorRatioMode: boolean;
 }
 
 // 1. ISOLATED DE-COUPLED CELL COMPONENT - Fully Typed for MUI v6
@@ -95,6 +88,9 @@ const MatrixNumericCell = ({
         }
       }}
       fullWidth
+      // Trims the standard-variant input's own default vertical padding,
+      // which was taller than what the cell's py alone could compensate for.
+      sx={{ "& .MuiInputBase-input": { py: "2px" } }}
     />
   );
 };
@@ -106,6 +102,7 @@ export default function SizeBreakdownTable({
   columnTotals,
   setIsDirty,
   unit,
+  isColorRatioMode,
 }: TableProps) {
   // FIXED (2026-08-07): replaces window.alert() with the shared InfoDialog -
   // per project convention, no native browser alert/confirm popups.
@@ -148,8 +145,38 @@ export default function SizeBreakdownTable({
         accessorKey: "sizeCode",
         header: "SIZE DIMENSION",
         enableEditing: false,
+        size: 55,
+        muiTableHeadCellProps: {
+          sx: { width: 55 },
+        },
         muiTableBodyCellProps: {
-          sx: { fontWeight: "bold", backgroundColor: "#f5f5f5" },
+          sx: { fontWeight: "bold", backgroundColor: "#f5f5f5", width: 55, py: "2px" },
+        },
+        // FIXED: the running totals used to be a completely separate <Table>
+        // rendered below the MRT table, with its own independent column
+        // widths - since nothing kept those widths in sync with the real
+        // table's (resizable, dynamically-sized) columns, the totals never
+        // lined up under the right column. Using MRT's own column Footer
+        // guarantees identical widths, since it's the same column model.
+        //
+        // No decorative border - kept plain per feedback. boxShadow/
+        // backgroundColor here override MuiTableCell's GLOBAL "footer"
+        // variant styleOverrides (see themes.ts) - that global rule paints
+        // every MRT footer cell app-wide with a blue background plus a
+        // heavy blurred box-shadow, which was blending this whole row
+        // into one undifferentiated blob instead of separate columns.
+        Footer: () => (
+          <Box sx={{ fontWeight: "bold", color: "#fff" }}>
+            RUNNING COL TOTALS:
+          </Box>
+        ),
+        muiTableFooterCellProps: {
+          sx: {
+            py: "4px",
+            width: 55,
+            boxShadow: "none",
+            backgroundColor: "#000",
+          },
         },
       },
     ];
@@ -157,7 +184,7 @@ export default function SizeBreakdownTable({
     selectedColors.forEach((col) => {
       generatedColumns.push({
         accessorKey: col.colorCode,
-        header: `${col.colorCode} : [${Number(col.allocationWeight)} ${unit}] `,
+        header: `${col.colorCode} : [${Number(col.allocationWeight)} ${isColorRatioMode ? "Ratio" : unit}] `,
         enableEditing: false, // Override internal MRT handlers to use our custom text field inputs instead
 
         Cell: ({ row }) => {
@@ -172,11 +199,43 @@ export default function SizeBreakdownTable({
             />
           );
         },
+        // FIXED: the numeric input cells had no cell-level padding override
+        // at all, so the TextField's own default (taller) padding was
+        // stretching the whole row despite density: "compact" - the
+        // sizeCode column next to it already had a tighter py, which is why
+        // only this table's rows looked taller than ColorBreakdownTable's.
+        muiTableBodyCellProps: { sx: { py: "2px" } },
+        Footer: () => (
+          <Box
+            sx={{
+              fontFamily: "monospace",
+              fontWeight: "bold",
+              color: "#fff",
+              textAlign: "right",
+            }}
+          >
+            {columnTotals[col.colorCode]}
+          </Box>
+        ),
+        muiTableFooterCellProps: {
+          sx: {
+            py: "4px",
+            boxShadow: "none",
+            backgroundColor: "#000",
+          },
+        },
       });
     });
 
     return generatedColumns;
-  }, [selectedColors, setMatrixRows, setIsDirty, unit]);
+  }, [
+    selectedColors,
+    setMatrixRows,
+    setIsDirty,
+    unit,
+    isColorRatioMode,
+    columnTotals,
+  ]);
 
   const table = useMaterialReactTable({
     columns,
@@ -184,7 +243,63 @@ export default function SizeBreakdownTable({
     enableEditing: false,
     enablePagination: false,
     enableBottomToolbar: false,
+    enableTableFooter: true,
+    // FIXED: plain column size is only a hint under the default table
+    // layout - the browser can still expand a column past it based on
+    // content (the long "SIZE DIMENSION" header text). table-layout: fixed
+    // makes the declared widths authoritative, without switching MRT's
+    // whole rendering engine (layoutMode: "grid" was tried and rebuilt the
+    // table as a flex/div layout instead of a real <table> - it broke row
+    // backgrounds, borders, and text wrapping across the whole grid, not
+    // just the one column it was meant to fix).
+    muiTableProps: {
+      sx: { tableLayout: "fixed" },
+    },
     getRowId: (row) => row.sizeCode,
+
+    // FIXED: matches ColorBreakdownTable's row hover exactly (that one gets
+    // this via useApparelProTable's shared muiTableBodyRowProps - see the
+    // "&:hover td" block there). Every cell here is a permanently-live
+    // MatrixNumericCell TextField rather than MRT's toggled row-edit mode,
+    // so there's no isEditing/isCreating distinction to make - the input
+    // text just needs to stay white (readable) against the black hover
+    // background at all times, same principle as the Colour table's
+    // "not currently editing" branch.
+    muiTableBodyRowProps: {
+      hover: true,
+      sx: {
+        "&:hover td": {
+          backgroundColor: "#000000 !important",
+          // Covers the plain "SIZE DIMENSION" label cell (not a TextField),
+          // which would otherwise stay its default dark text color and
+          // become unreadable against the black hover background.
+          color: "#FFFFFF !important",
+          "& .MuiInputBase-input": {
+            color: "#FFFFFF !important",
+            caretColor: "#FFFFFF !important",
+          },
+          "& .MuiInput-underline:before, & .MuiInput-underline:after, & .MuiInputBase-root:before, & .MuiInputBase-root:after":
+            {
+              borderColor: "#FFFFFF !important",
+            },
+        },
+      },
+    },
+
+    // FIXED: matches ColorBreakdownTable's toolbar exactly (that one gets
+    // this via the shared useApparelProTable hook; this table uses the raw
+    // hook directly, so it needs the same sx here) - standard table blue
+    // (#60a5fa) with white icons, instead of the global theme's default
+    // black icons on blue.
+    muiTopToolbarProps: {
+      sx: {
+        backgroundColor: "#60a5fa !important",
+        boxShadow: "0px 0px 20px rgba(0,0,0,.5) !important",
+        "& .MuiIconButton-root, & .MuiSvgIcon-root": {
+          color: "#ffffff !important",
+        },
+      },
+    },
 
     renderTopToolbarCustomActions: () => (
       <Box sx={{ p: 1 }}>
@@ -201,42 +316,18 @@ export default function SizeBreakdownTable({
         </Button>
       </Box>
     ),
+
+    // Removes the built-in MRT toolbar icon cluster (search, column filters,
+    // show/hide columns, toggle density, toggle fullscreen) - the Add
+    // button's own icon is unrelated and stays as it was.
+    enableToolbarInternalActions: false,
+
+    initialState: { density: "compact" },
   });
 
   return (
     <Box>
       <MaterialReactTable table={table} />
-
-      {/* Real-Time Running Totals Footer Grid Panel */}
-      <TableContainer
-        component={Paper}
-        variant="outlined"
-        sx={{ mt: 1, backgroundColor: "#eceff1" }}
-      >
-        <Table size="small">
-          <TableBody>
-            <TableRow>
-              <TableCell
-                sx={{ fontWeight: "bold", width: "180px", color: "#37474f" }}
-              >
-                RUNNING COL TOTALS:
-              </TableCell>
-              {selectedColors.map((col) => (
-                <TableCell
-                  key={col.colorCode}
-                  sx={{
-                    fontFamily: "monospace",
-                    fontWeight: "bold",
-                    color: "#263238",
-                  }}
-                >
-                  {col.colorCode}: {columnTotals[col.colorCode]}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableBody>
-        </Table>
-      </TableContainer>
 
       <InfoDialog
         open={!!duplicateSizeMessage}

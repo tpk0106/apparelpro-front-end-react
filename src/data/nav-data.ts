@@ -355,7 +355,7 @@ export const navbarData = [
         pinned: false,
       },
       {
-        routerLink: "srn",
+        routerLink: "end-of-production-confirmation",
         icon: null,
         label: "End of Production Confirmation",
         pinned: false,
@@ -711,10 +711,9 @@ export const navbarData = [
       { routerLink: "order-detail-report", icon: null, label: "Order Detail" },
       { routerLink: "color-size-report", icon: null, label: "Colour/Size" },
       {
-        routerLink: "Scheduled Shipments",
+        routerLink: "scheduled-shipments-report",
         icon: null,
         label: "Scheduled Shipments",
-        pinned: false,
       },
       {
         routerLink: "Shipment status Report",

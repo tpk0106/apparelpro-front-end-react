@@ -76,11 +76,10 @@ const updatePortDestinationFailure = (error: unknown) => {
 
 // delete
 
-const deletePortDestinationStart = (id: number, countryCode: string) => {
-  //console.log("action :", id, countryCode);
+const deletePortDestinationStart = (code: string, countryCode: string) => {
   return createAction(
     PORT_DESTINATION_ACTION_TYPES.DELETE_PORT_DESTINATION_START,
-    { id, countryCode },
+    { code, countryCode },
   );
 };
 

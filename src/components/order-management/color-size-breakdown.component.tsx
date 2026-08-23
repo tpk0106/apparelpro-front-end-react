@@ -14,7 +14,11 @@ import ColorBreakdown from "./color-breakdown.component";
 import type { LocalColorRow } from "./color-breakdown-table.component";
 import SizeBreakdown from "./size-breakdown.component";
 import type StyleContext from "../../interfaces/OrderManagement/StyleContext";
-import { useGetColorSizeSavedMatrix } from "../../tanstack-hooks/custom-hooks";
+import {
+  useGetColorSizeSavedMatrix,
+  useGetColorQuantityRatiosByStyle,
+  useGetStyleByBots,
+} from "../../tanstack-hooks/custom-hooks";
 import type { ColorSizeDetailsServiceModel } from "../material-consumption/material-consumption.types";
 
 // 1. Move the MatrixRow interface here so it's accessible globally
@@ -62,6 +66,13 @@ export default function ColorSizeBreakdown({
     { sizeCode: "XL" },
   ]);
 
+  // Ratio/Quantity mode for each stage - set by the user via the toggle at
+  // the top of each stage (see ColorBreakdown/SizeBreakdown), persisted to
+  // Style.ColorRatio/Style.SizeRatio. Initialized from whatever the style
+  // already has saved, defaulting to Quantity mode for a brand-new style.
+  const [colorMode, setColorMode] = useState<"R" | "Q">("Q");
+  const [sizeMode, setSizeMode] = useState<"R" | "Q">("Q");
+
   const [prevStyleId, setPrevStyleId] = useState<string | null>(null);
   const currentStyleId = selectedStyleFromGrid
     ? `${selectedStyleFromGrid.typeCode}-${selectedStyleFromGrid.styleCode}`
@@ -82,6 +93,38 @@ export default function ColorSizeBreakdown({
     ]);
   }
 
+  // FIXED: colorMode/sizeMode are no longer initialized from
+  // selectedStyleFromGrid.colorRatio/sizeRatio above - that prop is a
+  // one-time snapshot captured when the user clicked into this style from
+  // the Style Details grid, and the grid's own cached list is never
+  // refetched when the mode toggle updates Style.ColorRatio/SizeRatio
+  // server-side. Revisiting a style within the same session (without a full
+  // page reload) kept showing the mode from before the last toggle. This
+  // fetches the style fresh, independent of the grid's cache, and re-syncs
+  // colorMode/sizeMode whenever its persisted mode actually changes -
+  // including right after a toggle (useSetColorRatioModeMutation/
+  // useSetSizeRatioModeMutation invalidate this same query on success).
+  const { data: freshStyle, isLoading: isStyleLoading } = useGetStyleByBots(
+    {
+      buyerCode: buyerCode,
+      order: order,
+      typeCode: selectedStyleFromGrid?.typeCode || 0,
+      styleCode: selectedStyleFromGrid?.styleCode || "",
+    },
+    !!selectedStyleFromGrid,
+  );
+
+  const [prevModeSyncKey, setPrevModeSyncKey] = useState<string | null>(null);
+  const modeSyncKey = freshStyle
+    ? `${freshStyle.typeCode}-${freshStyle.styleCode}-${freshStyle.colorRatio}-${freshStyle.sizeRatio}`
+    : null;
+
+  if (modeSyncKey && modeSyncKey !== prevModeSyncKey) {
+    setPrevModeSyncKey(modeSyncKey);
+    setColorMode(freshStyle!.colorRatio?.trim().toUpperCase() === "R" ? "R" : "Q");
+    setSizeMode(freshStyle!.sizeRatio?.trim().toUpperCase() === "R" ? "R" : "Q");
+  }
+
   // if existing color/size breakdown
   const { data: savedMatrixData, isLoading: isMatrixLoading } =
     useGetColorSizeSavedMatrix(
@@ -100,11 +143,47 @@ export default function ColorSizeBreakdown({
   // 1. Evaluate if pre-existing style records exist inside SQL Server
   const hasExistingDbEntries = activeDataArray.length > 0;
 
+  // Colour-level allocation rows (od_clqr equivalent) - the real source of
+  // truth for what the user originally entered at Stage 1, including the
+  // Ratio value for a style saved in Ratio mode (which summing
+  // ColorSizeDetails.Qty alone can never recover).
+  const { data: savedColorQuantityRatios, isLoading: isRatiosLoading } =
+    useGetColorQuantityRatiosByStyle(
+      {
+        buyerCode: buyerCode,
+        order: order,
+        typeCode: selectedStyleFromGrid?.typeCode || 0,
+        styleCode: selectedStyleFromGrid?.styleCode || "",
+      },
+      !!selectedStyleFromGrid,
+    );
+  const activeRatioArray = savedColorQuantityRatios || [];
+
   // 2. Compute the existing colour allocation totals (Stage 1 data), used to
   // pre-populate the Colour screen for a style that already has a saved
   // matrix - see the hydration block below.
   let matrix: LocalColorRow[] = [];
-  if (hasExistingDbEntries) {
+  if (activeRatioArray.length > 0) {
+    // Preferred path: real Stage 1 rows exist - use them directly, showing
+    // Ratio or Quantity per the style's saved mode. Deliberately reads
+    // freshStyle (the query's own data) rather than the local colorMode
+    // state: colorMode is set from freshStyle one render later (a setState
+    // scheduled during render doesn't take effect until the next render), so
+    // reading colorMode here on the very first qualifying render would still
+    // see the stale "Q" default and hydrate with the wrong values - freshStyle
+    // itself carries no such lag once its query has resolved (see the
+    // isStyleLoading gate below, which holds off hydration until it has).
+    const isRatioStyle =
+      freshStyle?.colorRatio?.trim().toUpperCase() === "R";
+    matrix = activeRatioArray.map((item, idx) => ({
+      id: idx + 1,
+      colorCode: String(item.color).toUpperCase().trim(),
+      description: item.description || "",
+      allocationWeight: isRatioStyle ? item.ratio : item.quantity,
+    }));
+  } else if (hasExistingDbEntries) {
+    // Fallback for data saved before ColorQuantityRatios existed - derive
+    // colour totals by summing the size matrix, same as before.
     const colorTotalQty: Record<string, number> = {};
     // FIXED (2026-08-07): previously this only tallied quantities and then
     // fabricated a placeholder description ("Allocated Production Block
@@ -137,12 +216,23 @@ export default function ColorSizeBreakdown({
   // load, for BOTH the colour screen and the size matrix screen. Previously
   // only matrixRows was hydrated here, which is why the size screen already
   // showed existing data correctly while the colour screen never did.
+  //
+  // Deliberately NOT keyed on colorMode/sizeMode - doing so would re-run
+  // hydration (and silently discard any in-progress unsaved edits) every
+  // time the user clicks the Ratio/Quantity toggle mid-session, which should
+  // only relabel the numbers already on screen, not reset them. Instead,
+  // eligibility to hydrate at all is gated below on isStyleLoading being
+  // false, guaranteeing freshStyle (and therefore the isRatioStyle checks
+  // above/below, which read freshStyle directly - see the comment there) is
+  // already resolved before this ever runs, so it can only ever hydrate
+  // using the correct, already-settled mode - never a stale "Q" default.
   const [prevHydrationKey, setPrevHydrationKey] = useState<string | null>(null);
   const currentHydrationKey = hasExistingDbEntries
-    ? `${selectedStyleFromGrid?.styleCode}-${activeDataArray.length}`
+    ? `${selectedStyleFromGrid?.styleCode}-${activeDataArray.length}-${activeRatioArray.length}`
     : "NEW";
+  const readyToHydrate = !isMatrixLoading && !isRatiosLoading && !isStyleLoading;
 
-  if (currentHydrationKey !== prevHydrationKey) {
+  if (readyToHydrate && currentHydrationKey !== prevHydrationKey) {
     setPrevHydrationKey(currentHydrationKey);
 
     if (hasExistingDbEntries) {
@@ -167,9 +257,17 @@ export default function ColorSizeBreakdown({
               .toUpperCase() === sizeName,
         );
 
+        const isSizeRatioStyle =
+          freshStyle?.sizeRatio?.trim().toUpperCase() === "R";
         matchingDbRowsForSize.forEach((item: ColorSizeDetailsServiceModel) => {
           if (item?.color) {
-            rowObject[item.color] = item.qty || 0;
+            // FIXED: previously always read item.qty regardless of mode -
+            // in Ratio mode this silently showed the computed piece counts
+            // instead of the originally entered per-size ratios. Reads
+            // freshStyle directly rather than the local sizeMode state, same
+            // reasoning as isRatioStyle above (no render-lag).
+            rowObject[item.color] =
+              (isSizeRatioStyle ? item.ratio : item.qty) || 0;
           }
         });
         return rowObject;
@@ -218,7 +316,7 @@ export default function ColorSizeBreakdown({
   // the Colour/Size screens. Without this, the Colour screen could mount
   // (and permanently capture its initial state) before the hydration above
   // had a chance to run, showing an empty colour list for an existing style.
-  if (isMatrixLoading) {
+  if (isMatrixLoading || isRatiosLoading || isStyleLoading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
         <CircularProgress size={28} />
@@ -232,8 +330,8 @@ export default function ColorSizeBreakdown({
     typeCode: selectedStyleFromGrid.typeCode,
     styleCode: selectedStyleFromGrid.styleCode,
     quantity: Number(selectedStyleFromGrid.quantity) || 0,
-    colorRatio: selectedStyleFromGrid.colorRatio?.trim().toUpperCase() || "Q",
-    sizeRatio: selectedStyleFromGrid.sizeRatio?.trim().toUpperCase() || "Q",
+    colorRatio: colorMode,
+    sizeRatio: sizeMode,
     unit: selectedStyleFromGrid.unit,
   };
 
@@ -325,12 +423,13 @@ export default function ColorSizeBreakdown({
           saved matrix's colour totals (see the hydration block above). */}
       {currentWorkingStep === 0 && (
         <ColorBreakdown
-          styleCode={styleContextSanitized.styleCode}
-          bulkQuantity={styleContextSanitized.quantity}
+          styleContext={styleContextSanitized}
           colorsList={currentWorkingColors}
           setColorsList={setConfiguredColors}
           existingColorCodes={existingColorCodes}
           isStyleApproved={isStyleApproved}
+          colorMode={colorMode}
+          setColorMode={setColorMode}
           onNextStep={handleColorConfigurationComplete}
         />
       )}
@@ -346,6 +445,8 @@ export default function ColorSizeBreakdown({
           setIsDirty={setIsMatrixDirty}
           matrixRows={currentWorkingRows}
           setMatrixRows={setMatrixRows}
+          sizeMode={sizeMode}
+          setSizeMode={setSizeMode}
         />
       )}
     </Box>

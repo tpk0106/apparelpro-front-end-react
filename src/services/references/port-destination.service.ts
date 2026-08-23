@@ -30,7 +30,7 @@ const createNewPortDestination = async (
 };
 
 const updateEditPortDestination = async (
-  id: number,
+  code: string,
   countryCode: string,
   existingPortDestination: PortDestination,
 ) => {
@@ -39,17 +39,17 @@ const updateEditPortDestination = async (
     existingPortDestination,
     {
       params: {
-        id: id,
+        code: code,
         countryCode: countryCode,
       },
     },
   );
 };
 
-const removePortDestination = async (id: number, countryCode: string) => {
+const removePortDestination = async (code: string, countryCode: string) => {
   return await client.delete(
     APPARELPRO_ENDPOINTS.REFERENCE_SECTION.DESTINATION.DELETE +
-      id +
+      code +
       "/" +
       countryCode,
   );

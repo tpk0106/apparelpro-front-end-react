@@ -1,5 +1,5 @@
 export type PortDestination = {
   countryCode: string;
-  id: number;
+  code: string;
   destinationName: string;
 };

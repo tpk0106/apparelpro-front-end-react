@@ -4,6 +4,7 @@ import Styles from "./styles.component";
 import ColorSizeBreakdown from "./color-size-breakdown.component";
 import type { Style } from "../../interfaces/OrderManagement/Style";
 import PartShipmentsWorkspace from "../part-shipment/part-shipments-workspace";
+import ConfirmDialog from "../common/confirm-dialog";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -62,16 +63,31 @@ const OrderMain = ({ buyerCode, order, mainOrderUnit }: OrderMainProps) => {
   const [selectedStyle, setSelectedStyle] = useState<Style | null>(null);
   const [isMatrixDirty, setIsMatrixDirty] = useState<boolean>(false);
 
+  // Replaces window.confirm() with the shared ConfirmDialog, per project
+  // convention (no native browser alert/confirm popups). Since the dialog
+  // is async (unlike window.confirm, which blocks until the user answers),
+  // the tab change is held in pendingTabValue until the user actually
+  // confirms leaving - only then does the switch actually happen.
+  const [pendingTabValue, setPendingTabValue] = useState<number | null>(null);
+
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     // Intercept navigation passes if an operation layer is active and unsaved
     if (isMatrixDirty) {
-      const confirmLeave = window.confirm(
-        "WARNING: You have unsaved changes in your Colour/Size Matrix Breakdown! Moving away will discard all changes. Do you want to leave without saving?",
-      );
-      if (!confirmLeave) return; // Freeze tab change frame safely
-      setIsMatrixDirty(false);
+      setPendingTabValue(newValue);
+      return; // Freeze tab change frame safely until the dialog resolves
     }
     setValue(newValue);
+  };
+
+  const handleConfirmLeaveUnsaved = () => {
+    if (pendingTabValue === null) return;
+    setIsMatrixDirty(false);
+    setValue(pendingTabValue);
+    setPendingTabValue(null);
+  };
+
+  const handleCancelLeaveUnsaved = () => {
+    setPendingTabValue(null);
   };
 
   // if (!buyerCode || !order) {
@@ -215,6 +231,16 @@ const OrderMain = ({ buyerCode, order, mainOrderUnit }: OrderMainProps) => {
           </Box>
         )}
       </CustomTabPanel>
+
+      <ConfirmDialog
+        open={pendingTabValue !== null}
+        title="Unsaved Changes"
+        message="You have unsaved changes in your Colour/Size Matrix Breakdown. Moving away will discard all changes. Do you want to leave without saving?"
+        confirmLabel="Leave Without Saving"
+        confirmColor="error"
+        onConfirm={handleConfirmLeaveUnsaved}
+        onCancel={handleCancelLeaveUnsaved}
+      />
     </div>
   );
 };

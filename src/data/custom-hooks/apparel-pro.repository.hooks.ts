@@ -1161,7 +1161,7 @@ export const useUpdatePortDestination = (pagination: MRT_PaginationState) => {
         ["portDestinations", pagination?.pageSize, pagination?.pageIndex],
         (prevPortDestinations: PortDestination[]) =>
           prevPortDestinations?.map((prevPortDestination: PortDestination) => {
-            return prevPortDestination.id === editPortDestination.id &&
+            return prevPortDestination.code === editPortDestination.code &&
               prevPortDestination.countryCode ===
                 editPortDestination.countryCode
               ? editPortDestination
@@ -1190,7 +1190,7 @@ export const useUpdatePortDestination = (pagination: MRT_PaginationState) => {
 };
 
 type deletePortDestinationParams = {
-  id: number;
+  code: string;
   countryCode: string;
 };
 
@@ -1198,18 +1198,18 @@ export const useDeletePortDestination = (pagination: MRT_PaginationState) => {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   return useMutation({
-    mutationFn: async ({ id, countryCode }: deletePortDestinationParams) => {
-      const response = dispatch(deletePortDestinationStart(id, countryCode));
+    mutationFn: async ({ code, countryCode }: deletePortDestinationParams) => {
+      const response = dispatch(deletePortDestinationStart(code, countryCode));
       return response;
     },
 
-    onMutate: ({ id, countryCode }: deletePortDestinationParams) => {
+    onMutate: ({ code, countryCode }: deletePortDestinationParams) => {
       queryClient.setQueryData(
         ["portDestinations", pagination.pageSize, pagination.pageIndex],
         (prevPortDestinations: PortDestination[]) =>
           prevPortDestinations?.filter(
             (portDestination: PortDestination) =>
-              portDestination.id !== id &&
+              portDestination.code !== code &&
               portDestination.countryCode !== countryCode,
           ),
       );

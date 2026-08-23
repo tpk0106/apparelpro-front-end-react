@@ -207,6 +207,10 @@ export const APPARELPRO_ENDPOINTS = {
     PRODUCTION_PROGRESS_GRAPH: {
       GET: "api/production-progress-graph",
     },
+    END_OF_PRODUCTION_CONFIRMATION: {
+      GET: "api/end-of-production-confirmation",
+      CONFIRM: "api/end-of-production-confirmation/confirm",
+    },
     DASHBOARD: {
       CURRENT_STYLE: "api/dashboard/current-style",
       PRODUCTION_PROGRESS: "api/dashboard/production-progress",
@@ -280,8 +284,8 @@ export const APPARELPRO_ENDPOINTS = {
     },
     DESTINATION: {
       GET_BY_PAGINATION: "api/portDestination/list",
-      GET_PORT_BY_COUNTRY_AND_DESTINATION_ID:
-        "api/portDestination/list/countryCode/id",
+      GET_PORT_BY_COUNTRY_AND_DESTINATION_CODE:
+        "api/portDestination/list/countryCode/code",
       GET_ALL_PORTS_BY_COUNTRY_CODE: "api/portDestination/list/countryCode",
       POST: "api/portDestination",
       DELETE: "api/portDestination/",
@@ -382,6 +386,7 @@ export const APPARELPRO_ENDPOINTS = {
       DOES_STYLE_EXIST: "api/styleDetails/list/does-style-exist/",
       GETBY_PONO: "api/styleDetails/list/",
       GET_STYLE_TOTALS: "api/styleDetails/list/buyer/order/totals",
+      GET_STYLE_BY_BUYER_ORDER_TYPE_STYLE: "api/styleDetails/list",
       POST: "api/styleDetails",
       DELETE: "api/styleDetails/",
       PUT: "api/styleDetails/",
@@ -395,6 +400,12 @@ export const APPARELPRO_ENDPOINTS = {
       GET_COLOR_SIZE_MATRIX: "api/colorSizeBreakdownDetails/color-size-matrix",
       POST: "api/colorSizeBreakdownDetails/bulk-save",
       DELETE: "api/colorSizeBreakdownDetails/",
+    },
+    COLOR_QUANTITY_RATIO: {
+      GET_BY_STYLE: "api/colorQuantityRatio/by-style",
+      POST: "api/colorQuantityRatio/bulk-save",
+      SET_COLOR_RATIO_MODE: "api/colorQuantityRatio/set-color-ratio-mode",
+      SET_SIZE_RATIO_MODE: "api/colorQuantityRatio/set-size-ratio-mode",
     },
     MATERIAL_CONSUMPTION: {
       GET_AVAILABLE_MATERIALS: "api/material-consumption/items-lookup",
@@ -466,6 +477,13 @@ export const APPARELPRO_ENDPOINTS = {
     OUTSTANDING_PURCHASE_ORDER_LIST_REPORT: {
       GET_DETAILS: "api/outstanding-purchase-order-list-report/details",
       GET_PDF: "api/outstanding-purchase-order-list-report/pdf",
+    },
+    // Scheduled Shipments Report (Reports -> Order Management -> Scheduled Shipments).
+    // Backed by ScheduledShipmentsReportController - see
+    // src/components/reports/order-management/scheduled-shipments-report/*.
+    SCHEDULED_SHIPMENTS_REPORT: {
+      GET_DETAILS: "api/scheduled-shipments-report/details",
+      GET_PDF: "api/scheduled-shipments-report/pdf",
     },
   },
   ORDER_WISE_INVENTORY: {

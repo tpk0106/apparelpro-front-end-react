@@ -18,6 +18,7 @@ import LineEfficiencyReportWorkspace from "./components/reports/production/line-
 import EstimatedProductionScheduleReportWorkspace from "./components/reports/production/estimated-production-schedule-report-workspace";
 import ProductionAnalysisSummaryReportWorkspace from "./components/reports/production/production-analysis-summary-report-workspace";
 import ProductionProgressGraph from "./components/production/production-progress-graph/production-progress-graph.component";
+import EndOfProductionConfirmation from "./components/production/end-of-production-confirmation/end-of-production-confirmation.component";
 import MainMenu from "./navigation/main-menu.component";
 import SignInForm from "./sign-in/sign-in-form.component";
 import SignupForm from "./sign-up/sign-up-form.component";
@@ -54,6 +55,7 @@ import StockMovementItemReportWorkspace from "./components/orderwise-inventory/s
 import ColorSizeReportWorkspace from "./components/reports/order-management/color-size-report/color-size-report-workspace";
 import PurchaseOrderListReportWorkspace from "./components/reports/order-management/purchase-order-list-report/purchase-order-list-report-workspace";
 import OutstandingPurchaseOrderListReportWorkspace from "./components/reports/order-management/outstanding-purchase-order-list-report/outstanding-purchase-order-list-report-workspace";
+import ScheduledShipmentsReportWorkspace from "./components/reports/order-management/scheduled-shipments-report/scheduled-shipments-report-workspace";
 import OrderDetailReportWorkspace from "./components/reports/order-management/order-detail-report/order-detail-report-workspace";
 import TrimSheetReportWorkspace from "./components/reports/orderwise-inventory/trim-sheet-report/trim-sheet-report-workspace";
 import Suppliers from "./components/references/supplier/supplier.component";
@@ -245,6 +247,11 @@ function App() {
           path="production-progress-graph"
           element={<ProductionProgressGraph />}
         />
+        <Route
+          index
+          path="end-of-production-confirmation"
+          element={<EndOfProductionConfirmation />}
+        />
         <Route index path="supplier" element={<Suppliers />} />
         <Route index path="po" element={<OrderConfirmationRoutine />} />
         <Route
@@ -315,6 +322,11 @@ function App() {
           index
           path="color-size-report"
           element={<ColorSizeReportWorkspace />}
+        />
+        <Route
+          index
+          path="scheduled-shipments-report"
+          element={<ScheduledShipmentsReportWorkspace />}
         />
         <Route
           index

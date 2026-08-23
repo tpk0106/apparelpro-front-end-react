@@ -3,6 +3,7 @@ import type { AxiosResponse } from "axios";
 
 import type {
   BulkSaveResponse,
+  ColorSizeBreakdownDetailsParams,
   ColorSizeBreakdownDetailsPayloadWithBody,
   CreateAddressAPIModel,
   PaginationData,
@@ -41,6 +42,8 @@ import {
   removeUnit,
   updateEditUnit,
 } from "../services/references/unit.service";
+import type { PortDestination } from "../interfaces/references/PortDestination";
+import { loadPortDestinations } from "../services/references/port-destination.service";
 import type { Buyer } from "../interfaces/references/Buyer";
 import {
   createNewBuyer,
@@ -83,6 +86,7 @@ import type { StyleTotals } from "../interfaces/OrderManagement/StyleTotals";
 import {
   createNewStyle,
   deleteStyle,
+  loadStyleByBots,
   loadStyles,
   loadStylesByScope,
   loadStylesByBuyerOrder,
@@ -101,6 +105,14 @@ import {
   loadStyleDimensions,
   loadSavedColorSizeMatrix,
 } from "../services/material-consumption/color-size-breakdown-details.service";
+import {
+  loadColorQuantityRatiosByStyle,
+  bulkSaveColorQuantityRatios,
+  setColorRatioMode,
+  setSizeRatioMode,
+  type SetRatioModePayload,
+} from "../services/order-management/color-quantity-ratio.service";
+import type ColorQuantityRatio from "../interfaces/OrderManagement/ColorQuantityRatio";
 import {
   createNewSupplier,
   loadSuppliers,
@@ -375,6 +387,18 @@ export const useGetUnits = (paginate: PaginationData) => {
       return response.data;
     },
     placeholderData: (previousData) => previousData, // Keeps old page data visible while loading the next page (smooth transitions)
+  });
+};
+
+export const useGetDestinations = (paginate: PaginationData) => {
+  return useQuery<PaginationAPIModel<PortDestination>, Error>({
+    queryKey: ["portDestinationsLookup", paginate.pageIndex, paginate.pageSize],
+    queryFn: async () => {
+      const response: AxiosResponse<PaginationAPIModel<PortDestination>> =
+        await loadPortDestinations(paginate);
+      return response.data;
+    },
+    placeholderData: (previousData) => previousData,
   });
 };
 
@@ -1720,6 +1744,144 @@ export const useCreateColorSizeBreakdownDetailsMutation = () => {
       // 'error.message' automatically holds clean strings like "Matrix data payload can not be empty."
       toast.error(`Creation failed: ${error.message}`);
     },
+  });
+};
+
+// colour quantity ratio (od_clqr equivalent) - the Stage 1 colour-level
+// Ratio/Quantity allocation, saved as its own table before the Stage 2
+// colour+size matrix.
+
+export const useGetColorQuantityRatiosByStyle = (
+  params: {
+    buyerCode: number;
+    order: string;
+    typeCode: number;
+    styleCode: string;
+  },
+  enabled: boolean,
+) => {
+  return useQuery<ColorQuantityRatio[], Error>({
+    queryKey: [
+      "colorQuantityRatios",
+      params.buyerCode,
+      params.order,
+      params.typeCode,
+      params.styleCode,
+    ],
+    queryFn: async () => {
+      const response: AxiosResponse<ColorQuantityRatio[]> =
+        await loadColorQuantityRatiosByStyle(params);
+      return response.data;
+    },
+    enabled,
+  });
+};
+
+type ColorQuantityRatioPayloadWithBody = {
+  params: ColorSizeBreakdownDetailsParams;
+  payload: ColorQuantityRatio[];
+};
+
+export const useBulkSaveColorQuantityRatiosMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    AxiosResponse<BulkSaveResponse>,
+    AppError,
+    ColorQuantityRatioPayloadWithBody
+  >({
+    mutationFn: async (newColorQuantityRatios) => {
+      return await bulkSaveColorQuantityRatios(
+        newColorQuantityRatios.params,
+        newColorQuantityRatios.payload,
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["colorQuantityRatios"] });
+    },
+    onError: (error) => {
+      toast.error(`Colour allocation save failed: ${error.message}`);
+    },
+  });
+};
+
+export const useSetColorRatioModeMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation<void, AppError, SetRatioModePayload>({
+    mutationFn: async (payload) => {
+      await setColorRatioMode(payload);
+    },
+    onSuccess: (_data, payload) => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          "styleByBots",
+          payload.buyerCode,
+          payload.order,
+          payload.typeCode,
+          payload.styleCode,
+        ],
+      });
+    },
+    onError: (error) => {
+      toast.error(`Failed to set colour mode: ${error.message}`);
+    },
+  });
+};
+
+export const useSetSizeRatioModeMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation<void, AppError, SetRatioModePayload>({
+    mutationFn: async (payload) => {
+      await setSizeRatioMode(payload);
+    },
+    onSuccess: (_data, payload) => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          "styleByBots",
+          payload.buyerCode,
+          payload.order,
+          payload.typeCode,
+          payload.styleCode,
+        ],
+      });
+    },
+    onError: (error) => {
+      toast.error(`Failed to set size mode: ${error.message}`);
+    },
+  });
+};
+
+// Fresh single-style fetch, deliberately independent of the Style Details
+// grid's own cached row snapshot (see loadStyleByBots) - the source of
+// truth for ColorRatio/SizeRatio wherever staleness would otherwise show
+// the wrong mode after a toggle, until the grid itself is refetched.
+export const useGetStyleByBots = (
+  params: {
+    buyerCode: number;
+    order: string;
+    typeCode: number;
+    styleCode: string;
+  },
+  enabled: boolean,
+) => {
+  return useQuery<Style, Error>({
+    queryKey: [
+      "styleByBots",
+      params.buyerCode,
+      params.order,
+      params.typeCode,
+      params.styleCode,
+    ],
+    queryFn: async () => {
+      const response: AxiosResponse<Style> = await loadStyleByBots(
+        params.buyerCode,
+        params.order,
+        params.typeCode,
+        params.styleCode,
+      );
+      return response.data;
+    },
+    enabled,
   });
 };
 

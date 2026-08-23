@@ -118,7 +118,7 @@ interface CreateBuyerAPIModel {
 }
 
 interface CreatePortDestinationAPIModel {
-  id: number;
+  code: string;
   destinationName: string;
 }
 
@@ -134,7 +134,7 @@ interface UpdateBuyerAPIModel {
 }
 
 interface UpdatePortDestinationAPIModel {
-  id: number;
+  code: string;
   destinationName: string;
 }
 
