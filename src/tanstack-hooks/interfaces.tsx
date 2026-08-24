@@ -1,6 +1,7 @@
 import type { Style } from "../interfaces/OrderManagement/Style";
 import type { Address } from "../interfaces/references/Address";
 import type { Basis } from "../interfaces/references/Basis";
+import type { Season } from "../interfaces/references/Season";
 
 interface DeleteAddressPayload {
   buyerCode: number;
@@ -33,6 +34,15 @@ interface DeleteBasisPayload {
   code: string;
 }
 
+interface UpdateSeasonPayload {
+  code: string;
+  seasonToUpdate: Season;
+}
+
+interface DeleteSeasonPayload {
+  code: string;
+}
+
 interface UpdateStylePayload {
   styleCode: string;
   styleToUpdate: Style;
@@ -59,6 +69,8 @@ export type {
   UpdateBankAddressPayload,
   UpdateBasisPayload,
   DeleteBasisPayload,
+  UpdateSeasonPayload,
+  DeleteSeasonPayload,
   DeleteStylePayload,
   UpdateStylePayload,
   PurchaseOrderPayload,

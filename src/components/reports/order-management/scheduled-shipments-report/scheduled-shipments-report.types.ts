@@ -13,6 +13,7 @@ export interface ScheduledShipmentRow {
   buyerName: string;
   order: string;
   typeCode: number;
+  typeName: string;
   styleCode: string;
   shipmentOrderNo: string;
   unit: string;

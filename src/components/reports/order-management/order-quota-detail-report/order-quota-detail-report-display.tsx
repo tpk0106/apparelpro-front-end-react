@@ -11,10 +11,10 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 
-import type { ScheduledShipmentsReport } from "./scheduled-shipments-report.types";
+import type { OrderQuotaDetailReport } from "./order-quota-detail-report.types";
 
 interface Props {
-  report: ScheduledShipmentsReport;
+  report: OrderQuotaDetailReport;
 }
 
 const formatQuantity = (value: number): string =>
@@ -23,12 +23,8 @@ const formatQuantity = (value: number): string =>
     maximumFractionDigits: 2,
   });
 
-const formatDate = (value: string): string => {
-  const d = new Date(value);
-  return Number.isNaN(d.getTime())
-    ? value
-    : d.toLocaleDateString(undefined, { day: "2-digit", month: "2-digit", year: "2-digit" });
-};
+const formatQuotaStatus = (value: string): string =>
+  value === "Q" ? "Quota" : "Non-Quota";
 
 function HeaderField({ label, value }: { label: string; value: string }) {
   return (
@@ -43,10 +39,10 @@ function HeaderField({ label, value }: { label: string; value: string }) {
   );
 }
 
-// Renders the "SCHEDULE SHIPMENT DETAIL REPORT" as one flat table - legacy hid the
-// Buyer/Order/Type/Style columns progressively as they were filtered on (sha1/sha2/sha3),
+// Renders the "ORDER QUOTA REPORT" as one flat table - legacy hid the
+// Buyer/Order/Type/Style columns progressively as they were filtered on (sass1/sass2/sass3),
 // a dot-matrix ditto convention; this grid always shows every column instead.
-export default function ScheduledShipmentsReportDisplay({ report }: Props) {
+export default function OrderQuotaDetailReportDisplay({ report }: Props) {
   return (
     <Box>
       <Card
@@ -69,10 +65,12 @@ export default function ScheduledShipmentsReportDisplay({ report }: Props) {
               <TableCell>Type</TableCell>
               <TableCell>Style</TableCell>
               <TableCell>Shp. Order No.</TableCell>
+              <TableCell>Quota Status</TableCell>
+              <TableCell>Quota Year</TableCell>
+              <TableCell>Quota Category</TableCell>
+              <TableCell>Quota Type</TableCell>
               <TableCell>Unit</TableCell>
               <TableCell align="right">Quantity</TableCell>
-              <TableCell>Destination</TableCell>
-              <TableCell>Ship Date</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -83,10 +81,12 @@ export default function ScheduledShipmentsReportDisplay({ report }: Props) {
                 <TableCell>{row.typeName}</TableCell>
                 <TableCell>{row.styleCode}</TableCell>
                 <TableCell>{row.shipmentOrderNo}</TableCell>
+                <TableCell>{formatQuotaStatus(row.quotaStatus)}</TableCell>
+                <TableCell>{row.fromYearMonth} - {row.toYearMonth}</TableCell>
+                <TableCell>{row.quotaCategory}</TableCell>
+                <TableCell>{row.quotaType}</TableCell>
                 <TableCell>{row.unit}</TableCell>
                 <TableCell align="right">{formatQuantity(row.quantity)}</TableCell>
-                <TableCell>{row.destinationCode}</TableCell>
-                <TableCell>{formatDate(row.shipDate)}</TableCell>
               </TableRow>
             ))}
           </TableBody>

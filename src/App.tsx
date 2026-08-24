@@ -31,6 +31,7 @@ import Bank from "./components/references/bank-tan-stack/bank.component";
 import Units from "./components/references/unit-tanstack/unit.component";
 import Buyers from "./components/references/buyer-tanstack/buyer.component";
 import Basises from "./components/references/basis-tanstack/basis.component";
+import Seasons from "./components/references/season-tanstack/season.component";
 import OrderConfirmationRoutine from "./components/order-management/order-confirmation.component";
 import MaterialConsumption from "./components/material-consumption/material-consumption.component";
 import SupplierPurchaseOrderWorkspace from "./components/supplier-purchase-order-management/supplier-purchase-order-workspace";
@@ -57,6 +58,14 @@ import PurchaseOrderListReportWorkspace from "./components/reports/order-managem
 import OutstandingPurchaseOrderListReportWorkspace from "./components/reports/order-management/outstanding-purchase-order-list-report/outstanding-purchase-order-list-report-workspace";
 import ScheduledShipmentsReportWorkspace from "./components/reports/order-management/scheduled-shipments-report/scheduled-shipments-report-workspace";
 import OrderDetailReportWorkspace from "./components/reports/order-management/order-detail-report/order-detail-report-workspace";
+import ShipmentStatusReportWorkspace from "./components/reports/order-management/shipment-status-report/shipment-status-report-workspace";
+import YearSeasonOrdersReportWorkspace from "./components/reports/order-management/year-season-orders-report/year-season-orders-report-workspace";
+import PendingEventsReportWorkspace from "./components/reports/order-management/pending-events-report/pending-events-report-workspace";
+import StockArrivalStatusReportWorkspace from "./components/reports/order-management/stock-arrival-status-report/stock-arrival-status-report-workspace";
+import CostOfProductionReportWorkspace from "./components/reports/order-management/cost-of-production-report/cost-of-production-report-workspace";
+import OrderQuotaDetailReportWorkspace from "./components/reports/order-management/order-quota-detail-report/order-quota-detail-report-workspace";
+import PostOrderCostSheetReportWorkspace from "./components/reports/order-management/post-order-cost-sheet-report/post-order-cost-sheet-report-workspace";
+import MonthlyActualShipmentsReportWorkspace from "./components/reports/order-management/monthly-actual-shipments-report/monthly-actual-shipments-report-workspace";
 import TrimSheetReportWorkspace from "./components/reports/orderwise-inventory/trim-sheet-report/trim-sheet-report-workspace";
 import Suppliers from "./components/references/supplier/supplier.component";
 import ItemFeatures from "./components/references/item-feature/item-feature.component";
@@ -122,6 +131,7 @@ function App() {
         <Route index path="buyers" element={<Buyers />} />
         <Route index path="garment-type" element={<GarmentTypes />} />
         <Route index path="basis" element={<Basises />} />
+        <Route index path="season" element={<Seasons />} />
         <Route index path="production-line" element={<ProductionLines />} />
         <Route index path="operation" element={<Operations />} />
         <Route
@@ -327,6 +337,46 @@ function App() {
           index
           path="scheduled-shipments-report"
           element={<ScheduledShipmentsReportWorkspace />}
+        />
+        <Route
+          index
+          path="shipment-status-report"
+          element={<ShipmentStatusReportWorkspace />}
+        />
+        <Route
+          index
+          path="year-season-orders-report"
+          element={<YearSeasonOrdersReportWorkspace />}
+        />
+        <Route
+          index
+          path="pending-events-report"
+          element={<PendingEventsReportWorkspace />}
+        />
+        <Route
+          index
+          path="stock-arrival-status-report"
+          element={<StockArrivalStatusReportWorkspace />}
+        />
+        <Route
+          index
+          path="cost-of-production-report"
+          element={<CostOfProductionReportWorkspace />}
+        />
+        <Route
+          index
+          path="order-quota-detail-report"
+          element={<OrderQuotaDetailReportWorkspace />}
+        />
+        <Route
+          index
+          path="post-order-cost-sheet-report"
+          element={<PostOrderCostSheetReportWorkspace />}
+        />
+        <Route
+          index
+          path="monthly-actual-shipments-report"
+          element={<MonthlyActualShipmentsReportWorkspace />}
         />
         <Route
           index

@@ -25,6 +25,7 @@ import {
   useGetCurrenciesQuery,
   useGetGarmentTypes,
   useGetPurchaseOrder,
+  useGetSeasons,
   useGetUnits,
 } from "../../tanstack-hooks/custom-hooks";
 import { useNavigate } from "react-router-dom";
@@ -171,6 +172,15 @@ const OrderConfirmationRoutine = () => {
     filterQuery: null,
   });
 
+  const { data: seasonsPageData } = useGetSeasons({
+    pageIndex: 0,
+    pageSize: 999,
+    sortColumn: "description",
+    sortOrder: "asc",
+    filterColumn: null,
+    filterQuery: null,
+  });
+
   const { data: countriesPageData } = useGetCountriesQuery({
     pageIndex: 0,
     pageSize: 999,
@@ -205,6 +215,10 @@ const OrderConfirmationRoutine = () => {
   const basises = useMemo(
     () => basisesPageData?.items || [],
     [basisesPageData?.items],
+  );
+  const seasons = useMemo(
+    () => seasonsPageData?.items || [],
+    [seasonsPageData?.items],
   );
   const units = useMemo(
     () => unitsPageData?.items || [],
@@ -645,16 +659,26 @@ const OrderConfirmationRoutine = () => {
 
                 <div className="flex w-full justify-around p-0 m-0 border1-4 border1-red-600">
                   <div className="w-[30%] mt-1">
-                    <TextField
-                      fullWidth
-                      name="season"
-                      label="Season"
-                      margin="dense"
-                      size="small"
-                      autoComplete="off"
-                      value={poFormData.season}
-                      onChange={handleChange}
-                    />
+                    <FormControl fullWidth>
+                      <SelectList
+                        data={seasons}
+                        name="season"
+                        value={poFormData.season}
+                        label="Season"
+                        labelKey="description"
+                        valueKey="code"
+                        handleSelectedChange={handleSelectedChange}
+                        size="small"
+                        labelSx={selectLabelSx}
+                        menuSx={selectMenuSx}
+                        menuItemSx={selectMenuItemSx}
+                      />
+                      {errors.season && (
+                        <div className="text-red-500 text-[.7em] mt-1">
+                          {errors.season}
+                        </div>
+                      )}
+                    </FormControl>
                   </div>
                   <div className="w-[30%] mt-1">
                     <FormControl fullWidth>

@@ -64,6 +64,15 @@ export const APPARELPRO_ENDPOINTS = {
       PUT: "api/basis/",
       PATCH: "api/basis",
     },
+    // Season (od_sea) - reference data. Backed by SeasonController - see
+    // src/services/references/season.service.ts.
+    SEASON: {
+      GET_BY_PAGINATION: "api/season/list",
+      GETBY_CODE: "api/season/list/",
+      POST: "api/season",
+      DELETE: "api/season/",
+      PUT: "api/season/",
+    },
     PRODUCTION_LINE: {
       GET_BY_PAGINATION: "api/production-line/list",
       GETBY_CODE: "api/production-line/list/",
@@ -484,6 +493,62 @@ export const APPARELPRO_ENDPOINTS = {
     SCHEDULED_SHIPMENTS_REPORT: {
       GET_DETAILS: "api/scheduled-shipments-report/details",
       GET_PDF: "api/scheduled-shipments-report/pdf",
+    },
+    // Shipment Status Report (Reports -> Order Management -> Shipment status Report).
+    // Backed by ShipmentStatusReportController - see
+    // src/components/reports/order-management/shipment-status-report/*.
+    SHIPMENT_STATUS_REPORT: {
+      GET_DETAILS: "api/shipment-status-report/details",
+      GET_PDF: "api/shipment-status-report/pdf",
+    },
+    // Year/Season Wise Orders Report (Reports -> Order Management -> Year/Season Wise
+    // Orders). Backed by YearSeasonOrdersReportController - see
+    // src/components/reports/order-management/year-season-orders-report/*.
+    YEAR_SEASON_ORDERS_REPORT: {
+      GET_DETAILS: "api/year-season-orders-report/details",
+      GET_PDF: "api/year-season-orders-report/pdf",
+    },
+    // Pending Events Report (Reports -> Order Management -> Pending Events). Backed by
+    // PendingEventsReportController - see
+    // src/components/reports/order-management/pending-events-report/*.
+    PENDING_EVENTS_REPORT: {
+      GET_DETAILS: "api/pending-events-report/details",
+      GET_PDF: "api/pending-events-report/pdf",
+    },
+    // Stock Arrival Status Report (Reports -> Order Management -> Stock Arrival
+    // Status). Backed by StockArrivalStatusReportController - see
+    // src/components/reports/order-management/stock-arrival-status-report/*.
+    STOCK_ARRIVAL_STATUS_REPORT: {
+      GET_DETAILS: "api/stock-arrival-status-report/details",
+      GET_PDF: "api/stock-arrival-status-report/pdf",
+    },
+    // Cost of Production Report (Reports -> Order Management -> Cost of Production).
+    // Backed by CostOfProductionReportController - see
+    // src/components/reports/order-management/cost-of-production-report/*.
+    COST_OF_PRODUCTION_REPORT: {
+      GET_DETAILS: "api/cost-of-production-report/details",
+      GET_PDF: "api/cost-of-production-report/pdf",
+    },
+    // Order/Quota Detail Report (Reports -> Order Management -> Order/Quota Detail).
+    // Backed by OrderQuotaDetailReportController - see
+    // src/components/reports/order-management/order-quota-detail-report/*.
+    ORDER_QUOTA_DETAIL_REPORT: {
+      GET_DETAILS: "api/order-quota-detail-report/details",
+      GET_PDF: "api/order-quota-detail-report/pdf",
+    },
+    // Post Order Cost Sheet Report (Reports -> Order Management -> Post Order Cost Sheet).
+    // Backed by PostOrderCostSheetReportController - see
+    // src/components/reports/order-management/post-order-cost-sheet-report/*.
+    POST_ORDER_COST_SHEET_REPORT: {
+      GET_DETAILS: "api/post-order-cost-sheet-report/details",
+      GET_PDF: "api/post-order-cost-sheet-report/pdf",
+    },
+    // Monthly Actual Shipments Report (Reports -> Order Management -> Monthly Actual Shipments).
+    // Backed by MonthlyActualShipmentsReportController - see
+    // src/components/reports/order-management/monthly-actual-shipments-report/*.
+    MONTHLY_ACTUAL_SHIPMENTS_REPORT: {
+      GET_DETAILS: "api/monthly-actual-shipments-report/details",
+      GET_PDF: "api/monthly-actual-shipments-report/pdf",
     },
   },
   ORDER_WISE_INVENTORY: {

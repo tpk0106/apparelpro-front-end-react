@@ -66,12 +66,14 @@ import type {
   DeleteAddressPayload,
   DeleteBankAddressPayload,
   DeleteBasisPayload,
+  DeleteSeasonPayload,
   DeleteStylePayload,
   PurchaseOrderPayload,
   SupplierServiceModel,
   UpdateAddressPayload,
   UpdateBankAddressPayload,
   UpdateBasisPayload,
+  UpdateSeasonPayload,
   UpdateStylePayload,
 } from "./interfaces";
 import {
@@ -81,6 +83,13 @@ import {
   updateEditBasis,
 } from "../services/references/basis.service";
 import type { Basis } from "../interfaces/references/Basis";
+import {
+  createNewSeason,
+  loadSeasons,
+  removeSeason,
+  updateEditSeason,
+} from "../services/references/season.service";
+import type { Season } from "../interfaces/references/Season";
 import type { Style } from "../interfaces/OrderManagement/Style";
 import type { StyleTotals } from "../interfaces/OrderManagement/StyleTotals";
 import {
@@ -1287,6 +1296,74 @@ export const useGetBasis = (paginate: PaginationData) => {
       return response.data;
     },
     placeholderData: (previousData) => previousData, // Keeps old page data visible while loading the next page (smooth transitions)
+  });
+};
+
+// season
+
+export const useGetSeasons = (paginate: PaginationData) => {
+  return useQuery<PaginationAPIModel<Season>, Error>({
+    queryKey: ["seasons", paginate.pageIndex, paginate.pageSize],
+    queryFn: async () => {
+      const response: AxiosResponse<PaginationAPIModel<Season>> =
+        await loadSeasons(paginate);
+      return response.data;
+    },
+    placeholderData: (previousData) => previousData,
+  });
+};
+
+export const useCreateSeasonMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, Season>({
+    mutationFn: async (newSeason: Season) => {
+      await createNewSeason(newSeason);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["seasons"] });
+      toast.success("Season created successfully");
+    },
+    onError: (error) => {
+      toast.error(`Creation failed: ${error.message}`);
+    },
+  });
+};
+
+export const useUpdateSeasonMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, UpdateSeasonPayload>({
+    mutationFn: async (updatedSeasonPayload) => {
+      await updateEditSeason(
+        updatedSeasonPayload.code,
+        updatedSeasonPayload.seasonToUpdate,
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["seasons"] });
+      toast.success("Season updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Update failed: ${error.message}`);
+    },
+  });
+};
+
+export const useDeleteSeasonMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, DeleteSeasonPayload>({
+    mutationFn: async ({ code }) => {
+      await removeSeason(code);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["seasons"] });
+      toast.success("Season deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
+    },
   });
 };
 
