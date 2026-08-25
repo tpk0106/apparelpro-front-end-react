@@ -5,7 +5,7 @@ import type {
   BulkSaveResponse,
   ColorSizeBreakdownDetailsParams,
 } from "../../interfaces/definitions";
-import type ColorQuantityRatio from "../../interfaces/OrderManagement/ColorQuantityRatio";
+import type ColorQuantityRatio from "../../interfaces/order-management/ColorQuantityRatio";
 
 const loadColorQuantityRatiosByStyle = async (
   data: ColorSizeBreakdownDetailsParams,
@@ -27,7 +27,9 @@ const bulkSaveColorQuantityRatios = async (
   );
 };
 
-type SetRatioModePayload = ColorSizeBreakdownDetailsParams & { mode: "R" | "Q" };
+type SetRatioModePayload = ColorSizeBreakdownDetailsParams & {
+  mode: "R" | "Q";
+};
 
 const setColorRatioMode = async (payload: SetRatioModePayload) => {
   return await client.put(

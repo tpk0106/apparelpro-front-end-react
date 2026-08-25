@@ -5,7 +5,7 @@ import type {
   CommitSupplierPurchaseOrderResult,
   PODetailItemRow,
   POHeaderState,
-} from "../../interfaces/OrderManagement/purchase-order-types";
+} from "../../interfaces/order-management/purchase-order-types";
 
 export const supplierPurchaseOrderApi = createApi({
   reducerPath: "supplierPurchaseOrderApi",

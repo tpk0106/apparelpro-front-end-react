@@ -1,0 +1,142 @@
+import { useMemo } from "react";
+import { TextField, Chip, IconButton } from "@mui/material";
+import type { MRT_ColumnDef } from "material-react-table";
+import { MaterialReactTable } from "material-react-table";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { useApparelProTable } from "../../themes/useApparelProTable";
+import type { GeneralGinLineItemRow } from "../../interfaces/general-inventory/general-gin.types";
+
+interface GoodsIssueNoteLinesGridProps {
+  lines: GeneralGinLineItemRow[];
+  setLines: React.Dispatch<React.SetStateAction<GeneralGinLineItemRow[]>>;
+}
+
+// Row-derived, read-only figures - recomputed on every render, never stored in state.
+// availableToIssue mirrors the server's soft min-stock check (QtyInHand - effective
+// ShadowBalance) as a courtesy; the authoritative check always happens server-side.
+interface GinLineItemRowView extends GeneralGinLineItemRow {
+  availableToIssue: number;
+  isOverBalance: boolean;
+}
+
+export default function GoodsIssueNoteLinesGrid({
+  lines,
+  setLines,
+}: GoodsIssueNoteLinesGridProps) {
+  const handleUpdateQuantity = (index: number, rawValue: string) => {
+    const quantity = rawValue === "" ? 0 : Number(rawValue);
+    setLines((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], quantity };
+      return updated;
+    });
+  };
+
+  const handleRemoveLine = (index: number) => {
+    setLines((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const rows = useMemo<GinLineItemRowView[]>(
+    () =>
+      lines.map((line) => {
+        // Net of this SRN's own original reservation - matches the backend's
+        // effectiveShadowBalance calc, so the client-side warning agrees with the server.
+        const effectiveShadowBalance = line.shadowBalance - line.requestedQuantity;
+        const availableToIssue = line.qtyInHand - effectiveShadowBalance - line.minStock;
+        const quantity = Number(line.quantity || 0);
+        return {
+          ...line,
+          availableToIssue,
+          isOverBalance: quantity > availableToIssue,
+        };
+      }),
+    [lines],
+  );
+
+  const columns = useMemo<MRT_ColumnDef<GinLineItemRowView>[]>(
+    () => [
+      { accessorKey: "itemCode", header: "Item Code", size: 130 },
+      { accessorKey: "description", header: "Description", size: 200 },
+      { accessorKey: "unit", header: "Unit", size: 80 },
+      {
+        accessorKey: "requestedQuantity",
+        header: "SRN Qty",
+        size: 110,
+        Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
+      },
+      {
+        accessorKey: "qtyInHand",
+        header: "Qty In Hand",
+        size: 120,
+        Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
+      },
+      {
+        accessorKey: "quantity",
+        header: "Issue Qty",
+        size: 130,
+        Cell: ({ row }) => (
+          <TextField
+            type="number"
+            size="small"
+            variant="standard"
+            value={row.original.quantity}
+            error={row.original.isOverBalance}
+            onChange={(e) => handleUpdateQuantity(row.index, e.target.value)}
+            slotProps={{
+              htmlInput: { min: 0, style: { fontFamily: '"JetBrains Mono", monospace' } },
+            }}
+            sx={{ width: 100 }}
+          />
+        ),
+      },
+      {
+        accessorKey: "availableToIssue",
+        header: "Available",
+        size: 110,
+        Cell: ({ row }) => (
+          <Chip
+            size="small"
+            variant="filled"
+            color={row.original.isOverBalance ? "error" : "primary"}
+            label={row.original.availableToIssue.toLocaleString()}
+            sx={{
+              border: "1px solid #FFFFFF",
+              "& .MuiChip-label": { color: "#FFFFFF" },
+            }}
+          />
+        ),
+      },
+    ],
+    [],
+  );
+
+  const table = useApparelProTable<GinLineItemRowView>({
+    columns,
+    data: rows,
+    enableEditing: false,
+    enableColumnActions: false,
+    enableColumnFilters: false,
+    enableSorting: false,
+    enablePagination: false,
+    enableBottomToolbar: false,
+    enableTopToolbar: false,
+    enableRowActions: true,
+    positionActionsColumn: "last",
+    displayColumnDefOptions: {
+      "mrt-row-actions": { header: "Action", size: 70 },
+    },
+    renderRowActions: ({ row }) => (
+      <IconButton color="error" size="small" onClick={() => handleRemoveLine(row.index)}>
+        <DeleteIcon fontSize="small" />
+      </IconButton>
+    ),
+    muiTableBodyRowProps: ({ row }) => ({
+      sx: {
+        backgroundColor: row.original.isOverBalance ? "rgba(248,113,113,0.12) !important" : undefined,
+      },
+    }),
+    initialState: { density: "compact" },
+  });
+
+  return <MaterialReactTable table={table} />;
+}

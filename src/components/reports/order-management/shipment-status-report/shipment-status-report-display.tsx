@@ -71,24 +71,24 @@ export default function ShipmentStatusReportDisplay({ report }: Props) {
             <Box sx={{ p: 1.5, backgroundColor: "#eef1f7" }}>
               <Grid container spacing={2}>
                 <Grid size={{ xs: 6, sm: 2 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Type</Typography>
-                  <Typography variant="body2" fontWeight="bold">{row.typeName}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Type</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{row.typeName}</Typography>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 2.5 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Style</Typography>
-                  <Typography variant="body2" fontWeight="bold">{row.styleCode}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Style</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{row.styleCode}</Typography>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 2.5 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Shp. Order No.</Typography>
-                  <Typography variant="body2" fontWeight="bold">{row.shipmentOrderNo}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Shp. Order No.</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{row.shipmentOrderNo}</Typography>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 1.5 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Unit</Typography>
-                  <Typography variant="body2" fontWeight="bold">{row.unit}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Unit</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{row.unit}</Typography>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 3.5 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Destination</Typography>
-                  <Typography variant="body2" fontWeight="bold">{row.destinationCode}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Destination</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{row.destinationCode}</Typography>
                 </Grid>
               </Grid>
             </Box>

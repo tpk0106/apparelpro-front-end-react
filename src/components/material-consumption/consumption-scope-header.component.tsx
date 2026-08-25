@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Card, TextField } from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
 import Grid from "@mui/material/Grid";
-import type { Style } from "../../interfaces/OrderManagement/Style";
+import type { Style } from "../../interfaces/order-management/Style";
 import {
   useGetBuyersQuery,
   useGetAllPurchaseOrdersByBuyerCode,

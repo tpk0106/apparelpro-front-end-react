@@ -5,7 +5,7 @@ import type {
   BulkSaveResponse,
   ColorSizeBreakdownDetailsParams,
 } from "../../interfaces/definitions";
-import type ColorSizeBreakdownDetails from "../../interfaces/OrderManagement/ColorSizeDetails";
+import type ColorSizeBreakdownDetails from "../../interfaces/order-management/ColorSizeDetails";
 import type { ColorSizeDetailsServiceModel } from "../../components/material-consumption/material-consumption.types";
 
 const loadColorSizeBreakdownDetailsByStyle = async (

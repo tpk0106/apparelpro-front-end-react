@@ -1,8 +1,8 @@
 import { APPARELPRO_ENDPOINTS } from "../../api/api-configurations";
 import { client } from "../../auth/axiosClient";
 import type { PaginationData } from "../../interfaces/definitions";
-import type { Style } from "../../interfaces/OrderManagement/Style";
-import type { StyleTotals } from "../../interfaces/OrderManagement/StyleTotals";
+import type { Style } from "../../interfaces/order-management/Style";
+import type { StyleTotals } from "../../interfaces/order-management/StyleTotals";
 import type { PaginationAPIModel } from "../../interfaces/references/ApiResult";
 
 // Fetches a single style fresh from the server, bypassing whatever the

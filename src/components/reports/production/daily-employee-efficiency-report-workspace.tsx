@@ -43,7 +43,7 @@ const DailyEmployeeEfficiencyReportWorkspace = () => {
       </div>
 
       <Card variant="outlined" sx={{ p: 2, mb: 2 }}>
-        <Grid container spacing={2} alignItems="center">
+        <Grid container spacing={2} sx={{ alignItems: "center" }}>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <TextField
               label="Date" type="date" size="small" fullWidth

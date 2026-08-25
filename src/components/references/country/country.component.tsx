@@ -66,7 +66,7 @@ const Countries = () => {
   const allCountries = useSelector(SelectAllCountries);
   const CountriesTotal = useSelector(SelectCountriesTotal);
 
-  const [scopeContext, setScopeContext] = useState<SelectedScopeContext | null>(
+  const [, setScopeContext] = useState<SelectedScopeContext | null>(
     null,
   );
 

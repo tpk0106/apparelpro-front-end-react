@@ -74,7 +74,7 @@ import {
   updateUnitStart,
 } from "../../sagaStore/unit/unit.action";
 import type { Unit } from "../../interfaces/references/Unit";
-import type PurchaseOrder from "../../interfaces/OrderManagement/PurchaseOrder";
+import type PurchaseOrder from "../../interfaces/order-management/PurchaseOrder";
 import { loadOrderStart } from "../../sagaStore/order-confirmation/order.action";
 import type { Basis } from "../../interfaces/references/Basis";
 import { loadAllBasisesStart } from "../../sagaStore/basis/basis.action";

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { Style } from "../../interfaces/OrderManagement/Style";
+import type { Style } from "../../interfaces/order-management/Style";
 import type { Buyer } from "../../interfaces/references/Buyer";
 import type { GarmentType } from "../../interfaces/references/GarmentType";
 import type {

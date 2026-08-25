@@ -7,7 +7,7 @@ import {
 import type { Buyer } from "../../interfaces/references/Buyer";
 
 const useGetStyleData = () => {
-  const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
+  const [selectedBuyer] = useState<Buyer | null>(null);
   // Fetch Buyers Registry
   const { data: buyerPageData } = useGetBuyersQuery({
     pageIndex: 0,

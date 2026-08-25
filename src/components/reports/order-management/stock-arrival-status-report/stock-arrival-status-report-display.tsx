@@ -68,20 +68,20 @@ export default function StockArrivalStatusReportDisplay({ report }: Props) {
             <Box sx={{ p: 1.5, backgroundColor: "#eef1f7" }}>
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, sm: 4 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Item</Typography>
-                  <Typography variant="body2" fontWeight="bold">{item.itemCode} - {item.description}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Item</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{item.itemCode} - {item.description}</Typography>
                 </Grid>
                 <Grid size={{ xs: 4, sm: 2.5 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Order Qty</Typography>
-                  <Typography variant="body2" fontWeight="bold">{formatQuantity(item.orderedQuantity)} {item.unit}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Order Qty</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{formatQuantity(item.orderedQuantity)} {item.unit}</Typography>
                 </Grid>
                 <Grid size={{ xs: 4, sm: 2.5 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Received</Typography>
-                  <Typography variant="body2" fontWeight="bold">{formatQuantity(item.totalReceivedQuantity)}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Received</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{formatQuantity(item.totalReceivedQuantity)}</Typography>
                 </Grid>
                 <Grid size={{ xs: 4, sm: 3 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Balance to Receive</Typography>
-                  <Typography variant="body2" fontWeight="bold">{formatQuantity(item.balanceToReceive)}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Balance to Receive</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{formatQuantity(item.balanceToReceive)}</Typography>
                 </Grid>
               </Grid>
             </Box>

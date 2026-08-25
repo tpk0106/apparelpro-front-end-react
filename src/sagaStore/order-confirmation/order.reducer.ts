@@ -1,4 +1,4 @@
-import type PurchaseOrder from "../../interfaces/OrderManagement/PurchaseOrder";
+import type PurchaseOrder from "../../interfaces/order-management/PurchaseOrder";
 
 import { ORDERS_ACTION_TYPES } from "./order.types";
 import type { PayloadAction } from "@reduxjs/toolkit";

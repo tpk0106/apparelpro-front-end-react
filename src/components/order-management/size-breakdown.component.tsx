@@ -19,8 +19,8 @@ import {
   useCreateColorSizeBreakdownDetailsMutation,
   useSetSizeRatioModeMutation,
 } from "../../tanstack-hooks/custom-hooks";
-import type ColorSizeBreakdownDetails from "../../interfaces/OrderManagement/ColorSizeDetails";
-import type StyleContext from "../../interfaces/OrderManagement/StyleContext";
+import type ColorSizeBreakdownDetails from "../../interfaces/order-management/ColorSizeDetails";
+import type StyleContext from "../../interfaces/order-management/StyleContext";
 import type { ColorSizeBreakdownDetailsPayloadWithBody } from "../../interfaces/definitions";
 
 interface SizeBreakdownProps {
@@ -265,7 +265,14 @@ export default function SizeBreakdown({
             boundaries.
           </Typography>
         </Box>
-        <Box sx={{ textAlign: "right", display: "flex", alignItems: "center", gap: 2 }}>
+        <Box
+          sx={{
+            textAlign: "right",
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
           <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
             Color Mode: [{styleContext.colorRatio}]
           </Typography>

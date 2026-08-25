@@ -10,7 +10,7 @@ import {
   useGetStylesByScope,
 } from "../../../../tanstack-hooks/custom-hooks";
 
-import type { Style } from "../../../../interfaces/OrderManagement/Style";
+import type { Style } from "../../../../interfaces/order-management/Style";
 import type { TrimSheetReportScopeContext } from "./trim-sheet-report.types";
 import type { GarmentTypeServiceModel } from "../../../material-consumption/material-consumption.types";
 import type { Buyer } from "../../../../interfaces/references/Buyer";

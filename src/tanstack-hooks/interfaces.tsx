@@ -1,4 +1,4 @@
-import type { Style } from "../interfaces/OrderManagement/Style";
+import type { Style } from "../interfaces/order-management/Style";
 import type { Address } from "../interfaces/references/Address";
 import type { Basis } from "../interfaces/references/Basis";
 import type { Season } from "../interfaces/references/Season";

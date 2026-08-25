@@ -17,7 +17,7 @@ import type { PaginationData } from "../../interfaces/definitions";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
 
-import type { Style } from "../../interfaces/OrderManagement/Style";
+import type { Style } from "../../interfaces/order-management/Style";
 // import { isAfter, isValid, parseISO } from "date-fns";
 import type {
   DeleteStylePayload,

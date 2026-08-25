@@ -608,6 +608,60 @@ export const APPARELPRO_ENDPOINTS = {
       PDF: "api/stock-movement-item-reports/pdf",
     },
   },
+  GENERAL_INVENTORY: {
+    STRN: {
+      VERIFY_STOCK: "api/general-inventory-strn/verify-stock",
+      POST: "api/general-inventory-strn/commit",
+      AVAILABLE_CHOICES: "api/general-inventory-strn/available-choices",
+      STORES: "api/general-inventory-strn/stores",
+      PRINT: "api/general-inventory-strn/print",
+      PRINT_PDF: "api/general-inventory-strn/print/pdf",
+    },
+    GIN: {
+      ISSUABLE_LINES: "api/general-inventory-gin/issuable-lines",
+      COMMIT: "api/general-inventory-gin/commit",
+      PRINT: "api/general-inventory-gin/print",
+      PRINT_PDF: "api/general-inventory-gin/print/pdf",
+    },
+    GRN: {
+      RECEIVABLE_LINES: "api/general-inventory-grn/receivable-lines",
+      COMMIT: "api/general-inventory-grn/commit",
+      PRINT: "api/general-inventory-grn/print",
+      PRINT_PDF: "api/general-inventory-grn/print/pdf",
+    },
+    GTN: {
+      COMMIT: "api/general-inventory-gtn/commit",
+      PRINT: "api/general-inventory-gtn/print",
+      PRINT_PDF: "api/general-inventory-gtn/print/pdf",
+    },
+    OGTN: {
+      TRANSFERABLE_STOCK: "api/general-inventory-ogtn/transferable-stock",
+      COMMIT: "api/general-inventory-ogtn/commit",
+      PRINT: "api/general-inventory-ogtn/print",
+      PRINT_PDF: "api/general-inventory-ogtn/print/pdf",
+    },
+    RTN: {
+      COMMIT: "api/general-inventory-rtn/commit",
+      PRINT: "api/general-inventory-rtn/print",
+      PRINT_PDF: "api/general-inventory-rtn/print/pdf",
+    },
+    DGN: {
+      COMMIT: "api/general-inventory-dgn/commit",
+      PRINT: "api/general-inventory-dgn/print",
+      PRINT_PDF: "api/general-inventory-dgn/print/pdf",
+    },
+    SRTN: {
+      COMMIT: "api/general-inventory-srtn/commit",
+      PRINT: "api/general-inventory-srtn/print",
+      PRINT_PDF: "api/general-inventory-srtn/print/pdf",
+    },
+    PO: {
+      COMMIT: "api/general-inventory-po/commit",
+      GET_BY_NUMBER: "api/general-inventory-po",
+      PRINT: "api/general-inventory-po/print",
+      PRINT_PDF: "api/general-inventory-po/print/pdf",
+    },
+  },
   SYSTEM_CONFIGURATION: {
     SYSTEM_PARAMETER: {
       GET: "api/system-parameters/list",

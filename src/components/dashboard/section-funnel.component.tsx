@@ -29,7 +29,7 @@ const SectionFunnel = ({ sections, contractSectionCode }: Props) => {
             }}
           >
             <Box>
-              <Typography variant="body2" fontWeight={500} sx={{ color: DASHBOARD_COLORS.textPrimary }}>{section.sectionDescription}</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 500, color: DASHBOARD_COLORS.textPrimary }}>{section.sectionDescription}</Typography>
               {isContract && <Typography variant="caption" color="text.secondary">Contract section</Typography>}
             </Box>
             <Box sx={{ position: "relative", height: 14, borderRadius: 1, bgcolor: DASHBOARD_COLORS.border }}>

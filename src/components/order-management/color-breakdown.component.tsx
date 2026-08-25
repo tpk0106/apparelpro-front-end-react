@@ -14,7 +14,7 @@ import ColorBreakdownTable, {
   type LocalColorRow,
 } from "./color-breakdown-table.component";
 import InfoDialog from "../common/info-dialog";
-import type StyleContext from "../../interfaces/OrderManagement/StyleContext";
+import type StyleContext from "../../interfaces/order-management/StyleContext";
 import {
   useBulkSaveColorQuantityRatiosMutation,
   useSetColorRatioModeMutation,

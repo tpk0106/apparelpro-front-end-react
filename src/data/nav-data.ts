@@ -172,43 +172,49 @@ export const navbarData = [
     label: "General Inventory",
     subMenus: [
       {
-        routerLink: "srn",
+        routerLink: "general-srn",
         icon: null,
         label: "Stores Requisition Note",
         pinned: true,
       },
       {
-        routerLink: "gin",
+        routerLink: "general-gin",
         icon: null,
         label: "Goods Issue        Note",
         pinned: false,
       },
       {
-        routerLink: "grcn",
+        routerLink: "general-grn",
         icon: null,
         label: "Goods Receive     Note",
         pinned: false,
       },
       {
-        routerLink: "rtn",
+        routerLink: "general-rtn",
         icon: null,
-        label: "Goods Return Note------",
+        label: "Goods Return Note",
         pinned: false,
       },
       {
-        routerLink: "gtn",
+        routerLink: "general-gtn",
         icon: null,
         label: "Goods Transfer     Note",
         pinned: false,
       },
       {
-        routerLink: "supplier-return-note",
+        routerLink: "general-ogtn",
+        icon: null,
+        label: "Goods Transfer     Note (Orders)",
+        pinned: false,
+      },
+      {
+        routerLink: "general-srtn",
         icon: null,
         label: "Supplier Return    Note",
         pinned: false,
       },
       {
-        routerLink: "dgn",
+        routerLink: "general-dgn",
         icon: null,
         label: "Damaged Goods      Note",
         pinned: false,
@@ -229,6 +235,12 @@ export const navbarData = [
         routerLink: "san",
         icon: null,
         label: "Stock Adjustments  Note ",
+        pinned: false,
+      },
+      {
+        routerLink: "general-po",
+        icon: null,
+        label: "Purchase Order     Entry",
         pinned: false,
       },
     ],
@@ -530,6 +542,67 @@ export const navbarData = [
     subMenus: [],
   },
   {
+    routerLink: "general-inventory-notes-reports",
+    icon: "../assets/production/Inventory-Management.png",
+    label: "Reports - General Inventory Notes",
+    subMenus: [
+      {
+        routerLink: "general-strn-print",
+        icon: null,
+        label: "Stores Requisition Note - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "general-gin-print",
+        icon: null,
+        label: "Goods Issue Note - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "general-grn-print",
+        icon: null,
+        label: "Goods Received Note - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "general-gtn-print",
+        icon: null,
+        label: "Goods Transfer Note - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "general-ogtn-print",
+        icon: null,
+        label: "Goods Transfer Note (Orders) - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "general-rtn-print",
+        icon: null,
+        label: "Goods Return Note - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "general-dgn-print",
+        icon: null,
+        label: "Damaged Goods Note - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "general-srtn-print",
+        icon: null,
+        label: "Supplier Return Note - Print",
+        pinned: false,
+      },
+      {
+        routerLink: "general-po-print",
+        icon: null,
+        label: "Purchase Order - Print",
+        pinned: false,
+      },
+    ],
+  },
+  {
     routerLink: "orderwise-inventory-notes-reports",
     icon: "../assets/production/Inventory-Management.png",
     label: "Reports - Orderwise Inventory Notes",
@@ -779,13 +852,4 @@ export const navbarData = [
       },
     ],
   },
-  // { routerLink: 'aboutus', icon: '', label: 'About Us', subMenus: null },
-  // { routerLink: 'contactus', icon: '', label: 'Contact Us', subMenus: null },
-  // {
-  //   routerLink:'profile', icon:'', label:'Profile',
-  //   subMenus:[
-  //       { routerLink:'settings', icon:'', label:'Settings'},
-  //       { routerLink:'logout', icon:'', label:'Logout'}
-  //   ]
-  // },
 ];

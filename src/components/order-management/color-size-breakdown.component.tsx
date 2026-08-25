@@ -9,11 +9,11 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import type { Style } from "../../interfaces/OrderManagement/Style";
+import type { Style } from "../../interfaces/order-management/Style";
 import ColorBreakdown from "./color-breakdown.component";
 import type { LocalColorRow } from "./color-breakdown-table.component";
 import SizeBreakdown from "./size-breakdown.component";
-import type StyleContext from "../../interfaces/OrderManagement/StyleContext";
+import type StyleContext from "../../interfaces/order-management/StyleContext";
 import {
   useGetColorSizeSavedMatrix,
   useGetColorQuantityRatiosByStyle,
@@ -121,8 +121,12 @@ export default function ColorSizeBreakdown({
 
   if (modeSyncKey && modeSyncKey !== prevModeSyncKey) {
     setPrevModeSyncKey(modeSyncKey);
-    setColorMode(freshStyle!.colorRatio?.trim().toUpperCase() === "R" ? "R" : "Q");
-    setSizeMode(freshStyle!.sizeRatio?.trim().toUpperCase() === "R" ? "R" : "Q");
+    setColorMode(
+      freshStyle!.colorRatio?.trim().toUpperCase() === "R" ? "R" : "Q",
+    );
+    setSizeMode(
+      freshStyle!.sizeRatio?.trim().toUpperCase() === "R" ? "R" : "Q",
+    );
   }
 
   // if existing color/size breakdown
@@ -173,8 +177,7 @@ export default function ColorSizeBreakdown({
     // see the stale "Q" default and hydrate with the wrong values - freshStyle
     // itself carries no such lag once its query has resolved (see the
     // isStyleLoading gate below, which holds off hydration until it has).
-    const isRatioStyle =
-      freshStyle?.colorRatio?.trim().toUpperCase() === "R";
+    const isRatioStyle = freshStyle?.colorRatio?.trim().toUpperCase() === "R";
     matrix = activeRatioArray.map((item, idx) => ({
       id: idx + 1,
       colorCode: String(item.color).toUpperCase().trim(),
@@ -230,7 +233,8 @@ export default function ColorSizeBreakdown({
   const currentHydrationKey = hasExistingDbEntries
     ? `${selectedStyleFromGrid?.styleCode}-${activeDataArray.length}-${activeRatioArray.length}`
     : "NEW";
-  const readyToHydrate = !isMatrixLoading && !isRatiosLoading && !isStyleLoading;
+  const readyToHydrate =
+    !isMatrixLoading && !isRatiosLoading && !isStyleLoading;
 
   if (readyToHydrate && currentHydrationKey !== prevHydrationKey) {
     setPrevHydrationKey(currentHydrationKey);

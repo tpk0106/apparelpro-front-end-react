@@ -6,7 +6,7 @@ import type { PaginationAPIModel } from "../../interfaces/references/ApiResult";
 
 import { createAction } from "../../utils/reducer/reducer.utils";
 import { ORDERS_ACTION_TYPES } from "./order.types";
-import type PurchaseOrder from "../../interfaces/OrderManagement/PurchaseOrder";
+import type PurchaseOrder from "../../interfaces/order-management/PurchaseOrder";
 
 // load one order by buyer and po
 const loadOrderStart = ({ ...order }: POParameters) => {

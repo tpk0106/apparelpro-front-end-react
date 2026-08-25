@@ -10,7 +10,7 @@ import {
 } from "redux-saga/effects";
 
 import type { AnyAction } from "redux-saga";
-import type PurchaseOrder from "../../interfaces/OrderManagement/PurchaseOrder";
+import type PurchaseOrder from "../../interfaces/order-management/PurchaseOrder";
 import { loadOrderFailure, loadOrderSuccess } from "./order.action";
 import { ORDERS_ACTION_TYPES } from "./order.types";
 import { loadPurchaseOrder } from "../../services/order-management/poService";

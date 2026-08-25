@@ -13,7 +13,7 @@ import {
 import Autocomplete from "@mui/material/Autocomplete";
 import Grid from "@mui/material/Grid";
 import { toast } from "react-toastify";
-import type { Style } from "../../interfaces/OrderManagement/Style";
+import type { Style } from "../../interfaces/order-management/Style";
 import type { Buyer } from "../../interfaces/references/Buyer";
 import {
   useGetBuyersQuery,

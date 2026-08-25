@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Alert, Box, Tab, Tabs } from "@mui/material";
 import Styles from "./styles.component";
 import ColorSizeBreakdown from "./color-size-breakdown.component";
-import type { Style } from "../../interfaces/OrderManagement/Style";
+import type { Style } from "../../interfaces/order-management/Style";
 import PartShipmentsWorkspace from "../part-shipment/part-shipments-workspace";
 import ConfirmDialog from "../common/confirm-dialog";
 

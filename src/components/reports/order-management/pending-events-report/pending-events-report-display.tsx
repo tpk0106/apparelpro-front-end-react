@@ -60,20 +60,20 @@ export default function PendingEventsReportDisplay({ report }: Props) {
             <Box sx={{ p: 1.5, backgroundColor: "#eef1f7" }}>
               <Grid container spacing={2}>
                 <Grid size={{ xs: 6, sm: 3 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Buyer</Typography>
-                  <Typography variant="body2" fontWeight="bold">{group.buyerName}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Buyer</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{group.buyerName}</Typography>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 3 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Order</Typography>
-                  <Typography variant="body2" fontWeight="bold">{group.order}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Order</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{group.order}</Typography>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 3 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Type</Typography>
-                  <Typography variant="body2" fontWeight="bold">{group.typeName}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Type</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{group.typeName}</Typography>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 3 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Style</Typography>
-                  <Typography variant="body2" fontWeight="bold">{group.styleCode}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Style</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{group.styleCode}</Typography>
                 </Grid>
               </Grid>
             </Box>

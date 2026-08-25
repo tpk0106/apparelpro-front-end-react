@@ -90,8 +90,8 @@ import {
   updateEditSeason,
 } from "../services/references/season.service";
 import type { Season } from "../interfaces/references/Season";
-import type { Style } from "../interfaces/OrderManagement/Style";
-import type { StyleTotals } from "../interfaces/OrderManagement/StyleTotals";
+import type { Style } from "../interfaces/order-management/Style";
+import type { StyleTotals } from "../interfaces/order-management/StyleTotals";
 import {
   createNewStyle,
   deleteStyle,
@@ -102,7 +102,7 @@ import {
   loadStyleTotals,
   updateEditStyle,
 } from "../services/order-management/style.service";
-import type PurchaseOrder from "../interfaces/OrderManagement/PurchaseOrder";
+import type PurchaseOrder from "../interfaces/order-management/PurchaseOrder";
 import {
   createNewPO,
   loadPurchaseOrder,
@@ -121,7 +121,7 @@ import {
   setSizeRatioMode,
   type SetRatioModePayload,
 } from "../services/order-management/color-quantity-ratio.service";
-import type ColorQuantityRatio from "../interfaces/OrderManagement/ColorQuantityRatio";
+import type ColorQuantityRatio from "../interfaces/order-management/ColorQuantityRatio";
 import {
   createNewSupplier,
   loadSuppliers,
@@ -1179,8 +1179,7 @@ export const useUpdateBuyerAddressMutation = () => {
         { ...updatedBuyerAddressPayload.addressToUpdate },
       );
     },
-    onSuccess: (data) => {
-      // You can now access data.data if needed!
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["buyers"] });
       toast.success("Buyer Address updated successfully");
     },
@@ -2229,16 +2228,18 @@ export const useUpdateCurrencyConversionMutation = () => {
 export const useDeleteCurrencyConversionMutation = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<void, Error, { fromCurrency: string; toCurrency: string }>({
-    mutationFn: async ({ fromCurrency, toCurrency }) => {
-      await removeCurrencyConversion(fromCurrency, toCurrency);
+  return useMutation<void, Error, { fromCurrency: string; toCurrency: string }>(
+    {
+      mutationFn: async ({ fromCurrency, toCurrency }) => {
+        await removeCurrencyConversion(fromCurrency, toCurrency);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["currency-conversion"] });
+        toast.success("Currency Conversion rate deleted successfully");
+      },
+      onError: (error) => {
+        toast.error(`Delete failed: ${error.message}`);
+      },
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["currency-conversion"] });
-      toast.success("Currency Conversion rate deleted successfully");
-    },
-    onError: (error) => {
-      toast.error(`Delete failed: ${error.message}`);
-    },
-  });
+  );
 };

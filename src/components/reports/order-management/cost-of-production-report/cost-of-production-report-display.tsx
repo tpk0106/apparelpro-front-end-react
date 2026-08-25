@@ -117,7 +117,7 @@ export default function CostOfProductionReportDisplay({ report }: Props) {
           <SectionTitle>Additional Costs</SectionTitle>
           {report.additionalCostGroups.map((group, gi) => (
             <Box key={`${group.additionalCostCode}-${gi}`} sx={{ mb: 2 }}>
-              <Typography variant="body2" fontWeight="bold" sx={{ mb: 0.5 }}>
+              <Typography variant="body2" sx={{ fontWeight: "bold", mb: 0.5 }}>
                 {group.additionalCostDescription}
               </Typography>
               <TableContainer>
@@ -266,19 +266,19 @@ export default function CostOfProductionReportDisplay({ report }: Props) {
 
       {/* Final margin */}
       <Card variant="outlined" sx={{ p: 2.5, backgroundColor: "#eef1f7", borderLeft: "5px solid #1a237e" }}>
-        <Grid container spacing={2} alignItems="center">
+        <Grid container spacing={2} sx={{ alignItems: "center" }}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Typography variant="h6" sx={{ fontWeight: "bold", color: "#1a237e" }}>
               Profit Margin ({report.currencyCode})
             </Typography>
           </Grid>
           <Grid size={{ xs: 6, sm: 4 }}>
-            <Typography variant="caption" color="text.secondary" display="block">Estimated</Typography>
-            <Typography variant="h6" fontWeight="bold">{formatMoney(report.estimatedProfitMargin)}</Typography>
+            <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Estimated</Typography>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>{formatMoney(report.estimatedProfitMargin)}</Typography>
           </Grid>
           <Grid size={{ xs: 6, sm: 4 }}>
-            <Typography variant="caption" color="text.secondary" display="block">Actual</Typography>
-            <Typography variant="h6" fontWeight="bold">{formatMoney(report.actualProfitMargin)}</Typography>
+            <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Actual</Typography>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>{formatMoney(report.actualProfitMargin)}</Typography>
           </Grid>
         </Grid>
       </Card>

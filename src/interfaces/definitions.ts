@@ -1,4 +1,4 @@
-import type ColorSizeBreakdownDetails from "./OrderManagement/ColorSizeDetails";
+import type ColorSizeBreakdownDetails from "./order-management/ColorSizeDetails";
 
 const SLASH = "/";
 const ASSETS_FOLDER_LENGTH = 10;

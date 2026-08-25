@@ -1,7 +1,7 @@
 import { client } from "../../auth/axiosClient";
 import { APPARELPRO_ENDPOINTS } from "../../api/api-configurations";
 import type { POParameters } from "../../interfaces/definitions";
-import type PurchaseOrder from "../../interfaces/OrderManagement/PurchaseOrder";
+import type PurchaseOrder from "../../interfaces/order-management/PurchaseOrder";
 
 const loadPurchaseOrdersByBuyerCode = async (buyerCode: number) => {
   return await client.get(

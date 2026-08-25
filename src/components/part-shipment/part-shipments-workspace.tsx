@@ -4,7 +4,7 @@ import StyleShippingSummaryCard from "./style-shipping-summary-card";
 import PartShipmentsGrid from "./part-shipments-grid";
 
 import { useGetPartShipmentsLedgerQuery } from "../../services/order-management/part-shipment.service";
-import type { Style } from "../../interfaces/OrderManagement/Style";
+import type { Style } from "../../interfaces/order-management/Style";
 
 interface WorkspaceProps {
   buyerCode: number;

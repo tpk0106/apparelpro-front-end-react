@@ -225,16 +225,16 @@ export default function PostOrderCostSheetReportDisplay({ report }: Props) {
           <HeaderField label="Freight Charges" value={formatMoney(report.freightCharges)} />
         </Grid>
         <Divider sx={{ my: 2 }} />
-        <Grid container spacing={2} alignItems="center">
+        <Grid container spacing={2} sx={{ alignItems: "center" }}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <Typography variant="h6" sx={{ fontWeight: "bold", color: "#1a237e" }}>
               Net Profit ({report.currencyCode})
             </Typography>
-            <Typography variant="h6" fontWeight="bold">{formatMoney(report.netProfit)}</Typography>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>{formatMoney(report.netProfit)}</Typography>
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <Typography variant="caption" color="text.secondary" display="block">Net Profit On Sales</Typography>
-            <Typography variant="h6" fontWeight="bold">{report.netProfitOnSalesPercent.toFixed(2)}%</Typography>
+            <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Net Profit On Sales</Typography>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>{report.netProfitOnSalesPercent.toFixed(2)}%</Typography>
           </Grid>
         </Grid>
       </Card>

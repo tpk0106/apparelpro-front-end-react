@@ -62,7 +62,7 @@ export default function MonthlyActualShipmentsReportHeader({
         Monthly Actual Shipments - Selection Criteria
       </Typography>
 
-      <Grid container spacing={2} alignItems="center">
+      <Grid container spacing={2} sx={{ alignItems: "center" }}>
         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
           <TextField
             select

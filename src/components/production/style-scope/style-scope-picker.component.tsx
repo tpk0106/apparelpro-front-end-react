@@ -1,7 +1,14 @@
 import { useState } from "react";
-import { Autocomplete, Card, Grid, TextField, type SxProps, type Theme } from "@mui/material";
+import {
+  Autocomplete,
+  Card,
+  Grid,
+  TextField,
+  type SxProps,
+  type Theme,
+} from "@mui/material";
 import type { Buyer } from "../../../interfaces/references/Buyer";
-import type { Style } from "../../../interfaces/OrderManagement/Style";
+import type { Style } from "../../../interfaces/order-management/Style";
 import type { GarmentTypeServiceModel } from "../../material-consumption/material-consumption.types";
 import {
   useGetAllGarmentTypes,
@@ -33,7 +40,8 @@ interface Props {
 const StyleScopePicker = ({ onScopeChange, sx }: Props) => {
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
-  const [selectedType, setSelectedType] = useState<GarmentTypeServiceModel | null>(null);
+  const [selectedType, setSelectedType] =
+    useState<GarmentTypeServiceModel | null>(null);
   const [selectedStyle, setSelectedStyle] = useState<Style | null>(null);
 
   const { data: buyerPageData } = useGetBuyersQuery({
@@ -98,7 +106,10 @@ const StyleScopePicker = ({ onScopeChange, sx }: Props) => {
   };
 
   return (
-    <Card variant="outlined" sx={{ p: 2, mb: 2, backgroundColor: "#fafafa", ...sx }}>
+    <Card
+      variant="outlined"
+      sx={{ p: 2, mb: 2, backgroundColor: "#fafafa", ...sx }}
+    >
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Autocomplete
@@ -106,8 +117,12 @@ const StyleScopePicker = ({ onScopeChange, sx }: Props) => {
             getOptionLabel={(option: Buyer) => option.name || ""}
             value={selectedBuyer}
             onChange={(_, val) => handleBuyerChange(val)}
-            isOptionEqualToValue={(option, value) => option.buyerCode === value?.buyerCode}
-            renderInput={(params) => <TextField {...params} label="Select Buyer" size="small" />}
+            isOptionEqualToValue={(option, value) =>
+              option.buyerCode === value?.buyerCode
+            }
+            renderInput={(params) => (
+              <TextField {...params} label="Select Buyer" size="small" />
+            )}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 2 }}>
@@ -118,18 +133,24 @@ const StyleScopePicker = ({ onScopeChange, sx }: Props) => {
             value={selectedOrder}
             onChange={(_, val) => handleOrderChange(val)}
             isOptionEqualToValue={(option, value) => option === value}
-            renderInput={(params) => <TextField {...params} label="Select Order" size="small" />}
+            renderInput={(params) => (
+              <TextField {...params} label="Select Order" size="small" />
+            )}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
           <Autocomplete
             options={globalTypesList}
-            getOptionLabel={(option: GarmentTypeServiceModel) => option.typeName.toUpperCase() || ""}
+            getOptionLabel={(option: GarmentTypeServiceModel) =>
+              option.typeName.toUpperCase() || ""
+            }
             disabled={!selectedOrder}
             value={selectedType}
             onChange={(_, val) => handleTypeChange(val)}
             isOptionEqualToValue={(option, value) => option.id === value?.id}
-            renderInput={(params) => <TextField {...params} label="Select Garment Type" size="small" />}
+            renderInput={(params) => (
+              <TextField {...params} label="Select Garment Type" size="small" />
+            )}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 2 }}>
@@ -140,7 +161,9 @@ const StyleScopePicker = ({ onScopeChange, sx }: Props) => {
             value={selectedStyle}
             onChange={(_, val) => handleStyleChange(val)}
             isOptionEqualToValue={(option, value) => option.id === value?.id}
-            renderInput={(params) => <TextField {...params} label="Select Style" size="small" />}
+            renderInput={(params) => (
+              <TextField {...params} label="Select Style" size="small" />
+            )}
           />
         </Grid>
       </Grid>

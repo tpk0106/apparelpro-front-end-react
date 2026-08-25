@@ -37,7 +37,7 @@ import type {
   AvailableBudgetLine,
   PODetailItemRow,
   SupplierPOFormInputs,
-} from "../../interfaces/OrderManagement/purchase-order-types";
+} from "../../interfaces/order-management/purchase-order-types";
 import { useGetUnits } from "../../tanstack-hooks/custom-hooks";
 import type { Unit } from "../../interfaces/references/Unit";
 
@@ -108,11 +108,10 @@ export default function SupplierPurchaseOrderWorkspace() {
     [unitsPageData],
   );
 
-  const { data: unfulfilledBudgetDetails } =
-    useGetUnfulfilledBudgetLinesQuery({
-      buyerCode: poContext?.buyerCode || 0,
-      order: poContext?.orderNumber || "",
-    });
+  const { data: unfulfilledBudgetDetails } = useGetUnfulfilledBudgetLinesQuery({
+    buyerCode: poContext?.buyerCode || 0,
+    order: poContext?.orderNumber || "",
+  });
 
   const unfulfilledBudgetData = useMemo<AvailableBudgetLine[]>(() => {
     // if (!poContext) return [];

@@ -68,36 +68,36 @@ export default function YearSeasonOrdersReportDisplay({ report }: Props) {
             <Box sx={{ p: 1.5, backgroundColor: "#eef1f7" }}>
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, sm: 3 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Buyer</Typography>
-                  <Typography variant="body2" fontWeight="bold">{row.buyerName} ({row.buyerCode})</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Buyer</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{row.buyerName} ({row.buyerCode})</Typography>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 2 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Order</Typography>
-                  <Typography variant="body2" fontWeight="bold">{row.order}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Order</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{row.order}</Typography>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 2 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Date</Typography>
-                  <Typography variant="body2" fontWeight="bold">{formatDate(row.orderDate)}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Date</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{formatDate(row.orderDate)}</Typography>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 2.5 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Season</Typography>
-                  <Typography variant="body2" fontWeight="bold">{row.seasonDescription || row.seasonCode}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Season</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{row.seasonDescription || row.seasonCode}</Typography>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 2.5 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Currency</Typography>
-                  <Typography variant="body2" fontWeight="bold">{row.currencyCode}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Currency</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{row.currencyCode}</Typography>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 5 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Description</Typography>
-                  <Typography variant="body2" fontWeight="bold">{row.description || "-"}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Description</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{row.description || "-"}</Typography>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 2 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Country</Typography>
-                  <Typography variant="body2" fontWeight="bold">{row.countryCode}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Country</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{row.countryCode}</Typography>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 2 }}>
-                  <Typography variant="caption" color="text.secondary" display="block">Total Qty</Typography>
-                  <Typography variant="body2" fontWeight="bold">{formatQuantity(row.totalQuantity)} {row.unit}</Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Total Qty</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{formatQuantity(row.totalQuantity)} {row.unit}</Typography>
                 </Grid>
               </Grid>
             </Box>

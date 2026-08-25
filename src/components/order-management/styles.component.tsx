@@ -11,7 +11,7 @@ import {
 
 import { MenuItem, ThemeProvider, Typography } from "@mui/material";
 import StyleTable from "./styles-table.component";
-import type { Style } from "../../interfaces/OrderManagement/Style";
+import type { Style } from "../../interfaces/order-management/Style";
 import type { Unit } from "../../interfaces/references/Unit";
 import type { GarmentType } from "../../interfaces/references/GarmentType";
 import { asideMenuTitleTypographyTheme } from "../../themes/themes";
@@ -351,7 +351,8 @@ const Styles = ({
               {styleTotals
                 ? `TOTAL : ${styleTotals.totalQuantity.toLocaleString()} / ${styleTotals.orderTotalQuantity.toLocaleString()} ${styleTotals.mainUnit}`
                 : "TOTAL : \u2014"}
-              {styleTotals?.exceedsOrderQuantity && " \u26a0 Exceeds Order Quantity"}
+              {styleTotals?.exceedsOrderQuantity &&
+                " \u26a0 Exceeds Order Quantity"}
             </span>
           </Typography>
         </ThemeProvider>

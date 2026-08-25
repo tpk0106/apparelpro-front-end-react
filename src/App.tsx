@@ -40,12 +40,29 @@ import TrimSheetApprovalWorkspace from "./components/order-management/trim-sheet
 // import StyleShippingSummaryCard from "./components/part-shipment/style-shipping-summary-card";
 // import PartShipmentsWorkspace from "./components/part-shipment/part-shipments-workspace";
 import StoresRequisitionWorkspace from "./components/orderwise-inventory/stores-requisition-workspace";
+import GeneralStoresRequisitionWorkspace from "./components/general-inventory/stores-requisition-workspace";
 import GoodsIssueNoteWorkspace from "./components/orderwise-inventory/goods-issue-note-workspace";
+import GeneralGoodsIssueNoteWorkspace from "./components/general-inventory/goods-issue-note-workspace";
+import GeneralGinPrintReportWorkspace from "./components/reports/general-inventory/gin/general-gin-print-report-workspace";
 import GoodsIssueNoteCascadeWorkspace from "./components/orderwise-inventory/goods-issue-note-cascade-workspace";
 import GoodsReceivedNoteWorkspace from "./components/orderwise-inventory/goods-received-note-workspace";
+import GeneralGoodsReceivedNoteWorkspace from "./components/general-inventory/goods-received-note-workspace";
+import GeneralGrnPrintReportWorkspace from "./components/reports/general-inventory/grn/general-grn-print-report-workspace";
 import GoodsReceivedNoteCascadeWorkspace from "./components/orderwise-inventory/goods-received-note-cascade-workspace";
 import GoodsReturnNoteWorkspace from "./components/orderwise-inventory/goods-return-note-workspace";
 import GoodsTransferNoteWorkspace from "./components/orderwise-inventory/goods-transfer-note-workspace";
+import GeneralGoodsTransferNoteWorkspace from "./components/general-inventory/goods-transfer-note-workspace";
+import GeneralGtnPrintReportWorkspace from "./components/reports/general-inventory/gtn/general-gtn-print-report-workspace";
+import OrderGoodsTransferNoteWorkspace from "./components/general-inventory/order-goods-transfer-note-workspace";
+import GeneralOgtnPrintReportWorkspace from "./components/reports/general-inventory/ogtn/general-ogtn-print-report-workspace";
+import GeneralGoodsReturnNoteWorkspace from "./components/general-inventory/goods-return-note-workspace";
+import GeneralRtnPrintReportWorkspace from "./components/reports/general-inventory/rtn/general-rtn-print-report-workspace";
+import GeneralDamagedGoodsNoteWorkspace from "./components/general-inventory/damaged-goods-note-workspace";
+import GeneralDgnPrintReportWorkspace from "./components/reports/general-inventory/dgn/general-dgn-print-report-workspace";
+import GeneralSupplierReturnNoteWorkspace from "./components/general-inventory/supplier-return-note-workspace";
+import GeneralSrtnPrintReportWorkspace from "./components/reports/general-inventory/srtn/general-srtn-print-report-workspace";
+import GeneralPoWorkspace from "./components/general-inventory/general-po-workspace";
+import GeneralPoPrintReportWorkspace from "./components/reports/general-inventory/po/general-po-print-report-workspace";
 import SupplierReturnNoteWorkspace from "./components/orderwise-inventory/supplier-return-note-workspace";
 import DamagedGoodsNoteWorkspace from "./components/orderwise-inventory/damaged-goods-note-workspace";
 import StockAdjustmentNoteWorkspace from "./components/orderwise-inventory/stock-adjustment-note-workspace";
@@ -80,6 +97,7 @@ import GarmentAdditionalCostPage from "./components/garment-additional-cost/garm
 import SubContractPage from "./components/sub-contract/sub-contract.component";
 import SettingsPage from "./components/settings/settings.component";
 import StrnPrintReportWorkspace from "./components/reports/orderwise-inventory/strn/strn-print-report-workspace";
+import GeneralStrnPrintReportWorkspace from "./components/reports/general-inventory/strn/general-strn-print-report-workspace";
 import ProductionLines from "./components/references/production/production-line-tanstack/production-line.component";
 import Operations from "./components/references/production/operation-tanstack/operation.component";
 import NonProductiveHourCodes from "./components/references/production/non-productive-hour-code-tanstack/non-productive-hour-code.component";
@@ -285,13 +303,18 @@ function App() {
           element={<TrimSheetApprovalWorkspace />}
         />
         <Route index path="srn" element={<StoresRequisitionWorkspace />} />
+        <Route index path="general-srn" element={<GeneralStoresRequisitionWorkspace />} />
         <Route index path="gin" element={<GoodsIssueNoteWorkspace />} />
+        <Route index path="general-gin" element={<GeneralGoodsIssueNoteWorkspace />} />
+        <Route index path="general-gin-print" element={<GeneralGinPrintReportWorkspace />} />
         <Route
           index
           path="gin-cascade"
           element={<GoodsIssueNoteCascadeWorkspace />}
         />
         <Route index path="grn" element={<GoodsReceivedNoteWorkspace />} />
+        <Route index path="general-grn" element={<GeneralGoodsReceivedNoteWorkspace />} />
+        <Route index path="general-grn-print" element={<GeneralGrnPrintReportWorkspace />} />
         <Route
           index
           path="grn-cascade"
@@ -299,6 +322,18 @@ function App() {
         />
         <Route index path="rtn" element={<GoodsReturnNoteWorkspace />} />
         <Route index path="gtn" element={<GoodsTransferNoteWorkspace />} />
+        <Route index path="general-gtn" element={<GeneralGoodsTransferNoteWorkspace />} />
+        <Route index path="general-gtn-print" element={<GeneralGtnPrintReportWorkspace />} />
+        <Route index path="general-ogtn" element={<OrderGoodsTransferNoteWorkspace />} />
+        <Route index path="general-ogtn-print" element={<GeneralOgtnPrintReportWorkspace />} />
+        <Route index path="general-rtn" element={<GeneralGoodsReturnNoteWorkspace />} />
+        <Route index path="general-rtn-print" element={<GeneralRtnPrintReportWorkspace />} />
+        <Route index path="general-dgn" element={<GeneralDamagedGoodsNoteWorkspace />} />
+        <Route index path="general-dgn-print" element={<GeneralDgnPrintReportWorkspace />} />
+        <Route index path="general-srtn" element={<GeneralSupplierReturnNoteWorkspace />} />
+        <Route index path="general-srtn-print" element={<GeneralSrtnPrintReportWorkspace />} />
+        <Route index path="general-po" element={<GeneralPoWorkspace />} />
+        <Route index path="general-po-print" element={<GeneralPoPrintReportWorkspace />} />
         <Route
           index
           path="supplier-return-note"
@@ -318,6 +353,7 @@ function App() {
           element={<StockMovementItemReportWorkspace />}
         />
         <Route index path="strn-print" element={<StrnPrintReportWorkspace />} />
+        <Route index path="general-strn-print" element={<GeneralStrnPrintReportWorkspace />} />
         <Route
           index
           path="trim-sheet-report"
