@@ -661,6 +661,39 @@ export const APPARELPRO_ENDPOINTS = {
       PRINT: "api/general-inventory-po/print",
       PRINT_PDF: "api/general-inventory-po/print/pdf",
     },
+    STOCK_MASTER: {
+      COMMIT: "api/general-inventory-stock-master/commit",
+      UPDATE: "api/general-inventory-stock-master/update",
+      BY_STORE: "api/general-inventory-stock-master/by-store",
+      DELETE: "api/general-inventory-stock-master",
+    },
+    SAN: {
+      COMMIT: "api/general-inventory-san/commit",
+      PRINT: "api/general-inventory-san/print",
+      PRINT_PDF: "api/general-inventory-san/print/pdf",
+    },
+  },
+  GENERAL_INVENTORY_REPORTS: {
+    STOCK_STATUS: {
+      HEADER: "api/general-stock-status-reports/header",
+      LINES: "api/general-stock-status-reports/lines",
+      PDF: "api/general-stock-status-reports/pdf",
+    },
+    STOCK_MOVEMENT: {
+      HEADER: "api/general-stock-movement-reports/header",
+      LINES: "api/general-stock-movement-reports/lines",
+      PDF: "api/general-stock-movement-reports/pdf",
+    },
+    STOCK_VALUATION: {
+      HEADER: "api/general-stock-valuation-reports/header",
+      LINES: "api/general-stock-valuation-reports/lines",
+      PDF: "api/general-stock-valuation-reports/pdf",
+    },
+    STOCK_REORDER: {
+      HEADER: "api/general-stock-reorder-reports/header",
+      LINES: "api/general-stock-reorder-reports/lines",
+      PDF: "api/general-stock-reorder-reports/pdf",
+    },
   },
   SYSTEM_CONFIGURATION: {
     SYSTEM_PARAMETER: {

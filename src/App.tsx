@@ -62,7 +62,14 @@ import GeneralDgnPrintReportWorkspace from "./components/reports/general-invento
 import GeneralSupplierReturnNoteWorkspace from "./components/general-inventory/supplier-return-note-workspace";
 import GeneralSrtnPrintReportWorkspace from "./components/reports/general-inventory/srtn/general-srtn-print-report-workspace";
 import GeneralPoWorkspace from "./components/general-inventory/general-po-workspace";
+import GeneralStockStatusReportWorkspace from "./components/reports/general-inventory/general-stock-status-report-workspace";
+import GeneralStockMovementReportWorkspace from "./components/reports/general-inventory/general-stock-movement-report-workspace";
+import GeneralStockValuationReportWorkspace from "./components/reports/general-inventory/general-stock-valuation-report-workspace";
+import GeneralStockReorderReportWorkspace from "./components/reports/general-inventory/general-stock-reorder-report-workspace";
 import GeneralPoPrintReportWorkspace from "./components/reports/general-inventory/po/general-po-print-report-workspace";
+import GeneralStockMasterWorkspace from "./components/general-inventory/general-stock-master-workspace";
+import GeneralSanWorkspace from "./components/general-inventory/general-san-workspace";
+import GeneralSanPrintReportWorkspace from "./components/reports/general-inventory/san/general-san-print-report-workspace";
 import SupplierReturnNoteWorkspace from "./components/orderwise-inventory/supplier-return-note-workspace";
 import DamagedGoodsNoteWorkspace from "./components/orderwise-inventory/damaged-goods-note-workspace";
 import StockAdjustmentNoteWorkspace from "./components/orderwise-inventory/stock-adjustment-note-workspace";
@@ -334,6 +341,13 @@ function App() {
         <Route index path="general-srtn-print" element={<GeneralSrtnPrintReportWorkspace />} />
         <Route index path="general-po" element={<GeneralPoWorkspace />} />
         <Route index path="general-po-print" element={<GeneralPoPrintReportWorkspace />} />
+        <Route index path="general-stock-master" element={<GeneralStockMasterWorkspace />} />
+        <Route index path="general-san" element={<GeneralSanWorkspace />} />
+        <Route index path="general-san-print" element={<GeneralSanPrintReportWorkspace />} />
+        <Route index path="general-stock-status-report" element={<GeneralStockStatusReportWorkspace />} />
+        <Route index path="general-stock-movement-report" element={<GeneralStockMovementReportWorkspace />} />
+        <Route index path="general-stock-valuation-report" element={<GeneralStockValuationReportWorkspace />} />
+        <Route index path="general-stock-reorder-report" element={<GeneralStockReorderReportWorkspace />} />
         <Route
           index
           path="supplier-return-note"

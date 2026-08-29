@@ -1,27 +1,19 @@
-import { useState } from "react";
-import {
-  Alert,
-  Box,
-  Button,
-  Divider,
-  Paper,
-  TextField,
-  Typography,
-} from "@mui/material";
-import Grid from "@mui/material/Grid";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import SearchIcon from "@mui/icons-material/Search";
-import { toast } from "react-toastify";
+import { useMemo } from "react";
+import type { MRT_ColumnDef } from "material-react-table";
 import { format, parseISO } from "date-fns";
 
-import GeneralOgtnPrintReportGrid from "./general-ogtn-print-report-grid";
+import NotePrintReportWorkspace from "../../common/note-print-report-workspace";
+import NotePrintReportGrid from "../../common/note-print-report-grid";
 import KpiTile from "../../../common/kpi-tile";
 import {
   useDownloadOrderGtnPrintPdfMutation,
   useGetOrderGtnPrintDetailsQuery,
 } from "../../../../tanstack-hooks/general-inventory/general-ogtn-print-report.hooks";
 import { OrderGtnDirection } from "../../../../interfaces/general-inventory/general-ogtn.types";
-import type { AppError } from "../../../../auth/axiosClient";
+import type {
+  OrderGtnPrintReportDetails,
+  OrderGtnPrintReportLine,
+} from "./general-ogtn-print-report.types";
 
 const DIRECTION_LABELS: Record<string, string> = {
   [OrderGtnDirection.GeneralToOrder]: "General Stores -> Buyer/Order",
@@ -29,112 +21,58 @@ const DIRECTION_LABELS: Record<string, string> = {
 };
 
 export default function GeneralOgtnPrintReportWorkspace() {
-  const [ogtnNumberInput, setOgtnNumberInput] = useState<string>("");
-  const [searchedOgtnNumber, setSearchedOgtnNumber] = useState<string>("");
-
-  const isReady = searchedOgtnNumber.trim().length > 0;
-
-  const {
-    data: details,
-    isLoading,
-    isError,
-    error,
-  } = useGetOrderGtnPrintDetailsQuery(searchedOgtnNumber, isReady);
-  const { mutateAsync: downloadPdf, isPending: isDownloading } =
-    useDownloadOrderGtnPrintPdfMutation();
-
-  const handleLoad = () => {
-    const trimmed = ogtnNumberInput.trim();
-    if (!trimmed) return;
-    setSearchedOgtnNumber(trimmed);
-  };
-
-  const handleDownloadPdf = async () => {
-    if (!searchedOgtnNumber) return;
-    try {
-      await downloadPdf(searchedOgtnNumber);
-    } catch (err) {
-      const appError = err as AppError;
-      toast.error(appError?.message ?? "Failed to generate the PDF.");
-    }
-  };
+  const columns = useMemo<MRT_ColumnDef<OrderGtnPrintReportLine>[]>(
+    () => [
+      { accessorKey: "storeCode", header: "Store", size: 90 },
+      { accessorKey: "itemCode", header: "Item Code", size: 180 },
+      { accessorKey: "description", header: "Description", size: 240 },
+      { accessorKey: "unit", header: "Unit", size: 70, enableSorting: false },
+      {
+        accessorKey: "quantity",
+        header: "Quantity",
+        size: 130,
+        Cell: ({ cell }) => (
+          <span>
+            {cell.getValue<number>().toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </span>
+        ),
+      },
+    ],
+    [],
+  );
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#f9f9f9" }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-            Goods Transfer Note (Orders) — Print
-          </Typography>
-          <Button
-            variant="contained"
-            startIcon={<PictureAsPdfIcon />}
-            onClick={handleDownloadPdf}
-            disabled={!isReady || !details || isDownloading}
-          >
-            {isDownloading ? "Generating..." : "Download PDF"}
-          </Button>
-        </Box>
-
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <TextField
-              label="OGTN No"
-              size="small"
-              fullWidth
-              value={ogtnNumberInput}
-              onChange={(e) => setOgtnNumberInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleLoad();
-              }}
-              placeholder="e.g. 000001"
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <Button
-              variant="outlined"
-              startIcon={<SearchIcon />}
-              onClick={handleLoad}
-              disabled={!ogtnNumberInput.trim()}
-              fullWidth
-            >
-              Load
-            </Button>
-          </Grid>
-        </Grid>
-
-        {!isReady ? (
-          <Alert severity="info" variant="outlined">
-            Enter an OGTN No and click Load to preview and print.
-          </Alert>
-        ) : isError ? (
-          <Alert severity="error" variant="outlined">
-            {error?.message ?? `OGTN No '${searchedOgtnNumber}' not found.`}
-          </Alert>
-        ) : (
-          <>
-            <Grid container spacing={2} sx={{ mb: 2.5, flexDirection: "row" }} wrap="nowrap">
-              <KpiTile label="OGTN No" value={details?.header.ogtnNumber} loading={isLoading} size={{ xs: 12, sm: 6, md: 3, lg: 12 }} />
-              <KpiTile
-                label="Direction"
-                value={details?.header?.direction ? DIRECTION_LABELS[details.header.direction] : undefined}
-                loading={isLoading}
-                size={{ xs: 12, sm: 6, md: 3, lg: 12 }}
-              />
-              <KpiTile label="Buyer" value={details?.header.buyerName} loading={isLoading} size={{ xs: 12, sm: 6, md: 3, lg: 12 }} />
-              <KpiTile label="Order" value={details?.header.order} loading={isLoading} size={{ xs: 12, sm: 6, md: 3, lg: 12 }} />
-              <KpiTile
-                label="Date"
-                value={details?.header?.transactionDate && format(parseISO(details.header.transactionDate), "dd-MMM-yyyy")}
-                loading={isLoading}
-                size={{ xs: 12, sm: 6, md: 3, lg: 12 }}
-              />
-            </Grid>
-            <GeneralOgtnPrintReportGrid data={details?.lines ?? []} isLoading={isLoading} isError={isError} />
-            <Divider sx={{ my: 2 }} />
-          </>
-        )}
-      </Paper>
-    </Box>
+    <NotePrintReportWorkspace<OrderGtnPrintReportDetails>
+      title="Goods Transfer Note (Orders) — Print"
+      numberLabel="OGTN No"
+      useDetailsQuery={useGetOrderGtnPrintDetailsQuery}
+      useDownloadMutation={useDownloadOrderGtnPrintPdfMutation}
+      getNotFoundMessage={(n) => `OGTN No '${n}' not found.`}
+      renderKpiTiles={(details, isLoading) => (
+        <>
+          <KpiTile label="OGTN No" value={details?.header.ogtnNumber} loading={isLoading} size={{ xs: 12, sm: 6, md: 3, lg: 12 }} />
+          <KpiTile
+            label="Direction"
+            value={details?.header?.direction ? DIRECTION_LABELS[details.header.direction] : undefined}
+            loading={isLoading}
+            size={{ xs: 12, sm: 6, md: 3, lg: 12 }}
+          />
+          <KpiTile label="Buyer" value={details?.header.buyerName} loading={isLoading} size={{ xs: 12, sm: 6, md: 3, lg: 12 }} />
+          <KpiTile label="Order" value={details?.header.order} loading={isLoading} size={{ xs: 12, sm: 6, md: 3, lg: 12 }} />
+          <KpiTile
+            label="Date"
+            value={details?.header?.transactionDate && format(parseISO(details.header.transactionDate), "dd-MMM-yyyy")}
+            loading={isLoading}
+            size={{ xs: 12, sm: 6, md: 3, lg: 12 }}
+          />
+        </>
+      )}
+      renderGrid={(details, isLoading, isError) => (
+        <NotePrintReportGrid columns={columns} data={details?.lines ?? []} isLoading={isLoading} isError={isError} />
+      )}
+    />
   );
 }
