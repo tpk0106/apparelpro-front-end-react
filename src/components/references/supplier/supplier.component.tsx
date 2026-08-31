@@ -9,6 +9,7 @@ import SupplierTable from "./supplier-table.component";
 import { Bars } from "react-loading-icons";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import type { Supplier } from "../../../interfaces/references/Supplier";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
 const Suppliers = () => {
   const [validationErrors, setValidationErrors] =
@@ -151,10 +152,24 @@ const Suppliers = () => {
   );
 
   return (
-    <div className="flex flex-col w-[90%] mx-auto justify-around mt-10">
+    <div
+      className="flex flex-col w-[90%] mx-auto justify-around mt-10"
+      style={{
+        backgroundColor: DASHBOARD_COLORS.pageBg,
+        borderRadius: 16,
+        padding: "1.5rem",
+      }}
+    >
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">SUPPLIERS</Typography>
+          <Typography
+            sx={{
+              color: DASHBOARD_COLORS.accentStrong,
+              textShadow: "0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(0,0,0,0.4)",
+            }}
+          >
+            SUPPLIERS
+          </Typography>
         </ThemeProvider>
       </div>
       <SupplierTable

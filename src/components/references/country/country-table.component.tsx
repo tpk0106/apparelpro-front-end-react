@@ -23,6 +23,7 @@ import {
   useUpdateCountry,
 } from "../../../data/custom-hooks/apparel-pro.repository.hooks";
 import { useApparelProTable } from "../../../themes/useApparelProTable";
+import { oliveCopperTableTheme } from "../../../themes/table-color-themes";
 import ConfirmDialog from "../../common/confirm-dialog";
 
 interface Props {
@@ -136,6 +137,7 @@ const CountryTable = ({
   const table = useApparelProTable<Country>({
     columns,
     data: data,
+    colorTheme: oliveCopperTableTheme,
 
     // 🚀 THE CRITICAL FIX: Explicitly bind your initial pagination keys here!
     initialState: {
@@ -265,7 +267,7 @@ const CountryTable = ({
           table.setCreatingRow(true);
         }}
       >
-        New Country
+        <span style={{ position: "relative", zIndex: 1 }}>New Country</span>
       </Button>
     ),
 

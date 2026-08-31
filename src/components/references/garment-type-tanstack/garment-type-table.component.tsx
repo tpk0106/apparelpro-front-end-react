@@ -176,7 +176,7 @@ const GarmentTypeTable = ({
           table.setCreatingRow(true);
         }}
       >
-        New GarmentType
+        New Garment Type
       </Button>
     ),
 

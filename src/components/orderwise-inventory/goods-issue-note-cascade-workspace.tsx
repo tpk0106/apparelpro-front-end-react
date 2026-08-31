@@ -31,8 +31,19 @@ import {
 } from "../../tanstack-hooks/custom-hooks";
 import type { Buyer } from "../../interfaces/references/Buyer";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  workspaceInfoCaptionSx,
+  workspaceSectionLabelSx,
+} from "../../themes/workspace-theme";
 
 export default function GoodsIssueNoteCascadeWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string>("");
   const [selectedStrn, setSelectedStrn] = useState<string>("");
@@ -242,11 +253,11 @@ export default function GoodsIssueNoteCascadeWorkspace() {
         elevation={3}
         sx={{
           p: 3,
-          borderTop: "4px solid #60a5fa",
-          backgroundColor: "#fafafa",
+          borderTop: `4px solid ${DASHBOARD_COLORS.accent}`,
+          backgroundColor: DASHBOARD_COLORS.pageBg,
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
+        <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
           Goods Issue Note (GIN)
         </Typography>
         {/* <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 3 }}>
@@ -263,6 +274,8 @@ export default function GoodsIssueNoteCascadeWorkspace() {
               value={selectedBuyer ? String(selectedBuyer.buyerCode) : ""}
               onChange={(e) => handleBuyerChange(e.target.value)}
               disabled={isBuyersLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {buyersList.map((b) => (
                 <MenuItem key={b.buyerCode} value={String(b.buyerCode)}>
@@ -281,6 +294,8 @@ export default function GoodsIssueNoteCascadeWorkspace() {
               value={selectedOrder}
               onChange={(e) => handleOrderChange(e.target.value)}
               disabled={!selectedBuyer || isOrdersLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {ordersList.map((orderStr) => (
                 <MenuItem key={orderStr} value={orderStr}>
@@ -304,6 +319,8 @@ export default function GoodsIssueNoteCascadeWorkspace() {
                   ? "No pending STRNs for this order"
                   : " "
               }
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {pendingStrns.map((s) => (
                 <MenuItem key={s.strnNumber} value={s.strnNumber}>
@@ -322,6 +339,7 @@ export default function GoodsIssueNoteCascadeWorkspace() {
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={dropdownFieldSx}
             />
           </Grid>
         </Grid>
@@ -342,7 +360,7 @@ export default function GoodsIssueNoteCascadeWorkspace() {
           <Alert
             severity="info"
             variant="outlined"
-            sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+            sx={{ m: 2, fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}
           >
             Select a Buyer, Order and a pending STRN to load its outstanding
             material balance.
@@ -357,14 +375,11 @@ export default function GoodsIssueNoteCascadeWorkspace() {
                 alignItems: "center",
               }}
             >
-              <Typography
-                variant="subtitle2"
-                sx={{ fontWeight: "bold", textTransform: "uppercase" }}
-              >
+              <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>
                 Pending Material Lines &middot; To Dept.{" "}
                 {lookupResult.departmentCode}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={workspaceInfoCaptionSx}>
                 {lines.length} line(s) loaded from STRN {selectedStrn}
               </Typography>
             </Box>
@@ -386,9 +401,7 @@ export default function GoodsIssueNoteCascadeWorkspace() {
           sx={{
             gap: 2,
             mt: 3,
-            pt: 2,
-            borderTop: "1px dashed rgba(139,147,161,0.3)",
-            display: "flex",
+            pt: 2,            display: "flex",
             justifyContent: "flex-end",
           }}
         >
@@ -429,16 +442,18 @@ export default function GoodsIssueNoteCascadeWorkspace() {
             onClick={handleRequestCommit}
             disabled={isSubmitting || !isFormValid || isLinesLoading}
             sx={{
+              ...primaryActionButtonSx,
               minWidth: 190,
               height: 32,
               "&.Mui-disabled": {
-                backgroundColor: "rgba(139,147,161,0.15)",
+                background: "rgba(139,147,161,0.15)",
                 color: "#8B93A1",
                 border: "1px solid rgba(139,147,161,0.4)",
+                boxShadow: "none",
               },
             }}
           >
-            Confirm All Entries
+            <span style={themedButtonLabelStyle}>Confirm All Entries</span>
           </Button>
         </Box>
       </Paper>

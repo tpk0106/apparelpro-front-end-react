@@ -5,6 +5,8 @@ import type { ArnLineItemRow } from "./additional-goods-receipt-note.types";
 import type { Buyer } from "../../interfaces/references/Buyer";
 import { useGetAllPurchaseOrdersByBuyerCode } from "../../tanstack-hooks/custom-hooks";
 import { useGetReceivableStockByBuyerOrderQuery } from "../../tanstack-hooks/additional-goods-receipt-note.hooks";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import { plainTableBodyRowSx } from "../../themes/workspace-theme";
 
 interface Props {
   row: ArnLineItemRow;
@@ -17,6 +19,9 @@ interface Props {
 // line can point at a different Buyer/Order, so the item picker must be scoped
 // per-row - same reasoning as GeneralPoLineRow's per-row Store-scoped item picker.
 export default function AdditionalGoodsReceiptNoteLineRow({ row, buyersList, onChange, onRemove }: Props) {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
+
   const { data: ordersList = [], isLoading: isOrdersLoading } = useGetAllPurchaseOrdersByBuyerCode(
     row.buyerCode ?? 0,
     !!row.buyerCode,
@@ -27,8 +32,15 @@ export default function AdditionalGoodsReceiptNoteLineRow({ row, buyersList, onC
     !!row.buyerCode && !!row.order,
   );
 
-  const handleBuyerChange = (buyerCode: string) => {
-    const buyer = buyersList.find((b) => String(b.buyerCode) === buyerCode) ?? null;
+  // MUI's Select (used internally by TextField select) passes through the
+  // MenuItem's actual value type in the change event, not a string - since
+  // MenuItem value={b.buyerCode} is a number, e.target.value is already a
+  // number at runtime despite MUI's own TS typing calling it `string`.
+  // Comparing via String(b.buyerCode) === buyerCode was therefore always
+  // false (string !== number under ===), so a buyer selection never
+  // actually registered - the field looked blank and Order stayed disabled.
+  const handleBuyerChange = (buyerCode: number) => {
+    const buyer = buyersList.find((b) => b.buyerCode === buyerCode) ?? null;
     onChange("buyerCode", buyer?.buyerCode ?? null);
     onChange("buyerName", buyer?.name ?? "");
     onChange("order", "");
@@ -53,15 +65,17 @@ export default function AdditionalGoodsReceiptNoteLineRow({ row, buyersList, onC
   const isOverReceivable = row.isSemiFinishedGarment && row.quantity > row.receivableBalance;
 
   return (
-    <TableRow>
+    <TableRow sx={plainTableBodyRowSx(isOverReceivable)}>
       <TableCell>
         <TextField
           select
           size="small"
           variant="standard"
           fullWidth
+          sx={dropdownFieldSx}
+          slotProps={dropdownMenuSlotProps}
           value={row.buyerCode ?? ""}
-          onChange={(e) => handleBuyerChange(e.target.value)}
+          onChange={(e) => handleBuyerChange(e.target.value as unknown as number)}
         >
           {buyersList.map((b) => (
             <MenuItem key={b.buyerCode} value={b.buyerCode}>
@@ -77,6 +91,8 @@ export default function AdditionalGoodsReceiptNoteLineRow({ row, buyersList, onC
           size="small"
           variant="standard"
           fullWidth
+          sx={dropdownFieldSx}
+          slotProps={dropdownMenuSlotProps}
           value={row.order}
           disabled={!row.buyerCode || isOrdersLoading}
           onChange={(e) => {
@@ -98,6 +114,8 @@ export default function AdditionalGoodsReceiptNoteLineRow({ row, buyersList, onC
           size="small"
           variant="standard"
           fullWidth
+          sx={dropdownFieldSx}
+          slotProps={dropdownMenuSlotProps}
           value={row.itemCode}
           disabled={!row.order || isStockLoading}
           onChange={(e) => handleItemChange(e.target.value)}
@@ -130,6 +148,7 @@ export default function AdditionalGoodsReceiptNoteLineRow({ row, buyersList, onC
           size="small"
           variant="standard"
           fullWidth
+          sx={dropdownFieldSx}
           error={isOverReceivable}
           value={row.quantity === 0 ? "" : row.quantity}
           onChange={(e) => onChange("quantity", Number(e.target.value))}
@@ -143,6 +162,7 @@ export default function AdditionalGoodsReceiptNoteLineRow({ row, buyersList, onC
           size="small"
           variant="standard"
           fullWidth
+          sx={dropdownFieldSx}
           value={row.price === 0 ? "" : row.price}
           onChange={(e) => onChange("price", Number(e.target.value))}
           slotProps={{ htmlInput: { min: 0, step: "0.0001" } }}

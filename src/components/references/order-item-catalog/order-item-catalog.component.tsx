@@ -13,6 +13,7 @@ import type { Stock } from "../../../interfaces/references/Stock";
 
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import OrderItemCatalogTable from "./order-item-catalog-table.component";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
 // Order Items Catalog (od_itm master list) - the Stock/Item master that legacy
 // enters via [F1] help (Stock via F1, Item Code typed and validated against this
@@ -182,10 +183,24 @@ const OrderItemCatalogPage = () => {
   );
 
   return (
-    <div className="flex flex-col w-[80%] mx-auto justify-around mt-10">
+    <div
+      className="flex flex-col w-[80%] mx-auto justify-around mt-10"
+      style={{
+        backgroundColor: DASHBOARD_COLORS.pageBg,
+        borderRadius: 16,
+        padding: "1.5rem",
+      }}
+    >
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">ORDER ITEMS CATALOG</Typography>
+          <Typography
+            sx={{
+              color: DASHBOARD_COLORS.accentStrong,
+              textShadow: "0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(0,0,0,0.4)",
+            }}
+          >
+            ORDER ITEMS CATALOG
+          </Typography>
         </ThemeProvider>
       </div>
       <OrderItemCatalogTable

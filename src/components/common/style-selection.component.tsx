@@ -13,12 +13,15 @@ import {
   useGetStylesByScope,
 } from "../../tanstack-hooks/custom-hooks";
 import { Autocomplete, Card, Grid, TextField } from "@mui/material";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
 
 interface StyleSelectionComponentProps {
   onScopeChange: (scope: SelectedScopeContext | null) => void;
 }
 
 const StyleSelection = ({ onScopeChange }: StyleSelectionComponentProps) => {
+  const { listboxSx: autocompleteListboxSx } = useDropdownTheme();
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<GarmentType | null>(null);
@@ -84,34 +87,20 @@ const StyleSelection = ({ onScopeChange }: StyleSelectionComponentProps) => {
   };
 
   return (
-    <Card variant="outlined" sx={{ p: 2, mb: 2, backgroundColor: "#fafafa" }}>
+    <Card
+      variant="outlined"
+      sx={{
+        p: 2,
+        mb: 2,
+        backgroundColor: DASHBOARD_COLORS.cardBg,
+        border: `1px solid ${DASHBOARD_COLORS.border}`,
+      }}
+    >
       {/* Expanded grid spacing wrapper for clean 5-column or double-row rendering */}
-      <Grid container spacing={2} sx={{ color: "#ffffff", border: "#0000ff" }}>
+      <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Autocomplete
-            // V9 uses explicit slot mapping configurations
-            slotProps={{
-              listbox: {
-                sx: {
-                  // 1. Force override the background of the active selected option
-                  '& .MuiAutocomplete-option[aria-selected="true"]': {
-                    backgroundColor: "lightblue !important", // V9 CSS variables require !important to break theme ties
-                    color: "#000000",
-                  },
-
-                  // 2. Clear out or change the color when you hover over the already selected item
-                  '& .MuiAutocomplete-option[aria-selected="true"].Mui-focused':
-                    {
-                      backgroundColor: "#00bfff !important",
-                    },
-
-                  // 3. Optional: Style normal (unselected) items when hovered
-                  "& .MuiAutocomplete-option.Mui-focused": {
-                    backgroundColor: "#8ab17d",
-                  },
-                },
-              },
-            }}
+            slotProps={{ listbox: { sx: autocompleteListboxSx } }}
             options={buyersList}
             getOptionLabel={(option: Buyer) => option.name || ""}
             value={selectedBuyer}
@@ -130,11 +119,9 @@ const StyleSelection = ({ onScopeChange }: StyleSelectionComponentProps) => {
           />
         </Grid>
 
-        <Grid
-          size={{ xs: 12, sm: 6, md: 2 }}
-          sx={{ color: "#ffffff", border: "#0000ff" }}
-        >
+        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
           <Autocomplete
+            slotProps={{ listbox: { sx: autocompleteListboxSx } }}
             options={ordersList}
             getOptionLabel={(option: string) => option || ""}
             disabled={!selectedBuyer}
@@ -154,6 +141,7 @@ const StyleSelection = ({ onScopeChange }: StyleSelectionComponentProps) => {
 
         <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
           <Autocomplete
+            slotProps={{ listbox: { sx: autocompleteListboxSx } }}
             options={globalTypesList}
             getOptionLabel={(option: GarmentTypeServiceModel) =>
               option.typeName.toUpperCase() || ""
@@ -170,6 +158,7 @@ const StyleSelection = ({ onScopeChange }: StyleSelectionComponentProps) => {
 
         <Grid size={{ xs: 12, sm: 6, md: 2 }}>
           <Autocomplete
+            slotProps={{ listbox: { sx: autocompleteListboxSx } }}
             options={stylesList}
             disabled={!selectedType}
             getOptionLabel={(option: Style) =>

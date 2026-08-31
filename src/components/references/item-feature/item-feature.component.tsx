@@ -10,6 +10,7 @@ import type { ItemFeature } from "../../../interfaces/references/ItemFeature";
 
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import ItemFeatureTable from "./item-feature-table.component";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
 const ItemFeatures = () => {
   const [validationErrors, setValidationErrors] =
@@ -115,10 +116,24 @@ const ItemFeatures = () => {
   // ... keep your columns array layout exactly the same as before ...
 
   return (
-    <div className="flex flex-col w-[50%] mx-auto justify-around mt-10">
+    <div
+      className="flex flex-col w-[50%] mx-auto justify-around mt-10"
+      style={{
+        backgroundColor: DASHBOARD_COLORS.pageBg,
+        borderRadius: 16,
+        padding: "1.5rem",
+      }}
+    >
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">ITEM FEATURES</Typography>
+          <Typography
+            sx={{
+              color: DASHBOARD_COLORS.accentStrong,
+              textShadow: "0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(0,0,0,0.4)",
+            }}
+          >
+            ITEM FEATURES
+          </Typography>
         </ThemeProvider>
       </div>
       <ItemFeatureTable

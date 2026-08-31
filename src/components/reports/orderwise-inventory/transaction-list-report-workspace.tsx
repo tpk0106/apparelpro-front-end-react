@@ -24,6 +24,7 @@ import {
 } from "../../../tanstack-hooks/orderwise-inventory/transaction-list-report.hooks";
 import type { TransactionListReportLine } from "../../../interfaces/orderwise-inventory/transaction-list-report.types";
 import type { AppError } from "../../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
 // Matches the authoritative type-code -> name list already established in
 // StockMovementItemReportService.cs, not legacy IN_DLIST.PRG's own literal codes
@@ -149,7 +150,7 @@ export default function TransactionListReportWorkspace() {
 
   return (
     <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#f9f9f9" }}>
+      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.cardBg }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
           <Typography variant="h5" sx={{ fontWeight: "bold" }}>
             List of Transactions (Orderwise Inventory)

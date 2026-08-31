@@ -13,8 +13,11 @@ import type { ItemFeature } from "../../../interfaces/references/ItemFeature";
 
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import OrderItemFeatureTable from "./order-item-feature-table.component";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
 
 const OrderItemFeatures = () => {
+  const { listboxSx: dropdownListboxSx } = useDropdownTheme();
   const [validationErrors, setValidationErrors] =
     useState<Record<string, string | undefined>>();
 
@@ -63,27 +66,14 @@ const OrderItemFeatures = () => {
   const renderFeatureOptions = () =>
     itemFeatures.map((itemFeature) => (
       <MenuItem key={itemFeature.featureCode} value={itemFeature.featureCode}>
-        <Typography variant="body2" sx={{ color: "#000000" }}>
+        <Typography variant="body2" sx={{ color: DASHBOARD_COLORS.textPrimary }}>
           <strong>{itemFeature.featureCode}</strong> - {itemFeature.description}
         </Typography>
       </MenuItem>
     ));
 
   const featureSelectMenuProps = {
-    MenuProps: {
-      PaperProps: {
-        sx: {
-          backgroundColor: "#ffffff !important",
-          "& .MuiMenuItem-root": {
-            color: "#000000 !important",
-          },
-          "& .Mui-selected": {
-            backgroundColor: "#e3f2fd !important",
-            color: "#000000 !important",
-          },
-        },
-      },
-    },
+    MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } },
   };
 
   const columns = useMemo<MRT_ColumnDef<OrderItemFeature>[]>(
@@ -220,10 +210,24 @@ const OrderItemFeatures = () => {
   );
 
   return (
-    <div className="flex flex-col w-[80%] mx-auto justify-around mt-10">
+    <div
+      className="flex flex-col w-[80%] mx-auto justify-around mt-10"
+      style={{
+        backgroundColor: DASHBOARD_COLORS.pageBg,
+        borderRadius: 16,
+        padding: "1.5rem",
+      }}
+    >
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">ORDER ITEM FEATURES</Typography>
+          <Typography
+            sx={{
+              color: DASHBOARD_COLORS.accentStrong,
+              textShadow: "0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(0,0,0,0.4)",
+            }}
+          >
+            ORDER ITEM FEATURES
+          </Typography>
         </ThemeProvider>
       </div>
       <OrderItemFeatureTable

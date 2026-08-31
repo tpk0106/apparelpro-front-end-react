@@ -178,7 +178,7 @@ const ItemFeatureTable = ({
           table.setCreatingRow(true);
         }}
       >
-        New ItemFeature
+        New Item Feature
       </Button>
     ),
 

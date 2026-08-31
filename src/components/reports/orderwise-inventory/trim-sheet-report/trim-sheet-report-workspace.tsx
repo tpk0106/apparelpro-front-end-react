@@ -18,6 +18,7 @@ import {
 } from "../../../../tanstack-hooks/trim-sheet-report.hooks";
 import type { AppError } from "../../../../auth/axiosClient";
 import type { TrimSheetReportScopeContext } from "./trim-sheet-report.types";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
 
 // Stable placeholder used only while no scope is selected (the query is disabled
 // via `isReady` at that point, so this object's contents never reach the network) -
@@ -65,7 +66,7 @@ export default function TrimSheetReportWorkspace() {
           mb: 2,
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: "bold", color: "#1a237e" }}>
+        <Typography variant="h5" sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>
           Trim Sheet Report
         </Typography>
         <Button

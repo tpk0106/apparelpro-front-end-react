@@ -28,6 +28,9 @@ import {
 import { useGetUnits, useGetBasis } from "../../tanstack-hooks/custom-hooks";
 import type { Unit } from "../../interfaces/references/Unit";
 import type { Basis } from "../../interfaces/references/Basis";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import { plainTableBodyRowSx, plainTableHeaderCellSx, plainTableHeaderRowSx } from "../../themes/workspace-theme";
 
 // 1. Ensure you import the Autocomplete component near the top of StoresRequisitionLinesGrid.tsx:
 // import Autocomplete from "@mui/material/Autocomplete";
@@ -51,6 +54,9 @@ export default function StoresRequisitionLinesGrid({
   rowStockBalances,
   setRowStockBalances,
 }: LinesGridProps) {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
+
   // 1. Central Asynchronous Trigger Hook: Runs an on-demand inventory balance check on cellular blur
   const { mutateAsync: triggerStockCheck } =
     useVerifyStockItemAvailabilityMutation();
@@ -166,23 +172,27 @@ export default function StoresRequisitionLinesGrid({
   };
   return (
     <Box sx={{ width: "100%", overflowX: "auto", mt: 2 }}>
-      <Table size="small" sx={{ minWidth: 650, border: "1px solid #e0e0e0" }}>
-        <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
-          <TableRow>
-            <TableCell sx={{ fontWeight: "bold", width: "30%" }}>
+      <Table size="small" sx={{ minWidth: 650, border: `1px solid ${DASHBOARD_COLORS.border}` }}>
+        {/* plainTableHeaderRowSx uses "&&&" to beat themes.ts's global
+            MuiTableRow ":nth-of-type" override, which otherwise paints this
+            (and every body) row blue with !important regardless of the
+            TableHead's own background - see workspace-theme.ts. */}
+        <TableHead>
+          <TableRow sx={plainTableHeaderRowSx()}>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "30%" }}>
               Item Code
             </TableCell>
-            <TableCell sx={{ fontWeight: "bold", width: "15%" }}>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "15%" }}>
               Basis (Store)
             </TableCell>
-            <TableCell sx={{ fontWeight: "bold", width: "15%" }}>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "15%" }}>
               Unit
             </TableCell>
-            <TableCell sx={{ fontWeight: "bold", width: "20%" }}>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "20%" }}>
               Requested Qty
             </TableCell>
             <TableCell
-              sx={{ fontWeight: "bold", width: "10%", textAlign: "center" }}
+              sx={{ ...plainTableHeaderCellSx(), width: "10%", textAlign: "center" }}
             >
               Action
             </TableCell>
@@ -206,13 +216,7 @@ export default function StoresRequisitionLinesGrid({
             );
 
             return (
-              <TableRow
-                key={idx}
-                sx={{
-                  backgroundColor: hasExceededBalance ? "#fff3e0" : "inherit",
-                  "&:hover": { backgroundColor: "#fcfcfc" },
-                }}
-              >
+              <TableRow key={idx} sx={plainTableBodyRowSx(!!hasExceededBalance)}>
                 {/* Cell 1: Item Code Input Input */}
 
                 {/* Cell 1: REPLACED THE BLIND TEXTFIELD WITH AN AUTOCOMPLETE SEARCH SELECTION CARD */}
@@ -224,6 +228,8 @@ export default function StoresRequisitionLinesGrid({
                     size="small"
                     variant="standard"
                     fullWidth
+                    sx={dropdownFieldSx}
+                    slotProps={dropdownMenuSlotProps}
                     value={row.itemCode}
                     disabled={
                       isStockLoading || availableChoicesForRow.length === 0
@@ -453,6 +459,8 @@ export default function StoresRequisitionLinesGrid({
                     size="small"
                     variant="standard"
                     fullWidth
+                    sx={dropdownFieldSx}
+                    slotProps={dropdownMenuSlotProps}
                     value={row.storeCode}
                     onChange={(e) => {
                       handleUpdateLineCell(idx, "storeCode", e.target.value);
@@ -477,6 +485,7 @@ export default function StoresRequisitionLinesGrid({
                     size="small"
                     variant="standard"
                     fullWidth
+                    sx={dropdownFieldSx}
                     value={row.unit}
                     onChange={(e) => {
                       handleUpdateLineCell(idx, "unit", e.target.value);
@@ -484,7 +493,10 @@ export default function StoresRequisitionLinesGrid({
                       const modifiedRow = { ...row, unit: e.target.value };
                       handleExecuteCellBlurCheck(idx, modifiedRow);
                     }}
-                    slotProps={{ htmlInput: { style: { fontSize: "13px" } } }}
+                    slotProps={{
+                      ...dropdownMenuSlotProps,
+                      htmlInput: { style: { fontSize: "13px" } },
+                    }}
                   >
                     {systemUnits.map((u: Unit) => (
                       <MenuItem key={u.id} value={u.code}>
@@ -501,6 +513,7 @@ export default function StoresRequisitionLinesGrid({
                     size="small"
                     variant="standard"
                     fullWidth
+                    sx={dropdownFieldSx}
                     value={row.quantity === 0 ? "" : row.quantity}
                     onChange={(e) =>
                       handleUpdateLineCell(
@@ -549,8 +562,9 @@ export default function StoresRequisitionLinesGrid({
           sx={{
             p: 3,
             textAlign: "center",
-            border: "1px dashed #ccc",
+            border: `1px dashed ${DASHBOARD_COLORS.border}`,
             borderTop: "none",
+            color: DASHBOARD_COLORS.textSecondary,
           }}
         >
           <Typography

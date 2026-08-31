@@ -15,6 +15,7 @@ import {
 } from "../../../tanstack-hooks/orderwise-inventory/stock-valuation-monthly-report.hooks";
 import type { StockValuationMonthlyReportLine } from "../../../interfaces/orderwise-inventory/stock-valuation-monthly-report.types";
 import type { AppError } from "../../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
 // Replicates IN_SVAL1.PRG's "STOCK VALUATION REPORT (Monthly)" - item-level (Buyer/
 // Order-agnostic) GR/4I totals for a date range. See
@@ -116,7 +117,7 @@ export default function StockValuationMonthlyReportWorkspace() {
 
   return (
     <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#f9f9f9" }}>
+      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.cardBg }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
           <Typography variant="h5" sx={{ fontWeight: "bold" }}>
             Stock Valuation Report — Monthly (Orderwise Inventory)

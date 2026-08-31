@@ -17,6 +17,7 @@ import {
 import type { RawMaterialControlSheetLine } from "../../../interfaces/orderwise-inventory/raw-material-control-sheet.types";
 import type { Buyer } from "../../../interfaces/references/Buyer";
 import type { AppError } from "../../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
 // Replicates IN_RMCON.PRG's "RAW MATERIAL CONTROL SHEET" - per-Buyer/Order material
 // consumption (across every style/color/size sharing the same raw-material item)
@@ -151,7 +152,7 @@ export default function RawMaterialControlSheetWorkspace() {
 
   return (
     <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#f9f9f9" }}>
+      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.cardBg }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
           <Typography variant="h5" sx={{ fontWeight: "bold" }}>
             Raw Material Control Sheet (Orderwise Inventory)

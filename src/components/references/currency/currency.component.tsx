@@ -19,6 +19,7 @@ import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import type { Country } from "../../../interfaces/references/Country";
 
 import { loadAllCountriesStart } from "../../../sagaStore/country/country.action";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
 const Currencies = () => {
   const [validationErrors, setValidationErrors] =
@@ -305,10 +306,24 @@ const Currencies = () => {
 
   return (
     <>
-      <div className="">
+      <div
+        className=""
+        style={{
+          backgroundColor: DASHBOARD_COLORS.pageBg,
+          borderRadius: 16,
+          padding: "1.5rem",
+        }}
+      >
         <div className="text-center mt-3 mx-2">
           <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-            <Typography color="black">Currencies</Typography>
+            <Typography
+              sx={{
+                color: DASHBOARD_COLORS.accentStrong,
+                textShadow: "0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(0,0,0,0.4)",
+              }}
+            >
+              Currencies
+            </Typography>
           </ThemeProvider>
         </div>
 

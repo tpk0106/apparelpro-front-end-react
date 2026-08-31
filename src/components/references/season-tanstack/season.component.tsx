@@ -7,6 +7,7 @@ import SeasonTable from "./season-table.component";
 import { useGetSeasons } from "../../../tanstack-hooks/custom-hooks";
 import type { Season } from "../../../interfaces/references/Season";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
 const Seasons = () => {
   const [validationErrors, setValidationErrors] =
@@ -114,10 +115,24 @@ const Seasons = () => {
   );
 
   return (
-    <div className="flex flex-col w-[50%] min-w-[700px] mx-auto justify-around mt-10">
+    <div
+      className="flex flex-col w-[50%] min-w-[700px] mx-auto justify-around mt-10"
+      style={{
+        backgroundColor: DASHBOARD_COLORS.pageBg,
+        borderRadius: 16,
+        padding: "1.5rem",
+      }}
+    >
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">Season</Typography>
+          <Typography
+            sx={{
+              color: DASHBOARD_COLORS.accentStrong,
+              textShadow: "0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(0,0,0,0.4)",
+            }}
+          >
+            SEASON
+          </Typography>
         </ThemeProvider>
       </div>
       <SeasonTable

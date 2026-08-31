@@ -9,6 +9,7 @@ import type { Stock } from "../../../interfaces/references/Stock";
 
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import StockTable from "./stock-table.component";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
 // Reference Files > C. Inventory Control > A. Stock Reference (OD_STK1.PRG / OD_STK2.PRG)
 // in legacy (RF_MENU.PRG) - the master Stock category list (01 RAW MATERIAL, 02
@@ -101,10 +102,24 @@ const StockReference = () => {
   );
 
   return (
-    <div className="flex flex-col w-[80%] mx-auto justify-around mt-10">
+    <div
+      className="flex flex-col w-[80%] mx-auto justify-around mt-10"
+      style={{
+        backgroundColor: DASHBOARD_COLORS.pageBg,
+        borderRadius: 16,
+        padding: "1.5rem",
+      }}
+    >
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">STOCK REFERENCE CODES</Typography>
+          <Typography
+            sx={{
+              color: DASHBOARD_COLORS.accentStrong,
+              textShadow: "0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(0,0,0,0.4)",
+            }}
+          >
+            STOCK REFERENCE CODES
+          </Typography>
         </ThemeProvider>
       </div>
       <StockTable

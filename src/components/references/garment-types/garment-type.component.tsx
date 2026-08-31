@@ -15,6 +15,7 @@ import { useGetGarmentTypes } from "../../../api/custom-hooks";
 import { Bars } from "react-loading-icons";
 import { useSelector } from "react-redux";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
 const GarmentTypes = () => {
   const paginate: PaginationData = {
@@ -94,10 +95,24 @@ const GarmentTypes = () => {
 
   return (
     <>
-      <div className="">
+      <div
+        className=""
+        style={{
+          backgroundColor: DASHBOARD_COLORS.pageBg,
+          borderRadius: 16,
+          padding: "1.5rem",
+        }}
+      >
         <div className="text-center mt-3 mx-2">
           <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-            <Typography color="black">Garment Types</Typography>
+            <Typography
+              sx={{
+                color: DASHBOARD_COLORS.accentStrong,
+                textShadow: "0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(0,0,0,0.4)",
+              }}
+            >
+              Garment Types
+            </Typography>
           </ThemeProvider>
         </div>
 

@@ -8,23 +8,21 @@ import { Box, Typography } from "@mui/material";
 import type { AdditionalCost } from "../../../interfaces/references/AdditionalCost";
 
 import AdditionalCostTable from "./additional-cost-table.component";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
-// SCOPED LOOK-AND-FEEL EXPERIMENT (2026-08-08, per user request): this screen and
-// AdditionalCostTable intentionally do NOT use the shared asideMenuTitleTypographyTheme /
-// useApparelProTable() hook that every other reference screen uses (compare
-// order-item-feature.component.tsx, which this file was cloned from). Instead they carry
-// their own local dark-card styling matching the "Additional Costs per Garment" mockup the
-// user approved, so this experiment stays fully isolated to these two files - reverting to
-// the standard look is just restoring this file and additional-cost-table.component.tsx to
-// their pre-2026-08-08 versions, nothing shared was touched.
-const mockupColors = {
-  bg: "#0A0E14",
-  surface: "#141922",
-  border: "#232a36",
-  text: "#F4F6F8",
-  muted: "#8B93A1",
-  accent: "#93c5fd",
-};
+// The "SCOPED LOOK-AND-FEEL EXPERIMENT" that used to opt this screen and
+// AdditionalCostTable out of the shared hook has been reverted (both now use
+// useApparelProTable() / DASHBOARD_COLORS like every other reference screen).
+// mockupColors is unused now that the breadcrumb below is gone - kept
+// commented in case a future one-off need for these values comes up.
+// const mockupColors = {
+//   bg: "#0A0E14",
+//   surface: "#141922",
+//   border: "#232a36",
+//   text: "#F4F6F8",
+//   muted: "#8B93A1",
+//   accent: "#93c5fd",
+// };
 
 const AdditionalCosts = () => {
   const [validationErrors, setValidationErrors] =
@@ -121,9 +119,10 @@ const AdditionalCosts = () => {
         width: "80%",
         mx: "auto",
         mt: 5,
-        backgroundColor: mockupColors.bg,
+        backgroundColor: DASHBOARD_COLORS.pageBg,
         p: 2,
         borderRadius: "12px",
+        boxShadow: "0 10px 28px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.3)",
       }}
     >
       <Typography
@@ -131,27 +130,18 @@ const AdditionalCosts = () => {
           textAlign: "center",
           fontSize: "20px",
           fontWeight: 700,
-          color: mockupColors.accent,
+          color: DASHBOARD_COLORS.accentStrong,
+          textShadow: "0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(0,0,0,0.4)",
           mb: 0.5,
         }}
       >
         ADDITIONAL COST CATEGORIES
       </Typography>
-      <Typography
-        sx={{
-          textAlign: "center",
-          color: mockupColors.muted,
-          fontSize: "12px",
-          mb: 2.5,
-        }}
-      >
-        Order Management Reference &rsaquo; Additional Cost
-      </Typography>
 
       <Box
         sx={{
-          backgroundColor: mockupColors.surface,
-          border: `1px solid ${mockupColors.border}`,
+          backgroundColor: DASHBOARD_COLORS.cardBg,
+          border: `1px solid ${DASHBOARD_COLORS.border}`,
           borderRadius: "10px",
           p: 2,
         }}

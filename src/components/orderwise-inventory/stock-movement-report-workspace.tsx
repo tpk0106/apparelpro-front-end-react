@@ -30,6 +30,9 @@ import {
 } from "../../tanstack-hooks/custom-hooks";
 import type { Buyer } from "../../interfaces/references/Buyer";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import { primaryActionButtonSx, themedButtonLabelStyle, workspaceHeadingSx } from "../../themes/workspace-theme";
 
 // MRT hands back camelCase accessorKeys (e.g. "itemCode"), but BuildLineQuery's
 // OrderByColumn resolves sortColumn via a raw Expression.PropertyOrField lookup
@@ -47,6 +50,8 @@ const FILTER_TARGETS = [
 ];
 
 export default function StockMovementReportWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string>("");
   const [pagination, setPagination] = useState<MRT_PaginationState>({
@@ -145,8 +150,8 @@ export default function StockMovementReportWorkspace() {
         elevation={3}
         sx={{
           p: 3,
-          borderTop: "4px solid #60a5fa",
-          backgroundColor: "#f9f9f9",
+          borderTop: `4px solid ${DASHBOARD_COLORS.accent}`,
+          backgroundColor: DASHBOARD_COLORS.pageBg,
         }}
       >
         <Box
@@ -158,7 +163,7 @@ export default function StockMovementReportWorkspace() {
           }}
         >
           <Box>
-            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+            <Typography variant="h5" sx={workspaceHeadingSx}>
               Stock Movement Report — for an Order
             </Typography>
           </Box>
@@ -167,8 +172,11 @@ export default function StockMovementReportWorkspace() {
             startIcon={<PictureAsPdfIcon />}
             onClick={handleExportPdf}
             disabled={!isReady || isDownloading}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Generating..." : "Export PDF"}
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Export PDF"}
+            </span>
           </Button>
         </Box>
 
@@ -182,6 +190,8 @@ export default function StockMovementReportWorkspace() {
               value={selectedBuyer ? String(selectedBuyer.buyerCode) : ""}
               onChange={(e) => handleBuyerChange(e.target.value)}
               disabled={isBuyersLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {buyersList.map((b) => (
                 <MenuItem key={b.buyerCode} value={String(b.buyerCode)}>
@@ -200,6 +210,8 @@ export default function StockMovementReportWorkspace() {
               value={selectedOrder}
               onChange={(e) => handleOrderChange(e.target.value)}
               disabled={!selectedBuyer || isOrdersLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {ordersList.map((orderStr) => (
                 <MenuItem key={orderStr} value={orderStr}>
@@ -218,6 +230,8 @@ export default function StockMovementReportWorkspace() {
               value={filterTarget}
               onChange={(e) => setFilterTarget(e.target.value)}
               disabled={!isReady}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {FILTER_TARGETS.map((f) => (
                 <MenuItem key={f.value} value={f.value}>
@@ -235,6 +249,7 @@ export default function StockMovementReportWorkspace() {
               value={filterQuery}
               onChange={(e) => handleFilterQueryChange(e.target.value)}
               disabled={!isReady}
+              sx={dropdownFieldSx}
             />
           </Grid>
         </Grid>

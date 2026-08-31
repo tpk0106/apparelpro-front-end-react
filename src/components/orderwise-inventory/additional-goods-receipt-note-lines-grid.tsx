@@ -12,6 +12,8 @@ import {
 import type { ArnLineItemRow } from "./additional-goods-receipt-note.types";
 import type { Buyer } from "../../interfaces/references/Buyer";
 import AdditionalGoodsReceiptNoteLineRow from "./additional-goods-receipt-note-line-row";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { plainTableHeaderCellSx, plainTableHeaderRowSx } from "../../themes/workspace-theme";
 
 interface LinesGridProps {
   buyersList: Buyer[];
@@ -42,17 +44,21 @@ export default function AdditionalGoodsReceiptNoteLinesGrid({
 
   return (
     <Box sx={{ width: "100%", overflowX: "auto", mt: 2 }}>
-      <Table size="small" sx={{ minWidth: 950, border: "1px solid #e0e0e0" }}>
-        <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
-          <TableRow>
-            <TableCell sx={{ fontWeight: "bold" }}>Buyer</TableCell>
-            <TableCell sx={{ fontWeight: "bold" }}>Order</TableCell>
-            <TableCell sx={{ fontWeight: "bold" }}>Item Code / Process</TableCell>
-            <TableCell sx={{ fontWeight: "bold" }}>Unit</TableCell>
-            <TableCell sx={{ fontWeight: "bold" }}>Receivable</TableCell>
-            <TableCell sx={{ fontWeight: "bold" }}>Quantity</TableCell>
-            <TableCell sx={{ fontWeight: "bold" }}>Price</TableCell>
-            <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Action</TableCell>
+      <Table size="small" sx={{ minWidth: 950, border: `1px solid ${DASHBOARD_COLORS.border}` }}>
+        {/* plainTableHeaderRowSx uses "&&&" to beat themes.ts's global
+            MuiTableRow ":nth-of-type" override, which otherwise paints this
+            (and every body) row blue with !important regardless of the
+            TableHead's own background - see workspace-theme.ts. */}
+        <TableHead>
+          <TableRow sx={plainTableHeaderRowSx()}>
+            <TableCell sx={plainTableHeaderCellSx()}>Buyer</TableCell>
+            <TableCell sx={plainTableHeaderCellSx()}>Order</TableCell>
+            <TableCell sx={plainTableHeaderCellSx()}>Item Code / Process</TableCell>
+            <TableCell sx={plainTableHeaderCellSx()}>Unit</TableCell>
+            <TableCell sx={plainTableHeaderCellSx()}>Receivable</TableCell>
+            <TableCell sx={plainTableHeaderCellSx()}>Quantity</TableCell>
+            <TableCell sx={plainTableHeaderCellSx()}>Price</TableCell>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), textAlign: "center" }}>Action</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -69,7 +75,7 @@ export default function AdditionalGoodsReceiptNoteLinesGrid({
       </Table>
 
       {lineItems.length === 0 && (
-        <Box sx={{ p: 3, textAlign: "center", border: "1px dashed #ccc", borderTop: "none" }}>
+        <Box sx={{ p: 3, textAlign: "center", border: `1px dashed ${DASHBOARD_COLORS.border}`, borderTop: "none" }}>
           <Typography variant="body2" sx={{ color: "text.secondary", fontStyle: "italic" }}>
             No lines added yet. Click "Add Item" above.
           </Typography>

@@ -21,6 +21,8 @@ import type { GarmentTypeItem } from "../../../interfaces/references/GarmentType
 import type { Unit } from "../../../interfaces/references/Unit";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import GarmentTypeItemsTable from "./garment-type-items-table.component";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
 
 // Replicates OD_ITM1.PRG (Update) / OD_ITM2.PRG (List) - Reference Files >
 // B. Order Management > G. Type / Item in legacy (RF_MENU.PRG). Global theme
@@ -77,56 +79,9 @@ const GarmentTypeItems = () => {
 
   const units = useMemo<Unit[]>(() => unitPageData?.items || [], [unitPageData?.items]);
 
+  const { fieldSx: formControlSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const selectMenuProps = {
-    MenuProps: {
-      PaperProps: {
-        sx: {
-          backgroundColor: "#ffffff !important",
-          "& .MuiMenuItem-root": {
-            color: "#000000 !important",
-          },
-          "& .Mui-selected": {
-            backgroundColor: "#e3f2fd !important",
-            color: "#000000 !important",
-          },
-        },
-      },
-    },
-  };
-
-  // The app's root MUI theme is palette.mode: "dark" - its default OutlinedInput
-  // border/label colors assume a dark canvas and are barely visible on this
-  // screen's plain white page background. The global MuiTextField style override
-  // (in themes.ts) only reaches inputs nested inside a <TextField>, so a
-  // standalone <Select>/<FormControl> like this one falls through to that
-  // invisible dark-mode default unless explicitly overridden here.
-  const formControlSx = {
-    "& .MuiInputLabel-root": {
-      color: "#5f6b7a",
-      "&.Mui-focused": {
-        color: "#1d5fb4",
-      },
-    },
-    "& .MuiOutlinedInput-root": {
-      backgroundColor: "#ffffff",
-      color: "#000000",
-      "& .MuiSelect-select": {
-        color: "#000000",
-      },
-      "& fieldset": {
-        borderColor: "rgba(0, 0, 0, 0.4)",
-      },
-      "&:hover fieldset": {
-        borderColor: "#1d5fb4",
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "#1d5fb4",
-        borderWidth: "2px",
-      },
-    },
-    "& .MuiSvgIcon-root": {
-      color: "#5f6b7a",
-    },
+    MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } },
   };
 
   const columns = useMemo<MRT_ColumnDef<GarmentTypeItem>[]>(
@@ -216,10 +171,22 @@ const GarmentTypeItems = () => {
   );
 
   return (
-    <div className="flex flex-col w-[80%] mx-auto justify-around mt-10">
+    <div
+      className="flex flex-col w-[80%] mx-auto justify-around mt-10"
+      style={{
+        backgroundColor: DASHBOARD_COLORS.pageBg,
+        borderRadius: 16,
+        padding: "1.5rem",
+      }}
+    >
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">
+          <Typography
+            sx={{
+              color: DASHBOARD_COLORS.accentStrong,
+              textShadow: "0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(0,0,0,0.4)",
+            }}
+          >
             GARMENT TYPE WISE ITEM REQUIREMENTS
           </Typography>
         </ThemeProvider>
@@ -234,10 +201,7 @@ const GarmentTypeItems = () => {
             labelId="garment-type-items-select-label"
             label="Garment Type"
             value={selectedGarmentTypeId}
-            // MUI v9 moved Menu's PaperProps under slotProps.paper; the
-            // shared selectMenuProps object still uses the old shape, so
-            // translate it here for this one direct <Select> usage.
-            MenuProps={{ slotProps: { paper: selectMenuProps.MenuProps.PaperProps } }}
+            MenuProps={selectMenuProps.MenuProps}
             onChange={(event: SelectChangeEvent<number | "">) =>
               setSelectedGarmentTypeId(
                 event.target.value === "" ? "" : Number(event.target.value),

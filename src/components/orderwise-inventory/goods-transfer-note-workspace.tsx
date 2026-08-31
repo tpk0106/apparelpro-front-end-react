@@ -30,8 +30,19 @@ import {
 } from "../../tanstack-hooks/custom-hooks";
 import type { Buyer } from "../../interfaces/references/Buyer";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  workspaceInfoCaptionSx,
+  workspaceSectionLabelSx,
+} from "../../themes/workspace-theme";
 
 export default function GoodsTransferNoteWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const [selectedFromBuyer, setSelectedFromBuyer] = useState<Buyer | null>(
     null,
   );
@@ -266,17 +277,16 @@ export default function GoodsTransferNoteWorkspace() {
         elevation={3}
         sx={{
           p: 3,
-          borderTop: "4px solid #60a5fa",
-          backgroundColor: "#f9f9f9",
+          borderTop: `4px solid ${DASHBOARD_COLORS.accent}`,
+          backgroundColor: DASHBOARD_COLORS.pageBg,
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
+        <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
           Goods Transfer Note (GTN)
         </Typography>
         <Typography
           variant="caption"
-          color="text.secondary"
-          sx={{ display: "block", mb: 3 }}
+          sx={{ ...workspaceInfoCaptionSx, mb: 3 }}
         >
           GTN Number is allocated by the server on commit — it is never entered
           manually. Only items that already exist under both the From and To
@@ -297,6 +307,8 @@ export default function GoodsTransferNoteWorkspace() {
               }
               onChange={(e) => handleFromBuyerChange(e.target.value)}
               disabled={isBuyersLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {buyersList.map((b) => (
                 <MenuItem key={b.buyerCode} value={String(b.buyerCode)}>
@@ -315,6 +327,8 @@ export default function GoodsTransferNoteWorkspace() {
               value={selectedFromOrder}
               onChange={(e) => handleFromOrderChange(e.target.value)}
               disabled={!selectedFromBuyer || isFromOrdersLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {fromOrdersList.map((orderStr) => (
                 <MenuItem key={orderStr} value={orderStr}>
@@ -333,6 +347,8 @@ export default function GoodsTransferNoteWorkspace() {
               value={selectedToBuyer ? String(selectedToBuyer.buyerCode) : ""}
               onChange={(e) => handleToBuyerChange(e.target.value)}
               disabled={isBuyersLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {buyersList.map((b) => (
                 <MenuItem key={b.buyerCode} value={String(b.buyerCode)}>
@@ -351,6 +367,8 @@ export default function GoodsTransferNoteWorkspace() {
               value={selectedToOrder}
               onChange={(e) => handleToOrderChange(e.target.value)}
               disabled={!selectedToBuyer || isToOrdersLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {toOrdersList.map((orderStr) => (
                 <MenuItem key={orderStr} value={orderStr}>
@@ -369,6 +387,7 @@ export default function GoodsTransferNoteWorkspace() {
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={dropdownFieldSx}
             />
           </Grid>
         </Grid>
@@ -402,7 +421,7 @@ export default function GoodsTransferNoteWorkspace() {
             <Alert
               severity="info"
               variant="outlined"
-              sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+              sx={{ m: 2, fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}
             >
               Select a From Buyer/Order and a different To Buyer/Order to load
               items available for transfer.
@@ -412,7 +431,7 @@ export default function GoodsTransferNoteWorkspace() {
           <Alert
             severity="info"
             variant="outlined"
-            sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+            sx={{ m: 2, fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}
           >
             Nothing is currently transferable between these two Orders — either
             the From Order has no stock on hand, or none of its items also exist
@@ -428,13 +447,10 @@ export default function GoodsTransferNoteWorkspace() {
                 alignItems: "center",
               }}
             >
-              <Typography
-                variant="subtitle2"
-                sx={{ fontWeight: "bold", textTransform: "uppercase" }}
-              >
+              <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>
                 Transferable Material Lines
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={workspaceInfoCaptionSx}>
                 {lines.length} line(s) loaded — {selectedFromOrder} →{" "}
                 {selectedToOrder}
               </Typography>
@@ -444,7 +460,7 @@ export default function GoodsTransferNoteWorkspace() {
               <Alert
                 severity="info"
                 variant="outlined"
-                sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+                sx={{ m: 2, fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}
               >
                 All lines have been removed from this transfer. Reset to reload
                 the original transferable lines, or there's nothing left to
@@ -467,9 +483,7 @@ export default function GoodsTransferNoteWorkspace() {
               sx={{
                 gap: 2,
                 mt: 3,
-                pt: 2,
-                borderTop: "1px dashed rgba(139,147,161,0.3)",
-                display: "flex",
+                pt: 2,                display: "flex",
                 justifyContent: "flex-end",
               }}
             >
@@ -510,16 +524,18 @@ export default function GoodsTransferNoteWorkspace() {
                 onClick={handleRequestCommit}
                 disabled={isSubmitting || !isFormValid || isStockLoading}
                 sx={{
+                  ...primaryActionButtonSx,
                   minWidth: 190,
                   height: 32,
                   "&.Mui-disabled": {
-                    backgroundColor: "rgba(139,147,161,0.15)",
+                    background: "rgba(139,147,161,0.15)",
                     color: "#8B93A1",
                     border: "1px solid rgba(139,147,161,0.4)",
+                    boxShadow: "none",
                   },
                 }}
               >
-                Confirm All Entries
+                <span style={themedButtonLabelStyle}>Confirm All Entries</span>
               </Button>
             </Box>
           </Box>

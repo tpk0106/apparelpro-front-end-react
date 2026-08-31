@@ -16,22 +16,25 @@ import { useSelector } from "react-redux";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 
 import { useGetCountries } from "../../../api/custom-hooks";
-import StyleSelection from "../../common/style-selection.component";
+// import StyleSelection from "../../common/style-selection.component";
 import type { SelectedScopeContext } from "../../material-consumption/material-consumption.types";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
-const mockupColors = {
-  bg: "#0A0E14",
-  bg1: "#318CE7",
-  bg2: "#545AA7",
-  surface: "#141922",
-  border: "#232a36",
-  text: "#F4F6F8",
-  muted: "#8B93A1",
-  accent: "#93c5fd",
-  accent1: "#00ffff",
-  shadow: "#ffffff",
-  outerBackground: "#9e9e9e",
-};
+// Superseded by DASHBOARD_COLORS (see below) - kept commented for reference
+// while olive_copper is being tested on this table only.
+// const mockupColors = {
+//   bg: "#0A0E14",
+//   bg1: "#318CE7",
+//   bg2: "#545AA7",
+//   surface: "#141922",
+//   border: "#232a36",
+//   text: "#F4F6F8",
+//   muted: "#8B93A1",
+//   accent: "#93c5fd",
+//   accent1: "#00ffff",
+//   shadow: "#ffffff",
+//   outerBackground: "#9e9e9e",
+// };
 
 const Countries = () => {
   const [validationErrors, setValidationErrors] =
@@ -66,9 +69,7 @@ const Countries = () => {
   const allCountries = useSelector(SelectAllCountries);
   const CountriesTotal = useSelector(SelectCountriesTotal);
 
-  const [, setScopeContext] = useState<SelectedScopeContext | null>(
-    null,
-  );
+  const [, setScopeContext] = useState<SelectedScopeContext | null>(null);
 
   // Memoized callback handler tracking context alterations
   const handleScopeContextChange = useCallback(
@@ -233,10 +234,10 @@ const Countries = () => {
           mx: "auto",
           mt: 3,
           mb: 2,
-          backgroundColor: mockupColors.bg2,
+          backgroundColor: DASHBOARD_COLORS.pageBg,
           p: 2,
           borderRadius: "12px",
-          boxShadow: `1px 1px 10px ${mockupColors.surface}`,
+          boxShadow: "0 10px 28px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.3)",
         }}
       >
         <div className="text-center mt-3 mx-2">
@@ -247,7 +248,9 @@ const Countries = () => {
                 textAlign: "center",
                 fontSize: "20px",
                 fontWeight: 700,
-                // color: mockupColors.accent,
+                color: DASHBOARD_COLORS.accentStrong,
+                textShadow:
+                  "0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(0,0,0,0.4)",
                 mb: 0.5,
               }}
             >
@@ -257,7 +260,7 @@ const Countries = () => {
         </div>
 
         {/* <div className="flex justify-around mt-10"> */}
-        <StyleSelection onScopeChange={handleScopeContextChange} />
+        {/* <StyleSelection onScopeChange={handleScopeContextChange} /> */}
         <Box
           sx={{
             display: "flex",
@@ -265,8 +268,8 @@ const Countries = () => {
             // content: "center",
             justifyContent: "center",
             alignItems: "center",
-            backgroundColor: mockupColors.surface,
-            border: `1px solid ${mockupColors.border}`,
+            backgroundColor: DASHBOARD_COLORS.cardBg,
+            border: `1px solid ${DASHBOARD_COLORS.border}`,
             borderRadius: "10px",
             p: 2,
           }}

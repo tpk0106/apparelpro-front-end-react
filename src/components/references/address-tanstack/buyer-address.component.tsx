@@ -23,6 +23,7 @@ import type { Country } from "../../../interfaces/references/Country";
 import BuyerAddressesTable from "./buyer-address-table.component";
 import type { Address } from "../../../interfaces/references/Address";
 import { Bars } from "react-loading-icons";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
 interface BuyerAddressProps {
   buyerCode: number;
@@ -366,7 +367,14 @@ const BuyerAddresses = ({ buyerCode }: BuyerAddressProps) => {
 
   return (
     <>
-      <div className="flex justify-around mt-10 w-full">
+      <div
+        className="flex justify-around mt-10 w-full"
+        style={{
+          backgroundColor: DASHBOARD_COLORS.pageBg,
+          borderRadius: 16,
+          padding: "1.5rem",
+        }}
+      >
         <BuyerAddressesTable
           columns={columns}
           data={allBuyerAddresses}

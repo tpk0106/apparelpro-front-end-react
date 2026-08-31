@@ -28,8 +28,13 @@ import {
 } from "../../tanstack-hooks/custom-hooks";
 import type { Buyer } from "../../interfaces/references/Buyer";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import { primaryActionButtonSx, themedButtonLabelStyle, workspaceHeadingSx } from "../../themes/workspace-theme";
 
 export default function StockMovementItemReportWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string>("");
   const [selectedItemCode, setSelectedItemCode] = useState<string>("");
@@ -134,8 +139,8 @@ export default function StockMovementItemReportWorkspace() {
           px: { xs: 1, sm: 1.5, md: 2 },
           py: 3,
           width: "100%",
-          borderTop: "4px solid #60a5fa",
-          backgroundColor: "#f9f9f9",
+          borderTop: `4px solid ${DASHBOARD_COLORS.accent}`,
+          backgroundColor: DASHBOARD_COLORS.pageBg,
         }}
       >
         <Box
@@ -147,7 +152,7 @@ export default function StockMovementItemReportWorkspace() {
           }}
         >
           <Box>
-            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+            <Typography variant="h5" sx={workspaceHeadingSx}>
               Stock Movement — for an Item
             </Typography>
             <Typography variant="caption" color="text.secondary">
@@ -159,8 +164,11 @@ export default function StockMovementItemReportWorkspace() {
             startIcon={<PictureAsPdfIcon />}
             onClick={handleExportPdf}
             disabled={!isReady || isHeaderError || isDownloading}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Generating..." : "Export PDF"}
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Export PDF"}
+            </span>
           </Button>
         </Box>
 
@@ -174,6 +182,8 @@ export default function StockMovementItemReportWorkspace() {
               value={selectedBuyer ? String(selectedBuyer.buyerCode) : ""}
               onChange={(e) => handleBuyerChange(e.target.value)}
               disabled={isBuyersLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {buyersList.map((b) => (
                 <MenuItem key={b.buyerCode} value={String(b.buyerCode)}>
@@ -192,6 +202,8 @@ export default function StockMovementItemReportWorkspace() {
               value={selectedOrder}
               onChange={(e) => handleOrderChange(e.target.value)}
               disabled={!selectedBuyer || isOrdersLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {ordersList.map((orderStr) => (
                 <MenuItem key={orderStr} value={orderStr}>
@@ -210,6 +222,8 @@ export default function StockMovementItemReportWorkspace() {
               value={selectedItemCode}
               onChange={(e) => handleItemChange(e.target.value)}
               disabled={!selectedOrder || isItemsLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {itemsList.map((item) => (
                 <MenuItem key={item.itemCode} value={item.itemCode}>

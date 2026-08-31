@@ -12,6 +12,7 @@ import type { Country } from "../../../interfaces/references/Country";
 import BankAddressesTable from "./bank-address-table.component";
 import type { Address } from "../../../interfaces/references/Address";
 import { Bars } from "react-loading-icons";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
 interface BankAddressProps {
   bankCode: string;
@@ -270,7 +271,14 @@ const BankAddresses = ({ bankCode }: BankAddressProps) => {
 
   return (
     <>
-      <div className="flex justify-around mt-10 w-full">
+      <div
+        className="flex justify-around mt-10 w-full"
+        style={{
+          backgroundColor: DASHBOARD_COLORS.pageBg,
+          borderRadius: 16,
+          padding: "1.5rem",
+        }}
+      >
         <BankAddressesTable
           columns={columns}
           data={allBankAddresses}

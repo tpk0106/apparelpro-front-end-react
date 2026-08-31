@@ -23,6 +23,7 @@ import {
   useGetStrnPrintDetailsQuery,
 } from "../../../../tanstack-hooks/strn-print-report.hooks";
 import type { AppError } from "../../../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
 
 export default function StrnPrintReportWorkspace() {
   const [strnNumberInput, setStrnNumberInput] = useState<string>("");
@@ -62,8 +63,8 @@ export default function StrnPrintReportWorkspace() {
         elevation={3}
         sx={{
           p: 3,
-          borderTop: "4px solid #60a5fa",
-          backgroundColor: "#f9f9f9",
+          borderTop: `4px solid ${DASHBOARD_COLORS.accent}`,
+          backgroundColor: DASHBOARD_COLORS.cardBg,
         }}
       >
         <Box

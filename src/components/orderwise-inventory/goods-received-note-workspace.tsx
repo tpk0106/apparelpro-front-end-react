@@ -25,6 +25,14 @@ import {
   useCommitGrnMutation,
 } from "../../tanstack-hooks/goods-received-note.hooks";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  workspaceInfoCaptionSx,
+  workspaceSectionLabelSx,
+} from "../../themes/workspace-theme";
 
 export default function GoodsReceivedNoteWorkspace() {
   const [poNumberInput, setPoNumberInput] = useState("");
@@ -166,14 +174,20 @@ export default function GoodsReceivedNoteWorkspace() {
 
   return (
     <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa" }}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
+      <Paper
+        elevation={3}
+        sx={{
+          p: 3,
+          borderTop: `4px solid ${DASHBOARD_COLORS.accent}`,
+          backgroundColor: DASHBOARD_COLORS.pageBg,
+        }}
+      >
+        <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
           Goods Received Note (GRN)
         </Typography>
         <Typography
           variant="caption"
-          color="text.secondary"
-          sx={{ display: "block", mb: 3 }}
+          sx={{ ...workspaceInfoCaptionSx, mb: 3 }}
         >
           GRN Number is allocated by the server on commit — it is never entered
           manually.
@@ -238,14 +252,11 @@ export default function GoodsReceivedNoteWorkspace() {
                 alignItems: "center",
               }}
             >
-              <Typography
-                variant="subtitle2"
-                sx={{ fontWeight: "bold", textTransform: "uppercase" }}
-              >
+              <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>
                 Pending Material Lines &middot; Supplier{" "}
                 {lookupResult.supplierCode} / Store {lookupResult.storeCode}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={workspaceInfoCaptionSx}>
                 {lines.length} line(s) loaded from P/O {lookupPoNumber}
               </Typography>
             </Box>
@@ -267,9 +278,7 @@ export default function GoodsReceivedNoteWorkspace() {
           sx={{
             gap: 2,
             mt: 3,
-            pt: 2,
-            borderTop: "1px dashed rgba(139,147,161,0.3)",
-            display: "flex",
+            pt: 2,            display: "flex",
             justifyContent: "flex-end",
           }}
         >
@@ -310,16 +319,18 @@ export default function GoodsReceivedNoteWorkspace() {
             onClick={handleRequestCommit}
             disabled={isSubmitting || !isFormValid}
             sx={{
+              ...primaryActionButtonSx,
               minWidth: 190,
               height: 32,
               "&.Mui-disabled": {
-                backgroundColor: "rgba(139,147,161,0.15)",
+                background: "rgba(139,147,161,0.15)",
                 color: "#8B93A1",
                 border: "1px solid rgba(139,147,161,0.4)",
+                boxShadow: "none",
               },
             }}
           >
-            Confirm All Entries
+            <span style={themedButtonLabelStyle}>Confirm All Entries</span>
           </Button>
         </Box>
       </Paper>

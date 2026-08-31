@@ -7,6 +7,7 @@ import type { SubContractor } from "../../../interfaces/references/SubContractor
 import { useGetSubContractors } from "../../../tanstack-hooks/custom-hooks";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import SubContractorTable from "./sub-contractor-table.component";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
 // Standard reference-data screen (Code+Name), matching the Basis/Unit template -
 // NOT the scoped dark "mockup" theme used by additional-cost.component.tsx (that
@@ -108,10 +109,24 @@ const SubContractors = () => {
   );
 
   return (
-    <div className="flex flex-col w-[50%] min-w-[700px] mx-auto justify-around mt-10">
+    <div
+      className="flex flex-col w-[50%] min-w-[700px] mx-auto justify-around mt-10"
+      style={{
+        backgroundColor: DASHBOARD_COLORS.pageBg,
+        borderRadius: 16,
+        padding: "1.5rem",
+      }}
+    >
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">Sub Contractor</Typography>
+          <Typography
+            sx={{
+              color: DASHBOARD_COLORS.accentStrong,
+              textShadow: "0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(0,0,0,0.4)",
+            }}
+          >
+            SUB CONTRACTOR
+          </Typography>
         </ThemeProvider>
       </div>
       <SubContractorTable

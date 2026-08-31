@@ -10,8 +10,10 @@ import {
 } from "../../../tanstack-hooks/custom-hooks";
 
 import type { Bank } from "../../../interfaces/references/Bank";
-import { Box, MenuItem, Typography } from "@mui/material";
+import { Box, MenuItem, ThemeProvider, Typography } from "@mui/material";
 import type { Currency } from "../../../interfaces/references/Currency";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 
 const Banks = () => {
   const [validationErrors, setValidationErrors] =
@@ -284,7 +286,26 @@ const Banks = () => {
   // ... keep your columns array layout exactly the same as before ...
 
   return (
-    <div className="flex justify-around mt-10">
+    <div
+      className="flex flex-col w-[90%] mx-auto justify-around mt-10"
+      style={{
+        backgroundColor: DASHBOARD_COLORS.pageBg,
+        borderRadius: 16,
+        padding: "1.5rem",
+      }}
+    >
+      <div className="text-center mt-3 mx-2">
+        <ThemeProvider theme={asideMenuTitleTypographyTheme}>
+          <Typography
+            sx={{
+              color: DASHBOARD_COLORS.accentStrong,
+              textShadow: "0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(0,0,0,0.4)",
+            }}
+          >
+            BANK
+          </Typography>
+        </ThemeProvider>
+      </div>
       <BankTable
         columns={columns}
         data={allBanks}

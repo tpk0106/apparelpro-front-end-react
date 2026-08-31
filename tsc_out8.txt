@@ -1,0 +1,2 @@
+﻿src/components/orderwise-inventory/stores-requisition-lines-grid.tsx(496,21): error TS17001: JSX elements cannot have multiple attributes with the same name.
+src/components/references/country/country.component.tsx(75,9): error TS6133: 'handleScopeContextChange' is declared but its value is never read.
