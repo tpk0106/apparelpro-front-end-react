@@ -595,11 +595,59 @@ export const APPARELPRO_ENDPOINTS = {
     AIN: {
       ISSUABLE_STOCK: "api/orderwise-inventory-ain/issuable-stock",
       COMMIT: "api/orderwise-inventory-ain/commit",
+      PRINT: "api/orderwise-inventory-ain/print",
+      PRINT_PDF: "api/orderwise-inventory-ain/print/pdf",
+    },
+    ARN: {
+      RECEIVABLE_STOCK: "api/orderwise-inventory-arn/receivable-stock",
+      COMMIT: "api/orderwise-inventory-arn/commit",
+      PRINT: "api/orderwise-inventory-arn/print",
+      PRINT_PDF: "api/orderwise-inventory-arn/print/pdf",
     },
     STOCK_MOVEMENT_REPORT: {
       HEADER: "api/stock-movement-reports/header",
       LINES: "api/stock-movement-reports/lines",
       PDF: "api/stock-movement-reports/pdf",
+    },
+    STOCK_VALUATION_REPORT: {
+      HEADER: "api/stock-valuation-reports/header",
+      LINES: "api/stock-valuation-reports/lines",
+      PDF: "api/stock-valuation-reports/pdf",
+    },
+    STOCK_VALUATION_MONTHLY_REPORT: {
+      HEADER: "api/stock-valuation-monthly-reports/header",
+      LINES: "api/stock-valuation-monthly-reports/lines",
+      PDF: "api/stock-valuation-monthly-reports/pdf",
+    },
+    STOCK_STATUS_REPORT: {
+      HEADER: "api/orderwise-stock-status-reports/header",
+      LINES: "api/orderwise-stock-status-reports/lines",
+      PDF: "api/orderwise-stock-status-reports/pdf",
+    },
+    TRANSACTION_LIST_REPORT: {
+      HEADER: "api/orderwise-transaction-list-reports/header",
+      LINES: "api/orderwise-transaction-list-reports/lines",
+      PDF: "api/orderwise-transaction-list-reports/pdf",
+    },
+    ITEM_WISE_STOCK_BALANCE_REPORT: {
+      HEADER: "api/item-wise-stock-balance-reports/header",
+      LINES: "api/item-wise-stock-balance-reports/lines",
+      PDF: "api/item-wise-stock-balance-reports/pdf",
+    },
+    RAW_MATERIAL_CONTROL_SHEET_REPORT: {
+      HEADER: "api/raw-material-control-sheet-reports/header",
+      LINES: "api/raw-material-control-sheet-reports/lines",
+      PDF: "api/raw-material-control-sheet-reports/pdf",
+    },
+    STOCK_SUMMARY_REPORT: {
+      HEADER: "api/orderwise-stock-summary-reports/header",
+      LINES: "api/orderwise-stock-summary-reports/lines",
+      PDF: "api/orderwise-stock-summary-reports/pdf",
+    },
+    GRN_LISTING_REPORT: {
+      HEADER: "api/orderwise-grn-listing-reports/header",
+      LINES: "api/orderwise-grn-listing-reports/lines",
+      PDF: "api/orderwise-grn-listing-reports/pdf",
     },
     STOCK_MOVEMENT_ITEM_REPORT: {
       ITEMS: "api/stock-movement-item-reports/items",
@@ -693,6 +741,26 @@ export const APPARELPRO_ENDPOINTS = {
       HEADER: "api/general-stock-reorder-reports/header",
       LINES: "api/general-stock-reorder-reports/lines",
       PDF: "api/general-stock-reorder-reports/pdf",
+    },
+    TRANSACTION_LIST: {
+      HEADER: "api/general-transaction-list-reports/header",
+      LINES: "api/general-transaction-list-reports/lines",
+      PDF: "api/general-transaction-list-reports/pdf",
+    },
+    PURCHASE_ORDER_LIST: {
+      HEADER: "api/general-purchase-order-list-reports/header",
+      LINES: "api/general-purchase-order-list-reports/lines",
+      PDF: "api/general-purchase-order-list-reports/pdf",
+    },
+    STOCK_SUMMARY: {
+      HEADER: "api/general-stock-summary-reports/header",
+      LINES: "api/general-stock-summary-reports/lines",
+      PDF: "api/general-stock-summary-reports/pdf",
+    },
+    GRN_LISTING: {
+      HEADER: "api/general-grn-listing-reports/header",
+      LINES: "api/general-grn-listing-reports/lines",
+      PDF: "api/general-grn-listing-reports/pdf",
     },
   },
   SYSTEM_CONFIGURATION: {

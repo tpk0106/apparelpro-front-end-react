@@ -66,6 +66,10 @@ import GeneralStockStatusReportWorkspace from "./components/reports/general-inve
 import GeneralStockMovementReportWorkspace from "./components/reports/general-inventory/general-stock-movement-report-workspace";
 import GeneralStockValuationReportWorkspace from "./components/reports/general-inventory/general-stock-valuation-report-workspace";
 import GeneralStockReorderReportWorkspace from "./components/reports/general-inventory/general-stock-reorder-report-workspace";
+import GeneralTransactionListReportWorkspace from "./components/reports/general-inventory/general-transaction-list-report-workspace";
+import GeneralPurchaseOrderListReportWorkspace from "./components/reports/general-inventory/general-purchase-order-list-report-workspace";
+import GeneralStockSummaryReportWorkspace from "./components/reports/general-inventory/general-stock-summary-report-workspace";
+import GeneralGrnListingReportWorkspace from "./components/reports/general-inventory/general-grn-listing-report-workspace";
 import GeneralPoPrintReportWorkspace from "./components/reports/general-inventory/po/general-po-print-report-workspace";
 import GeneralStockMasterWorkspace from "./components/general-inventory/general-stock-master-workspace";
 import GeneralSanWorkspace from "./components/general-inventory/general-san-workspace";
@@ -74,6 +78,17 @@ import SupplierReturnNoteWorkspace from "./components/orderwise-inventory/suppli
 import DamagedGoodsNoteWorkspace from "./components/orderwise-inventory/damaged-goods-note-workspace";
 import StockAdjustmentNoteWorkspace from "./components/orderwise-inventory/stock-adjustment-note-workspace";
 import AdditionalIssueNoteWorkspace from "./components/orderwise-inventory/additional-issue-note-workspace";
+import AdditionalGoodsReceiptNoteWorkspace from "./components/orderwise-inventory/additional-goods-receipt-note-workspace";
+import AinPrintReportWorkspace from "./components/reports/orderwise-inventory/ain/ain-print-report-workspace";
+import ArnPrintReportWorkspace from "./components/reports/orderwise-inventory/arn/arn-print-report-workspace";
+import StockValuationReportWorkspace from "./components/reports/orderwise-inventory/stock-valuation-report-workspace";
+import StockValuationMonthlyReportWorkspace from "./components/reports/orderwise-inventory/stock-valuation-monthly-report-workspace";
+import OrderwiseStockStatusReportWorkspace from "./components/reports/orderwise-inventory/stock-status-report-workspace";
+import OrderwiseTransactionListReportWorkspace from "./components/reports/orderwise-inventory/transaction-list-report-workspace";
+import ItemWiseStockBalanceWorkspace from "./components/reports/orderwise-inventory/item-wise-stock-balance-workspace";
+import RawMaterialControlSheetWorkspace from "./components/reports/orderwise-inventory/raw-material-control-sheet-workspace";
+import OrderwiseStockSummaryReportWorkspace from "./components/reports/orderwise-inventory/stock-summary-report-workspace";
+import OrderwiseGrnListingReportWorkspace from "./components/reports/orderwise-inventory/grn-listing-report-workspace";
 import StockMovementReportWorkspace from "./components/orderwise-inventory/stock-movement-report-workspace";
 import StockMovementItemReportWorkspace from "./components/orderwise-inventory/stock-movement-item-report-workspace";
 
@@ -348,6 +363,10 @@ function App() {
         <Route index path="general-stock-movement-report" element={<GeneralStockMovementReportWorkspace />} />
         <Route index path="general-stock-valuation-report" element={<GeneralStockValuationReportWorkspace />} />
         <Route index path="general-stock-reorder-report" element={<GeneralStockReorderReportWorkspace />} />
+        <Route index path="general-transaction-list-report" element={<GeneralTransactionListReportWorkspace />} />
+        <Route index path="general-purchase-order-list-report" element={<GeneralPurchaseOrderListReportWorkspace />} />
+        <Route index path="general-stock-summary-report" element={<GeneralStockSummaryReportWorkspace />} />
+        <Route index path="general-grn-listing-report" element={<GeneralGrnListingReportWorkspace />} />
         <Route
           index
           path="supplier-return-note"
@@ -356,6 +375,17 @@ function App() {
         <Route index path="dgn" element={<DamagedGoodsNoteWorkspace />} />
         <Route index path="san" element={<StockAdjustmentNoteWorkspace />} />
         <Route index path="ain" element={<AdditionalIssueNoteWorkspace />} />
+        <Route index path="arn" element={<AdditionalGoodsReceiptNoteWorkspace />} />
+        <Route index path="ain-print" element={<AinPrintReportWorkspace />} />
+        <Route index path="arn-print" element={<ArnPrintReportWorkspace />} />
+        <Route index path="stock-valuation-report" element={<StockValuationReportWorkspace />} />
+        <Route index path="stock-valuation-monthly-report" element={<StockValuationMonthlyReportWorkspace />} />
+        <Route index path="orderwise-stock-status-report" element={<OrderwiseStockStatusReportWorkspace />} />
+        <Route index path="orderwise-transaction-list-report" element={<OrderwiseTransactionListReportWorkspace />} />
+        <Route index path="item-wise-stock-balance-report" element={<ItemWiseStockBalanceWorkspace />} />
+        <Route index path="raw-material-control-sheet-report" element={<RawMaterialControlSheetWorkspace />} />
+        <Route index path="orderwise-stock-summary-report" element={<OrderwiseStockSummaryReportWorkspace />} />
+        <Route index path="orderwise-grn-listing-report" element={<OrderwiseGrnListingReportWorkspace />} />
         <Route
           index
           path="stock-movement-report"
