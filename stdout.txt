@@ -1,7 +1,0 @@
-DOSBox version 0.74-3
-Copyright 2002-2019 DOSBox Team, published under GNU GPL.
----
-CONFIG:Loading primary settings from config file C:\AP\dosbox\tlink_main5.conf
-MIDI:Opened device:win32
-SHELL:Redirect output to E:\TLM5.LOG
-SHELL:Redirect output to E:\TLMD5.LOG

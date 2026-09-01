@@ -1,2 +1,0 @@
-﻿src/components/references/country/country.component.tsx(19,1): error TS6133: 'StyleSelection' is declared but its value is never read.
-src/components/references/country/country.component.tsx(75,9): error TS6133: 'handleScopeContextChange' is declared but its value is never read.

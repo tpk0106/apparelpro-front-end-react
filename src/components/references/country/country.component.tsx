@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { MRT_ColumnDef, MRT_PaginationState } from "material-react-table";
 import { Box, ThemeProvider, Typography } from "@mui/material";
 
@@ -17,7 +17,7 @@ import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 
 import { useGetCountries } from "../../../api/custom-hooks";
 // import StyleSelection from "../../common/style-selection.component";
-import type { SelectedScopeContext } from "../../material-consumption/material-consumption.types";
+// import type { SelectedScopeContext } from "../../material-consumption/material-consumption.types";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
 // Superseded by DASHBOARD_COLORS (see below) - kept commented for reference
@@ -69,17 +69,17 @@ const Countries = () => {
   const allCountries = useSelector(SelectAllCountries);
   const CountriesTotal = useSelector(SelectCountriesTotal);
 
-  const [, setScopeContext] = useState<SelectedScopeContext | null>(null);
+  // const [, setScopeContext] = useState<SelectedScopeContext | null>(null);
 
-  // Memoized callback handler tracking context alterations
-  const handleScopeContextChange = useCallback(
-    (context: SelectedScopeContext | null) => {
-      setScopeContext(context);
-      // setActiveSelection(null);
-      // setEditingRow(null); // Clear editing states on scope shift
-    },
-    [],
-  );
+  // //Memoized callback handler tracking context alterations
+  // const handleScopeContextChange = useCallback(
+  //   (context: SelectedScopeContext | null) => {
+  //     setScopeContext(context);
+  //     // setActiveSelection(null);
+  //     // setEditingRow(null); // Clear editing states on scope shift
+  //   },
+  //   [],
+  // );
 
   // const isError = useSelector(isErrorState);
   // const isLoading = useSelector(isLoadingState);

@@ -1,3 +1,0 @@
-﻿src/components/orderwise-inventory/goods-return-note-workspace.tsx(39,3): error TS6133: 'workspaceInfoCaptionSx' is declared but its value is never read.
-src/components/orderwise-inventory/goods-return-note-workspace.tsx(40,3): error TS6133: 'workspaceSectionLabelSx' is declared but its value is never read.
-src/components/references/country/country.component.tsx(75,9): error TS6133: 'handleScopeContextChange' is declared but its value is never read.
