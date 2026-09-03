@@ -15,6 +15,7 @@ import type { Style } from "../../interfaces/order-management/Style";
 import type { Unit } from "../../interfaces/references/Unit";
 import type { GarmentType } from "../../interfaces/references/GarmentType";
 import { asideMenuTitleTypographyTheme } from "../../themes/themes";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 
 interface styleProps {
   buyerCode: number;
@@ -339,7 +340,10 @@ const Styles = ({
     <div className="flex flex-col justify-around mt-10 w-full">
       <div>
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="blue-gray" className="text-center flex flex-col">
+          <Typography
+            sx={{ color: DASHBOARD_COLORS.accentStrong }}
+            className="text-center flex flex-col"
+          >
             <span>UNIT : {mainOrderUnit}</span>
             <span
               className={

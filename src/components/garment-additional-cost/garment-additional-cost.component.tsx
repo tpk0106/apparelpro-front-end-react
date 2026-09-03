@@ -9,20 +9,19 @@ import type {
 import { useGetMaterialCatalog } from "../../tanstack-hooks/material-consumption-entry.hooks";
 import { useGetGarmentAdditionalCosts } from "../../tanstack-hooks/garment-additional-cost.hooks";
 import type { GarmentAdditionalCostRow } from "./garment-additional-cost.types";
-import { mockupColors } from "./garment-additional-cost.types";
 import GarmentAdditionalCostItemPicker from "./garment-additional-cost-item-picker.component";
 import GarmentAdditionalCostEntryForm from "./garment-additional-cost-entry-form.component";
 import GarmentAdditionalCostGrid from "./garment-additional-cost-grid.component";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { workspaceHeadingSx } from "../../themes/workspace-theme";
 
-// SCOPED LOOK-AND-FEEL EXPERIMENT (2026-08-08, per user request): this screen and its four
-// sibling files (garment-additional-cost.types.ts, -item-picker, -entry-form, -grid) carry
-// their own dark-card styling matching the mockup the user approved, rather than the shared
-// apparelProDarkTheme look every other screen (including Material Consumption, which this
-// screen's layout mirrors) uses. ConsumptionScopeHeader is the one piece reused verbatim, per
-// the user's own plan - it is NOT restyled, so there is a deliberate visual seam between it and
-// the dark cards below. Reverting this experiment is just deleting these five files and
-// re-pointing the "additional" route/nav entry at nothing (the feature simply wouldn't exist
-// yet) - nothing shared was touched to make this happen.
+// RETIRED (2026-09-03): this screen used to carry its own isolated "mockup"
+// dark-card styling (see garment-additional-cost.types.ts's commented-out
+// mockupColors for the old palette reference) instead of the shared
+// olive/copper theme every other screen uses. Now converted over to
+// DASHBOARD_COLORS / useDropdownTheme / the shared button/table tokens,
+// matching Material Consumption (this screen's layout twin) and the rest of
+// the app.
 export default function GarmentAdditionalCostPage() {
   const [scopeContext, setScopeContext] = useState<SelectedScopeContext | null>(
     null,
@@ -60,22 +59,16 @@ export default function GarmentAdditionalCostPage() {
   );
 
   return (
-    <Box sx={{ width: "100%", p: 1, backgroundColor: mockupColors.bg }}>
+    <Box sx={{ width: "100%", py: 1, px: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
       <Typography
-        sx={{
-          textAlign: "center",
-          fontSize: "20px",
-          fontWeight: 700,
-          color: mockupColors.accentText,
-          mb: 0.5,
-        }}
+        sx={{ ...workspaceHeadingSx, textTransform: "uppercase", fontSize: "20px", mb: 0.5 }}
       >
-        ADDITIONAL COSTS PER GARMENT
+        Additional Costs per Garment
       </Typography>
       <Typography
         sx={{
           textAlign: "center",
-          color: mockupColors.muted,
+          color: DASHBOARD_COLORS.textSecondary,
           fontSize: "12px",
           mb: 2.5,
         }}
@@ -91,8 +84,8 @@ export default function GarmentAdditionalCostPage() {
             <Grid size={{ xs: 12, md: 4 }}>
               <Box
                 sx={{
-                  backgroundColor: mockupColors.surface,
-                  border: `1px solid ${mockupColors.border}`,
+                  backgroundColor: DASHBOARD_COLORS.cardBg,
+                  border: `1px solid ${DASHBOARD_COLORS.border}`,
                   borderRadius: "10px",
                   p: 2,
                   height: "480px",
@@ -107,7 +100,7 @@ export default function GarmentAdditionalCostPage() {
                     fontSize: "13px",
                     textAlign: "center",
                     mb: 1,
-                    color: mockupColors.text,
+                    color: DASHBOARD_COLORS.accentStrong,
                   }}
                 >
                   MAIN MATERIALS
@@ -127,8 +120,8 @@ export default function GarmentAdditionalCostPage() {
             <Grid size={{ xs: 12, md: 8 }}>
               <Box
                 sx={{
-                  backgroundColor: mockupColors.surface,
-                  border: `1px solid ${mockupColors.border}`,
+                  backgroundColor: DASHBOARD_COLORS.cardBg,
+                  border: `1px solid ${DASHBOARD_COLORS.border}`,
                   borderRadius: "10px",
                   p: 2,
                   minHeight: "480px",
@@ -149,7 +142,7 @@ export default function GarmentAdditionalCostPage() {
                   <Box
                     sx={{
                       height: "350px",
-                      color: mockupColors.muted,
+                      color: DASHBOARD_COLORS.textSecondary,
                       display: "flex",
                       justifyContent: "center",
                       alignItems: "center",
@@ -169,8 +162,8 @@ export default function GarmentAdditionalCostPage() {
 
           <Box
             sx={{
-              backgroundColor: mockupColors.surface,
-              border: `1px solid ${mockupColors.border}`,
+              backgroundColor: DASHBOARD_COLORS.cardBg,
+              border: `1px solid ${DASHBOARD_COLORS.border}`,
               borderRadius: "10px",
               p: 2,
               mt: 2,
@@ -195,7 +188,13 @@ export default function GarmentAdditionalCostPage() {
         <Alert
           severity="info"
           variant="outlined"
-          sx={{ m: 2, fontWeight: "bold", color: mockupColors.accentText }}
+          sx={{
+            m: 2,
+            fontWeight: "bold",
+            color: DASHBOARD_COLORS.accentStrong,
+            backgroundColor: DASHBOARD_COLORS.cardBg,
+            borderColor: DASHBOARD_COLORS.border,
+          }}
         >
           Please select a Buyer, Purchase Order, Garment Type, and Style in the
           header above to load the Additional Cost entries.

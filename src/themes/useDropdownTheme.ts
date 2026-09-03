@@ -16,6 +16,11 @@ import { DEFAULT_DROPDOWN_THEME_ID, getDropdownColorTheme } from "./dropdown-the
 export function useDropdownTheme(themeId: string = DEFAULT_DROPDOWN_THEME_ID) {
   const theme = getDropdownColorTheme(themeId);
   return {
+    // The raw palette - for call sites that can't use fieldSx/listboxSx as-is
+    // (e.g. a component whose label/select/menu-item colors are separate
+    // props applied directly to those elements, not nested under a parent
+    // wrapper) and need to build their own flat sx from the same hex values.
+    theme,
     fieldSx: getDropdownFieldSx(theme),
     listboxSx: getDropdownListboxSx(theme),
   };

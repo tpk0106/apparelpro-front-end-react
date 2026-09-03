@@ -2,8 +2,10 @@ import type { ProductionLineAllocation } from "../production/ProductionLineAlloc
 
 export type CurrentStyle = {
   buyerCode: number;
+  buyerName: string;
   order: string;
   typeCode: number;
+  typeName: string;
   styleCode: string;
   source: "latest-entry" | "pinned";
 };

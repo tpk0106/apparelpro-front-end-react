@@ -28,6 +28,15 @@ import EditIcon from "@mui/icons-material/Edit"; // Add this icon import
 import { useApparelProTable } from "../../themes/useApparelProTable";
 import ConfirmDialog from "../common/confirm-dialog";
 import CopyFromStyleDialog from "./copy-from-style-dialog.component";
+import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+
+// Same copper highlight as material-master-list.component.tsx's actively
+// selected item row - was a saturated amber (#ffca28/#e65100).
+const highlightBg = copperTextColor;
+const highlightBorder = "#6B4420";
+const highlightText = "#2B1B0E";
 
 interface LedgerGridProps {
   styleContext: StyleContext;
@@ -84,8 +93,8 @@ export default function ConsumptionLedgerGrid({
             wordBreak: "break-word",
             lineHeight: 1.3,
             ...(isEditingRowMatch(row.original) && {
-              backgroundColor: "#ffca28 !important",
-              color: "#3e2723 !important",
+              backgroundColor: `${highlightBg} !important`,
+              color: `${highlightText} !important`,
             }),
           },
         }),
@@ -140,8 +149,8 @@ export default function ConsumptionLedgerGrid({
             color: "#2e7d32",
             textAlign: "right",
             ...(isEditingRowMatch(row.original) && {
-              backgroundColor: "#ffca28 !important",
-              color: "#3e2723 !important",
+              backgroundColor: `${highlightBg} !important`,
+              color: `${highlightText} !important`,
               fontWeight: "bold",
             }),
           },
@@ -244,9 +253,9 @@ export default function ConsumptionLedgerGrid({
       return {
         sx: isSelected
           ? {
-              backgroundColor: "#ffca28 !important",
-              borderLeft: "4px solid #e65100 !important",
-              "& td": { color: "#3e2723 !important", fontWeight: "bold" },
+              backgroundColor: `${highlightBg} !important`,
+              borderLeft: `4px solid ${highlightBorder} !important`,
+              "& td": { color: `${highlightText} !important`, fontWeight: "bold" },
             }
           : {},
       };
@@ -269,8 +278,8 @@ export default function ConsumptionLedgerGrid({
       sx: {
         fontSize: "0.78rem",
         ...(isEditingRowMatch(row.original) && {
-          backgroundColor: "#ffca28 !important",
-          color: "#3e2723 !important",
+          backgroundColor: `${highlightBg} !important`,
+          color: `${highlightText} !important`,
           fontWeight: "bold",
         }),
       },
@@ -317,19 +326,21 @@ export default function ConsumptionLedgerGrid({
       >
         <Typography
           variant="subtitle2"
-          sx={{ fontWeight: "bold", color: "#ffffff" }}
+          sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.accentStrong }}
         >
           [ CONSOLIDATED STYLE RUNNING PRODUCTION LEDGER MATRIX ]
         </Typography>
 
         <Button
           variant="contained"
-          color="primary"
           size="small"
           startIcon={<ContentCopyIcon />}
           onClick={() => setIsCopyDialogOpen(true)}
+          sx={primaryActionButtonSx}
         >
-          Copy all materials from another Style
+          <span style={themedButtonLabelStyle}>
+            Copy all materials from another Style
+          </span>
         </Button>
       </Box>
 

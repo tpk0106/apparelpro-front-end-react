@@ -32,7 +32,12 @@ import type { Buyer } from "../../interfaces/references/Buyer";
 import type { AppError } from "../../auth/axiosClient";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 import { useDropdownTheme } from "../../themes/useDropdownTheme";
-import { primaryActionButtonSx, themedButtonLabelStyle, workspaceHeadingSx } from "../../themes/workspace-theme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  workspaceInfoCaptionSx,
+} from "../../themes/workspace-theme";
 
 // MRT hands back camelCase accessorKeys (e.g. "itemCode"), but BuildLineQuery's
 // OrderByColumn resolves sortColumn via a raw Expression.PropertyOrField lookup
@@ -321,7 +326,7 @@ export default function StockMovementReportWorkspace() {
             />
 
             <Divider sx={{ my: 2 }} />
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={workspaceInfoCaptionSx}>
               * Transfer In/Out, Supplier Return and Last Adjustment currently
               always show 0 — Order Wise Inventory doesn't have Stock Transfer,
               Supplier Return or Stock Adjustment Note modules yet. These
@@ -347,7 +352,7 @@ function LegendItem({ color, label }: { color: string; label: string }) {
           backgroundColor: color,
         }}
       />
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" sx={workspaceInfoCaptionSx}>
         {label}
       </Typography>
     </Box>

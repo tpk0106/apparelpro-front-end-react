@@ -3,7 +3,8 @@ import type {
   MaterialCatalogGroup,
   MaterialSelection,
 } from "../material-consumption/material-consumption.types";
-import { mockupColors } from "./garment-additional-cost.types";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
 
 // Deliberately NOT MaterialMasterList (the MaterialReactTable-based picker Material
 // Consumption uses) - that component is wired to the shared useApparelProTable() look.
@@ -32,14 +33,14 @@ export default function GarmentAdditionalCostItemPicker({
           height: "200px",
         }}
       >
-        <CircularProgress size={28} sx={{ color: mockupColors.accent }} />
+        <CircularProgress size={28} sx={{ color: copperTextColor }} />
       </Box>
     );
   }
 
   if (catalogGroups.length === 0) {
     return (
-      <Typography sx={{ color: mockupColors.muted, fontSize: "12.5px", p: 1 }}>
+      <Typography sx={{ color: DASHBOARD_COLORS.textSecondary, fontSize: "12.5px", p: 1 }}>
         No materials catalogued yet.
       </Typography>
     );
@@ -52,8 +53,8 @@ export default function GarmentAdditionalCostItemPicker({
           <Typography
             sx={{
               fontSize: "12px",
-              color: mockupColors.muted,
-              borderBottom: `1px solid ${mockupColors.border}`,
+              color: DASHBOARD_COLORS.textSecondary,
+              borderBottom: `1px solid ${DASHBOARD_COLORS.border}`,
               py: 0.5,
               px: 0.5,
               textTransform: "uppercase",
@@ -81,16 +82,16 @@ export default function GarmentAdditionalCostItemPicker({
                   borderRadius: "6px",
                   margin: "3px 0",
                   cursor: "pointer",
-                  color: isSelected ? mockupColors.accent : mockupColors.text,
+                  color: isSelected ? copperTextColor : DASHBOARD_COLORS.textPrimary,
                   backgroundColor: isSelected
-                    ? "rgba(96, 165, 250, 0.15)"
+                    ? "rgba(201,128,61,0.15)"
                     : "transparent",
                   border: isSelected
-                    ? `1px solid ${mockupColors.accent}`
+                    ? `1px solid ${copperTextColor}`
                     : "1px solid transparent",
                   "&:hover": {
                     backgroundColor: isSelected
-                      ? "rgba(96, 165, 250, 0.15)"
+                      ? "rgba(201,128,61,0.15)"
                       : "rgba(255, 255, 255, 0.04)",
                   },
                 }}

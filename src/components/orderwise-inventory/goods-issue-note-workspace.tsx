@@ -26,6 +26,7 @@ import {
 } from "../../tanstack-hooks/goods-issue-note.hooks";
 import type { AppError } from "../../auth/axiosClient";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
 import {
   primaryActionButtonSx,
   themedButtonLabelStyle,
@@ -35,6 +36,7 @@ import {
 } from "../../themes/workspace-theme";
 
 export default function GoodsIssueNoteWorkspace() {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const [strnNumberInput, setStrnNumberInput] = useState("");
   const [lookupStrnNumber, setLookupStrnNumber] = useState("");
   const [transactionDate, setTransactionDate] = useState<string>(
@@ -236,6 +238,7 @@ export default function GoodsIssueNoteWorkspace() {
               onChange={(e) => setStrnNumberInput(e.target.value.toUpperCase())}
               onKeyDown={(e) => e.key === "Enter" && handleLookup()}
               placeholder="e.g. STRN000123"
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
@@ -258,6 +261,7 @@ export default function GoodsIssueNoteWorkspace() {
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={dropdownFieldSx}
             />
           </Grid>
         </Grid>

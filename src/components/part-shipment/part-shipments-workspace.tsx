@@ -5,6 +5,8 @@ import PartShipmentsGrid from "./part-shipments-grid";
 
 import { useGetPartShipmentsLedgerQuery } from "../../services/order-management/part-shipment.service";
 import type { Style } from "../../interfaces/order-management/Style";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
 
 interface WorkspaceProps {
   buyerCode: number;
@@ -32,7 +34,7 @@ export default function PartShipmentsWorkspace({
       {/* Central Screen Layout Title Header */}
       <Typography
         variant="h5"
-        sx={{ fontWeight: "bold", color: "#1a237e", mb: 2 }}
+        sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.accentStrong, mb: 2 }}
       >
         Scheduled Shipments & Part Deliveries Ledger
       </Typography>
@@ -49,7 +51,13 @@ export default function PartShipmentsWorkspace({
 
         <Paper
           elevation={3}
-          sx={{ p: 3, mt: 2, borderTop: "4px solid #2e7d32" }}
+          sx={{
+            p: 3,
+            mt: 2,
+            backgroundColor: DASHBOARD_COLORS.cardBg,
+            border: `1px solid ${DASHBOARD_COLORS.border}`,
+            borderTop: `4px solid ${copperTextColor}`,
+          }}
         >
           <Box
             sx={{
@@ -63,7 +71,7 @@ export default function PartShipmentsWorkspace({
               variant="subtitle2"
               sx={{
                 fontWeight: "bold",
-                color: "#2e7d32",
+                color: DASHBOARD_COLORS.accentStrong,
                 textTransform: "uppercase",
               }}
             >
@@ -72,11 +80,11 @@ export default function PartShipmentsWorkspace({
             <Typography
               variant="caption"
               sx={{
-                backgroundColor: "#e8f5e9",
+                backgroundColor: "rgba(159,174,94,0.18)",
                 p: 1,
                 borderRadius: "4px",
                 fontWeight: "bold",
-                color: "#2e7d32",
+                color: DASHBOARD_COLORS.accentStrong,
               }}
             ></Typography>
           </Box>
@@ -100,7 +108,7 @@ export default function PartShipmentsWorkspace({
             mt: 2,
             fontWeight: "bold",
             borderLeft: "4px solid #0288d1",
-            backgroundColor: "#fafafa",
+            backgroundColor: DASHBOARD_COLORS.cardBg,
           }}
         >
           Please select a valid Buyer, Purchase Order Contract, Garment Type,

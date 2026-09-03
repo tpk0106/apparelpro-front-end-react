@@ -27,6 +27,11 @@ type SelectListProps<T> = {
   // SelectList, on a light theme) sees zero visual change unless it opts in.
   menuSx?: SxProps<Theme>;
   menuItemSx?: SxProps<Theme>;
+  // Optional override for the closed field itself (background/text/border) -
+  // the Select's own sx below is otherwise hardcoded white/black, which
+  // labelSx/menuSx/menuItemSx alone can't reach since they target the label
+  // and popup, not the field. Defaults preserve existing behavior.
+  selectSx?: SxProps<Theme>;
 };
 
 const SelectList = <T,>({
@@ -42,6 +47,7 @@ const SelectList = <T,>({
   labelSx,
   menuSx,
   menuItemSx,
+  selectSx,
 }: SelectListProps<T>) => {
   return (
     <FormControl fullWidth variant="outlined" size={size} sx={{ mb: 0 }}>
@@ -77,6 +83,7 @@ const SelectList = <T,>({
           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
             borderColor: "#3b82f6",
           },
+          ...selectSx,
         }}
         MenuProps={{
           slotProps: {

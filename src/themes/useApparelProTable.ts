@@ -90,7 +90,13 @@ export function useApparelProTable<TData extends MRT_RowData>(
       // every other row would wrongly flip to editBg while a new row is open.
       const isThisRowCreating = table.getState().creatingRow?.id === row.id;
       const anyRowEditing = !!table.getState().editingRow;
-      const isRowEven = Number(row?.id) % 2 === 0;
+      // row.index (the row's position in the current page/dataset) - NOT
+      // row.id, which can be a caller-supplied getRowId of any shape (e.g.
+      // colorCode, itemCode). Number(row.id) on a non-numeric id is NaN, and
+      // NaN % 2 === 0 is always false, so every row silently fell into the
+      // same "odd" branch - rows and alt-rows rendered identically for any
+      // table with a non-numeric row id, which index is always safe against.
+      const isRowEven = row.index % 2 === 0;
       const isEditModeRow = isEditing || isThisRowCreating;
 
       return {

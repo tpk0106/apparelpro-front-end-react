@@ -24,7 +24,10 @@ import type {
   GarmentAdditionalCostRow,
   SaveGarmentAdditionalCostPayload,
 } from "./garment-additional-cost.types";
-import { mockupColors } from "./garment-additional-cost.types";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
 
 interface FormState {
   additionalCostCode: string;
@@ -62,20 +65,6 @@ const blankForm = (defaultCurrency: string): FormState => ({
   isSemiFinishedGarment: false,
 });
 
-// Dark-input styling scoped to this form only - see garment-additional-cost.component.tsx's
-// header comment for why this doesn't touch the shared theme.
-const darkFieldSx = {
-  "& .MuiInputBase-root": {
-    color: mockupColors.text,
-    backgroundColor: mockupColors.input,
-  },
-  "& .MuiInputLabel-root": { color: mockupColors.muted },
-  "& .MuiOutlinedInput-notchedOutline": { borderColor: mockupColors.border },
-  "&:hover .MuiOutlinedInput-notchedOutline": {
-    borderColor: mockupColors.accent,
-  },
-};
-
 interface EntryFormProps {
   styleContext: SelectedScopeContext;
   selectedMaterial: MaterialSelection;
@@ -91,6 +80,26 @@ export default function GarmentAdditionalCostEntryForm({
   onCommitSuccess,
   onCancelEdit,
 }: EntryFormProps) {
+  const { theme: dropdownTheme, fieldSx: dropdownFieldSx } = useDropdownTheme();
+  const selectMenuProps = {
+    slotProps: {
+      paper: {
+        sx: {
+          backgroundColor: `${dropdownTheme.panelBg} !important`,
+          border: `1px solid ${dropdownTheme.panelBorder}`,
+        },
+      },
+    },
+  };
+  const menuItemSx = {
+    color: `${dropdownTheme.optionText} !important`,
+    "&:hover": { backgroundColor: `${dropdownTheme.optionHoverBg} !important` },
+    "&.Mui-selected": {
+      backgroundColor: `${dropdownTheme.optionSelectedBg} !important`,
+      color: `${dropdownTheme.optionSelectedText} !important`,
+    },
+  };
+
   const [form, setForm] = useState<FormState>(() =>
     blankForm(styleContext.currencyCode),
   );
@@ -266,12 +275,12 @@ export default function GarmentAdditionalCostEntryForm({
     <Box>
       <Box
         sx={{
-          backgroundColor: "rgba(96, 165, 250, 0.08)",
-          border: `1px solid rgba(96, 165, 250, 0.3)`,
+          backgroundColor: "rgba(159,174,94,0.18)",
+          border: `1px solid ${DASHBOARD_COLORS.border}`,
           borderRadius: "6px",
           padding: "8px 12px",
           fontSize: "12.5px",
-          color: mockupColors.accentText,
+          color: DASHBOARD_COLORS.accentStrong,
           mb: 2,
         }}
       >
@@ -292,12 +301,13 @@ export default function GarmentAdditionalCostEntryForm({
             label="Additional Cost Category *"
             size="small"
             fullWidth
-            sx={darkFieldSx}
+            sx={dropdownFieldSx}
+            slotProps={{ select: { MenuProps: selectMenuProps } }}
             value={form.additionalCostCode}
             onChange={(e) => handleChange("additionalCostCode", e.target.value)}
           >
             {additionalCostOptions.map((option) => (
-              <MenuItem key={option.code} value={option.code}>
+              <MenuItem key={option.code} value={option.code} sx={menuItemSx}>
                 {option.code} — {option.description}
               </MenuItem>
             ))}
@@ -309,13 +319,14 @@ export default function GarmentAdditionalCostEntryForm({
             label="Colour"
             size="small"
             fullWidth
-            sx={darkFieldSx}
+            sx={dropdownFieldSx}
+            slotProps={{ select: { MenuProps: selectMenuProps } }}
             value={form.color}
             onChange={(e) => handleChange("color", e.target.value)}
           >
-            <MenuItem value="">(blank = all colours)</MenuItem>
+            <MenuItem value="" sx={menuItemSx}>(blank = all colours)</MenuItem>
             {availableColors.map((color) => (
-              <MenuItem key={color} value={color}>
+              <MenuItem key={color} value={color} sx={menuItemSx}>
                 {color}
               </MenuItem>
             ))}
@@ -327,13 +338,14 @@ export default function GarmentAdditionalCostEntryForm({
             label="Size"
             size="small"
             fullWidth
-            sx={darkFieldSx}
+            sx={dropdownFieldSx}
+            slotProps={{ select: { MenuProps: selectMenuProps } }}
             value={form.size}
             onChange={(e) => handleChange("size", e.target.value)}
           >
-            <MenuItem value="">(blank = all sizes)</MenuItem>
+            <MenuItem value="" sx={menuItemSx}>(blank = all sizes)</MenuItem>
             {availableSizes.map((size) => (
-              <MenuItem key={size} value={size}>
+              <MenuItem key={size} value={size} sx={menuItemSx}>
                 {size}
               </MenuItem>
             ))}
@@ -358,7 +370,7 @@ export default function GarmentAdditionalCostEntryForm({
               label={`Enter ${featureMap.feature1}`}
               size="small"
               fullWidth
-              sx={darkFieldSx}
+              sx={dropdownFieldSx}
               value={form.feature1}
               disabled={!!editingRow}
               onChange={(e) =>
@@ -374,7 +386,7 @@ export default function GarmentAdditionalCostEntryForm({
               label={`Enter ${featureMap.feature2}`}
               size="small"
               fullWidth
-              sx={darkFieldSx}
+              sx={dropdownFieldSx}
               value={form.feature2}
               disabled={!!editingRow}
               onChange={(e) =>
@@ -390,7 +402,7 @@ export default function GarmentAdditionalCostEntryForm({
               label={`Enter ${featureMap.feature3}`}
               size="small"
               fullWidth
-              sx={darkFieldSx}
+              sx={dropdownFieldSx}
               value={form.feature3}
               disabled={!!editingRow}
               onChange={(e) =>
@@ -406,7 +418,7 @@ export default function GarmentAdditionalCostEntryForm({
               label={`Enter ${featureMap.feature4}`}
               size="small"
               fullWidth
-              sx={darkFieldSx}
+              sx={dropdownFieldSx}
               value={form.feature4}
               disabled={!!editingRow}
               onChange={(e) =>
@@ -422,7 +434,7 @@ export default function GarmentAdditionalCostEntryForm({
             label="Description"
             size="small"
             fullWidth
-            sx={darkFieldSx}
+            sx={dropdownFieldSx}
             value={form.description}
             onChange={(e) => handleChange("description", e.target.value)}
             slotProps={{ htmlInput: { maxLength: 40 } }}
@@ -435,12 +447,13 @@ export default function GarmentAdditionalCostEntryForm({
             label="Basis *"
             size="small"
             fullWidth
-            sx={darkFieldSx}
+            sx={dropdownFieldSx}
+            slotProps={{ select: { MenuProps: selectMenuProps } }}
             value={form.storeCode}
             onChange={(e) => handleChange("storeCode", e.target.value)}
           >
             {basisOptions.map((basis) => (
-              <MenuItem key={basis.code} value={basis.code}>
+              <MenuItem key={basis.code} value={basis.code} sx={menuItemSx}>
                 {basis.code} — {basis.description}
               </MenuItem>
             ))}
@@ -452,12 +465,13 @@ export default function GarmentAdditionalCostEntryForm({
             label="Currency *"
             size="small"
             fullWidth
-            sx={darkFieldSx}
+            sx={dropdownFieldSx}
+            slotProps={{ select: { MenuProps: selectMenuProps } }}
             value={form.currency}
             onChange={(e) => handleChange("currency", e.target.value)}
           >
             {currencyOptions.map((currency) => (
-              <MenuItem key={currency.code} value={currency.code}>
+              <MenuItem key={currency.code} value={currency.code} sx={menuItemSx}>
                 {currency.code}
               </MenuItem>
             ))}
@@ -469,12 +483,13 @@ export default function GarmentAdditionalCostEntryForm({
             label="Unit *"
             size="small"
             fullWidth
-            sx={darkFieldSx}
+            sx={dropdownFieldSx}
+            slotProps={{ select: { MenuProps: selectMenuProps } }}
             value={form.unit}
             onChange={(e) => handleChange("unit", e.target.value)}
           >
             {unitOptions.map((unit) => (
-              <MenuItem key={unit.code} value={unit.code}>
+              <MenuItem key={unit.code} value={unit.code} sx={menuItemSx}>
                 {unit.code}
               </MenuItem>
             ))}
@@ -486,7 +501,7 @@ export default function GarmentAdditionalCostEntryForm({
             type="number"
             size="small"
             fullWidth
-            sx={darkFieldSx}
+            sx={dropdownFieldSx}
             value={form.quantity}
             onChange={(e) => handleChange("quantity", e.target.value)}
           />
@@ -498,7 +513,7 @@ export default function GarmentAdditionalCostEntryForm({
             type="number"
             size="small"
             fullWidth
-            sx={darkFieldSx}
+            sx={dropdownFieldSx}
             value={form.cost}
             onChange={(e) => handleChange("cost", e.target.value)}
           />
@@ -508,7 +523,7 @@ export default function GarmentAdditionalCostEntryForm({
             label="Value (computed on save)"
             size="small"
             fullWidth
-            sx={darkFieldSx}
+            sx={dropdownFieldSx}
             value={previewValue}
             disabled
           />
@@ -522,11 +537,11 @@ export default function GarmentAdditionalCostEntryForm({
                 onChange={(e) =>
                   handleChange("isCostPerGarment", e.target.checked)
                 }
-                sx={{ color: mockupColors.muted, "&.Mui-checked": { color: mockupColors.accent } }}
+                sx={{ color: DASHBOARD_COLORS.textSecondary, "&.Mui-checked": { color: copperTextColor } }}
               />
             }
             label="Cost is per Garment (unchecked = Cost is a lump-sum Total Value)"
-            sx={{ color: mockupColors.text }}
+            sx={{ color: DASHBOARD_COLORS.textPrimary }}
           />
         </Grid>
         <Grid size={12}>
@@ -537,11 +552,11 @@ export default function GarmentAdditionalCostEntryForm({
                 onChange={(e) =>
                   handleChange("isSemiFinishedGarment", e.target.checked)
                 }
-                sx={{ color: mockupColors.muted, "&.Mui-checked": { color: mockupColors.accent } }}
+                sx={{ color: DASHBOARD_COLORS.textSecondary, "&.Mui-checked": { color: copperTextColor } }}
               />
             }
             label="Semi-Finished Garment line (no stock balance is created for this line)"
-            sx={{ color: mockupColors.text }}
+            sx={{ color: DASHBOARD_COLORS.textPrimary }}
           />
         </Grid>
       </Grid>
@@ -549,26 +564,23 @@ export default function GarmentAdditionalCostEntryForm({
       <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5, mt: 2 }}>
         {editingRow && (
           <Button
-            variant="outlined"
+            variant="contained"
+            type="button"
             onClick={onCancelEdit}
-            sx={{ color: mockupColors.muted, borderColor: mockupColors.border, textTransform: "none" }}
+            sx={{ ...primaryActionButtonSx, textTransform: "none" }}
           >
-            Cancel Edit
+            <span style={themedButtonLabelStyle}>Cancel Edit</span>
           </Button>
         )}
         <Button
           variant="contained"
           onClick={handleSave}
           disabled={isSaving}
-          sx={{
-            backgroundColor: `${mockupColors.accent} !important`,
-            color: "#06101f !important",
-            fontWeight: 700,
-            textTransform: "none",
-            boxShadow: "none !important",
-          }}
+          sx={{ ...primaryActionButtonSx, fontWeight: 700, textTransform: "none" }}
         >
-          {isSaving ? "Saving..." : "Save Additional Cost Entry"}
+          <span style={themedButtonLabelStyle}>
+            {isSaving ? "Saving..." : "Save Additional Cost Entry"}
+          </span>
         </Button>
       </Box>
     </Box>

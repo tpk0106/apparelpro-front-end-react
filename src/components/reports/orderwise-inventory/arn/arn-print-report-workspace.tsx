@@ -14,8 +14,15 @@ import {
 } from "../../../../tanstack-hooks/arn-print-report.hooks";
 import type { AppError } from "../../../../auth/axiosClient";
 import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+} from "../../../../themes/workspace-theme";
 
 export default function ArnPrintReportWorkspace() {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const [arnNumberInput, setArnNumberInput] = useState<string>("");
   const [searchedArnNumber, setSearchedArnNumber] = useState<string>("");
 
@@ -48,9 +55,9 @@ export default function ArnPrintReportWorkspace() {
 
   return (
     <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.cardBg }}>
+      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          <Typography variant="h5" sx={workspaceHeadingSx}>
             Additional Goods Receipt Note — Print
           </Typography>
           <Button
@@ -58,8 +65,11 @@ export default function ArnPrintReportWorkspace() {
             startIcon={<PictureAsPdfIcon />}
             onClick={handleDownloadPdf}
             disabled={!isReady || !details || isDownloading}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Generating..." : "Download PDF"}
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
           </Button>
         </Box>
 
@@ -75,6 +85,7 @@ export default function ArnPrintReportWorkspace() {
                 if (e.key === "Enter") handleLoad();
               }}
               placeholder="e.g. 000123"
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>

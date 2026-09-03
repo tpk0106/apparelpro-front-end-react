@@ -19,6 +19,11 @@ import {
 import type { AppError } from "../../../../auth/axiosClient";
 import type { TrimSheetReportScopeContext } from "./trim-sheet-report.types";
 import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+} from "../../../../themes/workspace-theme";
 
 // Stable placeholder used only while no scope is selected (the query is disabled
 // via `isReady` at that point, so this object's contents never reach the network) -
@@ -58,58 +63,70 @@ export default function TrimSheetReportWorkspace() {
 
   return (
     <Box sx={{ width: "100%", p: 1 }}>
-      <Box
+      <Paper
+        elevation={3}
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          mb: 2,
+          p: 3,
+          borderTop: `4px solid ${DASHBOARD_COLORS.accent}`,
+          backgroundColor: DASHBOARD_COLORS.pageBg,
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>
-          Trim Sheet Report
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={
-            isDownloading ? (
-              <CircularProgress size={18} color="inherit" />
-            ) : (
-              <PictureAsPdfIcon />
-            )
-          }
-          onClick={handleDownloadPdf}
-          disabled={!isReady || !report || isLoading || isDownloading}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            mb: 2,
+          }}
         >
-          {isDownloading ? "Generating..." : "Print (PDF)"}
-        </Button>
-      </Box>
-
-      <TrimSheetReportHeader onScopeLock={setScope} />
-
-      {!isReady ? (
-        <Paper
-          elevation={0}
-          variant="outlined"
-          sx={{ p: 3, textAlign: "center", color: "text.secondary" }}
-        >
-          <Typography variant="body2">
-            Select a Buyer, Purchase Order, Garment Type, and Style above to
-            display its Trim Sheet Report.
+          <Typography variant="h5" sx={workspaceHeadingSx}>
+            Trim Sheet Report
           </Typography>
-        </Paper>
-      ) : isLoading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-          <CircularProgress />
+          <Button
+            variant="contained"
+            startIcon={
+              isDownloading ? (
+                <CircularProgress size={18} color="inherit" />
+              ) : (
+                <PictureAsPdfIcon />
+              )
+            }
+            onClick={handleDownloadPdf}
+            disabled={!isReady || !report || isLoading || isDownloading}
+            sx={primaryActionButtonSx}
+          >
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Print (PDF)"}
+            </span>
+          </Button>
         </Box>
-      ) : isError ? (
-        <Alert severity="error" variant="outlined">
-          {error?.message ??
-            "Failed to load the Trim Sheet Report for the selected style."}
-        </Alert>
-      ) : report ? (
-        <TrimSheetReportDisplay report={report} />
-      ) : null}
+
+        <TrimSheetReportHeader onScopeLock={setScope} />
+
+        {!isReady ? (
+          <Paper
+            elevation={0}
+            variant="outlined"
+            sx={{ p: 3, textAlign: "center", color: "text.secondary" }}
+          >
+            <Typography variant="body2">
+              Select a Buyer, Purchase Order, Garment Type, and Style above to
+              display its Trim Sheet Report.
+            </Typography>
+          </Paper>
+        ) : isLoading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : isError ? (
+          <Alert severity="error" variant="outlined">
+            {error?.message ??
+              "Failed to load the Trim Sheet Report for the selected style."}
+          </Alert>
+        ) : report ? (
+          <TrimSheetReportDisplay report={report} />
+        ) : null}
+      </Paper>
     </Box>
   );
 }

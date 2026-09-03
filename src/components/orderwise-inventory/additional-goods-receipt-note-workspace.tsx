@@ -178,7 +178,7 @@ export default function AdditionalGoodsReceiptNoteWorkspace() {
         <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
           Additional Goods Receipt Note (ARN)
         </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 3, color: DASHBOARD_COLORS.textSecondary }}>
+        <Typography variant="caption" sx={{ ...workspaceInfoCaptionSx, mb: 3 }}>
           ARN Number is allocated by the server on commit — it is never entered manually. Receives processed
           goods back from a Sub Contractor. Unlike AIN, each line can target a different Buyer/Order/Process —
           add one row per item received.

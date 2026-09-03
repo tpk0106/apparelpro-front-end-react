@@ -17,12 +17,20 @@ import {
 import type { StockSummaryReportLine } from "../../../interfaces/orderwise-inventory/stock-summary-report.types";
 import type { AppError } from "../../../auth/axiosClient";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+} from "../../../themes/workspace-theme";
 
 // Replicates IN_SVAL2.PRG's "SUMMARY OF STOCK VALUE - Order-wise Inventory"
 // (a.k.a. "Stock Summary Report - Basis wise" in IN_MENU.PRG) - system-wide,
 // grouped by Stock Type then Store, valued in two chosen currencies, reading
 // OrderwiseStock's live QtyInHand (no chronological replay needed).
 export default function StockSummaryReportWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const [currency1, setCurrency1] = useState<string>("");
   const [currency2, setCurrency2] = useState<string>("");
   const [searchedParams, setSearchedParams] = useState<{ currency1: string; currency2: string } | null>(null);
@@ -135,9 +143,9 @@ export default function StockSummaryReportWorkspace() {
 
   return (
     <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.cardBg }}>
+      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          <Typography variant="h5" sx={workspaceHeadingSx}>
             Stock Summary Report — Basis Wise (Orderwise Inventory)
           </Typography>
           <Button
@@ -145,8 +153,11 @@ export default function StockSummaryReportWorkspace() {
             startIcon={<PictureAsPdfIcon />}
             onClick={handleDownloadPdf}
             disabled={!isReady || isError || isDownloading}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Generating..." : "Download PDF"}
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
           </Button>
         </Box>
 
@@ -160,6 +171,8 @@ export default function StockSummaryReportWorkspace() {
               value={currency1}
               onChange={(e) => setCurrency1(e.target.value)}
               disabled={isCurrenciesLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {currenciesList.map((c) => (
                 <MenuItem key={c.code} value={c.code}>
@@ -177,6 +190,8 @@ export default function StockSummaryReportWorkspace() {
               value={currency2}
               onChange={(e) => setCurrency2(e.target.value)}
               disabled={isCurrenciesLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {currenciesList.map((c) => (
                 <MenuItem key={c.code} value={c.code}>

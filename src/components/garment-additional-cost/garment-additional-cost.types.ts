@@ -77,17 +77,22 @@ export interface GarmentAdditionalCostReport {
   categories: GarmentAdditionalCostReportCategory[];
 }
 
-// Shared dark-card look for this feature only - see garment-additional-cost.component.tsx's
-// header comment for why this stays isolated from the shared apparelProDarkTheme /
-// useApparelProTable() hook that every other screen uses.
-export const mockupColors = {
-  bg: "#0A0E14",
-  surface: "#141922",
-  input: "#0D1117",
-  border: "#232a36",
-  text: "#F4F6F8",
-  muted: "#8B93A1",
-  accent: "#60a5fa",
-  accentText: "#93c5fd",
-  danger: "#f87171",
-};
+// RETIRED (2026-09-03): this screen used to carry its own isolated "mockup"
+// dark-card look instead of the shared olive/copper theme every other screen
+// uses (see the old header comment on garment-additional-cost.component.tsx
+// for the original rationale). Now converted over to the shared theme
+// (DASHBOARD_COLORS / useDropdownTheme / useApparelProTable-style tokens) -
+// kept here, commented out, purely as a color reference in case anyone needs
+// to see what the old mockup palette looked like:
+//
+// export const mockupColors = {
+//   bg: "#0A0E14",          // page background
+//   surface: "#141922",     // card/panel background
+//   input: "#0D1117",       // form field background
+//   border: "#232a36",      // card/field/table border
+//   text: "#F4F6F8",        // primary text
+//   muted: "#8B93A1",       // secondary/muted text, table headers
+//   accent: "#60a5fa",      // sky-blue accent - buttons, selected state, links
+//   accentText: "#93c5fd",  // lighter blue - info banner text
+//   danger: "#f87171",      // delete icon color
+// };

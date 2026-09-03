@@ -18,6 +18,8 @@ import {
 } from "./material-consumption.types";
 import type { Buyer } from "../../interfaces/references/Buyer";
 import type { Currency } from "../../interfaces/references/Currency";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
 
 interface ScopeHeaderProps {
   onScopeChange: (context: SelectedScopeContext | null) => void;
@@ -26,6 +28,8 @@ interface ScopeHeaderProps {
 export default function ConsumptionScopeHeader({
   onScopeChange,
 }: ScopeHeaderProps) {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [selectedType, setSelectedType] =
@@ -141,7 +145,15 @@ export default function ConsumptionScopeHeader({
   };
 
   return (
-    <Card variant="outlined" sx={{ p: 2, mb: 2, backgroundColor: "#fafafa" }}>
+    <Card
+      variant="outlined"
+      sx={{
+        p: 2,
+        mb: 2,
+        backgroundColor: DASHBOARD_COLORS.cardBg,
+        borderColor: DASHBOARD_COLORS.border,
+      }}
+    >
       {/* Expanded grid spacing wrapper for clean 5-column or double-row rendering */}
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -153,8 +165,9 @@ export default function ConsumptionScopeHeader({
             isOptionEqualToValue={(option, value) =>
               option.buyerCode === value?.buyerCode
             }
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(params) => (
-              <TextField {...params} label="Select Buyer" size="small" />
+              <TextField {...params} label="Select Buyer" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>
@@ -167,11 +180,13 @@ export default function ConsumptionScopeHeader({
             value={selectedOrder}
             onChange={(_, val) => handleOrderChange(val)}
             isOptionEqualToValue={(option, value) => option === value}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(params) => (
               <TextField
                 {...params}
                 label="Select Purchase Order"
                 size="small"
+                sx={dropdownFieldSx}
               />
             )}
           />
@@ -187,8 +202,9 @@ export default function ConsumptionScopeHeader({
             value={selectedType}
             onChange={(_, val) => handleTypeChange(val)}
             isOptionEqualToValue={(option, value) => option.id === value?.id}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(params) => (
-              <TextField {...params} label="Select Garment Type" size="small" />
+              <TextField {...params} label="Select Garment Type" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>
@@ -205,8 +221,9 @@ export default function ConsumptionScopeHeader({
             value={selectedStyle}
             onChange={(_, val) => handleStyleChange(val)}
             isOptionEqualToValue={(option, value) => option.id === value?.id}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(params) => (
-              <TextField {...params} label="Select Active Style" size="small" />
+              <TextField {...params} label="Select Active Style" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>
@@ -222,8 +239,9 @@ export default function ConsumptionScopeHeader({
             value={selectedCurrency}
             onChange={(_, val) => handleCurrencyChange(val)}
             isOptionEqualToValue={(option, value) => option.id === value?.id}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(params) => (
-              <TextField {...params} label="Ledger Currency" size="small" />
+              <TextField {...params} label="Ledger Currency" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>

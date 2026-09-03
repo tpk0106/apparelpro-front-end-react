@@ -43,7 +43,10 @@ export const workspaceSectionLabelSx: SxProps<Theme> = {
 // treatment - spread this LAST if you also set minWidth/height/disabled sx so
 // your overrides win. Wrap the button's text in the exported span helper
 // below so it stays above the gloss's ::before/::after highlight layers.
-export const primaryActionButtonSx: SxProps<Theme> = copperGlossButtonSx;
+// Deliberately untyped (no `: SxProps<Theme>`) - see button-color-themes.ts's
+// note on copperGlossButtonSx for why: that broader type can't be spread
+// inside a nested selector object, only as a top-level `sx` prop value.
+export const primaryActionButtonSx = copperGlossButtonSx;
 
 // Wrap a primary button's text content with this to keep it legible over the
 // gloss overlay: <Button sx={primaryActionButtonSx}><ThemedButtonLabel>Save</ThemedButtonLabel></Button>
@@ -79,6 +82,21 @@ export function plainTableHeaderCellSx(): SxProps<Theme> {
     backgroundColor: `${DASHBOARD_COLORS.accent} !important`,
   };
 }
+
+// The native <input type="date"> calendar icon is a browser-drawn SVG whose
+// glyph color is fixed black, unaffected by the field's own text/icon color -
+// it renders invisible against this app's dark field backgrounds. There's no
+// direct "set this icon to hex X" CSS property for it, so this approximates
+// the same tan/khaki tone as the dropdown arrow (oliveDropdownTheme.iconColor,
+// #B7AE86) via a filter on the black glyph. Spread this alongside a field's
+// own sx (it has no overlapping keys with dropdownFieldSx/selectFieldSx).
+export const dateIconFieldSx: SxProps<Theme> = {
+  "& input[type='date']::-webkit-calendar-picker-indicator": {
+    filter:
+      "invert(78%) sepia(11%) saturate(694%) hue-rotate(358deg) brightness(88%) contrast(85%)",
+    cursor: "pointer",
+  },
+};
 
 export function plainTableBodyRowSx(highlighted = false): SxProps<Theme> {
   return {

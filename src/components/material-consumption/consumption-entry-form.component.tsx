@@ -38,6 +38,10 @@ import {
 import type { SupplierServiceModel } from "../../tanstack-hooks/interfaces";
 import type { Unit } from "../../interfaces/references/Unit";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
 
 interface EntryFormProps {
   styleContext: StyleContext;
@@ -52,6 +56,28 @@ export default function ConsumptionEntryForm({
   onCommitSuccess,
   editingRow,
 }: EntryFormProps) {
+  // Same dark field theme the Order Confirmation form uses.
+  const { theme: dropdownTheme, fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const formLabelSx = { color: dropdownTheme.labelText };
+  const selectMenuProps = {
+    slotProps: {
+      paper: {
+        sx: {
+          backgroundColor: `${dropdownTheme.panelBg} !important`,
+          border: `1px solid ${dropdownTheme.panelBorder}`,
+        },
+      },
+    },
+  };
+  const menuItemSx = {
+    color: `${dropdownTheme.optionText} !important`,
+    "&:hover": { backgroundColor: `${dropdownTheme.optionHoverBg} !important` },
+    "&.Mui-selected": {
+      backgroundColor: `${dropdownTheme.optionSelectedBg} !important`,
+      color: `${dropdownTheme.optionSelectedText} !important`,
+    },
+  };
+
   const [form, setForm] = useState<FormInputs>({
     feature1: "",
     feature2: "",
@@ -296,8 +322,7 @@ export default function ConsumptionEntryForm({
     <Box>
       <Typography
         variant="h6"
-        sx={{ fontWeight: "bold", mb: 2, color: "#ffffff" }}
-        //sx={{ fontWeight: "bold", mb: 2, color: "#1a237e" }}
+        sx={{ fontWeight: "bold", mb: 2, color: DASHBOARD_COLORS.accentStrong }}
       >
         Selected: {selectedMaterial.description} ({selectedMaterial.stockCode}/
         {selectedMaterial.itemCode})
@@ -309,20 +334,37 @@ export default function ConsumptionEntryForm({
         </Alert>
       )}
 
-      <Card variant="outlined" sx={{ p: 3, backgroundColor: "#fff" }}>
+      <Card
+        variant="outlined"
+        sx={{
+          p: 3,
+          backgroundColor: DASHBOARD_COLORS.cardBg,
+          borderColor: DASHBOARD_COLORS.border,
+        }}
+      >
         <Grid container spacing={2}>
-          {editingRow &&
-            (featureMap?.feature1 ||
-              featureMap?.feature2 ||
-              featureMap?.feature3 ||
-              featureMap?.feature4) && (
-              <Grid size={12}>
-                <Alert severity="info" sx={{ py: 0.5 }}>
-                  Feature values are locked while editing — start a new entry to
-                  change the material variant.
-                </Alert>
-              </Grid>
-            )}
+          {/* FIXED: previously only rendered while editingRow was set, which
+              made the form measurably taller in edit mode than for a new
+              entry - the left Materials panel is a fixed height matched to
+              the form's new-entry height, so that extra row pushed the two
+              panels out of alignment. visibility: hidden (not a conditional
+              render) reserves this row's space at all times, so the form's
+              height is identical in both modes, while the message itself
+              still only becomes visible when it's actually true. */}
+          {featureMap?.feature1 ||
+          featureMap?.feature2 ||
+          featureMap?.feature3 ||
+          featureMap?.feature4 ? (
+            <Grid size={12}>
+              <Alert
+                severity="info"
+                sx={{ py: 0.5, visibility: editingRow ? "visible" : "hidden" }}
+              >
+                Feature values are locked while editing — start a new entry to
+                change the material variant.
+              </Alert>
+            </Grid>
+          ) : null}
           {/* Group 1: Dynamic Features Section */}
           {featureMap?.feature1 && (
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -342,6 +384,7 @@ export default function ConsumptionEntryForm({
                     style: { textTransform: "uppercase" },
                   },
                 }}
+                sx={dropdownFieldSx}
               />
             </Grid>
           )}
@@ -363,6 +406,7 @@ export default function ConsumptionEntryForm({
                     style: { textTransform: "uppercase" },
                   },
                 }}
+                sx={dropdownFieldSx}
               />
             </Grid>
           )}
@@ -384,6 +428,7 @@ export default function ConsumptionEntryForm({
                     style: { textTransform: "uppercase" },
                   },
                 }}
+                sx={dropdownFieldSx}
               />
             </Grid>
           )}
@@ -405,6 +450,7 @@ export default function ConsumptionEntryForm({
                     style: { textTransform: "uppercase" },
                   },
                 }}
+                sx={dropdownFieldSx}
               />
             </Grid>
           )}
@@ -420,6 +466,7 @@ export default function ConsumptionEntryForm({
               fullWidth
               value={form.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
+              sx={dropdownFieldSx}
             />
           </Grid>
 
@@ -432,7 +479,7 @@ export default function ConsumptionEntryForm({
           <Grid size={12}>
             <FormLabel
               component="legend"
-              sx={{ fontSize: "0.875rem", fontWeight: 600, mb: 0.5 }}
+              sx={{ fontSize: "0.875rem", fontWeight: 600, mb: 0.5, ...formLabelSx }}
             >
               Calculate Consumptions?
             </FormLabel>
@@ -449,13 +496,31 @@ export default function ConsumptionEntryForm({
             >
               <FormControlLabel
                 value="Yes"
-                control={<Radio size="small" color="primary" />}
+                control={
+                  <Radio
+                    size="small"
+                    sx={{
+                      color: copperTextColor,
+                      "&.Mui-checked": { color: copperTextColor },
+                    }}
+                  />
+                }
                 label="Yes - Calculate from Garment Qty"
+                sx={{ color: DASHBOARD_COLORS.textPrimary }}
               />
               <FormControlLabel
                 value="No"
-                control={<Radio size="small" color="secondary" />}
+                control={
+                  <Radio
+                    size="small"
+                    sx={{
+                      color: copperTextColor,
+                      "&.Mui-checked": { color: copperTextColor },
+                    }}
+                  />
+                }
                 label="No - Enter Total Consumption Manually"
+                sx={{ color: DASHBOARD_COLORS.textPrimary }}
               />
             </RadioGroup>
           </Grid>
@@ -474,13 +539,15 @@ export default function ConsumptionEntryForm({
               onChange={(e) =>
                 handleInputChange("garmentColor", e.target.value)
               }
+              sx={dropdownFieldSx}
+              slotProps={{ select: { MenuProps: selectMenuProps } }}
             >
               {/* Explicit empty string option allows operators to apply consumption globally across all colours */}
-              <MenuItem value="">
+              <MenuItem value="" sx={menuItemSx}>
                 <em>UNIVERSAL (Applies to all Fabric Colours)</em>
               </MenuItem>
               {availableColors.map((colorStr) => (
-                <MenuItem key={colorStr} value={colorStr}>
+                <MenuItem key={colorStr} value={colorStr} sx={menuItemSx}>
                   {colorStr}
                 </MenuItem>
               ))}
@@ -495,12 +562,14 @@ export default function ConsumptionEntryForm({
               fullWidth
               value={form.garmentSize}
               onChange={(e) => handleInputChange("garmentSize", e.target.value)}
+              sx={dropdownFieldSx}
+              slotProps={{ select: { MenuProps: selectMenuProps } }}
             >
-              <MenuItem value="">
+              <MenuItem value="" sx={menuItemSx}>
                 <em>UNIVERSAL (Applies to all Dimensional Sizes)</em>
               </MenuItem>
               {availableSizes.map((sizeStr) => (
-                <MenuItem key={sizeStr} value={sizeStr}>
+                <MenuItem key={sizeStr} value={sizeStr} sx={menuItemSx}>
                   {sizeStr}
                 </MenuItem>
               ))}
@@ -544,9 +613,11 @@ export default function ConsumptionEntryForm({
               onChange={(e) =>
                 handleInputChange("consumptionUnit", e.target.value)
               }
+              sx={dropdownFieldSx}
+              slotProps={{ select: { MenuProps: selectMenuProps } }}
             >
               {unitsList.map((unit) => (
-                <MenuItem key={unit.id} value={unit.code}>
+                <MenuItem key={unit.id} value={unit.code} sx={menuItemSx}>
                   {unit.code} ({unit.description})
                 </MenuItem>
               ))}
@@ -562,6 +633,7 @@ export default function ConsumptionEntryForm({
               onChange={(e) =>
                 handleInputChange("quantityPerGarment", e.target.value)
               }
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
@@ -574,6 +646,7 @@ export default function ConsumptionEntryForm({
               onChange={(e) =>
                 handleInputChange("allowancePercentage", e.target.value)
               }
+              sx={dropdownFieldSx}
             />
           </Grid>
           </>
@@ -599,6 +672,7 @@ export default function ConsumptionEntryForm({
               helperText={`Enter the total quantity required, in ${
                 form.finalItemUnit || "the selected purchase unit"
               }.`}
+              sx={dropdownFieldSx}
             />
           </Grid>
           )}
@@ -643,6 +717,7 @@ export default function ConsumptionEntryForm({
               isOptionEqualToValue={(option, value) =>
                 option.code === value?.code
               }
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -650,6 +725,7 @@ export default function ConsumptionEntryForm({
                   size="small"
                   fullWidth
                   required
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -676,6 +752,7 @@ export default function ConsumptionEntryForm({
               isOptionEqualToValue={(option, value) =>
                 option.supplierCode === value?.supplierCode
               }
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -683,6 +760,7 @@ export default function ConsumptionEntryForm({
                   size="small"
                   fullWidth
                   required
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -707,6 +785,7 @@ export default function ConsumptionEntryForm({
               fullWidth
               value={form.unitPrice}
               onChange={(e) => handleInputChange("unitPrice", e.target.value)}
+              sx={dropdownFieldSx}
             />
           </Grid>
         </Grid>
@@ -714,7 +793,7 @@ export default function ConsumptionEntryForm({
         {/* Action Panel Actions Block */}
         <Box
           sx={{
-            borderTop: "1px solid #dee2e6",
+            borderTop: `1px solid ${DASHBOARD_COLORS.border}`,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -725,7 +804,6 @@ export default function ConsumptionEntryForm({
           {calculateConsumption ? (
             <Button
               variant="contained"
-              color="primary"
               startIcon={
                 isCalculating ? <CircularProgress size={20} /> : <CalculateIcon />
               }
@@ -733,13 +811,14 @@ export default function ConsumptionEntryForm({
                 isCalculating || !form.consumptionUnit || !form.finalItemUnit
               }
               onClick={handleRunCalculation}
+              sx={primaryActionButtonSx}
             >
-              Calculate Consumption
+              <span style={themedButtonLabelStyle}>Calculate Consumption</span>
             </Button>
           ) : (
             <Typography
               variant="body2"
-              sx={{ color: "text.secondary", fontStyle: "italic" }}
+              sx={{ color: DASHBOARD_COLORS.textSecondary, fontStyle: "italic" }}
             >
               Manual entry mode - Total Consumption entered directly above.
             </Typography>
@@ -750,7 +829,7 @@ export default function ConsumptionEntryForm({
               variant="h6"
               sx={{
                 fontWeight: "bold",
-                color: "#2e7d32",
+                color: DASHBOARD_COLORS.accentStrong,
                 fontFamily: "monospace",
               }}
             >
@@ -761,7 +840,6 @@ export default function ConsumptionEntryForm({
 
           <Button
             variant="contained"
-            color="success"
             startIcon={
               isSaving ? (
                 <CircularProgress size={20} color="inherit" />
@@ -769,6 +847,7 @@ export default function ConsumptionEntryForm({
                 <AddShoppingCartIcon />
               )
             }
+            sx={primaryActionButtonSx}
             disabled={
               // Calculated mode: unchanged - must have run Calculate at least
               // once. Manual mode: must have entered a positive Total
@@ -911,7 +990,7 @@ export default function ConsumptionEntryForm({
               }
             }}
           >
-            {isSaving ? "Saving..." : "Save"}
+            <span style={themedButtonLabelStyle}>{isSaving ? "Saving..." : "Save"}</span>
           </Button>
         </Box>
       </Card>

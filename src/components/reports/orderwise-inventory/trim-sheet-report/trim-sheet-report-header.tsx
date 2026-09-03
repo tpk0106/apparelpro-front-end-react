@@ -14,6 +14,9 @@ import type { Style } from "../../../../interfaces/order-management/Style";
 import type { TrimSheetReportScopeContext } from "./trim-sheet-report.types";
 import type { GarmentTypeServiceModel } from "../../../material-consumption/material-consumption.types";
 import type { Buyer } from "../../../../interfaces/references/Buyer";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../../themes/useDropdownTheme";
+import { workspaceInfoCaptionSx } from "../../../../themes/workspace-theme";
 
 interface TrimSheetReportHeaderProps {
   // Broadcasts the fully-resolved Buyer/Order/Type/Style scope up to the workspace
@@ -28,6 +31,7 @@ interface TrimSheetReportHeaderProps {
 export default function TrimSheetReportHeader({
   onScopeLock,
 }: TrimSheetReportHeaderProps) {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [selectedType, setSelectedType] =
@@ -110,16 +114,16 @@ export default function TrimSheetReportHeader({
       sx={{
         p: 2.5,
         mb: 3,
-        backgroundColor: "#fafafa",
-        borderLeft: "5px solid #1a237e",
+        backgroundColor: DASHBOARD_COLORS.cardBg,
+        border: `1px solid ${DASHBOARD_COLORS.border}`,
+        borderLeft: `5px solid ${DASHBOARD_COLORS.accent}`,
       }}
     >
       <Typography
         variant="caption"
         sx={{
-          display: "block",
+          ...workspaceInfoCaptionSx,
           fontWeight: "bold",
-          color: "text.secondary",
           mb: 2,
           textTransform: "uppercase",
         }}
@@ -136,8 +140,9 @@ export default function TrimSheetReportHeader({
             onChange={(_, v: Buyer | null) => handleBuyerChange(v)}
             loading={isBuyersLoading}
             isOptionEqualToValue={(o, v) => o.buyerCode === v?.buyerCode}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(p) => (
-              <TextField {...p} label="Select Buyer" size="small" />
+              <TextField {...p} label="Select Buyer" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>
@@ -151,8 +156,9 @@ export default function TrimSheetReportHeader({
             onChange={(_, v: string | null) => handleOrderChange(v)}
             loading={isOrdersLoading}
             isOptionEqualToValue={(o, v) => o === v}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(p) => (
-              <TextField {...p} label="Select Purchase Order" size="small" />
+              <TextField {...p} label="Select Purchase Order" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>
@@ -168,8 +174,9 @@ export default function TrimSheetReportHeader({
             }
             loading={isTypesLoading}
             isOptionEqualToValue={(o, v) => o.id === v?.id}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(p) => (
-              <TextField {...p} label="Select Garment Type" size="small" />
+              <TextField {...p} label="Select Garment Type" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>
@@ -185,8 +192,9 @@ export default function TrimSheetReportHeader({
             onChange={(_, v: Style | null) => handleStyleChange(v)}
             loading={isStylesLoading}
             isOptionEqualToValue={(o, v) => o.id === v?.id}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(p) => (
-              <TextField {...p} label="Select Active Style" size="small" />
+              <TextField {...p} label="Select Active Style" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>

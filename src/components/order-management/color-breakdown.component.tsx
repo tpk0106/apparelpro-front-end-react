@@ -19,6 +19,9 @@ import {
   useBulkSaveColorQuantityRatiosMutation,
   useSetColorRatioModeMutation,
 } from "../../tanstack-hooks/custom-hooks";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { oliveGlossSx } from "../../themes/button-color-themes";
+import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
 
 interface ColorBreakdownProps {
   styleContext: StyleContext;
@@ -145,7 +148,15 @@ export default function ColorBreakdown({
   };
 
   return (
-    <Card sx={{ p: 3, mt: 2, boxShadow: 3 }}>
+    <Card
+      sx={{
+        p: 3,
+        mt: 2,
+        boxShadow: 3,
+        backgroundColor: DASHBOARD_COLORS.cardBg,
+        border: `1px solid ${DASHBOARD_COLORS.border}`,
+      }}
+    >
       <Box
         sx={{
           display: "flex",
@@ -155,10 +166,13 @@ export default function ColorBreakdown({
         }}
       >
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: "bold", color: "#fff" }}>
+          <Typography
+            variant="h5"
+            sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.accentStrong }}
+          >
             Stage 1: Colour Target Allocation Setup
           </Typography>
-          <Typography variant="body2" sx={{ color: "#fff" }}>
+          <Typography variant="body2" sx={{ color: DASHBOARD_COLORS.textSecondary }}>
             Define unique production colour blocks and{" "}
             {isRatioMode ? "ratios" : "piece targets"} for Style:{" "}
             <strong>{styleContext.styleCode}</strong>
@@ -171,49 +185,50 @@ export default function ColorBreakdown({
             size="small"
             onChange={handleModeChange}
             sx={{
-              backgroundColor: "#60a5fa",
+              ...oliveGlossSx,
               borderRadius: 1,
               p: "3px",
               "& .MuiToggleButton-root": {
-                color: "#fff",
+                position: "relative",
+                zIndex: 1,
+                color: "#F3EADF",
                 fontWeight: "bold",
                 border: "none",
                 borderRadius: "6px !important",
                 px: 2,
-                // Unselected: blends into the blue bar - selected: inverts to
-                // a solid white pill with navy text + a checkmark, so which
-                // mode is active is unmistakable at a glance, not just a
-                // subtle shade difference between two blues.
+                // Unselected: blends into the olive gloss bar - selected:
+                // switches to the copper gloss with a checkmark, so which
+                // mode is active is unmistakable at a glance.
                 "&.Mui-selected": {
-                  backgroundColor: "#fff",
-                  color: "#1a237e",
-                  "&:hover": { backgroundColor: "#fff" },
+                  ...primaryActionButtonSx,
                 },
-                "&:hover": { backgroundColor: "rgba(255,255,255,0.2)" },
+                "&:hover": { backgroundColor: "rgba(255,255,255,0.15)" },
               },
             }}
           >
             <ToggleButton value="Q">
               {colorMode === "Q" && (
-                <CheckCircleIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                <CheckCircleIcon sx={{ fontSize: 16, mr: 0.5, position: "relative", zIndex: 1 }} />
               )}
-              Quantity
+              <span style={themedButtonLabelStyle}>Quantity</span>
             </ToggleButton>
             <ToggleButton value="R">
               {colorMode === "R" && (
-                <CheckCircleIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                <CheckCircleIcon sx={{ fontSize: 16, mr: 0.5, position: "relative", zIndex: 1 }} />
               )}
-              Ratio
+              <span style={themedButtonLabelStyle}>Ratio</span>
             </ToggleButton>
           </ToggleButtonGroup>
           <Typography
             variant="h6"
             sx={{
-              background: "#e8eaf6",
+              display: "inline-block",
               p: 1,
               borderRadius: 1,
               fontWeight: "bold",
-              color: "#1a237e",
+              backgroundColor: "rgba(159,174,94,0.18)",
+              border: `1px solid ${DASHBOARD_COLORS.border}`,
+              color: DASHBOARD_COLORS.accentStrong,
             }}
           >
             Bulk Style Target: {bulkQuantity.toLocaleString()} Pcs
@@ -268,18 +283,15 @@ export default function ColorBreakdown({
         isRatioMode={isRatioMode}
       />
 
-      <Box
-        sx={{ display: "flex", justifyContent: "flex-end", marginTop: "3px" }}
-      >
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
         <Button
           variant="contained"
           size="large"
-          color="success"
           disabled={isSetupInvalid}
           onClick={handleProceed}
-          sx={{ px: 4, fontWeight: "bold" }}
+          sx={{ ...primaryActionButtonSx, px: 4, fontWeight: "bold" }}
         >
-          Generate Size Distribution Matrix →
+          <span style={themedButtonLabelStyle}>Generate Size Distribution Matrix →</span>
         </Button>
       </Box>
 

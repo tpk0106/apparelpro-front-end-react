@@ -141,6 +141,11 @@ const ColorBreakdownTable = ({
     enableBottomToolbar: false,
     getRowId: (row) => row.colorCode,
     enableRowActions: true,
+    // Column header still sorts on click (enableSorting stays default true) -
+    // this only removes the kebab menu's other actions (filter, hide, pin,
+    // drag-reorder). Separate from enableRowActions above, which is the
+    // per-row Edit/Delete icon column and stays on.
+    enableColumnActions: false,
 
     onEditingRowSave: ({ values, exitEditingMode }) => {
       const sanitizedValues: LocalColorRow = {

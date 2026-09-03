@@ -30,7 +30,12 @@ import type { Buyer } from "../../interfaces/references/Buyer";
 import type { AppError } from "../../auth/axiosClient";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 import { useDropdownTheme } from "../../themes/useDropdownTheme";
-import { primaryActionButtonSx, themedButtonLabelStyle, workspaceHeadingSx } from "../../themes/workspace-theme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  workspaceInfoCaptionSx,
+} from "../../themes/workspace-theme";
 
 export default function StockMovementItemReportWorkspace() {
   const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
@@ -152,10 +157,10 @@ export default function StockMovementItemReportWorkspace() {
           }}
         >
           <Box>
-            <Typography variant="h5" sx={workspaceHeadingSx}>
+            <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 0.5 }}>
               Stock Movement — for an Item
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={workspaceInfoCaptionSx}>
               Legacy reference: in_smve1.prg
             </Typography>
           </Box>
@@ -295,7 +300,7 @@ export default function StockMovementItemReportWorkspace() {
             />
 
             <Divider sx={{ my: 2 }} />
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={workspaceInfoCaptionSx}>
               * Additional Issue Note (4X) is shown for reference but never affects
               the running balance, and Stock Adjustment Note (3A) sets the balance
               directly rather than adding to it — both replicate legacy IN_SMVE1.PRG
@@ -312,7 +317,7 @@ function LegendItem({ color, label }: { color: string; label: string }) {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
       <Box sx={{ width: 12, height: 12, borderRadius: "3px", backgroundColor: color }} />
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" sx={workspaceInfoCaptionSx}>
         {label}
       </Typography>
     </Box>

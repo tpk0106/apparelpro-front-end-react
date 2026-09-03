@@ -16,7 +16,6 @@ import {
 import {
   type MRT_Row,
   MaterialReactTable,
-  useMaterialReactTable,
   type MRT_ColumnDef,
 } from "material-react-table";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -30,6 +29,10 @@ import {
   useSavePartShipmentLineMutation,
   useDeletePartShipmentLineMutation,
 } from "../../services/order-management/part-shipment.service";
+import { useApparelProTable } from "../../themes/useApparelProTable";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { dateIconFieldSx, primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
 
 // Import your existing live master lookup hook for units reference validation
 import { useGetUnits, useGetDestinations } from "../../tanstack-hooks/custom-hooks";
@@ -72,6 +75,32 @@ export default function PartShipmentsGrid({
   shipmentsData,
   isLoading,
 }: GridProps) {
+  // Same dark field theme the Order Confirmation form uses, applied to this
+  // modal's TextFields/Selects so it matches the app's form look instead of
+  // MUI's default light styling.
+  const { theme: dropdownTheme, fieldSx: dropdownFieldSx } = useDropdownTheme();
+  const modalSelectMenuProps = {
+    slotProps: {
+      paper: {
+        sx: {
+          backgroundColor: `${dropdownTheme.panelBg} !important`,
+          border: `1px solid ${dropdownTheme.panelBorder}`,
+        },
+      },
+    },
+  };
+  const modalMenuItemSx = {
+    color: `${dropdownTheme.optionText} !important`,
+    "&:hover": { backgroundColor: `${dropdownTheme.optionHoverBg} !important` },
+    "&.Mui-selected": {
+      backgroundColor: `${dropdownTheme.optionSelectedBg} !important`,
+      color: `${dropdownTheme.optionSelectedText} !important`,
+    },
+  };
+  // Shared filter that tints the native date-picker's black calendar icon to
+  // match the dropdown arrow color - see dateIconFieldSx in workspace-theme.ts.
+  const dateIconSx = dateIconFieldSx;
+
   // 1. Central Mutation Tracking Hooks
   const [saveLine] = useSavePartShipmentLineMutation();
   const [deleteLine] = useDeletePartShipmentLineMutation();
@@ -248,7 +277,7 @@ export default function PartShipmentsGrid({
       {
         accessorKey: "subContractFlag",
         header: "Sub Contract",
-        size: 90,
+        size: 70,
         editSelectOptions: ["N", "Y"],
         editVariant: "select",
         Cell: ({ cell }) => (cell.getValue() === "Y" ? "YES [Y]" : "NO [N]"),
@@ -256,7 +285,7 @@ export default function PartShipmentsGrid({
       {
         accessorKey: "newOrder",
         header: "Order No.",
-        size: 110,
+        size: 80,
         Edit: ({ cell, row }) => (
           <TextField
             size="small"
@@ -276,7 +305,7 @@ export default function PartShipmentsGrid({
       {
         accessorKey: "destinationCode",
         header: "Dest.",
-        size: 70,
+        size: 60,
         Edit: ({ cell, row }) => (
           <TextField
             select
@@ -299,7 +328,7 @@ export default function PartShipmentsGrid({
       {
         accessorKey: "shipDate",
         header: "Shp.Date",
-        size: 110,
+        size: 85,
         Cell: ({ cell }) =>
           cell.getValue() ? String(cell.getValue()).split("T")[0] : "",
         Edit: ({ cell, row }) => (
@@ -314,13 +343,14 @@ export default function PartShipmentsGrid({
               handleCellEditBlur(row, "shipDate", e.target.value || null)
             }
             slotProps={{ htmlInput: { style: { fontSize: "13px" } } }}
+            sx={dateIconSx}
           />
         ),
       },
       {
         accessorKey: "unit",
         header: "Unit",
-        size: 80,
+        size: 55,
         Edit: ({ cell, row }) => (
           <TextField
             select
@@ -341,7 +371,7 @@ export default function PartShipmentsGrid({
       {
         accessorKey: "quantity",
         header: "Qty.",
-        size: 100,
+        size: 80,
         Cell: ({ cell }) =>
           Number(cell.getValue()).toLocaleString(undefined, {
             minimumFractionDigits: 2,
@@ -366,14 +396,14 @@ export default function PartShipmentsGrid({
       {
         accessorKey: "shippingMode",
         header: "Shp.Mode",
-        size: 90,
+        size: 70,
         editSelectOptions: ["SEA", "AIR"],
         editVariant: "select",
       },
       {
         accessorKey: "quotaCountry",
         header: "Quota Country",
-        size: 110,
+        size: 85,
         Edit: ({ cell, row }) => (
           <TextField
             size="small"
@@ -398,14 +428,14 @@ export default function PartShipmentsGrid({
       {
         accessorKey: "quotaStatus",
         header: "Qta.;Stat",
-        size: 80,
+        size: 65,
         editSelectOptions: ["N", "Q"],
         editVariant: "select",
       },
       {
         accessorKey: "fromYearMonth",
         header: "From YYMM",
-        size: 90,
+        size: 70,
         Edit: ({ cell, row }) => (
           <TextField
             size="small"
@@ -423,7 +453,7 @@ export default function PartShipmentsGrid({
       {
         accessorKey: "quotaCategory",
         header: "Qta.;Cat.",
-        size: 90,
+        size: 70,
         Edit: ({ cell, row }) => (
           <TextField
             size="small"
@@ -448,7 +478,7 @@ export default function PartShipmentsGrid({
       {
         accessorKey: "quotaType",
         header: "Cat.;Type",
-        size: 90,
+        size: 65,
         editSelectOptions: ["", "OR", "AD", "PL"],
         editVariant: "select",
       },
@@ -456,7 +486,7 @@ export default function PartShipmentsGrid({
     [handleCellEditBlur, systemUnits],
   );
 
-  const table = useMaterialReactTable({
+  const table = useApparelProTable<PartShipmentRow>({
     columns,
     data: shipmentsData,
     state: { isLoading },
@@ -465,6 +495,18 @@ export default function PartShipmentsGrid({
     enablePagination: false,
     enableRowActions: true,
     enableTopToolbar: true,
+    // Column sizes above were trimmed to fit without horizontal scrolling -
+    // table-layout: fixed makes those declared widths authoritative instead
+    // of the browser expanding columns to fit cell content (same fix as
+    // SizeBreakdownTable's SIZE DIMENSION column).
+    enableColumnResizing: false,
+    muiTableProps: {
+      sx: { tableLayout: "fixed" },
+    },
+    // Column header still sorts on click - this only removes the kebab
+    // menu's other actions (filter, hide, pin, drag-reorder), matching the
+    // Colour/Size tables' convention.
+    enableColumnActions: false,
     initialState: { density: "compact" },
     renderRowActions: ({ row }) => (
       <IconButton
@@ -476,13 +518,15 @@ export default function PartShipmentsGrid({
     ),
     renderTopToolbarCustomActions: () => (
       <Button
-        variant="outlined"
-        color="primary"
+        variant="contained"
         size="small"
         startIcon={<PostAddIcon />}
         onClick={() => setOpenModal(true)}
+        sx={primaryActionButtonSx}
       >
-        [Ins] Create Split Shipment Delivery Manifest Row
+        <span style={themedButtonLabelStyle}>
+          Create Split Shipment Delivery Manifest
+        </span>
       </Button>
     ),
   });
@@ -497,13 +541,27 @@ export default function PartShipmentsGrid({
         onClose={() => setOpenModal(false)}
         maxWidth="sm"
         fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              backgroundColor: DASHBOARD_COLORS.cardBg,
+              border: `1px solid ${DASHBOARD_COLORS.border}`,
+              boxShadow: "0 10px 28px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.3)",
+            },
+          },
+        }}
       >
         <DialogTitle
-          sx={{ fontWeight: "bold", color: "#1a237e", fontSize: "16px" }}
+          sx={{
+            fontWeight: "bold",
+            color: DASHBOARD_COLORS.accentStrong,
+            fontSize: "16px",
+            textTransform: "uppercase",
+          }}
         >
           New Shipment Delivery Manifest Entry
         </DialogTitle>
-        <DialogContent dividers>
+        <DialogContent dividers sx={{ borderColor: DASHBOARD_COLORS.border }}>
           <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 2 }}>
             <Box
               sx={{
@@ -520,9 +578,11 @@ export default function PartShipmentsGrid({
                 onChange={(e) =>
                   setNewForm((p) => ({ ...p, subContractFlag: e.target.value }))
                 }
+                sx={dropdownFieldSx}
+                slotProps={{ select: { MenuProps: modalSelectMenuProps } }}
               >
-                <MenuItem value="N">NO [N]</MenuItem>
-                <MenuItem value="Y">YES [Y]</MenuItem>
+                <MenuItem value="N" sx={modalMenuItemSx}>NO [N]</MenuItem>
+                <MenuItem value="Y" sx={modalMenuItemSx}>YES [Y]</MenuItem>
               </TextField>
               <TextField
                 label="Split Order No."
@@ -535,6 +595,7 @@ export default function PartShipmentsGrid({
                     newOrder: e.target.value.toUpperCase(),
                   }))
                 }
+                sx={dropdownFieldSx}
               />
             </Box>
             <Box
@@ -555,9 +616,15 @@ export default function PartShipmentsGrid({
                     destinationCode: e.target.value,
                   }))
                 }
+                sx={dropdownFieldSx}
+                slotProps={{ select: { MenuProps: modalSelectMenuProps } }}
               >
                 {systemDestinations.map((d: PortDestination) => (
-                  <MenuItem key={`${d.countryCode}-${d.code}`} value={d.code}>
+                  <MenuItem
+                    key={`${d.countryCode}-${d.code}`}
+                    value={d.code}
+                    sx={modalMenuItemSx}
+                  >
                     {d.code} - {d.destinationName}
                   </MenuItem>
                 ))}
@@ -572,6 +639,10 @@ export default function PartShipmentsGrid({
                   setNewForm((p) => ({ ...p, shipDate: e.target.value }))
                 }
                 slotProps={{ inputLabel: { shrink: true } }}
+                sx={{
+                  ...(dropdownFieldSx as Record<string, unknown>),
+                  ...(dateIconSx as Record<string, unknown>),
+                }}
               />
             </Box>
             <Box
@@ -589,9 +660,11 @@ export default function PartShipmentsGrid({
                 onChange={(e) =>
                   setNewForm((p) => ({ ...p, unit: e.target.value }))
                 }
+                sx={dropdownFieldSx}
+                slotProps={{ select: { MenuProps: modalSelectMenuProps } }}
               >
                 {systemUnits.map((u: Unit) => (
-                  <MenuItem key={u.id} value={u.code}>
+                  <MenuItem key={u.id} value={u.code} sx={modalMenuItemSx}>
                     {u.code}
                   </MenuItem>
                 ))}
@@ -608,6 +681,7 @@ export default function PartShipmentsGrid({
                     quantity: Number(e.target.value),
                   }))
                 }
+                sx={dropdownFieldSx}
               />
               <TextField
                 select
@@ -618,23 +692,30 @@ export default function PartShipmentsGrid({
                 onChange={(e) =>
                   setNewForm((p) => ({ ...p, shippingMode: e.target.value }))
                 }
+                sx={dropdownFieldSx}
+                slotProps={{ select: { MenuProps: modalSelectMenuProps } }}
               >
-                <MenuItem value="SEA">SEA</MenuItem>
-                <MenuItem value="AIR">AIR</MenuItem>
+                <MenuItem value="SEA" sx={modalMenuItemSx}>SEA</MenuItem>
+                <MenuItem value="AIR" sx={modalMenuItemSx}>AIR</MenuItem>
               </TextField>
             </Box>
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenModal(false)} color="secondary">
-            Cancel
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setOpenModal(false)}
+            type="button"
+            variant="contained"
+            sx={primaryActionButtonSx}
+          >
+            <span style={themedButtonLabelStyle}>Cancel</span>
           </Button>
           <Button
             onClick={handleNewFormSubmit}
             variant="contained"
-            color="primary"
+            sx={primaryActionButtonSx}
           >
-            Commit Line Entry
+            <span style={themedButtonLabelStyle}>Save</span>
           </Button>
         </DialogActions>
       </Dialog>

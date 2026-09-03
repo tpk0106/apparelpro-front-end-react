@@ -25,6 +25,12 @@ import {
 import type { TransactionListReportLine } from "../../../interfaces/orderwise-inventory/transaction-list-report.types";
 import type { AppError } from "../../../auth/axiosClient";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+} from "../../../themes/workspace-theme";
 
 // Matches the authoritative type-code -> name list already established in
 // StockMovementItemReportService.cs, not legacy IN_DLIST.PRG's own literal codes
@@ -47,6 +53,7 @@ const TRANSACTION_TYPE_OPTIONS: { code: string; label: string }[] = [
 // Replicates IN_DLIST.PRG's "LIST OF TRANSACTIONS" (Orderwise) - a flat
 // OrderwiseStockTransactions log for a date range, no running balance/totals.
 export default function TransactionListReportWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
   const [transactionType, setTransactionType] = useState<string>("");
@@ -150,9 +157,9 @@ export default function TransactionListReportWorkspace() {
 
   return (
     <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.cardBg }}>
+      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          <Typography variant="h5" sx={workspaceHeadingSx}>
             List of Transactions (Orderwise Inventory)
           </Typography>
           <Button
@@ -160,8 +167,11 @@ export default function TransactionListReportWorkspace() {
             startIcon={<PictureAsPdfIcon />}
             onClick={handleDownloadPdf}
             disabled={!isReady || isError || isDownloading}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Generating..." : "Download PDF"}
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
           </Button>
         </Box>
 
@@ -175,6 +185,7 @@ export default function TransactionListReportWorkspace() {
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
@@ -186,6 +197,7 @@ export default function TransactionListReportWorkspace() {
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -196,7 +208,8 @@ export default function TransactionListReportWorkspace() {
               fullWidth
               value={transactionType}
               onChange={(e) => setTransactionType(e.target.value)}
-              slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
+              slotProps={{ select: { displayEmpty: true, MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } }, inputLabel: { shrink: true } }}
+              sx={dropdownFieldSx}
             >
               {TRANSACTION_TYPE_OPTIONS.map((opt) => (
                 <MenuItem key={opt.code} value={opt.code}>
@@ -213,6 +226,7 @@ export default function TransactionListReportWorkspace() {
               value={itemCodePrefix}
               onChange={(e) => setItemCodePrefix(e.target.value)}
               placeholder="optional"
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>

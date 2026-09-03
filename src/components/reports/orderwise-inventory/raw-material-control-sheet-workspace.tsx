@@ -18,11 +18,19 @@ import type { RawMaterialControlSheetLine } from "../../../interfaces/orderwise-
 import type { Buyer } from "../../../interfaces/references/Buyer";
 import type { AppError } from "../../../auth/axiosClient";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+} from "../../../themes/workspace-theme";
 
 // Replicates IN_RMCON.PRG's "RAW MATERIAL CONTROL SHEET" - per-Buyer/Order material
 // consumption (across every style/color/size sharing the same raw-material item)
 // vs Order/Received/Issued/Balance quantities.
 export default function RawMaterialControlSheetWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string>("");
   const [searchedParams, setSearchedParams] = useState<{ buyerCode: number; order: string } | null>(null);
@@ -152,9 +160,9 @@ export default function RawMaterialControlSheetWorkspace() {
 
   return (
     <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.cardBg }}>
+      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          <Typography variant="h5" sx={workspaceHeadingSx}>
             Raw Material Control Sheet (Orderwise Inventory)
           </Typography>
           <Button
@@ -162,8 +170,11 @@ export default function RawMaterialControlSheetWorkspace() {
             startIcon={<PictureAsPdfIcon />}
             onClick={handleDownloadPdf}
             disabled={!isReady || isError || isDownloading}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Generating..." : "Download PDF"}
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
           </Button>
         </Box>
 
@@ -177,6 +188,8 @@ export default function RawMaterialControlSheetWorkspace() {
               value={selectedBuyer ? String(selectedBuyer.buyerCode) : ""}
               onChange={(e) => handleBuyerChange(e.target.value)}
               disabled={isBuyersLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {buyersList.map((b) => (
                 <MenuItem key={b.buyerCode} value={String(b.buyerCode)}>
@@ -194,6 +207,8 @@ export default function RawMaterialControlSheetWorkspace() {
               value={selectedOrder}
               onChange={(e) => setSelectedOrder(e.target.value)}
               disabled={!selectedBuyer || isOrdersLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {ordersList.map((orderStr) => (
                 <MenuItem key={orderStr} value={orderStr}>

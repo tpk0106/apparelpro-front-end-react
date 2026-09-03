@@ -5,10 +5,15 @@ import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import type { SelectedScopeContext } from "../material-consumption/material-consumption.types";
 import type { GarmentAdditionalCostRow } from "./garment-additional-cost.types";
-import { mockupColors } from "./garment-additional-cost.types";
 import { useDeleteGarmentAdditionalCostMutation } from "../../tanstack-hooks/garment-additional-cost.hooks";
 import { useDownloadGarmentAdditionalCostReportPdfMutation } from "../../tanstack-hooks/garment-additional-cost.hooks";
 import ConfirmDialog from "../common/confirm-dialog";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
+import { getTableColorTheme, DEFAULT_TABLE_THEME_ID } from "../../themes/table-theme-registry";
+
+const tableColorTheme = getTableColorTheme(DEFAULT_TABLE_THEME_ID);
 
 interface GridProps {
   styleContext: SelectedScopeContext;
@@ -55,11 +60,11 @@ export default function GarmentAdditionalCostGrid({
           mb: 1.5,
         }}
       >
-        <Box sx={{ fontWeight: 700, fontSize: "13px", color: mockupColors.text }}>
+        <Box sx={{ fontWeight: 700, fontSize: "13px", color: DASHBOARD_COLORS.accentStrong }}>
           EXISTING ADDITIONAL COST ENTRIES — {styleContext.styleCode}
         </Box>
         <Button
-          variant="outlined"
+          variant="contained"
           size="small"
           startIcon={<DownloadOutlinedIcon />}
           disabled={isDownloading || rows.length === 0}
@@ -71,13 +76,11 @@ export default function GarmentAdditionalCostGrid({
               styleCode: styleContext.styleCode,
             })
           }
-          sx={{
-            color: mockupColors.accent,
-            borderColor: mockupColors.accent,
-            textTransform: "none",
-          }}
+          sx={{ ...primaryActionButtonSx, textTransform: "none" }}
         >
-          {isDownloading ? "Generating..." : "Print Report (PDF)"}
+          <span style={themedButtonLabelStyle}>
+            {isDownloading ? "Generating..." : "Print Report (PDF)"}
+          </span>
         </Button>
       </Box>
 
@@ -101,10 +104,11 @@ export default function GarmentAdditionalCostGrid({
                   key={header}
                   style={{
                     textAlign: "left",
-                    color: mockupColors.muted,
+                    color: tableColorTheme.headerText,
+                    backgroundColor: tableColorTheme.headerBg,
                     fontWeight: 600,
                     padding: "8px 10px",
-                    borderBottom: `1px solid ${mockupColors.border}`,
+                    borderBottom: `1px solid ${DASHBOARD_COLORS.border}`,
                   }}
                 >
                   {header}
@@ -117,7 +121,7 @@ export default function GarmentAdditionalCostGrid({
               <tr>
                 <td
                   colSpan={10}
-                  style={{ padding: "16px", color: mockupColors.muted }}
+                  style={{ padding: "16px", color: DASHBOARD_COLORS.textSecondary }}
                 >
                   Loading...
                 </td>
@@ -127,25 +131,34 @@ export default function GarmentAdditionalCostGrid({
               <tr>
                 <td
                   colSpan={10}
-                  style={{ padding: "16px", color: mockupColors.muted }}
+                  style={{ padding: "16px", color: DASHBOARD_COLORS.textSecondary }}
                 >
                   No Additional Cost entries recorded for this style yet.
                 </td>
               </tr>
             )}
-            {rows.map((row) => {
+            {rows.map((row, index) => {
               const compositeItemCode = `${row.stockCode}${row.itemCode}${row.feature1}${row.feature2}${row.feature3}${row.feature4}`;
+              const rowStyle: React.CSSProperties = {
+                cursor: "default",
+                backgroundColor: index % 2 === 0 ? tableColorTheme.rowAltBg : tableColorTheme.rowBg,
+              };
+              const cellStyle: React.CSSProperties = {
+                padding: "8px 10px",
+                borderBottom: `1px solid ${tableColorTheme.rowBorder}`,
+                color: tableColorTheme.rowText,
+              };
               return (
                 <tr
                   key={`${row.additionalCostCode}-${compositeItemCode}`}
-                  style={{ cursor: "default" }}
+                  style={rowStyle}
                 >
                   <td style={cellStyle}>
                     <Box
                       component="span"
                       sx={{
-                        backgroundColor: "rgba(96, 165, 250, 0.12)",
-                        color: mockupColors.accent,
+                        backgroundColor: "rgba(201,128,61,0.18)",
+                        color: copperTextColor,
                         borderRadius: "4px",
                         padding: "2px 6px",
                         fontSize: "11px",
@@ -177,9 +190,9 @@ export default function GarmentAdditionalCostGrid({
                             width: 26,
                             height: 26,
                             borderRadius: "6px",
-                            border: `1px solid ${mockupColors.border}`,
-                            backgroundColor: `${mockupColors.input} !important`,
-                            color: `${mockupColors.muted} !important`,
+                            border: `1px solid ${DASHBOARD_COLORS.border}`,
+                            backgroundColor: `${DASHBOARD_COLORS.cardBg} !important`,
+                            color: `${copperTextColor} !important`,
                           }}
                         >
                           <ModeEditOutlinedIcon sx={{ fontSize: 14 }} />
@@ -193,9 +206,9 @@ export default function GarmentAdditionalCostGrid({
                             width: 26,
                             height: 26,
                             borderRadius: "6px",
-                            border: `1px solid ${mockupColors.border}`,
-                            backgroundColor: `${mockupColors.input} !important`,
-                            color: `${mockupColors.danger} !important`,
+                            border: `1px solid ${DASHBOARD_COLORS.border}`,
+                            backgroundColor: `${DASHBOARD_COLORS.cardBg} !important`,
+                            color: `${DASHBOARD_COLORS.critical} !important`,
                           }}
                         >
                           <DeleteForeverOutlinedIcon sx={{ fontSize: 14 }} />
@@ -223,9 +236,3 @@ export default function GarmentAdditionalCostGrid({
     </Box>
   );
 }
-
-const cellStyle: React.CSSProperties = {
-  padding: "8px 10px",
-  borderBottom: `1px solid ${mockupColors.border}`,
-  color: mockupColors.text,
-};

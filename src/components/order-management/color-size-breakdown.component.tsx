@@ -20,6 +20,8 @@ import {
   useGetStyleByBots,
 } from "../../tanstack-hooks/custom-hooks";
 import type { ColorSizeDetailsServiceModel } from "../material-consumption/material-consumption.types";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
 
 // 1. Move the MatrixRow interface here so it's accessible globally
 export interface MatrixRow {
@@ -359,8 +361,37 @@ export default function ColorSizeBreakdown({
 
   return (
     <Box sx={{ width: "100%", mt: 1 }}>
-      <Paper elevation={2} sx={{ p: 2, mb: 3, backgroundColor: "#fafafa" }}>
-        <Stepper activeStep={currentWorkingStep} alternativeLabel>
+      <Paper
+        elevation={2}
+        sx={{
+          p: 2,
+          mb: 3,
+          backgroundColor: DASHBOARD_COLORS.cardBg,
+          border: `1px solid ${DASHBOARD_COLORS.border}`,
+        }}
+      >
+        <Stepper
+          activeStep={currentWorkingStep}
+          alternativeLabel
+          sx={{
+            "& .MuiStepIcon-root": {
+              color: "#F3EADF",
+              "&.Mui-active, &.Mui-completed": { color: copperTextColor },
+            },
+            "& .MuiStepIcon-text": { fill: "#14120A" },
+            "& .MuiStepConnector-line": {
+              borderColor: DASHBOARD_COLORS.border,
+            },
+            "& .MuiStepLabel-label": {
+              color: DASHBOARD_COLORS.accentStrong,
+              fontWeight: 600,
+              "&.Mui-active, &.Mui-completed": {
+                color: DASHBOARD_COLORS.accentStrong,
+                fontWeight: 700,
+              },
+            },
+          }}
+        >
           {steps.map((label) => (
             <Step key={label}>
               <StepLabel>{label}</StepLabel>
@@ -375,8 +406,8 @@ export default function ColorSizeBreakdown({
         sx={{
           p: 2,
           mb: 3,
-          backgroundColor: "#000",
-          borderColor: "#c0ca33",
+          backgroundColor: DASHBOARD_COLORS.cardBg,
+          borderColor: DASHBOARD_COLORS.border,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -385,22 +416,21 @@ export default function ColorSizeBreakdown({
         <Box>
           <Typography
             variant="subtitle1"
-            sx={{ fontWeight: "bold", color: "#2e7d32" }}
+            sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.accentStrong }}
           >
             Active Working Target: Style Code [{" "}
             {styleContextSanitized.styleCode} ]
           </Typography>
           <Typography
             variant="body2"
-            color="text.secondary"
-            sx={{ fontWeight: "bold", color: "#fff" }}
+            sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textSecondary }}
           >
             Buyer: {buyerCode} | Order Ref: {order} | Bulk Target Size:{" "}
             {styleContextSanitized.quantity.toLocaleString()}{" "}
             {selectedStyleFromGrid.unit || "Pcs"}
           </Typography>
         </Box>
-        <Box sx={{ textAlign: "right", color: "#fff" }}>
+        <Box sx={{ textAlign: "right", color: DASHBOARD_COLORS.textSecondary }}>
           <Typography
             variant="caption"
             sx={{ fontWeight: "bold", display: "block" }}
@@ -412,7 +442,7 @@ export default function ColorSizeBreakdown({
           </Typography>
           <Typography
             variant="caption"
-            sx={{ fontWeight: "bold", display: "block", color: "#fff" }}
+            sx={{ fontWeight: "bold", display: "block", color: DASHBOARD_COLORS.textSecondary }}
           >
             SIZE MATRIX MODE:{" "}
             {styleContextSanitized.sizeRatio === "R"

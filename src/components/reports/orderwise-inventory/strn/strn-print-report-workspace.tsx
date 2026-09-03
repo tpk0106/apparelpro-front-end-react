@@ -24,8 +24,15 @@ import {
 } from "../../../../tanstack-hooks/strn-print-report.hooks";
 import type { AppError } from "../../../../auth/axiosClient";
 import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+} from "../../../../themes/workspace-theme";
 
 export default function StrnPrintReportWorkspace() {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const [strnNumberInput, setStrnNumberInput] = useState<string>("");
   const [searchedStrnNumber, setSearchedStrnNumber] = useState<string>("");
 
@@ -64,7 +71,7 @@ export default function StrnPrintReportWorkspace() {
         sx={{
           p: 3,
           borderTop: `4px solid ${DASHBOARD_COLORS.accent}`,
-          backgroundColor: DASHBOARD_COLORS.cardBg,
+          backgroundColor: DASHBOARD_COLORS.pageBg,
         }}
       >
         <Box
@@ -76,7 +83,7 @@ export default function StrnPrintReportWorkspace() {
           }}
         >
           <Box>
-            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+            <Typography variant="h5" sx={workspaceHeadingSx}>
               Stores Requisition Note — Print
             </Typography>
           </Box>
@@ -85,8 +92,11 @@ export default function StrnPrintReportWorkspace() {
             startIcon={<PictureAsPdfIcon />}
             onClick={handleDownloadPdf}
             disabled={!isReady || !details || isDownloading}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Generating..." : "Download PDF"}
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
           </Button>
         </Box>
 
@@ -102,6 +112,7 @@ export default function StrnPrintReportWorkspace() {
                 if (e.key === "Enter") handleLoad();
               }}
               placeholder="e.g. 000123"
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>

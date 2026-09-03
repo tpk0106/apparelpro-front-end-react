@@ -22,6 +22,9 @@ import {
 import type ColorSizeBreakdownDetails from "../../interfaces/order-management/ColorSizeDetails";
 import type StyleContext from "../../interfaces/order-management/StyleContext";
 import type { ColorSizeBreakdownDetailsPayloadWithBody } from "../../interfaces/definitions";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { oliveGlossSx } from "../../themes/button-color-themes";
+import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
 
 interface SizeBreakdownProps {
   styleContext: StyleContext;
@@ -243,24 +246,31 @@ export default function SizeBreakdown({
   };
 
   return (
-    <Card sx={{ p: 3, mt: 2, boxShadow: 3, backgroundColor: "#fff" }}>
+    <Card
+      sx={{
+        p: 3,
+        mt: 2,
+        boxShadow: 3,
+        backgroundColor: DASHBOARD_COLORS.cardBg,
+        border: `1px solid ${DASHBOARD_COLORS.border}`,
+      }}
+    >
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: "2px",
-          // backgroundColor: "#fff",
         }}
       >
         <Box>
           <Typography
             variant="h5"
-            sx={{ fontWeight: "bold", color: "#1a237e" }}
+            sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.accentStrong }}
           >
             Stage 2: Horizontal Size Matrix Breakdown
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: DASHBOARD_COLORS.textSecondary }}>
             Input size distribution ratios or quantities across dynamic color
             boundaries.
           </Typography>
@@ -273,7 +283,10 @@ export default function SizeBreakdown({
             gap: 2,
           }}
         >
-          <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+          <Typography
+            variant="subtitle2"
+            sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.accentStrong }}
+          >
             Color Mode: [{styleContext.colorRatio}]
           </Typography>
           <ToggleButtonGroup
@@ -282,41 +295,41 @@ export default function SizeBreakdown({
             size="small"
             onChange={handleSizeModeChange}
             sx={{
-              backgroundColor: "#60a5fa",
+              ...oliveGlossSx,
               borderRadius: 1,
               p: "3px",
               "& .MuiToggleButton-root": {
-                color: "#fff",
+                position: "relative",
+                zIndex: 1,
+                color: "#F3EADF",
                 fontWeight: "bold",
                 border: "none",
                 borderRadius: "6px !important",
                 px: 2,
                 "&.Mui-selected": {
-                  backgroundColor: "#fff",
-                  color: "#1a237e",
-                  "&:hover": { backgroundColor: "#fff" },
+                  ...primaryActionButtonSx,
                 },
-                "&:hover": { backgroundColor: "rgba(255,255,255,0.2)" },
+                "&:hover": { backgroundColor: "rgba(255,255,255,0.15)" },
               },
             }}
           >
             <ToggleButton value="Q">
               {sizeMode === "Q" && (
-                <CheckCircleIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                <CheckCircleIcon sx={{ fontSize: 16, mr: 0.5, position: "relative", zIndex: 1 }} />
               )}
-              Size Qty
+              <span style={themedButtonLabelStyle}>Size Qty</span>
             </ToggleButton>
             <ToggleButton value="R">
               {sizeMode === "R" && (
-                <CheckCircleIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                <CheckCircleIcon sx={{ fontSize: 16, mr: 0.5, position: "relative", zIndex: 1 }} />
               )}
-              Size Ratio
+              <span style={themedButtonLabelStyle}>Size Ratio</span>
             </ToggleButton>
           </ToggleButtonGroup>
         </Box>
       </Box>
 
-      <Divider sx={{ mb: 2 }} />
+      <Divider sx={{ mb: 2, borderColor: DASHBOARD_COLORS.border }} />
 
       <SizeBreakdownTable
         matrixRows={matrixRows}
@@ -338,22 +351,20 @@ export default function SizeBreakdown({
         <Button
           variant="contained"
           size="large"
-          color="primary"
           startIcon={<ArrowBackIcon />}
           onClick={onBackToColors}
-          sx={{ px: 4, fontWeight: "bold" }}
+          sx={{ ...primaryActionButtonSx, px: 4, fontWeight: "bold" }}
         >
-          Back to Color Adjustments
+          <span style={themedButtonLabelStyle}>Back to Color Adjustments</span>
         </Button>
         <Button
           variant="contained"
           size="large"
-          color="primary"
           startIcon={<SaveIcon />}
           onClick={handleVerifyAndSubmit}
-          sx={{ px: 4, fontWeight: "bold" }}
+          sx={{ ...primaryActionButtonSx, px: 4, fontWeight: "bold" }}
         >
-          [Esc] Save Breakdown Matrix
+          <span style={themedButtonLabelStyle}>[Esc] Save Breakdown Matrix</span>
         </Button>
       </Box>
 

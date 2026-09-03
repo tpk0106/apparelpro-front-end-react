@@ -16,12 +16,19 @@ import {
 import type { StockValuationMonthlyReportLine } from "../../../interfaces/orderwise-inventory/stock-valuation-monthly-report.types";
 import type { AppError } from "../../../auth/axiosClient";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+} from "../../../themes/workspace-theme";
 
 // Replicates IN_SVAL1.PRG's "STOCK VALUATION REPORT (Monthly)" - item-level (Buyer/
 // Order-agnostic) GR/4I totals for a date range. See
 // StockValuationMonthlyReportService for why reporting currency/price is picked from
 // whichever OrderwiseStockMaster row matches the item code first.
 export default function StockValuationMonthlyReportWorkspace() {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
   const [searchedParams, setSearchedParams] = useState<{ fromDate: string; toDate: string } | null>(null);
@@ -117,9 +124,9 @@ export default function StockValuationMonthlyReportWorkspace() {
 
   return (
     <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.cardBg }}>
+      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          <Typography variant="h5" sx={workspaceHeadingSx}>
             Stock Valuation Report — Monthly (Orderwise Inventory)
           </Typography>
           <Button
@@ -127,8 +134,11 @@ export default function StockValuationMonthlyReportWorkspace() {
             startIcon={<PictureAsPdfIcon />}
             onClick={handleDownloadPdf}
             disabled={!isReady || isError || isDownloading}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Generating..." : "Download PDF"}
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
           </Button>
         </Box>
 
@@ -142,6 +152,7 @@ export default function StockValuationMonthlyReportWorkspace() {
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -153,6 +164,7 @@ export default function StockValuationMonthlyReportWorkspace() {
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>

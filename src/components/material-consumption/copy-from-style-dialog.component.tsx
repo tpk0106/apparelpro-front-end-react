@@ -27,6 +27,9 @@ import type {
   GarmentTypeServiceModel,
   StyleContext,
 } from "./material-consumption.types";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
 
 interface CopyFromStyleDialogProps {
   open: boolean;
@@ -53,6 +56,10 @@ export default function CopyFromStyleDialog({
   targetStyleContext,
   onCopyComplete,
 }: CopyFromStyleDialogProps) {
+  // Same dark field theme used across the app's forms (Order Confirmation,
+  // Part Shipment's "New Shipment Delivery Manifest Entry" dialog, etc.).
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [selectedType, setSelectedType] =
@@ -177,16 +184,26 @@ export default function CopyFromStyleDialog({
       maxWidth="sm"
       fullWidth
       slotProps={{
-        paper: { sx: { backgroundColor: "#ffffff" } },
-        //  paper: { sx: { backgroundColor: "#141922" } },
+        paper: {
+          sx: {
+            backgroundColor: DASHBOARD_COLORS.cardBg,
+            border: `1px solid ${DASHBOARD_COLORS.border}`,
+            boxShadow: "0 10px 28px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.3)",
+          },
+        },
       }}
     >
-      {/* <DialogTitle sx={{ color: "#F4F6F8" }}> */}
-      <DialogTitle sx={{ color: "000000" }}>
+      <DialogTitle
+        sx={{
+          fontWeight: "bold",
+          color: DASHBOARD_COLORS.accentStrong,
+          textTransform: "uppercase",
+        }}
+      >
         Copy Materials from Another Style
       </DialogTitle>
       <DialogContent>
-        <Typography variant="body2" sx={{ color: "#8B93A1", mb: 2 }}>
+        <Typography variant="body2" sx={{ color: DASHBOARD_COLORS.textSecondary, mb: 2 }}>
           Select the Buyer, Purchase Order, Garment Type and Style to copy every
           material line from. Quantity/Garment, Price and Currency are copied
           exactly as they are on the source style; Colour/Size are copied as-is.
@@ -210,8 +227,9 @@ export default function CopyFromStyleDialog({
               isOptionEqualToValue={(option, value) =>
                 option.buyerCode === value?.buyerCode
               }
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
-                <TextField {...params} label="Source Buyer" size="small" />
+                <TextField {...params} label="Source Buyer" size="small" sx={dropdownFieldSx} />
               )}
             />
           </Grid>
@@ -229,11 +247,13 @@ export default function CopyFromStyleDialog({
                 setSelectedStyle(null);
               }}
               isOptionEqualToValue={(option, value) => option === value}
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Source Purchase Order"
                   size="small"
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -253,11 +273,13 @@ export default function CopyFromStyleDialog({
                 setSelectedStyle(null);
               }}
               isOptionEqualToValue={(option, value) => option.id === value?.id}
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Source Garment Type"
                   size="small"
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -276,8 +298,9 @@ export default function CopyFromStyleDialog({
               value={selectedStyle}
               onChange={(_, val) => setSelectedStyle(val)}
               isOptionEqualToValue={(option, value) => option.id === value?.id}
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
-                <TextField {...params} label="Source Style" size="small" />
+                <TextField {...params} label="Source Style" size="small" sx={dropdownFieldSx} />
               )}
             />
           </Grid>
@@ -293,26 +316,27 @@ export default function CopyFromStyleDialog({
       <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
         <Button
           onClick={handleClose}
-          variant="outlined"
-          color="primary"
+          type="button"
+          variant="contained"
           disabled={isCopying}
-          sx={{ minWidth: 100 }}
+          sx={{ ...primaryActionButtonSx, minWidth: 100 }}
         >
-          Cancel
+          <span style={themedButtonLabelStyle}>Cancel</span>
         </Button>
         <Button
           onClick={handleConfirmCopy}
           variant="contained"
-          color="primary"
           disabled={!isSourceFullySelected || isSameAsTarget || isCopying}
           startIcon={
             isCopying ? (
               <CircularProgress size={16} color="inherit" />
             ) : undefined
           }
-          sx={{ minWidth: 100 }}
+          sx={{ ...primaryActionButtonSx, minWidth: 100 }}
         >
-          {isCopying ? "Copying..." : "Copy Materials"}
+          <span style={themedButtonLabelStyle}>
+            {isCopying ? "Copying..." : "Copy Materials"}
+          </span>
         </Button>
       </DialogActions>
     </Dialog>

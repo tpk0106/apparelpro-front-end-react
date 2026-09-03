@@ -16,11 +16,18 @@ import {
 import type { ItemWiseStockBalanceLine } from "../../../interfaces/orderwise-inventory/item-wise-stock-balance.types";
 import type { AppError } from "../../../auth/axiosClient";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+} from "../../../themes/workspace-theme";
 
 // Replicates IN_STBAL.PRG's "ITEM-WISE STOCK BALANCES" (Orderwise) - system-wide
 // (every Buyer/Order), filtered to a 6-char Stock+Item code range, grouped Stock
 // Type -> Item group -> individual lines. Zero-balance items excluded.
 export default function ItemWiseStockBalanceWorkspace() {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const [fromRange, setFromRange] = useState<string>("");
   const [toRange, setToRange] = useState<string>("");
   const [searchedParams, setSearchedParams] = useState<{ fromRange: string; toRange: string } | null>(null);
@@ -142,9 +149,9 @@ export default function ItemWiseStockBalanceWorkspace() {
 
   return (
     <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.cardBg }}>
+      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          <Typography variant="h5" sx={workspaceHeadingSx}>
             Item-wise Stock Balances (Orderwise Inventory)
           </Typography>
           <Button
@@ -152,8 +159,11 @@ export default function ItemWiseStockBalanceWorkspace() {
             startIcon={<PictureAsPdfIcon />}
             onClick={handleDownloadPdf}
             disabled={!isReady || isError || isDownloading}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Generating..." : "Download PDF"}
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
           </Button>
         </Box>
 
@@ -167,6 +177,7 @@ export default function ItemWiseStockBalanceWorkspace() {
               onChange={(e) => setFromRange(e.target.value)}
               placeholder="e.g. 02TISS"
               slotProps={{ htmlInput: { maxLength: 6 } }}
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -178,6 +189,7 @@ export default function ItemWiseStockBalanceWorkspace() {
               onChange={(e) => setToRange(e.target.value)}
               placeholder="e.g. 02TISS"
               slotProps={{ htmlInput: { maxLength: 6 } }}
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>

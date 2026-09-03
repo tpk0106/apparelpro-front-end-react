@@ -19,8 +19,10 @@ import {
 
 export interface StyleScope {
   buyerCode: number;
+  buyerName: string;
   order: string;
   typeCode: number;
+  typeName: string;
   styleCode: string;
 }
 
@@ -96,8 +98,10 @@ const StyleScopePicker = ({ onScopeChange, sx }: Props) => {
     if (styleObj && selectedBuyer && selectedOrder && selectedType) {
       onScopeChange({
         buyerCode: selectedBuyer.buyerCode,
+        buyerName: selectedBuyer.name,
         order: selectedOrder,
         typeCode: selectedType.id,
+        typeName: selectedType.typeName,
         styleCode: styleObj.styleCode,
       });
     } else {

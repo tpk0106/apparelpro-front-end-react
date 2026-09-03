@@ -7,6 +7,8 @@ import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
 
 // Import your unified network tracking service hook and interfaces cleanly
 import { useGetStyleShippingSummaryQuery } from "../../services/order-management/part-shipment.service";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
 
 interface SummaryCardProps {
   buyerCode: number;
@@ -56,18 +58,24 @@ export default function StyleShippingSummaryCard({
   const progressIndicatorColor = useMemo(() => {
     if (trackingPercentage >= 100) return "#2e7d32"; // Complete Booking (Safe Green Compliance)
     if (trackingPercentage >= 75) return "#ef6c00"; // High Allocation (Orange alert)
-    return "#1a237e"; // Initial Staging (Corporate Dark Blue)
+    return DASHBOARD_COLORS.accentStrong; // Initial Staging (base olive)
   }, [trackingPercentage]);
 
   if (isLoading) {
     return (
       <Card
         variant="outlined"
-        sx={{ p: 2, mb: 3, backgroundColor: "#fafafa", textAlign: "center" }}
+        sx={{
+          p: 2,
+          mb: 3,
+          backgroundColor: DASHBOARD_COLORS.cardBg,
+          borderColor: DASHBOARD_COLORS.border,
+          textAlign: "center",
+        }}
       >
         <Typography
           variant="body2"
-          color="text.secondary"
+          sx={{ color: DASHBOARD_COLORS.textSecondary }}
           className="animate-pulse uppercase font-semibold"
         >
           Calculating split shipment tracking capacities from SQL Server...
@@ -80,7 +88,7 @@ export default function StyleShippingSummaryCard({
     return (
       <Card
         variant="outlined"
-        sx={{ p: 2, mb: 3, backgroundColor: "#fffde7", borderColor: "#fff59d" }}
+        sx={{ p: 2, mb: 3, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: "#fff59d" }}
       >
         <Typography variant="body2" color="error" sx={{ fontWeight: "bold" }}>
           ⚠️ Operational Warning: Failed to query rolling shipping caps from the
@@ -103,17 +111,19 @@ export default function StyleShippingSummaryCard({
               display: "flex",
               alignItems: "center",
               gap: 2,
-              borderLeft: "5px solid #1a237e",
+              backgroundColor: DASHBOARD_COLORS.cardBg,
+              borderColor: DASHBOARD_COLORS.border,
+              borderLeft: `5px solid ${copperTextColor}`,
             }}
           >
-            <InventoryIcon sx={{ color: "#1a237e", fontSize: "32px" }} />
+            <InventoryIcon sx={{ color: copperTextColor, fontSize: "32px" }} />
             <Box>
               <Typography
                 variant="caption"
                 sx={{
                   fontWeight: "bold",
                   textTransform: "uppercase",
-                  color: "text.secondary",
+                  color: DASHBOARD_COLORS.textSecondary,
                   display: "block",
                 }}
               >
@@ -123,7 +133,7 @@ export default function StyleShippingSummaryCard({
                 variant="h5"
                 sx={{
                   fontWeight: "bold",
-                  color: "#1a237e",
+                  color: DASHBOARD_COLORS.accentStrong,
                   fontFamily: "monospace",
                 }}
               >
@@ -143,6 +153,8 @@ export default function StyleShippingSummaryCard({
               display: "flex",
               alignItems: "center",
               gap: 2,
+              backgroundColor: DASHBOARD_COLORS.cardBg,
+              borderColor: DASHBOARD_COLORS.border,
               borderLeft: `5px solid ${progressIndicatorColor}`,
             }}
           >
@@ -155,7 +167,7 @@ export default function StyleShippingSummaryCard({
                 sx={{
                   fontWeight: "bold",
                   textTransform: "uppercase",
-                  color: "text.secondary",
+                  color: DASHBOARD_COLORS.textSecondary,
                   display: "block",
                 }}
               >
@@ -185,15 +197,16 @@ export default function StyleShippingSummaryCard({
               display: "flex",
               alignItems: "center",
               gap: 2,
-              borderLeft: "5px solid #2e7d32",
+              borderColor: DASHBOARD_COLORS.border,
+              borderLeft: `5px solid ${copperTextColor}`,
               backgroundColor:
                 metrics.remainingUnscheduledBalance <= 0
-                  ? "#e8f5e9"
-                  : "inherit",
+                  ? "rgba(159,174,94,0.18)"
+                  : DASHBOARD_COLORS.cardBg,
             }}
           >
             <AssignmentTurnedInIcon
-              sx={{ color: "#2e7d32", fontSize: "32px" }}
+              sx={{ color: copperTextColor, fontSize: "32px" }}
             />
             <Box>
               <Typography
@@ -201,7 +214,7 @@ export default function StyleShippingSummaryCard({
                 sx={{
                   fontWeight: "bold",
                   textTransform: "uppercase",
-                  color: "text.secondary",
+                  color: DASHBOARD_COLORS.textSecondary,
                   display: "block",
                 }}
               >
@@ -211,7 +224,7 @@ export default function StyleShippingSummaryCard({
                 variant="h5"
                 sx={{
                   fontWeight: "bold",
-                  color: "#2e7d32",
+                  color: DASHBOARD_COLORS.accentStrong,
                   fontFamily: "monospace",
                 }}
               >
@@ -224,7 +237,15 @@ export default function StyleShippingSummaryCard({
       </Grid>
 
       {/* 4. VISUAL SCHEDULING DISPATCH PROGRESS CAPACITY TRACKER LINE BAR */}
-      <Card variant="outlined" sx={{ p: 2, mt: 2, backgroundColor: "#fafafa" }}>
+      <Card
+        variant="outlined"
+        sx={{
+          p: 2,
+          mt: 2,
+          backgroundColor: DASHBOARD_COLORS.cardBg,
+          borderColor: DASHBOARD_COLORS.border,
+        }}
+      >
         <Box
           sx={{
             mb: 1,
@@ -235,7 +256,7 @@ export default function StyleShippingSummaryCard({
         >
           <Typography
             variant="caption"
-            sx={{ fontWeight: "bold", color: "text.secondary" }}
+            sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textSecondary }}
           >
             CUMULATIVE PRODUCTION SPLIT DISPATCH STATUS BOUNDARY LIMITS
           </Typography>
@@ -252,7 +273,7 @@ export default function StyleShippingSummaryCard({
           sx={{
             height: 10,
             borderRadius: "4px",
-            backgroundColor: "#e0e0e0",
+            backgroundColor: "rgba(191,168,90,0.16)",
             "& .MuiLinearProgress-bar": {
               backgroundColor: progressIndicatorColor,
             },

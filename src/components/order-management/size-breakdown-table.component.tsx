@@ -1,16 +1,20 @@
 import React, { useMemo, useState } from "react";
 import {
   MaterialReactTable,
-  useMaterialReactTable,
   type MRT_ColumnDef,
 } from "material-react-table";
 import { Box, Button, TextField } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import InfoDialog from "../common/info-dialog";
 import ConfirmDialog from "../common/confirm-dialog";
+import { useApparelProTable } from "../../themes/useApparelProTable";
+import { getTableColorTheme, DEFAULT_TABLE_THEME_ID } from "../../themes/table-theme-registry";
+import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
 
 import type { LocalColorRow } from "./color-breakdown-table.component";
 import type { MatrixRow } from "./color-size-breakdown.component";
+
+const tableColorTheme = getTableColorTheme(DEFAULT_TABLE_THEME_ID);
 // import type { StyleContext } from "../material-consumption/material-consumption.types";
 
 interface TableProps {
@@ -145,12 +149,30 @@ export default function SizeBreakdownTable({
         accessorKey: "sizeCode",
         header: "SIZE DIMENSION",
         enableEditing: false,
-        size: 55,
+        size: 78,
+        // Column-level muiTableHeadCellProps REPLACES (does not merge with)
+        // useApparelProTable's table-level header theming - without an
+        // explicit backgroundColor/color here, this one header cell fell
+        // through to themes.ts's global hardcoded blue MuiTableCell "head"
+        // styleOverride instead of the olive/copper table theme every other
+        // header cell gets automatically.
         muiTableHeadCellProps: {
-          sx: { width: 55 },
+          sx: {
+            width: 78,
+            whiteSpace: "normal",
+            lineHeight: 1.15,
+            backgroundColor: `${tableColorTheme.headerBg} !important`,
+            color: `${tableColorTheme.headerText} !important`,
+          },
         },
         muiTableBodyCellProps: {
-          sx: { fontWeight: "bold", backgroundColor: "#f5f5f5", width: 55, py: "2px" },
+          sx: {
+            fontWeight: "bold",
+            backgroundColor: "rgba(159,174,94,0.18) !important",
+            color: `${tableColorTheme.rowText} !important`,
+            width: 78,
+            py: "2px",
+          },
         },
         // FIXED: the running totals used to be a completely separate <Table>
         // rendered below the MRT table, with its own independent column
@@ -166,16 +188,16 @@ export default function SizeBreakdownTable({
         // heavy blurred box-shadow, which was blending this whole row
         // into one undifferentiated blob instead of separate columns.
         Footer: () => (
-          <Box sx={{ fontWeight: "bold", color: "#fff" }}>
+          <Box sx={{ fontWeight: "bold", color: tableColorTheme.footerText }}>
             RUNNING COL TOTALS:
           </Box>
         ),
         muiTableFooterCellProps: {
           sx: {
             py: "4px",
-            width: 55,
+            width: 78,
             boxShadow: "none",
-            backgroundColor: "#000",
+            backgroundColor: `${tableColorTheme.footerBg} !important`,
           },
         },
       },
@@ -210,7 +232,7 @@ export default function SizeBreakdownTable({
             sx={{
               fontFamily: "monospace",
               fontWeight: "bold",
-              color: "#fff",
+              color: tableColorTheme.footerText,
               textAlign: "right",
             }}
           >
@@ -221,7 +243,7 @@ export default function SizeBreakdownTable({
           sx: {
             py: "4px",
             boxShadow: "none",
-            backgroundColor: "#000",
+            backgroundColor: `${tableColorTheme.footerBg} !important`,
           },
         },
       });
@@ -237,7 +259,7 @@ export default function SizeBreakdownTable({
     columnTotals,
   ]);
 
-  const table = useMaterialReactTable({
+  const table = useApparelProTable<MatrixRow>({
     columns,
     data: matrixRows,
     enableEditing: false,
@@ -257,62 +279,23 @@ export default function SizeBreakdownTable({
     },
     getRowId: (row) => row.sizeCode,
 
-    // FIXED: matches ColorBreakdownTable's row hover exactly (that one gets
-    // this via useApparelProTable's shared muiTableBodyRowProps - see the
-    // "&:hover td" block there). Every cell here is a permanently-live
-    // MatrixNumericCell TextField rather than MRT's toggled row-edit mode,
-    // so there's no isEditing/isCreating distinction to make - the input
-    // text just needs to stay white (readable) against the black hover
-    // background at all times, same principle as the Colour table's
-    // "not currently editing" branch.
-    muiTableBodyRowProps: {
-      hover: true,
-      sx: {
-        "&:hover td": {
-          backgroundColor: "#000000 !important",
-          // Covers the plain "SIZE DIMENSION" label cell (not a TextField),
-          // which would otherwise stay its default dark text color and
-          // become unreadable against the black hover background.
-          color: "#FFFFFF !important",
-          "& .MuiInputBase-input": {
-            color: "#FFFFFF !important",
-            caretColor: "#FFFFFF !important",
-          },
-          "& .MuiInput-underline:before, & .MuiInput-underline:after, & .MuiInputBase-root:before, & .MuiInputBase-root:after":
-            {
-              borderColor: "#FFFFFF !important",
-            },
-        },
-      },
-    },
-
-    // FIXED: matches ColorBreakdownTable's toolbar exactly (that one gets
-    // this via the shared useApparelProTable hook; this table uses the raw
-    // hook directly, so it needs the same sx here) - standard table blue
-    // (#60a5fa) with white icons, instead of the global theme's default
-    // black icons on blue.
-    muiTopToolbarProps: {
-      sx: {
-        backgroundColor: "#60a5fa !important",
-        boxShadow: "0px 0px 20px rgba(0,0,0,.5) !important",
-        "& .MuiIconButton-root, & .MuiSvgIcon-root": {
-          color: "#ffffff !important",
-        },
-      },
-    },
+    // Column header still sorts on click (enableSorting stays default true) -
+    // this only removes the kebab menu's other actions (filter, hide, pin,
+    // drag-reorder), per feedback that only sort should remain.
+    enableColumnActions: false,
 
     renderTopToolbarCustomActions: () => (
       <Box sx={{ p: 1 }}>
         <Button
           variant="contained"
-          color="info"
           startIcon={<AddIcon />}
           onClick={() => {
             setNewSizeLabelInput("");
             setIsAddSizeDialogOpen(true);
           }}
+          sx={primaryActionButtonSx}
         >
-          Add Product Size Row
+          <span style={themedButtonLabelStyle}>Add Product Size Row</span>
         </Button>
       </Box>
     ),

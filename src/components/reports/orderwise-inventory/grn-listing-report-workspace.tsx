@@ -18,12 +18,19 @@ import type { GrnListingReportLine } from "../../../interfaces/orderwise-invento
 import type { Buyer } from "../../../interfaces/references/Buyer";
 import type { AppError } from "../../../auth/axiosClient";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+} from "../../../themes/workspace-theme";
 
 // Unifies legacy IN_GRN3.PRG ("GRN LISTING - DATE WISE", optional Basis filter) and
 // IN_GRN4.PRG ("BUYER/ORDER GRN's LISTING", optional Supplier filter) into one
 // flexible report - fill in a Date Range for the Date-Wise variant, or a Buyer/Order
 // for the Buyer/Order-Wise variant (both can be combined too).
 export default function GrnListingReportWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
@@ -158,9 +165,9 @@ export default function GrnListingReportWorkspace() {
 
   return (
     <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.cardBg }}>
+      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          <Typography variant="h5" sx={workspaceHeadingSx}>
             GRN Listing (Orderwise Inventory)
           </Typography>
           <Button
@@ -168,8 +175,11 @@ export default function GrnListingReportWorkspace() {
             startIcon={<PictureAsPdfIcon />}
             onClick={handleDownloadPdf}
             disabled={!isReady || isError || isDownloading}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Generating..." : "Download PDF"}
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
           </Button>
         </Box>
 
@@ -183,6 +193,7 @@ export default function GrnListingReportWorkspace() {
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
@@ -194,6 +205,7 @@ export default function GrnListingReportWorkspace() {
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
@@ -203,6 +215,7 @@ export default function GrnListingReportWorkspace() {
               fullWidth
               value={storeCode}
               onChange={(e) => setStoreCode(e.target.value)}
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -214,7 +227,8 @@ export default function GrnListingReportWorkspace() {
               value={selectedBuyer ? String(selectedBuyer.buyerCode) : ""}
               onChange={(e) => handleBuyerChange(e.target.value)}
               disabled={isBuyersLoading}
-              slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
+              slotProps={{ select: { displayEmpty: true, MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } }, inputLabel: { shrink: true } }}
+              sx={dropdownFieldSx}
             >
               <MenuItem value="">None</MenuItem>
               {buyersList.map((b) => (
@@ -233,7 +247,8 @@ export default function GrnListingReportWorkspace() {
               value={selectedOrder}
               onChange={(e) => setSelectedOrder(e.target.value)}
               disabled={!selectedBuyer || isOrdersLoading}
-              slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
+              slotProps={{ select: { displayEmpty: true, MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } }, inputLabel: { shrink: true } }}
+              sx={dropdownFieldSx}
             >
               <MenuItem value="">None</MenuItem>
               {ordersList.map((orderStr) => (
@@ -252,6 +267,7 @@ export default function GrnListingReportWorkspace() {
               fullWidth
               value={supplierCode}
               onChange={(e) => setSupplierCode(e.target.value)}
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>

@@ -18,6 +18,8 @@ import {
   useApproveTrimSheetMutation,
 } from "../../../tanstack-hooks/custom-hooks";
 import type { TrimSheetApprovalScopeContext } from "./trim-sheet-approval.types";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { primaryActionButtonSx, themedButtonLabelStyle } from "../../../themes/workspace-theme";
 
 interface TrimSheetApprovalCardProps {
   scope: TrimSheetApprovalScopeContext;
@@ -101,7 +103,7 @@ export default function TrimSheetApprovalCard({
             </Typography>
           </Box>
 
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: DASHBOARD_COLORS.textSecondary }}>
             {isApproved
               ? `This style's Trim Sheet was approved by [ ${approvedBy} ] on ${approvedDate}. Material Consumption entries for this style are now locked for standard users - only a Merchandising Manager, Merchandiser Manager, or Executive Director can still edit them. Supplier PO raising is now enabled for this style.`
               : `Review the style's material requirements before approving. Approving the Trim Sheet locks Material Consumption entry for standard users (edits after this point require a Merchandising Manager, Merchandiser Manager, or Executive Director) and enables Supplier PO raising for this style, matching the legacy Trim Sheet Approval routine.`}
@@ -115,7 +117,7 @@ export default function TrimSheetApprovalCard({
                 alignItems: "center",
                 gap: 0.5,
                 fontWeight: "bold",
-                color: "text.secondary",
+                color: DASHBOARD_COLORS.textSecondary,
               }}
             >
               <VerifiedUserIcon sx={{ fontSize: "14px" }} /> Approver:{" "}
@@ -128,7 +130,7 @@ export default function TrimSheetApprovalCard({
                 alignItems: "center",
                 gap: 0.5,
                 fontWeight: "bold",
-                color: "text.secondary",
+                color: DASHBOARD_COLORS.textSecondary,
               }}
             >
               <CalendarMonthIcon sx={{ fontSize: "14px" }} /> System Date:{" "}
@@ -173,7 +175,6 @@ export default function TrimSheetApprovalCard({
           ) : (
             <Button
               variant="contained"
-              color="warning"
               size="large"
               onClick={handleRequestApprove}
               disabled={approveMutation.isPending}
@@ -184,15 +185,9 @@ export default function TrimSheetApprovalCard({
                   <VerifiedUserIcon />
                 )
               }
-              sx={{
-                backgroundColor: "#f57f17",
-                "&.Mui-disabled": { backgroundColor: "#cca785" },
-                "&:hover": { backgroundColor: "#e65100" },
-                fontWeight: "bold",
-                px: 3,
-              }}
+              sx={{ ...primaryActionButtonSx, fontWeight: "bold", px: 3 }}
             >
-              Approve Trim Sheet
+              <span style={themedButtonLabelStyle}>Approve Trim Sheet</span>
             </Button>
           )}
         </Grid>

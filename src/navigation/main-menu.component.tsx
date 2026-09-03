@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Header from "./header.component";
 import Footer from "./footer.component";
+import { DASHBOARD_COLORS } from "../components/dashboard/dashboard-theme";
 
 const MainMenu = () => {
   return (
@@ -15,7 +16,10 @@ const MainMenu = () => {
         </div>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto bg-black1 bg-white">
+        <div
+          className="flex-1 overflow-y-auto"
+          style={{ backgroundColor: DASHBOARD_COLORS.pageBg }}
+        >
           <Outlet />
         </div>
 

@@ -15,6 +15,14 @@ import { asideMenuTitleTypographyTheme } from "../../themes/themes";
 import z from "zod";
 import SelectList from "../../lib/select-list.component";
 import { format, isValid, parse, parseISO } from "date-fns";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import {
+  dateIconFieldSx,
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+} from "../../themes/workspace-theme";
 
 import {
   useCreateOrderMutation,
@@ -54,29 +62,6 @@ const poSchema = z.object({
 
 type PoFormData = z.infer<typeof poSchema>;
 
-// Shared label styling for every SelectList on this form, so its label
-// behaves the same way (muted -> filled/blue -> focused/indigo) as the
-// plain TextFields already do via the app's theme - scoped to just this
-// form via SelectList's optional labelSx prop, not a global change.
-const selectLabelSx = {
-  color: "#8B93A1",
-  "&.MuiInputLabel-shrink": { color: "#005B96", fontWeight: 600 },
-  "&.Mui-focused": { color: "#6366F1" },
-};
-
-// Dropdown popup styling for every SelectList on this form, matching the
-// Order field's Autocomplete dropdown (#0D1117) so every dropdown on this
-// screen looks consistent -- passed via SelectList's optional menuSx/
-// menuItemSx props, which default to the component's original white/black
-// styling everywhere else it's used (e.g. the sign-up form).
-const selectMenuSx = {
-  backgroundColor: "#0D1117",
-  color: "#F4F6F8",
-};
-const selectMenuItemSx = {
-  color: "#F4F6F8",
-  "&:hover": { backgroundColor: "rgba(139, 147, 161, 0.12)", color: "#F4F6F8" },
-};
 
 // Explicitly pass the schema type
 // const treeErrors = z.treeifyError<typeof poSchema>(error);
@@ -99,6 +84,35 @@ const orderFormData: PoFormData = {
 
 const OrderConfirmationRoutine = () => {
   const navigate = useNavigate();
+
+  // SelectList's labelSx/menuSx/menuItemSx/selectSx target the label, the
+  // popup paper, each option, and the closed field respectively as flat sx -
+  // built directly from the shared dropdown palette rather than
+  // fieldSx/listboxSx (which nest under a parent wrapper this component
+  // doesn't have around each SelectList).
+  const { theme: dropdownTheme, fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const selectLabelSx = {
+    color: dropdownTheme.labelText,
+    "&.MuiInputLabel-shrink": { color: dropdownTheme.labelText },
+    "&.Mui-focused": { color: dropdownTheme.labelFocusText },
+  };
+  const selectFieldSx = {
+    backgroundColor: `${dropdownTheme.fieldBg} !important`,
+    color: `${dropdownTheme.fieldText} !important`,
+    ".MuiOutlinedInput-notchedOutline": { borderColor: dropdownTheme.fieldBorder },
+    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: dropdownTheme.fieldBorderHover },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: dropdownTheme.fieldBorderFocus },
+    "& .MuiSvgIcon-root": { color: dropdownTheme.iconColor },
+  };
+  const selectMenuSx = {
+    backgroundColor: `${dropdownTheme.panelBg} !important`,
+    border: `1px solid ${dropdownTheme.panelBorder}`,
+  };
+  const selectMenuItemSx = {
+    color: `${dropdownTheme.optionText} !important`,
+    "&:hover": { backgroundColor: `${dropdownTheme.optionHoverBg} !important` },
+    "&.Mui-selected": { backgroundColor: `${dropdownTheme.optionSelectedBg} !important`, color: `${dropdownTheme.optionSelectedText} !important` },
+  };
 
   const [poFormData, setPoFormData] = useState<PoFormData>(orderFormData);
   const [errors, setErrors] = useState<PoFormDataErrors>({});
@@ -433,16 +447,22 @@ const OrderConfirmationRoutine = () => {
     <>
       <div className="flex flex-col justify-center w-full m-auto h1-screen h1-1/2 mx-auto my-auto mt-10 mb-5">
         {/* Outer Form Container Wrapper Card */}
-        <div className="relative p-6 bg-white rounded-lg shadow-sm">
+        <div
+          className="relative p-6 rounded-lg shadow-sm"
+          style={{ backgroundColor: DASHBOARD_COLORS.pageBg }}
+        >
           {/* Unified Safe Responsive Backdrop Overlay */}
           {isFormBlocked && (
-            <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 backdrop-blur-[1px] transition-all duration-200">
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-[1px] transition-all duration-200">
               <div className="flex flex-col items-center gap-3">
                 {/* Your custom Bars layout spinner */}
-                <Bars stroke="#60a5fa" strokeOpacity={1.0} speed={1.0} />
+                <Bars stroke={DASHBOARD_COLORS.accent} strokeOpacity={1.0} speed={1.0} />
 
                 {/* Dynamic loading label text based on active process flag */}
-                <span className="text-xs font-semibold text-blue-400 tracking-wide animate-pulse uppercase">
+                <span
+                  className="text-xs font-semibold tracking-wide animate-pulse uppercase"
+                  style={{ color: DASHBOARD_COLORS.accentStrong }}
+                >
                   {isSubmitting
                     ? "Saving Order Details..."
                     : "Loading Existing Record..."}
@@ -453,13 +473,18 @@ const OrderConfirmationRoutine = () => {
           <Box
             component="form"
             noValidate
-            className={`flex flex-col m-auto border rounded-md border-gray-300 shadow-xl relative space-y-4 transition-opacity duration-200 ${isFetching ? "opacity-40 pointer-events-none" : "opacity-100"}`}
+            className={`flex flex-col m-auto rounded-md relative space-y-4 transition-opacity duration-200 ${isFetching ? "opacity-40 pointer-events-none" : "opacity-100"}`}
             onSubmit={handleSubmit}
-            sx={{ width: "80%", padding: 4 }}
-            // className="flex flex-col m-auto border rounded-md border-gray-300 shadow-xl relative"
+            sx={{
+              width: "80%",
+              padding: 4,
+              backgroundColor: DASHBOARD_COLORS.cardBg,
+              border: `1px solid ${DASHBOARD_COLORS.border}`,
+              boxShadow: "0 10px 28px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.3)",
+            }}
           >
             <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-              <Typography color="blue-gray" className="text-center">
+              <Typography sx={{ ...workspaceHeadingSx, textTransform: "uppercase" }}>
                 Order Confirmation Routine
               </Typography>
             </ThemeProvider>
@@ -486,6 +511,7 @@ const OrderConfirmationRoutine = () => {
                         labelSx={selectLabelSx}
                         menuSx={selectMenuSx}
                         menuItemSx={selectMenuItemSx}
+                        selectSx={selectFieldSx}
                       />
                       {errors.buyerCode && (
                         <div className="text-red-500 text-[.7em] mt-1">
@@ -512,6 +538,7 @@ const OrderConfirmationRoutine = () => {
                       onInputChange={(_, newValue) =>
                         handleOrderChange(newValue)
                       }
+                      slotProps={{ listbox: { sx: dropdownListboxSx } }}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -521,6 +548,7 @@ const OrderConfirmationRoutine = () => {
                           size="small"
                           autoComplete="off"
                           className="w-[95%]"
+                          sx={dropdownFieldSx}
                           helperText={
                             !poFormData.buyerCode
                               ? "Select a buyer first"
@@ -555,6 +583,7 @@ const OrderConfirmationRoutine = () => {
                         labelSx={selectLabelSx}
                         menuSx={selectMenuSx}
                         menuItemSx={selectMenuItemSx}
+                        selectSx={selectFieldSx}
                       />
                       {errors.buyerCode && (
                         <div className="text-red-500 text-[.7em] mt-1">
@@ -578,6 +607,7 @@ const OrderConfirmationRoutine = () => {
                       slotProps={{ htmlInput: { maxLength: 30 } }}
                       value={poFormData.description}
                       onChange={handleChange}
+                      sx={dropdownFieldSx}
                     />
                   </div>
 
@@ -595,6 +625,7 @@ const OrderConfirmationRoutine = () => {
                         labelSx={selectLabelSx}
                         menuSx={selectMenuSx}
                         menuItemSx={selectMenuItemSx}
+                        selectSx={selectFieldSx}
                       />
                       {errors.countryCode && (
                         <div className="text-red-500 text-[.7em] mt-1">
@@ -617,6 +648,7 @@ const OrderConfirmationRoutine = () => {
                         labelSx={selectLabelSx}
                         menuSx={selectMenuSx}
                         menuItemSx={selectMenuItemSx}
+                        selectSx={selectFieldSx}
                       />
                       {errors.unitCode && (
                         <div className="text-red-500 text-[.7em] mt-1">
@@ -636,6 +668,7 @@ const OrderConfirmationRoutine = () => {
                       size="small"
                       value={poFormData.totalQuantity || ""}
                       onChange={handleChange}
+                      sx={dropdownFieldSx}
                     />
                   </div>
                   <div className="w-[45%] mt-1">
@@ -652,6 +685,10 @@ const OrderConfirmationRoutine = () => {
                       slotProps={{
                         inputLabel: { shrink: true },
                         formHelperText: { children: errors.orderDate?.[0] },
+                      }}
+                      sx={{
+                        ...(dropdownFieldSx as Record<string, unknown>),
+                        ...(dateIconFieldSx as Record<string, unknown>),
                       }}
                     />
                   </div>
@@ -672,6 +709,7 @@ const OrderConfirmationRoutine = () => {
                         labelSx={selectLabelSx}
                         menuSx={selectMenuSx}
                         menuItemSx={selectMenuItemSx}
+                        selectSx={selectFieldSx}
                       />
                       {errors.season && (
                         <div className="text-red-500 text-[.7em] mt-1">
@@ -694,6 +732,7 @@ const OrderConfirmationRoutine = () => {
                         labelSx={selectLabelSx}
                         menuSx={selectMenuSx}
                         menuItemSx={selectMenuItemSx}
+                        selectSx={selectFieldSx}
                       />
                       {errors.currencyCode && (
                         <div className="text-red-500 text-[.7em] mt-1">
@@ -716,6 +755,7 @@ const OrderConfirmationRoutine = () => {
                         labelSx={selectLabelSx}
                         menuSx={selectMenuSx}
                         menuItemSx={selectMenuItemSx}
+                        selectSx={selectFieldSx}
                       />
                       {errors.basisCode && (
                         <div className="text-red-500 text-[.7em] mt-1">
@@ -734,18 +774,20 @@ const OrderConfirmationRoutine = () => {
                       color="primary"
                       type="submit"
                       className="mt-8 w-[45%]"
+                      sx={primaryActionButtonSx}
                     >
-                      Submit
+                      <span style={themedButtonLabelStyle}>Submit</span>
                     </Button>
                     <Button
                       variant="contained"
                       size="small"
                       color="primary"
-                      type="submit"
+                      type="button"
                       className="mt-8 w-[45%]"
                       onClick={handleCancel}
+                      sx={primaryActionButtonSx}
                     >
-                      Cancel
+                      <span style={themedButtonLabelStyle}>Cancel</span>
                     </Button>
                   </div>
                 </div>

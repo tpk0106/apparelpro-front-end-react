@@ -231,8 +231,7 @@ export default function StockAdjustmentNoteWorkspace() {
         </Typography>
         <Typography
           variant="caption"
-          color="text.secondary"
-          sx={{ display: "block", mb: 3, color: DASHBOARD_COLORS.textSecondary }}
+          sx={{ ...workspaceInfoCaptionSx, mb: 3 }}
         >
           SAN Number is allocated by the server on commit — it is never entered
           manually. Adjusted Qty defaults to the current quantity on hand for

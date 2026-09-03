@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Box, Paper, Typography, Alert } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import ConsumptionScopeHeader from "./consumption-scope-header.component";
@@ -19,6 +19,8 @@ import type {
   StyleMaterialConsumptionLedgerRow,
 } from "./material-consumption.types";
 import ConsumptionLedgerGrid from "./consumption-ledger-grid.component";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { workspaceHeadingSx } from "../../themes/workspace-theme";
 
 export default function MaterialConsumption() {
   const [scopeContext, setScopeContext] = useState<SelectedScopeContext | null>(
@@ -32,6 +34,29 @@ export default function MaterialConsumption() {
   // 1. ADD state memory to hold the specific row record currently being edited
   const [editingRow, setEditingRow] =
     useState<StyleMaterialConsumptionLedgerRow | null>(null);
+
+  // Measures the form panel's own real rendered height (never the reverse -
+  // the form's sx below is untouched, still just its natural minHeight/
+  // content) and mirrors that exact pixel value onto the Materials list
+  // panel next to it. A plain measured height, not CSS flex/grid stretch -
+  // stretch was tried twice for this same pair of panels and produced a
+  // "huge empty space" bug both times (see project memory); reading the
+  // form's real size with ResizeObserver and applying it as a literal height
+  // sidesteps whatever stretch was doing.
+  const formPanelRef = useRef<HTMLDivElement | null>(null);
+  const [formPanelHeight, setFormPanelHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    const node = formPanelRef.current;
+    if (!node) return;
+
+    const observer = new ResizeObserver((entries) => {
+      const measuredHeight = entries[0]?.contentRect.height;
+      if (measuredHeight) setFormPanelHeight(measuredHeight);
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   // Memoized callback handler tracking context alterations
   const handleScopeContextChange = useCallback(
@@ -66,15 +91,17 @@ export default function MaterialConsumption() {
   );
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
+    <Box
+      sx={{
+        width: "100%",
+        py: 1,
+        px: 3,
+        backgroundColor: DASHBOARD_COLORS.pageBg,
+      }}
+    >
       <Typography
         variant="h5"
-        sx={{
-          fontWeight: "bold",
-          color: "#1a237e",
-          mb: 1,
-          textAlign: "center",
-        }}
+        sx={{ ...workspaceHeadingSx, textTransform: "uppercase", mb: 1 }}
       >
         Material Consumption Details
       </Typography>
@@ -98,18 +125,20 @@ export default function MaterialConsumption() {
                 elevation={2}
                 sx={{
                   p: 2,
-                  height: "480px",
-                  // Fixed height so expanding a material category scrolls
-                  // within this panel instead of growing it (and shifting
-                  // the whole layout) - matches the form panel's height.
-                  // The panel itself never scrolls (overflow: hidden) - only
-                  // the MaterialMasterList table's own internal scroll region
-                  // (set via muiTableContainerProps) scrolls, avoiding the
-                  // confusing double-scrollbar of both this Paper and the
-                  // table scrolling at once.
+                  // Mirrors the form panel's actual measured height (see
+                  // formPanelHeight above) - falls back to 480px before the
+                  // first measurement lands. The panel itself never scrolls
+                  // (overflow: hidden) - only the MaterialMasterList table's
+                  // own internal scroll region (set via
+                  // muiTableContainerProps) scrolls, avoiding the confusing
+                  // double-scrollbar of both this Paper and the table
+                  // scrolling at once.
+                  height: formPanelHeight ? `${formPanelHeight}px` : "480px",
                   overflow: "hidden",
                   display: "flex",
                   flexDirection: "column",
+                  backgroundColor: DASHBOARD_COLORS.cardBg,
+                  border: `1px solid ${DASHBOARD_COLORS.border}`,
                 }}
               >
                 <Typography
@@ -118,7 +147,7 @@ export default function MaterialConsumption() {
                     fontWeight: "bold",
                     textAlign: "center",
                     mb: 1,
-                    color: "#ffffff",
+                    color: DASHBOARD_COLORS.accentStrong,
                   }}
                 >
                   Main Materials
@@ -136,7 +165,16 @@ export default function MaterialConsumption() {
               </Paper>
             </Grid>
             <Grid size={{ xs: 12, md: 8 }}>
-              <Paper elevation={2} sx={{ p: 2, minHeight: "480px" }}>
+              <Paper
+                ref={formPanelRef}
+                elevation={2}
+                sx={{
+                  p: 2,
+                  minHeight: "480px",
+                  backgroundColor: DASHBOARD_COLORS.cardBg,
+                  border: `1px solid ${DASHBOARD_COLORS.border}`,
+                }}
+              >
                 {activeSelection ? (
                   <ConsumptionEntryForm
                     styleContext={scopeContext}
@@ -169,7 +207,15 @@ export default function MaterialConsumption() {
           </Grid>
 
           {/* Bottom Panel: The Consolidated Continuous Spreadsheet Data Log */}
-          <Paper elevation={3} sx={{ p: 2, mt: 2 }}>
+          <Paper
+            elevation={3}
+            sx={{
+              p: 2,
+              mt: 2,
+              backgroundColor: DASHBOARD_COLORS.cardBg,
+              border: `1px solid ${DASHBOARD_COLORS.border}`,
+            }}
+          >
             <ConsumptionLedgerGrid
               styleContext={scopeContext}
               ledgerData={currentLedger}
@@ -193,7 +239,13 @@ export default function MaterialConsumption() {
         <Alert
           severity="info"
           variant="outlined"
-          sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+          sx={{
+            m: 2,
+            fontWeight: "bold",
+            color: DASHBOARD_COLORS.accentStrong,
+            backgroundColor: DASHBOARD_COLORS.cardBg,
+            borderColor: DASHBOARD_COLORS.border,
+          }}
         >
           Please select a Buyer, Purchase Order, Garment Type, and Style in the
           header above to load the consumption details.

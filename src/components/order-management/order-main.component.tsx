@@ -5,6 +5,20 @@ import ColorSizeBreakdown from "./color-size-breakdown.component";
 import type { Style } from "../../interfaces/order-management/Style";
 import PartShipmentsWorkspace from "../part-shipment/part-shipments-workspace";
 import ConfirmDialog from "../common/confirm-dialog";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { oliveGlossSx, copperTextColor } from "../../themes/button-color-themes";
+
+// Shared look for this file's "nothing selected yet" notices - was MUI's
+// default filled-blue Alert; replaced with the app's dark card background and
+// bold copper text so it matches the rest of the olive/copper theme instead
+// of standing out as leftover default styling.
+const emptyStateAlertSx = {
+  fontWeight: "bold",
+  color: copperTextColor,
+  backgroundColor: DASHBOARD_COLORS.cardBg,
+  border: `1px solid ${DASHBOARD_COLORS.border}`,
+  "& .MuiAlert-icon": { color: copperTextColor },
+};
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -37,11 +51,11 @@ function CustomTabPanel(props: TabPanelProps) {
         sx={{
           margin: "10px 0",
           p: 3,
-          border: "1px solid #ccc",
+          border: `1px solid ${DASHBOARD_COLORS.border}`,
           borderRadius: "4px",
           minWidth: "70%",
           minHeight: "100%",
-          backgroundColor: "#fff",
+          backgroundColor: DASHBOARD_COLORS.cardBg,
         }}
       >
         {children}
@@ -104,38 +118,39 @@ const OrderMain = ({ buyerCode, order, mainOrderUnit }: OrderMainProps) => {
         sx={{
           width: "50%",
           margin: "0 auto",
-          border: "2px solid gray",
+          border: `2px solid ${DASHBOARD_COLORS.border}`,
           borderRadius: "5px",
           marginTop: "3px",
         }}
       >
         <Box
           sx={{
+            ...oliveGlossSx,
             borderBottom: 1,
-            borderColor: "divider",
-            backgroundColor: "#60A5FA",
-            color: "#000",
           }}
         >
           <Tabs
             sx={{
-              color: "#000",
-
-              // 1. Unselected tab text color
+              // 1. Unselected tab text color - the olive gloss's own cream
               "& .MuiTab-root": {
-                color: "#000",
+                color: "#F3EADF",
+                position: "relative",
+                zIndex: 1,
               },
-              // 2. Selected tab text color
+              // 2. Selected tab text color - same cream, distinguished by
+              // weight and the indicator bar instead of a color swap.
               "& .MuiTab-root.Mui-selected": {
-                color: "#1c398e ",
+                color: "#F3EADF",
+                fontWeight: 700,
               },
               // 3. Bottom sliding indicator bar color
               "& .MuiTabs-indicator": {
-                backgroundColor: "#1c398e ",
+                backgroundColor: "#9FAE5E",
+                height: "3px",
               },
               // 4. Hover effect color
               "& .MuiTab-root:hover": {
-                color: "#3f51b5",
+                color: copperTextColor,
               },
             }}
             value={value}
@@ -166,7 +181,7 @@ const OrderMain = ({ buyerCode, order, mainOrderUnit }: OrderMainProps) => {
           />
         ) : (
           <Box sx={{ padding: "2px" }}>
-            <Alert severity="info" variant="filled" sx={{ fontWeight: "bold" }}>
+            <Alert severity="info" variant="outlined" sx={emptyStateAlertSx}>
               Please select a valid Buyer and Order in Order confirmation
               routine (above) to display style details.
             </Alert>
@@ -194,8 +209,8 @@ const OrderMain = ({ buyerCode, order, mainOrderUnit }: OrderMainProps) => {
             <Box sx={{ padding: "3px" }}>
               <Alert
                 severity="info"
-                variant="filled"
-                sx={{ fontWeight: "bold" }}
+                variant="outlined"
+                sx={emptyStateAlertSx}
               >
                 ⚠️ Access Refused: Please return to the [Style Details]
                 spreadsheet panel tab and click a style row item to initialize
@@ -222,7 +237,7 @@ const OrderMain = ({ buyerCode, order, mainOrderUnit }: OrderMainProps) => {
           />
         ) : (
           <Box sx={{ padding: "3px" }}>
-            <Alert severity="info" variant="filled">
+            <Alert severity="info" variant="outlined" sx={emptyStateAlertSx}>
               No Style context selected. Please return to the{" "}
               <strong>[Style Details]</strong> tab and click the{" "}
               <strong>Grid matrix button</strong> on a style row to begin

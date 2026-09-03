@@ -71,8 +71,10 @@ const DashboardHome = () => {
   const activeScope: StyleScope | null = overrideScope ?? (currentStyle
     ? {
         buyerCode: currentStyle.buyerCode,
+        buyerName: currentStyle.buyerName,
         order: currentStyle.order,
         typeCode: currentStyle.typeCode,
+        typeName: currentStyle.typeName,
         styleCode: currentStyle.styleCode,
       }
     : null);
@@ -107,7 +109,8 @@ const DashboardHome = () => {
       <Card variant="outlined" sx={{ p: 2, mb: 2, display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap", ...CARD_SX }}>
         {activeScope ? (
           <Typography variant="body2" sx={{ color: DASHBOARD_COLORS.textPrimary }}>
-            {activeScope.buyerCode} / {activeScope.order} / {activeScope.typeCode} / {activeScope.styleCode}
+            {activeScope.buyerName || activeScope.buyerCode} / {activeScope.order} /{" "}
+            {activeScope.typeName || activeScope.typeCode} / {activeScope.styleCode}
           </Typography>
         ) : (
           <Typography variant="body2" sx={{ color: DASHBOARD_COLORS.textSecondary }}>

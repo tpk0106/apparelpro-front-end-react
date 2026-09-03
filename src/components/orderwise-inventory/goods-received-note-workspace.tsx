@@ -26,6 +26,7 @@ import {
 } from "../../tanstack-hooks/goods-received-note.hooks";
 import type { AppError } from "../../auth/axiosClient";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
 import {
   primaryActionButtonSx,
   themedButtonLabelStyle,
@@ -35,6 +36,7 @@ import {
 } from "../../themes/workspace-theme";
 
 export default function GoodsReceivedNoteWorkspace() {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const [poNumberInput, setPoNumberInput] = useState("");
   const [lookupPoNumber, setLookupPoNumber] = useState("");
   const [transactionDate, setTransactionDate] = useState<string>(
@@ -203,6 +205,7 @@ export default function GoodsReceivedNoteWorkspace() {
               onChange={(e) => setPoNumberInput(e.target.value.toUpperCase())}
               onKeyDown={(e) => e.key === "Enter" && handleLookup()}
               placeholder="e.g. 000001"
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
@@ -225,6 +228,7 @@ export default function GoodsReceivedNoteWorkspace() {
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={dropdownFieldSx}
             />
           </Grid>
         </Grid>
