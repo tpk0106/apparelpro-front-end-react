@@ -60,6 +60,37 @@ export function getDropdownListboxSx(t: DropdownColorTheme): SxProps<Theme> {
   };
 }
 
+// MenuProps for a native <TextField select>/<Select>'s popup paper - pass as
+// `slotProps={{ select: { MenuProps: getDropdownSelectMenuProps(theme) } }}`
+// (or MRT's `muiEditTextFieldProps.slotProps.select.MenuProps`). Complements
+// getDropdownListboxSx above, which is for <Autocomplete> instead.
+export function getDropdownSelectMenuProps(t: DropdownColorTheme) {
+  return {
+    slotProps: {
+      paper: {
+        sx: {
+          backgroundColor: `${t.panelBg} !important`,
+          border: `1px solid ${t.panelBorder}`,
+        },
+      },
+    },
+  };
+}
+
+// Per-<MenuItem> sx to pair with getDropdownSelectMenuProps - MUI does not
+// let the Menu's own paper sx cascade text/hover/selected colors down into
+// each option, so every MenuItem needs this applied directly.
+export function getDropdownMenuItemSx(t: DropdownColorTheme) {
+  return {
+    color: `${t.optionText} !important`,
+    "&:hover": { backgroundColor: `${t.optionHoverBg} !important` },
+    "&.Mui-selected": {
+      backgroundColor: `${t.optionSelectedBg} !important`,
+      color: `${t.optionSelectedText} !important`,
+    },
+  };
+}
+
 // The closed field itself (TextField/Select/FormControl outline, label, icon).
 // Wrapped in "&&" - the app's global MuiTextField theme override (themes.ts)
 // sets its own ".MuiInputLabel-root.MuiInputLabel-shrink" / ".Mui-focused"

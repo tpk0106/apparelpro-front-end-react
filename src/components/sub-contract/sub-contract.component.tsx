@@ -2,6 +2,8 @@ import { useCallback, useMemo, useState } from "react";
 import { Alert, Box, ThemeProvider, Typography } from "@mui/material";
 import ConsumptionScopeHeader from "../material-consumption/consumption-scope-header.component";
 import type { SelectedScopeContext } from "../material-consumption/material-consumption.types";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { workspaceHeadingSx } from "../../themes/workspace-theme";
 import { asideMenuTitleTypographyTheme } from "../../themes/themes";
 import {
   useGetSubContractors,
@@ -80,10 +82,15 @@ export default function SubContractPage() {
   );
 
   return (
-    <div className="flex flex-col w-[90%] mx-auto justify-around mt-10">
+    <div
+      className="flex flex-col w-[90%] mx-auto justify-around mt-10"
+      style={{ backgroundColor: DASHBOARD_COLORS.pageBg, padding: "1.5rem", borderRadius: 8 }}
+    >
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">SUB CONTRACTS</Typography>
+          <Typography sx={{ ...workspaceHeadingSx, textTransform: "uppercase" }}>
+            Sub Contracts
+          </Typography>
         </ThemeProvider>
       </div>
 
@@ -122,7 +129,17 @@ export default function SubContractPage() {
           />
         </Box>
       ) : (
-        <Alert severity="info" variant="outlined" sx={{ m: 2 }}>
+        <Alert
+          severity="info"
+          variant="outlined"
+          sx={{
+            m: 2,
+            fontWeight: "bold",
+            color: DASHBOARD_COLORS.accentStrong,
+            backgroundColor: DASHBOARD_COLORS.cardBg,
+            borderColor: DASHBOARD_COLORS.border,
+          }}
+        >
           Please select a Buyer, Purchase Order, Garment Type, and Style in
           the header above to load the Sub Contract entries.
         </Alert>

@@ -15,6 +15,9 @@ import type { Style } from "../../interfaces/order-management/Style"; // Ensure 
 import type { SelectedHeaderContext } from "./stylewise-events.types";
 import type { GarmentTypeServiceModel } from "../material-consumption/material-consumption.types";
 import type { Buyer } from "../../interfaces/references/Buyer";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
 
 interface HeaderSelectorProps {
   // Callback function to broadcast the verified header coordinates up to the workspace controller
@@ -24,6 +27,8 @@ interface HeaderSelectorProps {
 export default function StylewiseEventsHeader({
   onContextLock,
 }: HeaderSelectorProps) {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+
   // 1. Core Hierarchy Selection States
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
@@ -111,8 +116,9 @@ export default function StylewiseEventsHeader({
       sx={{
         p: 2.5,
         mb: 3,
-        backgroundColor: "#fafafa",
-        borderLeft: "5px solid #1a237e",
+        backgroundColor: DASHBOARD_COLORS.cardBg,
+        borderColor: DASHBOARD_COLORS.border,
+        borderLeft: `5px solid ${copperTextColor}`,
       }}
     >
       <Typography
@@ -120,7 +126,7 @@ export default function StylewiseEventsHeader({
         sx={{
           display: "block",
           fontWeight: "bold",
-          color: "text.secondary",
+          color: DASHBOARD_COLORS.accentStrong,
           mb: 2,
           textTransform: "uppercase",
         }}
@@ -139,8 +145,9 @@ export default function StylewiseEventsHeader({
             onChange={(_, v: Buyer | null) => handleBuyerChange(v)}
             loading={isBuyersLoading}
             isOptionEqualToValue={(o, v) => o.buyerCode === v?.buyerCode}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(p) => (
-              <TextField {...p} label="Select Buyer" size="small" />
+              <TextField {...p} label="Select Buyer" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>
@@ -155,8 +162,9 @@ export default function StylewiseEventsHeader({
             onChange={(_, v: string | null) => handleOrderChange(v)}
             loading={isOrdersLoading}
             isOptionEqualToValue={(o, v) => o === v}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(p) => (
-              <TextField {...p} label="Select Purchase Order" size="small" />
+              <TextField {...p} label="Select Purchase Order" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>
@@ -173,8 +181,9 @@ export default function StylewiseEventsHeader({
             }
             loading={isTypesLoading}
             isOptionEqualToValue={(o, v) => o.id === v?.id}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(p) => (
-              <TextField {...p} label="Select Garment Type" size="small" />
+              <TextField {...p} label="Select Garment Type" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>
@@ -191,8 +200,9 @@ export default function StylewiseEventsHeader({
             onChange={(_, v: Style | null) => handleStyleChange(v)}
             loading={isStylesLoading}
             isOptionEqualToValue={(o, v) => o.id === v?.id}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(p) => (
-              <TextField {...p} label="Select Active Style" size="small" />
+              <TextField {...p} label="Select Active Style" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>

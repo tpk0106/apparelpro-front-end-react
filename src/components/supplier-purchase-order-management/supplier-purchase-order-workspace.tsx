@@ -9,7 +9,9 @@ import {
   CircularProgress,
   MenuItem,
   Card,
+  ThemeProvider,
 } from "@mui/material";
+import { asideMenuTitleTypographyTheme } from "../../themes/themes";
 import Grid from "@mui/material/Grid";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -27,9 +29,9 @@ import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 // FIXED: Wrap MaterialReactTable inside curly braces to fix the call signature compiler error!
 import {
   MaterialReactTable,
-  useMaterialReactTable,
   type MRT_ColumnDef,
 } from "material-react-table";
+import { useApparelProTable } from "../../themes/useApparelProTable";
 
 import SupplierPOHeaderSelector from "./supplier-po-header-selector";
 import type {
@@ -40,6 +42,10 @@ import type {
 } from "../../interfaces/order-management/purchase-order-types";
 import { useGetUnits } from "../../tanstack-hooks/custom-hooks";
 import type { Unit } from "../../interfaces/references/Unit";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { workspaceHeadingSx, primaryActionButtonSx, themedButtonLabelStyle, dateIconFieldSx } from "../../themes/workspace-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
 
 // Import your custom RTK-Query mutation hook from your verified store services
 import {
@@ -65,6 +71,8 @@ function extractErrorMessage(
 }
 
 export default function SupplierPurchaseOrderWorkspace() {
+  const { fieldSx: dropdownFieldSx, selectMenuProps, menuItemSx } = useDropdownTheme();
+
   // 1. Core Structural Workspace States
   const [poContext, setPoContext] = useState<SelectedPOContext | null>(null);
   const [activeBudgetLine, setActiveBudgetLine] =
@@ -179,6 +187,19 @@ export default function SupplierPurchaseOrderWorkspace() {
     if (!poContext || !activeBudgetLine || Number(form.orderQuantity) <= 0)
       return;
 
+    // FIXED: previously nothing stopped staging a line with a blank Order
+    // Unit or zero Unit Price - the row would just silently go into
+    // poLineItems malformed, with no error shown, matching the other guards
+    // in this function.
+    if (!form.orderUnit) {
+      toast.error("Order Unit is required.");
+      return;
+    }
+    if (Number(form.unitPrice) <= 0) {
+      toast.error("Unit Purchase Price must be greater than zero.");
+      return;
+    }
+
     // Budget Limit Cap Guard: Prevent the operator from over-purchasing against the style profile
     if (Number(form.orderQuantity) > activeBudgetLine.balanceQuantity) {
       toast.error(
@@ -289,12 +310,14 @@ export default function SupplierPurchaseOrderWorkspace() {
         size: 120,
         muiTableBodyCellProps: ({ row }) => ({
           sx: {
-            fontFamily: "monospace",
-            fontWeight: "bold",
-            ...(isRowSelected(row.original) && {
-              backgroundColor: "#ffca28 !important",
-              color: "#3e2723 !important",
-            }),
+            "&&&": {
+              fontFamily: "monospace",
+              fontWeight: "bold",
+              ...(isRowSelected(row.original) && {
+                backgroundColor: `${copperTextColor} !important`,
+                color: "#2B1B0E !important",
+              }),
+            },
           },
         }),
       },
@@ -354,36 +377,49 @@ export default function SupplierPurchaseOrderWorkspace() {
     [activeBudgetLine],
   );
 
-  const leftTable = useMaterialReactTable({
+  const leftTable = useApparelProTable<AvailableBudgetLine>({
     columns: leftColumns,
     data: unfulfilledBudgetData,
+    enableEditing: false,
     enablePagination: false,
     enableSorting: true,
     enableTopToolbar: false,
     initialState: { density: "compact" },
+    getRowId: (row) => row.itemCode,
     muiTableBodyRowProps: ({ row }) => {
       const isSelected = isRowSelected(row.original);
       return {
         onClick: () => setActiveBudgetLine(row.original),
         sx: {
           cursor: "pointer",
-          "&:hover": { backgroundColor: "#e8eaf6 !important" },
-          // Grey out lines whose Style hasn't completed Trim Sheet Approval yet -
-          // still clickable (the toast guard above explains why when they try),
-          // but visually distinct so most operators won't bother selecting them.
-          ...(!row.original.isStyleApproved && {
-            opacity: 0.5,
-            fontStyle: "italic",
-          }),
-          // Persistent highlight for whichever line is currently loaded into
-          // the entry form on the right - matches the amber-highlight
-          // convention already used for the active selection elsewhere
-          // (ConsumptionLedgerGrid/MaterialMasterList). Row-level sx alone
-          // isn't reliable in this MRT setup, so the same highlight is also
-          // applied per-cell below via muiTableBodyCellProps.
-          ...(isSelected && {
-            borderLeft: "4px solid #e65100 !important",
-          }),
+          // FIXED: this used the SAME key "&&&" as the shared hook's own sx
+          // (see useApparelProTable.ts's muiTableBodyRowProps) - since the
+          // hook spreads the caller's custom.sx as a plain JS object after
+          // its own "&&&" entry, an identical key there doesn't merge, it
+          // silently REPLACES the hook's entire "&&&" block (including its
+          // row background/alt-row/hover colors), which is exactly why this
+          // table still looked like the old default theme despite switching
+          // to useApparelProTable. "&&" (a different object key, still
+          // enough specificity for these non-conflicting properties) avoids
+          // the collision.
+          "&&": {
+            // Grey out lines whose Style hasn't completed Trim Sheet Approval
+            // yet - still clickable (the toast guard above explains why when
+            // they try), but visually distinct so most operators won't
+            // bother selecting them.
+            ...(!row.original.isStyleApproved && {
+              opacity: 0.5,
+              fontStyle: "italic",
+            }),
+            // Persistent highlight for whichever line is currently loaded
+            // into the entry form on the right - matches the copper-highlight
+            // convention used elsewhere (ConsumptionLedgerGrid/MaterialMasterList).
+            // Row-level sx alone isn't reliable in this MRT setup, so the same
+            // highlight is also applied per-cell below via muiTableBodyCellProps.
+            ...(isSelected && {
+              borderLeft: "4px solid #6B4420 !important",
+            }),
+          },
         },
       };
     },
@@ -393,11 +429,13 @@ export default function SupplierPurchaseOrderWorkspace() {
     // same highlight itself.
     muiTableBodyCellProps: ({ row }) => ({
       sx: {
-        ...(isRowSelected(row.original) && {
-          backgroundColor: "#ffca28 !important",
-          color: "#3e2723 !important",
-          fontWeight: "bold",
-        }),
+        "&&&": {
+          ...(isRowSelected(row.original) && {
+            backgroundColor: `${copperTextColor} !important`,
+            color: "#2B1B0E !important",
+            fontWeight: "bold",
+          }),
+        },
       },
     }),
     // Fluid grid layout: columns scale to fit the container width instead of the
@@ -453,9 +491,10 @@ export default function SupplierPurchaseOrderWorkspace() {
     [],
   );
 
-  const bottomTable = useMaterialReactTable({
+  const bottomTable = useApparelProTable<PODetailItemRow>({
     columns: bottomColumns,
     data: poLineItems,
+    enableEditing: false,
     enablePagination: false,
     enableSorting: false,
     enableTopToolbar: false,
@@ -482,19 +521,14 @@ export default function SupplierPurchaseOrderWorkspace() {
   });
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Typography
-        variant="h5"
-        align="center"
-        sx={{
-          fontWeight: "bold",
-          color: "#1a237e",
-          mb: 2,
-          mt: 1,
-        }}
-      >
-        Supplier Purchase Order Entry
-      </Typography>
+    <Box sx={{ width: "100%", py: 1, px: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
+      <ThemeProvider theme={asideMenuTitleTypographyTheme}>
+        <Typography
+          sx={{ ...workspaceHeadingSx, textTransform: "uppercase", mb: 2, mt: 1 }}
+        >
+          Supplier Purchase Order Entry
+        </Typography>
+      </ThemeProvider>
 
       {lastSavedPoNumber && (
         <Alert
@@ -524,20 +558,10 @@ export default function SupplierPurchaseOrderWorkspace() {
               guidance is visible immediately, between the header selector above
               and the table/form below, with no scrolling needed. */}
           {poLineItems.length === 0 && (
-            // Text/border forced to black (2026-08-03) - the default MUI "warning"
-            // outlined palette (amber-on-transparent) was hard to read against this
-            // card's light surface; kept the horizontal margin (mx) so it doesn't
-            // run flush against the card edges like the header selector above it.
             <Alert
               severity="warning"
               variant="outlined"
-              sx={{
-                mb: 3,
-                mx: 2,
-                color: "#000000",
-                borderColor: "#000000",
-                "& .MuiAlert-icon": { color: "#000000" },
-              }}
+              sx={{ mb: 3, mx: 2, fontWeight: "bold" }}
             >
               No procurement detail rows have been staged yet. Highlight a
               material on the left and input contract metrics to add lines to
@@ -552,10 +576,18 @@ export default function SupplierPurchaseOrderWorkspace() {
                 at the old width; the right form panel was narrowed to match and its
                 fields switched to a single stacked column below. */}
             <Grid size={{ xs: 12, md: 7 }}>
-              <Paper elevation={2} sx={{ p: 2, minHeight: "400px" }}>
+              <Paper
+                elevation={2}
+                sx={{
+                  p: 2,
+                  minHeight: "400px",
+                  backgroundColor: DASHBOARD_COLORS.cardBg,
+                  border: `1px solid ${DASHBOARD_COLORS.border}`,
+                }}
+              >
                 <Typography
                   variant="subtitle2"
-                  sx={{ fontWeight: "bold", color: "#ffffff", mb: 1.5 }}
+                  sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.accentStrong, mb: 1.5 }}
                 >
                   Available Material Budget Thresholds (bal_qty &gt; 0)
                 </Typography>
@@ -565,20 +597,27 @@ export default function SupplierPurchaseOrderWorkspace() {
 
             {/* Right Flank Panel: Supplier Line Procurement Input Form */}
             <Grid size={{ xs: 12, md: 5 }}>
-              <Paper elevation={2} sx={{ p: 2, minHeight: "400px" }}>
+              <Paper
+                elevation={2}
+                sx={{
+                  p: 2,
+                  minHeight: "400px",
+                  backgroundColor: DASHBOARD_COLORS.cardBg,
+                  border: `1px solid ${DASHBOARD_COLORS.border}`,
+                }}
+              >
                 {activeBudgetLine ? (
                   <Card
                     variant="outlined"
                     sx={{
                       p: 2,
-                      border: "1px solid #1a237e",
-                      backgroundColor: "#f9f9f9",
+                      border: `1px solid ${copperTextColor}`,
+                      backgroundColor: "rgba(159,174,94,0.1)",
                     }}
                   >
                     <Typography
                       variant="body2"
-                      color="primary"
-                      sx={{ fontWeight: "bold", mb: 2 }}
+                      sx={{ fontWeight: "bold", mb: 2, color: DASHBOARD_COLORS.accentStrong }}
                     >
                       Procuring: {activeBudgetLine.description} (
                       {activeBudgetLine.itemCode})
@@ -602,6 +641,7 @@ export default function SupplierPurchaseOrderWorkspace() {
                               maxLength: 30,
                             },
                           }}
+                          sx={dropdownFieldSx}
                         />
                       </Grid>
                       <Grid size={{ xs: 12 }}>
@@ -614,9 +654,11 @@ export default function SupplierPurchaseOrderWorkspace() {
                           onChange={(e) =>
                             handleInputChange("orderUnit", e.target.value)
                           }
+                          sx={dropdownFieldSx}
+                          slotProps={{ select: { MenuProps: selectMenuProps } }}
                         >
                           {systemUnits.map((u: Unit) => (
-                            <MenuItem key={u.id} value={u.code}>
+                            <MenuItem key={u.id} value={u.code} sx={menuItemSx}>
                               {u.code} ({u.description})
                             </MenuItem>
                           ))}
@@ -632,6 +674,7 @@ export default function SupplierPurchaseOrderWorkspace() {
                           onChange={(e) =>
                             handleInputChange("orderQuantity", e.target.value)
                           }
+                          sx={dropdownFieldSx}
                         />
                       </Grid>
                       <Grid size={{ xs: 12 }}>
@@ -644,6 +687,7 @@ export default function SupplierPurchaseOrderWorkspace() {
                           onChange={(e) =>
                             handleInputChange("unitPrice", e.target.value)
                           }
+                          sx={dropdownFieldSx}
                         />
                       </Grid>
                       <Grid size={{ xs: 12 }}>
@@ -657,6 +701,10 @@ export default function SupplierPurchaseOrderWorkspace() {
                             handleInputChange("exportDate", e.target.value)
                           }
                           slotProps={{ inputLabel: { shrink: true } }}
+                          sx={{
+                            ...(dropdownFieldSx as Record<string, unknown>),
+                            ...(dateIconFieldSx as Record<string, unknown>),
+                          }}
                         />
                       </Grid>
                       <Grid size={{ xs: 12 }}>
@@ -665,6 +713,7 @@ export default function SupplierPurchaseOrderWorkspace() {
                           size="small"
                           fullWidth
                           value={form.lcNo}
+                          sx={dropdownFieldSx}
                           onChange={(e) =>
                             handleInputChange("lcNo", e.target.value)
                           }
@@ -680,13 +729,13 @@ export default function SupplierPurchaseOrderWorkspace() {
                       }}
                     >
                       <Button
-                        variant="outlined"
-                        color="primary"
+                        variant="contained"
                         startIcon={<AddShoppingCartIcon />}
                         onClick={handleAddLineToSessionList}
                         disabled={Number(form.orderQuantity) <= 0}
+                        sx={primaryActionButtonSx}
                       >
-                        Stage PO Line Item
+                        <span style={themedButtonLabelStyle}>Stage PO Line Item</span>
                       </Button>
                     </Box>
                   </Card>
@@ -715,18 +764,26 @@ export default function SupplierPurchaseOrderWorkspace() {
               yet" guidance now lives above the table/form (see the Alert above),
               so there's nothing useful for this panel to show before then. */}
           {poLineItems.length > 0 && (
-            <Paper elevation={3} sx={{ p: 2, mt: 3 }}>
+            <Paper
+              elevation={3}
+              sx={{
+                p: 2,
+                mt: 3,
+                backgroundColor: DASHBOARD_COLORS.cardBg,
+                border: `1px solid ${DASHBOARD_COLORS.border}`,
+              }}
+            >
               <Box
                 sx={{
                   mb: 2,
                   display: "flex",
-                  justifyContent: "space:between",
+                  justifyContent: "space-between",
                   alignItems: "center",
                 }}
               >
                 <Typography
                   variant="subtitle2"
-                  sx={{ fontWeight: "bold", color: "#1a237e" }}
+                  sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.accentStrong }}
                 >
                   [ RUNNING SUMMARY - STAGED PURCHASE ORDER DETAIL LINES ]
                 </Typography>
@@ -734,7 +791,6 @@ export default function SupplierPurchaseOrderWorkspace() {
                 {/* Master Database Transaction Commit Button */}
                 <Button
                   variant="contained"
-                  color="success"
                   startIcon={
                     isCommitting ? (
                       <CircularProgress size={20} color="inherit" />
@@ -744,12 +800,15 @@ export default function SupplierPurchaseOrderWorkspace() {
                   }
                   disabled={isCommitting}
                   onClick={handleCommitPoToDatabase}
+                  sx={primaryActionButtonSx}
                 >
-                  {isCommitting
-                    ? "Transmitting..."
-                    : poContext.purchaseNumber
-                      ? `Commit P/O [${poContext.purchaseNumber}]`
-                      : "Commit New P/O"}
+                  <span style={themedButtonLabelStyle}>
+                    {isCommitting
+                      ? "Transmitting..."
+                      : poContext.purchaseNumber
+                        ? `Commit P/O [${poContext.purchaseNumber}]`
+                        : "Commit New P/O"}
+                  </span>
                 </Button>
               </Box>
 
@@ -761,7 +820,13 @@ export default function SupplierPurchaseOrderWorkspace() {
         <Alert
           severity="info"
           variant="outlined"
-          sx={{ mt: 2, fontWeight: "bold" }}
+          sx={{
+            mt: 2,
+            fontWeight: "bold",
+            color: DASHBOARD_COLORS.accentStrong,
+            backgroundColor: DASHBOARD_COLORS.cardBg,
+            borderColor: DASHBOARD_COLORS.border,
+          }}
         >
           Please select a valid P/O Mode, Supplier, Store, Currency, Buyer, and
           Order to initialize the procurement workspace.

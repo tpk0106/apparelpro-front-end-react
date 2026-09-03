@@ -1,10 +1,14 @@
 import { useState } from "react";
-import { Box, Paper, Typography, Alert } from "@mui/material";
+import { Box, Paper, ThemeProvider, Typography, Alert } from "@mui/material";
 import StylewiseEventsHeader from "./stylewise-events-header";
 import StylewiseEventsGrid from "././stylewise-events-grid";
 import { useGetStylewiseEventsChecklistQuery } from "../../services/order-management/stylewise-event.services";
 import type { SelectedHeaderContext } from "../stylewise-events/stylewise-events.types";
 import StylewiseEventsApprovalCard from "./stylewise-events-approval-card";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { workspaceHeadingSx } from "../../themes/workspace-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
+import { asideMenuTitleTypographyTheme } from "../../themes/themes";
 
 // Import your live query hook cleanly from your active Redux slice service
 // import { useGetStylewiseEventsChecklistQuery } from "../../services/stylewiseEventApi";
@@ -46,21 +50,28 @@ export default function StylewiseEventsWorkspace() {
   const loggedInUserName = localStorage.getItem("user") || "Guest Operator";
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
+    <Box sx={{ width: "100%", py: 1, px: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
       {/* Module Title Accent Header Bar */}
-      <Typography
-        variant="h5"
-        sx={{ fontWeight: "bold", color: "#1a237e", mb: 2 }}
-      >
-        Style-Wise Production Critical Path Milestones
-      </Typography>
+      <ThemeProvider theme={asideMenuTitleTypographyTheme}>
+        <Typography sx={{ ...workspaceHeadingSx, textTransform: "uppercase", mb: 2 }}>
+          Style-Wise Production Critical Path Milestones
+        </Typography>
+      </ThemeProvider>
 
       {/* 3. Mount the unified 4-column filter selection card panel */}
       <StylewiseEventsHeader onContextLock={(ctx) => setScopeContext(ctx)} />
 
       {/* 4. DYNAMIC WORKSPACE PANEL SWITCHER */}
       {scopeContext && serverResponse ? (
-        <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #1a237e" }}>
+        <Paper
+          elevation={3}
+          sx={{
+            p: 3,
+            backgroundColor: DASHBOARD_COLORS.cardBg,
+            border: `1px solid ${DASHBOARD_COLORS.border}`,
+            borderTop: `4px solid ${copperTextColor}`,
+          }}
+        >
           {/* 1. PASS REAL SERVER RECOGNITION FIELDS STRAIGHT DOWN */}
           <StylewiseEventsApprovalCard
             buyerCode={scopeContext.buyerCode}
@@ -85,7 +96,7 @@ export default function StylewiseEventsWorkspace() {
               variant="subtitle2"
               sx={{
                 fontWeight: "bold",
-                color: "#1a237e",
+                color: DASHBOARD_COLORS.accentStrong,
                 textTransform: "uppercase",
               }}
             >
@@ -110,8 +121,9 @@ export default function StylewiseEventsWorkspace() {
           sx={{
             mt: 2,
             fontWeight: "bold",
+            color: DASHBOARD_COLORS.accentStrong,
             borderLeft: "4px solid #0288d1",
-            backgroundColor: "#fafafa",
+            backgroundColor: DASHBOARD_COLORS.cardBg,
           }}
         >
           Please select a valid Buyer, Purchase Order Contract, Garment Type,

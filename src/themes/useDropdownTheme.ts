@@ -1,4 +1,9 @@
-import { getDropdownFieldSx, getDropdownListboxSx } from "./dropdown-color-themes";
+import {
+  getDropdownFieldSx,
+  getDropdownListboxSx,
+  getDropdownSelectMenuProps,
+  getDropdownMenuItemSx,
+} from "./dropdown-color-themes";
 import { DEFAULT_DROPDOWN_THEME_ID, getDropdownColorTheme } from "./dropdown-theme-registry";
 
 // Shared entry point for any Select/Autocomplete dropdown that wants the
@@ -6,13 +11,22 @@ import { DEFAULT_DROPDOWN_THEME_ID, getDropdownColorTheme } from "./dropdown-the
 // dropdown-theme-registry.ts) - pass one to opt a single dropdown into a
 // different palette without affecting any other.
 //
+// DRY reminder: every screen's dropdown/select must look the same (olive
+// theme) - always reach for this hook (or getDropdownColorTheme directly at
+// module scope for a non-component file, see selectMenuProps/menuItemSx
+// below) instead of hand-rolling a local selectMenuProps/menuItemSx/darkFieldSx
+// object per file, even for a quick one-off fix.
+//
 // Usage for a MUI <Autocomplete>:
 //   const { listboxSx } = useDropdownTheme();
 //   <Autocomplete slotProps={{ listbox: { sx: listboxSx } }} ... />
 //
-// Usage for a MUI <TextField select> or <Select>:
-//   const { fieldSx, listboxSx } = useDropdownTheme();
-//   <TextField select sx={fieldSx} slotProps={{ select: { MenuProps: { slotProps: { paper: { sx: listboxSx } } } } }} ... />
+// Usage for a MUI <TextField select> or <Select> (including MRT's
+// muiEditTextFieldProps, which forwards straight to TextField):
+//   const { fieldSx, selectMenuProps, menuItemSx } = useDropdownTheme();
+//   <TextField select sx={fieldSx} slotProps={{ select: { MenuProps: selectMenuProps } }}>
+//     <MenuItem sx={menuItemSx} value="x">X</MenuItem>
+//   </TextField>
 export function useDropdownTheme(themeId: string = DEFAULT_DROPDOWN_THEME_ID) {
   const theme = getDropdownColorTheme(themeId);
   return {
@@ -23,5 +37,7 @@ export function useDropdownTheme(themeId: string = DEFAULT_DROPDOWN_THEME_ID) {
     theme,
     fieldSx: getDropdownFieldSx(theme),
     listboxSx: getDropdownListboxSx(theme),
+    selectMenuProps: getDropdownSelectMenuProps(theme),
+    menuItemSx: getDropdownMenuItemSx(theme),
   };
 }

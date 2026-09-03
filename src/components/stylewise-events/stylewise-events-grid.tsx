@@ -12,11 +12,19 @@ import {
 } from "@mui/material";
 import {
   MaterialReactTable,
-  useMaterialReactTable,
   type MRT_ColumnDef,
 } from "material-react-table";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PostAddIcon from "@mui/icons-material/PostAdd";
+import { useApparelProTable } from "../../themes/useApparelProTable";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  dateIconFieldSx,
+} from "../../themes/workspace-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import ConfirmDialog from "../common/confirm-dialog";
 
 // Import standard Redux Toolkit Query error type structures to eliminate generic 'any' blocks completely
 import type { SerializedError } from "@reduxjs/toolkit";
@@ -64,6 +72,8 @@ export default function StylewiseEventsGrid({
   eventsData,
   isLoading,
 }: GridProps) {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
+
   const [updateLine] = useUpdateStylewiseEventLineMutation();
   const [deleteLine] = useDeleteStylewiseEventLineMutation();
   const [addCustomLine] = useAddCustomStylewiseEventLineMutation();
@@ -71,6 +81,13 @@ export default function StylewiseEventsGrid({
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [customEventCode, setCustomEventCode] = useState<string>("");
   const [customRemarks, setCustomRemarks] = useState<string>("");
+
+  // FIXED: replaces window.confirm() with the shared ConfirmDialog, per
+  // project convention (no native browser alert/confirm/prompt popups).
+  const [eventCodeToDelete, setEventCodeToDelete] = useState<string | null>(
+    null,
+  );
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleCellEditSave = async (
     row: any,
@@ -100,23 +117,26 @@ export default function StylewiseEventsGrid({
     }
   };
 
-  const handleDeleteMilestone = async (eventCode: string) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to purge event milestone [${eventCode}] from the tracking ledger?`,
-      )
-    )
-      return;
+  const handleRequestDeleteMilestone = (eventCode: string) => {
+    setEventCodeToDelete(eventCode);
+  };
+
+  const handleConfirmDeleteMilestone = async () => {
+    if (!eventCodeToDelete) return;
+    setIsDeleting(true);
     try {
       await deleteLine({
         buyerCode,
         order,
         typeCode,
         styleCode,
-        eventCode,
+        eventCode: eventCodeToDelete,
       }).unwrap();
+      setEventCodeToDelete(null);
     } catch (err) {
       alert(extractErrorMessage(err as FetchBaseQueryError | SerializedError));
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -149,8 +169,9 @@ export default function StylewiseEventsGrid({
         header: "Event Code",
         size: 90,
         enableEditing: false,
+        enableSorting: false,
         muiTableBodyCellProps: {
-          sx: { fontFamily: "monospace", fontWeight: "bold", color: "#1a237e" },
+          sx: { fontFamily: "monospace", fontWeight: "bold" },
         },
       },
       {
@@ -158,6 +179,7 @@ export default function StylewiseEventsGrid({
         header: "Milestone Description",
         size: 200,
         enableEditing: false,
+        enableSorting: false,
       },
       {
         accessorKey: "scheduledDate",
@@ -177,6 +199,7 @@ export default function StylewiseEventsGrid({
               handleCellEditSave(row, "scheduledDate", e.target.value || null)
             }
             slotProps={{ htmlInput: { style: { fontSize: "13px" } } }}
+            sx={dateIconFieldSx}
           />
         ),
       },
@@ -198,6 +221,7 @@ export default function StylewiseEventsGrid({
               handleCellEditSave(row, "actualDate", e.target.value || null)
             }
             slotProps={{ htmlInput: { style: { fontSize: "13px" } } }}
+            sx={dateIconFieldSx}
           />
         ),
       },
@@ -205,6 +229,7 @@ export default function StylewiseEventsGrid({
         accessorKey: "remarks",
         header: "Remarks / Operational Compliance Notes",
         size: 220,
+        enableSorting: false,
         Edit: ({ cell, row }) => (
           <TextField
             size="small"
@@ -227,6 +252,7 @@ export default function StylewiseEventsGrid({
         header: "Tracking Status Badge",
         size: 150,
         enableEditing: false,
+        enableSorting: false,
         Cell: ({ cell }) => {
           const status = cell.getValue<string>();
           let fontColor = "#2e7d32";
@@ -243,7 +269,7 @@ export default function StylewiseEventsGrid({
     [],
   );
 
-  const table = useMaterialReactTable({
+  const table = useApparelProTable<StylewiseEventRow>({
     columns,
     data: eventsData,
     state: { isLoading },
@@ -252,12 +278,14 @@ export default function StylewiseEventsGrid({
     enablePagination: false,
     enableRowActions: true,
     enableTopToolbar: true,
+    enableColumnActions: false,
+    getRowId: (row) => row.eventCode,
     initialState: { density: "compact" },
     renderRowActions: ({ row }) => (
       <Tooltip title="Purge custom milestone row from contract layout scope">
         <IconButton
           color="error"
-          onClick={() => handleDeleteMilestone(row.original.eventCode)}
+          onClick={() => handleRequestDeleteMilestone(row.original.eventCode)}
         >
           {/* FIXED ICON PROPERTIES: Switched from size='small' to correct fontSize='small' definition */}
           <DeleteIcon fontSize="small" />
@@ -274,20 +302,20 @@ export default function StylewiseEventsGrid({
         }}
       >
         <Button
-          variant="outlined"
-          color="primary"
+          variant="contained"
           size="small"
           startIcon={<PostAddIcon />}
           onClick={() => setOpenModal(true)}
+          sx={primaryActionButtonSx}
         >
-          [Ins] Add Custom Tracking Milestone Row
+          <span style={themedButtonLabelStyle}>Add Custom Tracking Milestone</span>
         </Button>
 
         {/* NEW: PDF Print Report Trigger Button */}
         <Button
           variant="contained"
-          color="secondary"
           size="small"
+          sx={primaryActionButtonSx}
           onClick={() => {
             // FIXED: Switched from legacy process.env to Vite's type-safe import.meta.env mapping string!
             // Direct type-safe mapping from your master central configuration endpoints file!
@@ -302,7 +330,7 @@ export default function StylewiseEventsGrid({
             window.open(targetPrintUrl, "_blank");
           }}
         >
-          [Print] Export Milestone Status Report
+          <span style={themedButtonLabelStyle}>[Print] Export Milestone Status Report</span>
         </Button>
       </Box>
     ),
@@ -328,9 +356,23 @@ export default function StylewiseEventsGrid({
         onClose={() => setOpenModal(false)}
         maxWidth="xs"
         fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              backgroundColor: DASHBOARD_COLORS.cardBg,
+              border: `1px solid ${DASHBOARD_COLORS.border}`,
+              boxShadow: "0 10px 28px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.3)",
+            },
+          },
+        }}
       >
         <DialogTitle
-          sx={{ fontWeight: "bold", color: "#1a237e", fontSize: "16px" }}
+          sx={{
+            fontWeight: "bold",
+            color: DASHBOARD_COLORS.accentStrong,
+            fontSize: "16px",
+            textTransform: "uppercase",
+          }}
         >
           Append Custom Milestone
         </DialogTitle>
@@ -345,6 +387,7 @@ export default function StylewiseEventsGrid({
               slotProps={{
                 htmlInput: { style: { textTransform: "uppercase" } },
               }}
+              sx={dropdownFieldSx}
             />
             <TextField
               label="Initial Remarks"
@@ -355,23 +398,40 @@ export default function StylewiseEventsGrid({
               slotProps={{
                 htmlInput: { style: { textTransform: "uppercase" } },
               }}
+              sx={dropdownFieldSx}
             />
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenModal(false)} color="secondary">
-            Cancel
+          <Button
+            onClick={() => setOpenModal(false)}
+            type="button"
+            variant="contained"
+            sx={primaryActionButtonSx}
+          >
+            <span style={themedButtonLabelStyle}>Cancel</span>
           </Button>
           <Button
             onClick={handleAddCustomMilestoneSubmit}
             variant="contained"
-            color="primary"
+            sx={primaryActionButtonSx}
             disabled={!customEventCode.trim()}
           >
-            Inject Row
+            <span style={themedButtonLabelStyle}>Inject Row</span>
           </Button>
         </DialogActions>
       </Dialog>
+
+      <ConfirmDialog
+        open={!!eventCodeToDelete}
+        title="Delete Milestone"
+        message={`Are you sure you want to purge event milestone [${eventCodeToDelete}] from the tracking ledger?`}
+        confirmLabel="Delete"
+        confirmColor="error"
+        isConfirming={isDeleting}
+        onConfirm={handleConfirmDeleteMilestone}
+        onCancel={() => setEventCodeToDelete(null)}
+      />
     </Box>
   );
 }

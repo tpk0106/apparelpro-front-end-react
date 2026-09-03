@@ -18,6 +18,8 @@ import { toast, type Id } from "react-toastify";
 import { useApproveStyleEventsMutation } from "../../services/order-management/sylewise.events.service";
 
 import type { StylewiseEventRow } from "./stylewise-events.types";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
 
 interface ApprovalCardProps {
   buyerCode: number;
@@ -177,7 +179,7 @@ export default function StylewiseEventsApprovalCard({
             </Typography>
           </Box>
 
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: DASHBOARD_COLORS.textSecondary }}>
             {approvalState.isApproved
               ? `This operational schedule matrix was officially verified and locked by Operator ID [ ${approvalState.approvedBy} ] on ${approvalState.approvedDate}. Custom milestones and target modification routes are frozen.`
               : `Review all tracking targets carefully. Approving this profile will secure the schedule baseline and toggle compliance guard blocks active across factory floor data entry masks.`}
@@ -191,7 +193,7 @@ export default function StylewiseEventsApprovalCard({
                 alignItems: "center",
                 gap: 0.5,
                 fontWeight: "bold",
-                color: "text.secondary",
+                color: DASHBOARD_COLORS.textSecondary,
               }}
             >
               <VerifiedUserIcon sx={{ fontSize: "14px" }} /> Auditor:{" "}
@@ -204,7 +206,7 @@ export default function StylewiseEventsApprovalCard({
                 alignItems: "center",
                 gap: 0.5,
                 fontWeight: "bold",
-                color: "text.secondary",
+                color: DASHBOARD_COLORS.textSecondary,
               }}
             >
               <CalendarMonthIcon sx={{ fontSize: "14px" }} /> System Date:{" "}
@@ -247,7 +249,6 @@ export default function StylewiseEventsApprovalCard({
           ) : (
             <Button
               variant="contained"
-              color="warning"
               size="large"
               onClick={(e) => handleExecuteApproval(e)}
               disabled={isProcessingLock || isSubmitting}
@@ -258,15 +259,9 @@ export default function StylewiseEventsApprovalCard({
                   <VerifiedUserIcon />
                 )
               }
-              sx={{
-                backgroundColor: "#f57f17",
-                "&.Mui-disabled": { backgroundColor: "#cca785" },
-                "&:hover": { backgroundColor: "#e65100" },
-                fontWeight: "bold",
-                px: 3,
-              }}
+              sx={{ ...primaryActionButtonSx, fontWeight: "bold", px: 3 }}
             >
-              Authorize Event Sign-Off
+              <span style={themedButtonLabelStyle}>Authorize Event Sign-Off</span>
             </Button>
           )}
         </Grid>

@@ -32,6 +32,10 @@ import type {
 import type { Buyer } from "../../interfaces/references/Buyer";
 import type { Style } from "../../interfaces/order-management/Style";
 import type { GarmentTypeServiceModel } from "../material-consumption/material-consumption.types";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import { dateIconFieldSx } from "../../themes/workspace-theme";
 
 interface HeaderSelectorProps {
   onHeaderContextLock: (context: SelectedPOContext | null) => void;
@@ -44,6 +48,8 @@ export default function SupplierPOHeaderSelector({
   onHeaderContextLock,
   confirmedPurchaseNumber,
 }: HeaderSelectorProps) {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+
   // 1. ALL CORE STATE VARIABLES FULLY DECLARED HERE
   const [poMode, setPoMode] = useState<"NEW" | "EDIT">("NEW");
   // For a new P/O, no number exists yet - the backend allocates the real one
@@ -225,8 +231,9 @@ export default function SupplierPOHeaderSelector({
       sx={{
         p: 2.5,
         mb: 3,
-        backgroundColor: "#fafafa",
-        borderLeft: "5px solid #1a237e",
+        backgroundColor: DASHBOARD_COLORS.cardBg,
+        borderColor: DASHBOARD_COLORS.border,
+        borderLeft: `5px solid ${copperTextColor}`,
       }}
     >
       <Box
@@ -239,7 +246,7 @@ export default function SupplierPOHeaderSelector({
       >
         <Typography
           variant="subtitle2"
-          sx={{ fontWeight: "bold", color: "#1a237e" }}
+          sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.accentStrong }}
         >
           [ PROCUREMENT MANAGEMENT - SUPPLIER PURCHASE ORDER HEADER ]
         </Typography>
@@ -251,13 +258,25 @@ export default function SupplierPOHeaderSelector({
         >
           <FormControlLabel
             value="NEW"
-            control={<Radio size="small" color="primary" />}
+            control={
+              <Radio
+                size="small"
+                sx={{ color: copperTextColor, "&.Mui-checked": { color: copperTextColor } }}
+              />
+            }
             label="New P/O Entry"
+            sx={{ color: DASHBOARD_COLORS.textPrimary }}
           />
           <FormControlLabel
             value="EDIT"
-            control={<Radio size="small" color="secondary" />}
+            control={
+              <Radio
+                size="small"
+                sx={{ color: copperTextColor, "&.Mui-checked": { color: copperTextColor } }}
+              />
+            }
             label="Edit Existing P/O"
+            sx={{ color: DASHBOARD_COLORS.textPrimary }}
           />
         </RadioGroup>
       </Box>
@@ -283,6 +302,7 @@ export default function SupplierPOHeaderSelector({
                 style: { fontFamily: "monospace", fontWeight: "bold" },
               },
             }}
+            sx={dropdownFieldSx}
           />
         </Grid>
 
@@ -302,11 +322,13 @@ export default function SupplierPOHeaderSelector({
             isOptionEqualToValue={(option, value) =>
               option.supplierCode === value?.supplierCode
             }
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(params) => (
               <TextField
                 {...params}
                 label="Select Vendor / Supplier"
                 size="small"
+                sx={dropdownFieldSx}
               />
             )}
           />
@@ -331,8 +353,9 @@ export default function SupplierPOHeaderSelector({
             isOptionEqualToValue={(option, value) =>
               option.code === value?.code
             }
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(params) => (
-              <TextField {...params} label="Basis" size="small" />
+              <TextField {...params} label="Basis" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>
@@ -356,8 +379,9 @@ export default function SupplierPOHeaderSelector({
             }}
             loading={isCurrenciesLoading}
             isOptionEqualToValue={(option, value) => option.id === value?.id}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(params) => (
-              <TextField {...params} label="Purchase Currency" size="small" />
+              <TextField {...params} label="Purchase Currency" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>
@@ -384,6 +408,7 @@ export default function SupplierPOHeaderSelector({
                 cleanedVal,
               );
             }}
+            sx={dropdownFieldSx}
           />
         </Grid>
 
@@ -413,6 +438,10 @@ export default function SupplierPOHeaderSelector({
               );
             }}
             slotProps={{ inputLabel: { shrink: true } }}
+            sx={{
+              ...(dropdownFieldSx as Record<string, unknown>),
+              ...(dateIconFieldSx as Record<string, unknown>),
+            }}
           />
         </Grid>
 
@@ -450,11 +479,13 @@ export default function SupplierPOHeaderSelector({
                 isOptionEqualToValue={(option, value) =>
                   option.buyerCode === value?.buyerCode
                 }
+                slotProps={{ listbox: { sx: dropdownListboxSx } }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     label="Filter Target Buyer"
                     size="small"
+                    sx={dropdownFieldSx}
                   />
                 )}
               />
@@ -484,11 +515,13 @@ export default function SupplierPOHeaderSelector({
                 }}
                 loading={isOrdersLoading}
                 isOptionEqualToValue={(option, value) => option === value}
+                slotProps={{ listbox: { sx: dropdownListboxSx } }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     label="Filter Target Buyer Order"
                     size="small"
+                    sx={dropdownFieldSx}
                   />
                 )}
               />
@@ -524,11 +557,13 @@ export default function SupplierPOHeaderSelector({
                 isOptionEqualToValue={(option, value) =>
                   option.id === value?.id
                 }
+                slotProps={{ listbox: { sx: dropdownListboxSx } }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     label="Select Garment Type"
                     size="small"
+                    sx={dropdownFieldSx}
                   />
                 )}
               />
@@ -562,11 +597,13 @@ export default function SupplierPOHeaderSelector({
                 isOptionEqualToValue={(option, value) =>
                   option.id === value?.id
                 }
+                slotProps={{ listbox: { sx: dropdownListboxSx } }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
                     label="Select Active Style"
                     size="small"
+                    sx={dropdownFieldSx}
                   />
                 )}
               />

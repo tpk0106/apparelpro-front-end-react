@@ -21,6 +21,20 @@ import {
   useSaveSubContractMutation,
   useDeleteSubContractMutation,
 } from "../../tanstack-hooks/sub-contract.hooks";
+import { getDropdownColorTheme, DEFAULT_DROPDOWN_THEME_ID } from "../../themes/dropdown-theme-registry";
+import {
+  getDropdownFieldSx,
+  getDropdownSelectMenuProps,
+  getDropdownMenuItemSx,
+} from "../../themes/dropdown-color-themes";
+import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
+
+// Module-scope (not useDropdownTheme()) since columns/selectMenuProps below
+// are built outside the component body - same underlying theme data either
+// way, see useDropdownTheme.ts's DRY note.
+const dropdownTheme = getDropdownColorTheme(DEFAULT_DROPDOWN_THEME_ID);
+const dropdownFieldSx = getDropdownFieldSx(dropdownTheme);
+const menuItemSx = getDropdownMenuItemSx(dropdownTheme);
 
 interface SubContractScope {
   buyerCode: number;
@@ -40,22 +54,7 @@ interface SubContractGridProps {
   onSaveError: (message: string | null) => void;
 }
 
-const selectMenuProps = {
-  MenuProps: {
-    PaperProps: {
-      sx: {
-        backgroundColor: "#ffffff !important",
-        "& .MuiMenuItem-root": {
-          color: "#000000 !important",
-        },
-        "& .Mui-selected": {
-          backgroundColor: "#e3f2fd !important",
-          color: "#000000 !important",
-        },
-      },
-    },
-  },
-};
+const selectMenuProps = { MenuProps: getDropdownSelectMenuProps(dropdownTheme) };
 
 export default function SubContractGrid({
   scope,
@@ -67,9 +66,14 @@ export default function SubContractGrid({
   onQuantityWarning,
   onSaveError,
 }: SubContractGridProps) {
-  const [, setValidationErrors] = useState<Record<string, string | undefined>>(
-    {},
-  );
+  // FIXED: this getter used to be discarded (`const [, setValidationErrors]`),
+  // so validation errors were computed and stored but never read anywhere -
+  // a save with e.g. a missing Sub Contractor just silently stayed in edit
+  // mode with no visible reason why. Now wired into each field's
+  // error/helperText below.
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string | undefined>
+  >({});
   const [rowToDelete, setRowToDelete] = useState<MRT_Row<SubContractRow> | null>(
     null,
   );
@@ -186,9 +190,14 @@ export default function SubContractGrid({
         muiEditTextFieldProps: {
           select: true,
           required: true,
-          SelectProps: selectMenuProps.MenuProps,
+          sx: dropdownFieldSx,
+          slotProps: { select: { MenuProps: selectMenuProps.MenuProps } },
+          error: !!validationErrors.subContractorCode,
+          helperText: validationErrors.subContractorCode,
+          onChange: () =>
+            setValidationErrors((prev) => ({ ...prev, subContractorCode: undefined })),
           children: subContractorsList.map((sc) => (
-            <MenuItem key={sc.code} value={sc.code}>
+            <MenuItem key={sc.code} value={sc.code} sx={menuItemSx}>
               {sc.code} - {sc.name}
             </MenuItem>
           )),
@@ -199,14 +208,30 @@ export default function SubContractGrid({
         header: "Sub Contract Qty",
         size: 140,
         Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
-        muiEditTextFieldProps: { type: "number", required: true },
+        muiEditTextFieldProps: {
+          type: "number",
+          required: true,
+          sx: dropdownFieldSx,
+          error: !!validationErrors.subQuantity,
+          helperText: validationErrors.subQuantity,
+          onChange: () =>
+            setValidationErrors((prev) => ({ ...prev, subQuantity: undefined })),
+        },
       },
       {
         accessorKey: "costPerGarment",
         header: "Cost / Garment",
         size: 130,
         Cell: ({ cell }) => cell.getValue<number>().toFixed(2),
-        muiEditTextFieldProps: { type: "number", required: true },
+        muiEditTextFieldProps: {
+          type: "number",
+          required: true,
+          sx: dropdownFieldSx,
+          error: !!validationErrors.costPerGarment,
+          helperText: validationErrors.costPerGarment,
+          onChange: () =>
+            setValidationErrors((prev) => ({ ...prev, costPerGarment: undefined })),
+        },
       },
       {
         accessorKey: "currency",
@@ -216,9 +241,14 @@ export default function SubContractGrid({
         muiEditTextFieldProps: {
           select: true,
           required: true,
-          SelectProps: selectMenuProps.MenuProps,
+          sx: dropdownFieldSx,
+          slotProps: { select: { MenuProps: selectMenuProps.MenuProps } },
+          error: !!validationErrors.currency,
+          helperText: validationErrors.currency,
+          onChange: () =>
+            setValidationErrors((prev) => ({ ...prev, currency: undefined })),
           children: currenciesList.map((currency) => (
-            <MenuItem key={currency.code} value={currency.code}>
+            <MenuItem key={currency.code} value={currency.code} sx={menuItemSx}>
               {currency.code}
             </MenuItem>
           )),
@@ -232,9 +262,14 @@ export default function SubContractGrid({
         muiEditTextFieldProps: {
           select: true,
           required: true,
-          SelectProps: selectMenuProps.MenuProps,
+          sx: dropdownFieldSx,
+          slotProps: { select: { MenuProps: selectMenuProps.MenuProps } },
+          error: !!validationErrors.unit,
+          helperText: validationErrors.unit,
+          onChange: () =>
+            setValidationErrors((prev) => ({ ...prev, unit: undefined })),
           children: unitsList.map((unit) => (
-            <MenuItem key={unit.id} value={unit.code}>
+            <MenuItem key={unit.id} value={unit.code} sx={menuItemSx}>
               {unit.code}
             </MenuItem>
           )),
@@ -245,7 +280,14 @@ export default function SubContractGrid({
         header: "Received Qty",
         size: 130,
         Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
-        muiEditTextFieldProps: { type: "number" },
+        muiEditTextFieldProps: {
+          type: "number",
+          sx: dropdownFieldSx,
+          error: !!validationErrors.receivedQuantity,
+          helperText: validationErrors.receivedQuantity,
+          onChange: () =>
+            setValidationErrors((prev) => ({ ...prev, receivedQuantity: undefined })),
+        },
       },
       {
         accessorKey: "balanceQuantity",
@@ -258,7 +300,7 @@ export default function SubContractGrid({
           ).toLocaleString(),
       },
     ],
-    [subContractorsList, currenciesList, unitsList],
+    [subContractorsList, currenciesList, unitsList, validationErrors],
   );
 
   const table = useApparelProTable<SubContractRow>({
@@ -289,17 +331,15 @@ export default function SubContractGrid({
 
     muiTableBodyRowProps: ({ table }) => ({
       hover: !table.getState().editingRow,
-      sx: {
-        "& .MuiInputBase-input": {
-          color: "#000000",
-          WebkitTextFillColor: "#000000",
-        },
-      },
     }),
 
     renderTopToolbarCustomActions: ({ table }) => (
-      <Button variant="contained" onClick={() => table.setCreatingRow(true)}>
-        New Sub Contract Entry
+      <Button
+        variant="contained"
+        onClick={() => table.setCreatingRow(true)}
+        sx={primaryActionButtonSx}
+      >
+        <span style={themedButtonLabelStyle}>New Sub Contract Entry</span>
       </Button>
     ),
 
