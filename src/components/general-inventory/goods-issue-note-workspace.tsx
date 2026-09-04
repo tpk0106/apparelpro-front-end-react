@@ -25,11 +25,22 @@ import {
   useCommitGeneralGinMutation,
 } from "../../tanstack-hooks/general-inventory/general-gin.hooks";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  workspaceInfoCaptionSx,
+  workspaceSectionLabelSx,
+  dateIconFieldSx,
+} from "../../themes/workspace-theme";
 
 // Replicates GI_GIN1.PRG's "GOODS ISSUE NOTE (General)" entry screen - always raised
 // against exactly one Stores Requisition Note. Unlike Orderwise's GIN, there's no
 // Buyer/Order context at all.
 export default function GoodsIssueNoteWorkspace() {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const [strnNumberInput, setStrnNumberInput] = useState("");
   const [lookupStrnNumber, setLookupStrnNumber] = useState("");
   const [transactionDate, setTransactionDate] = useState<string>(
@@ -90,7 +101,7 @@ export default function GoodsIssueNoteWorkspace() {
   const hasOverBalanceLine = lines.some((l) => {
     const effectiveShadowBalance = l.shadowBalance - l.requestedQuantity;
     const availableToIssue = l.qtyInHand - effectiveShadowBalance - l.minStock;
-    return l.quantity > availableToIssue;
+    return l.quantity > 0 && l.quantity > availableToIssue;
   });
   const isFormValid =
     isHeaderReady &&
@@ -182,12 +193,12 @@ export default function GoodsIssueNoteWorkspace() {
   };
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#fafafa" }}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }}>
+    <Box sx={{ width: "100%", py: 1, px: 3 }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
+        <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
           Goods Issue Note (General Inventory)
         </Typography>
-        <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 3 }}>
+        <Typography variant="caption" sx={{ ...workspaceInfoCaptionSx, mb: 3 }}>
           GIN Number is allocated by the server on commit - it is never entered manually.
         </Typography>
 
@@ -201,6 +212,7 @@ export default function GoodsIssueNoteWorkspace() {
               onChange={(e) => setStrnNumberInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleLookup()}
               placeholder="e.g. 000001"
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
@@ -223,6 +235,7 @@ export default function GoodsIssueNoteWorkspace() {
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
         </Grid>
@@ -242,16 +255,16 @@ export default function GoodsIssueNoteWorkspace() {
         )}
 
         {!isHeaderReady ? (
-          <Alert severity="info" variant="outlined">
+          <Alert severity="info" variant="outlined" sx={{ color: DASHBOARD_COLORS.textPrimary }}>
             Enter a known SRN number and click Look Up to load its requisitioned items.
           </Alert>
         ) : (
           <Box>
             <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: "bold", textTransform: "uppercase" }}>
+              <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>
                 {lookupResult.storeDescription} &middot; To Dept. {lookupResult.departmentCode}
               </Typography>
-              <Typography variant="caption" sx={{ color: "text.secondary" }}>
+              <Typography variant="caption" sx={workspaceInfoCaptionSx}>
                 {lines.length} line(s) loaded from SRN {lookupStrnNumber}
               </Typography>
             </Box>
@@ -267,7 +280,7 @@ export default function GoodsIssueNoteWorkspace() {
           </Box>
         )}
 
-        <Box sx={{ gap: 2, mt: 3, pt: 2, borderTop: "1px dashed rgba(139,147,161,0.3)", display: "flex", justifyContent: "flex-end" }}>
+        <Box sx={{ gap: 2, mt: 3, pt: 2, display: "flex", justifyContent: "flex-end" }}>
           <Button
             variant="outlined"
             color="inherit"
@@ -275,6 +288,7 @@ export default function GoodsIssueNoteWorkspace() {
             startIcon={<DeleteIcon />}
             onClick={handleReset}
             disabled={isSubmitting}
+            sx={{ minWidth: 190, height: 32, color: "#8B93A1", borderColor: "#8B93A1" }}
           >
             Cancel GIN
           </Button>
@@ -285,8 +299,19 @@ export default function GoodsIssueNoteWorkspace() {
             startIcon={<SendIcon />}
             onClick={handleRequestCommit}
             disabled={isSubmitting || !isFormValid}
+            sx={{
+              ...primaryActionButtonSx,
+              minWidth: 190,
+              height: 32,
+              "&.Mui-disabled": {
+                background: "rgba(139,147,161,0.15)",
+                color: "#8B93A1",
+                border: "1px solid rgba(139,147,161,0.4)",
+                boxShadow: "none",
+              },
+            }}
           >
-            Confirm All Entries
+            <span style={themedButtonLabelStyle}>Save Goods Issue Note</span>
           </Button>
         </Box>
       </Paper>

@@ -3,6 +3,7 @@ import { Box, Tab, Tabs } from "@mui/material";
 import GroupsPanel from "./groups-panel.component";
 import UsersPanel from "./users-panel.component";
 import PermissionMatrixPanel from "./permission-matrix-panel.component";
+import { copperTabsSx } from "../../themes/workspace-theme";
 
 // Only mounted for Administrators - see settings.component.tsx, which hides
 // the "Users & Groups" tab entirely for everyone else.
@@ -15,7 +16,7 @@ const UsersAndGroupsPanel = () => {
         <Tabs
           value={activeSubTab}
           onChange={(_event, newValue: number) => setActiveSubTab(newValue)}
-          sx={{ borderBottom: "1px solid rgba(139, 147, 161, 0.15)" }}
+          sx={{ borderBottom: "1px solid rgba(139, 147, 161, 0.15)", ...copperTabsSx }}
         >
           <Tab label="Groups" />
           <Tab label="Users" />

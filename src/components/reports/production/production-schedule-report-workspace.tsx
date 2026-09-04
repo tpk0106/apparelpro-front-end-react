@@ -21,22 +21,19 @@ import {
 } from "../../../tanstack-hooks/production-schedule-report.hooks";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import { withReadableReportTable } from "../../../themes/report-table-theme";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import {
+  workspaceHeadingSx,
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  dateIconFieldSx,
+} from "../../../themes/workspace-theme";
 
 const today = () => new Date().toISOString().slice(0, 10);
 const inOneMonth = () => {
   const d = new Date();
   d.setMonth(d.getMonth() + 1);
   return d.toISOString().slice(0, 10);
-};
-
-// The app-wide theme forces date-input text to #141922 (near-black), meant
-// for a light input fill - these Cards have no background override so they
-// render on the theme's dark paper (#141922), making the date text and the
-// browser's native calendar icon both effectively invisible. Same fix as
-// Production Summary (Daily)'s date field.
-const dateFieldSx = {
-  "& .MuiOutlinedInput-input": { color: "#F4F6F8" },
-  "& input::-webkit-calendar-picker-indicator": { filter: "invert(1)" },
 };
 
 const ProductionScheduleReportWorkspace = () => {
@@ -49,39 +46,40 @@ const ProductionScheduleReportWorkspace = () => {
     <div className="flex flex-col w-[90%] mx-auto justify-around mt-10 mb-12">
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">Production Schedule</Typography>
+          <Typography sx={workspaceHeadingSx}>Production Schedule</Typography>
         </ThemeProvider>
       </div>
 
-      <Card variant="outlined" sx={{ p: 2, mb: 2, display: "flex", alignItems: "center", gap: 2 }}>
+      <Card variant="outlined" sx={{ p: 2, mb: 2, display: "flex", alignItems: "center", gap: 2, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}>
         <TextField
           label="From Date" type="date" size="small"
           slotProps={{ inputLabel: { shrink: true } }}
           value={fromDate} onChange={(e) => setFromDate(e.target.value)}
-          sx={dateFieldSx}
+          sx={dateIconFieldSx}
         />
         <TextField
           label="To Date" type="date" size="small"
           slotProps={{ inputLabel: { shrink: true } }}
           value={toDate} onChange={(e) => setToDate(e.target.value)}
-          sx={dateFieldSx}
+          sx={dateIconFieldSx}
         />
         <Button
           variant="contained"
           disabled={!report || isDownloading}
           onClick={() => downloadPdf({ fromDate, toDate })}
+          sx={primaryActionButtonSx}
         >
-          {isDownloading ? "Preparing PDF..." : "Print / Download PDF"}
+          <span style={themedButtonLabelStyle}>{isDownloading ? "Preparing PDF..." : "Print / Download PDF"}</span>
         </Button>
       </Card>
 
-      {isLoading && <Typography>Loading...</Typography>}
+      {isLoading && <Typography sx={{ color: DASHBOARD_COLORS.textSecondary }}>Loading...</Typography>}
 
       {isError && <Alert severity="info">{error.message}</Alert>}
 
       {report && (
         <ThemeProvider theme={withReadableReportTable}>
-        <TableContainer component={Card} variant="outlined">
+        <TableContainer component={Card} variant="outlined" sx={{ backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}>
           <Table size="small">
             <TableHead>
               <TableRow>

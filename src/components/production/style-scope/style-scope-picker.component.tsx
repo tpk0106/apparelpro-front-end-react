@@ -16,6 +16,8 @@ import {
   useGetBuyersQuery,
   useGetStylesByScope,
 } from "../../../tanstack-hooks/custom-hooks";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 
 export interface StyleScope {
   buyerCode: number;
@@ -29,8 +31,9 @@ export interface StyleScope {
 interface Props {
   onScopeChange: (scope: StyleScope | null) => void;
   // Lets a caller override the card's look (background/border/etc.) without
-  // touching the default here - the default (#fafafa) is what every other
-  // screen using this picker still relies on.
+  // touching the default here - the default (DASHBOARD_COLORS.cardBg) is
+  // what every other screen using this picker relies on; Dashboard passes
+  // its own CARD_SX instead, purely for the extra elevated-shadow look.
   sx?: SxProps<Theme>;
 }
 
@@ -40,6 +43,7 @@ interface Props {
 // fields (bulkQuantity, currencyCode) that don't belong in Production Control.
 // Reuses the same underlying TanStack hooks, just a narrower callback shape.
 const StyleScopePicker = ({ onScopeChange, sx }: Props) => {
+  const { fieldSx, listboxSx } = useDropdownTheme();
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [selectedType, setSelectedType] =
@@ -112,7 +116,13 @@ const StyleScopePicker = ({ onScopeChange, sx }: Props) => {
   return (
     <Card
       variant="outlined"
-      sx={{ p: 2, mb: 2, backgroundColor: "#fafafa", ...sx }}
+      sx={{
+        p: 2,
+        mb: 2,
+        backgroundColor: DASHBOARD_COLORS.cardBg,
+        borderColor: DASHBOARD_COLORS.border,
+        ...sx,
+      }}
     >
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -124,12 +134,13 @@ const StyleScopePicker = ({ onScopeChange, sx }: Props) => {
             isOptionEqualToValue={(option, value) =>
               option.buyerCode === value?.buyerCode
             }
+            slotProps={{ listbox: { sx: listboxSx } }}
             renderInput={(params) => (
-              <TextField {...params} label="Select Buyer" size="small" />
+              <TextField {...params} label="Select Buyer" size="small" sx={fieldSx} />
             )}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Autocomplete
             options={ordersList}
             getOptionLabel={(option: string) => option || ""}
@@ -137,12 +148,13 @@ const StyleScopePicker = ({ onScopeChange, sx }: Props) => {
             value={selectedOrder}
             onChange={(_, val) => handleOrderChange(val)}
             isOptionEqualToValue={(option, value) => option === value}
+            slotProps={{ listbox: { sx: listboxSx } }}
             renderInput={(params) => (
-              <TextField {...params} label="Select Order" size="small" />
+              <TextField {...params} label="Select Order" size="small" sx={fieldSx} />
             )}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Autocomplete
             options={globalTypesList}
             getOptionLabel={(option: GarmentTypeServiceModel) =>
@@ -152,12 +164,13 @@ const StyleScopePicker = ({ onScopeChange, sx }: Props) => {
             value={selectedType}
             onChange={(_, val) => handleTypeChange(val)}
             isOptionEqualToValue={(option, value) => option.id === value?.id}
+            slotProps={{ listbox: { sx: listboxSx } }}
             renderInput={(params) => (
-              <TextField {...params} label="Select Garment Type" size="small" />
+              <TextField {...params} label="Select Garment Type" size="small" sx={fieldSx} />
             )}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Autocomplete
             options={stylesList}
             disabled={!selectedType}
@@ -165,8 +178,9 @@ const StyleScopePicker = ({ onScopeChange, sx }: Props) => {
             value={selectedStyle}
             onChange={(_, val) => handleStyleChange(val)}
             isOptionEqualToValue={(option, value) => option.id === value?.id}
+            slotProps={{ listbox: { sx: listboxSx } }}
             renderInput={(params) => (
-              <TextField {...params} label="Select Style" size="small" />
+              <TextField {...params} label="Select Style" size="small" sx={fieldSx} />
             )}
           />
         </Grid>

@@ -3,17 +3,19 @@ import { Box, Tab, Tabs } from "@mui/material";
 import SystemParametersPanel from "./system-parameters-panel.component";
 import UsersAndGroupsPanel from "./users-and-groups.component";
 import { isAdministrator } from "../../auth/jwt.util";
+import { copperTabsSx } from "../../themes/workspace-theme";
 
 const SettingsPage = () => {
   const isAdmin = isAdministrator();
   const [activeTab, setActiveTab] = useState(0);
 
   return (
-    <Box className="max-w-5xl mx-auto py-8 px-6">
+    <Box className="w-[95%] mx-auto py-8">
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
         <Tabs
           value={activeTab}
           onChange={(_event, newValue: number) => setActiveTab(newValue)}
+          sx={copperTabsSx}
         >
           <Tab label="System Parameters" />
           {/* Entirely hidden (not just read-only) for non-Administrators, since

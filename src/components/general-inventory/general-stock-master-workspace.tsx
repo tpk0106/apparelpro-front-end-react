@@ -35,6 +35,18 @@ import {
 import type { Unit } from "../../interfaces/references/Unit";
 import type { GeneralStockMasterRow } from "../../interfaces/general-inventory/general-stock-master.types";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  workspaceSectionLabelSx,
+  noteTableHeadCellUppercaseSx,
+  selectedRowHighlightSx,
+  deleteRowIconButtonSx,
+  numberFieldNoSpinnerSx,
+} from "../../themes/workspace-theme";
 
 // Replicates GI_TPDT1.PRG's "GENERAL STOCK MASTER CREATION" entry screen - the one
 // screen that actually creates a GeneralStockMaster row (every other General Inventory
@@ -48,6 +60,8 @@ import type { AppError } from "../../auth/axiosClient";
 // from legacy gi_stmst.dbf data may have no matching StockItems catalog entry at all,
 // so re-running them through the catalog-validated create path would reject them.
 export default function GeneralStockMasterWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const { mutateAsync: commitEntry, isPending: isSubmitting } =
     useCreateGeneralStockMasterMutation();
   const { mutateAsync: updateEntry, isPending: isUpdating } =
@@ -270,7 +284,7 @@ export default function GeneralStockMasterWorkspace() {
       {
         accessorKey: "qtyInHand",
         header: "Qty In Hand",
-        size: 130,
+        size: 160,
         Cell: ({ cell }) => <span>{cell.getValue<number>().toLocaleString()}</span>,
       },
     ],
@@ -278,6 +292,7 @@ export default function GeneralStockMasterWorkspace() {
   );
 
   const table = useApparelProTable<GeneralStockMasterRow>({
+    muiTableHeadCellProps: noteTableHeadCellUppercaseSx,
     columns,
     data: existingItems,
     enableEditing: false,
@@ -285,9 +300,21 @@ export default function GeneralStockMasterWorkspace() {
     enableColumnFilters: false,
     enableRowActions: true,
     positionActionsColumn: "last",
+    // "grid" sizes columns to their declared `size` instead of auto-stretching
+    // to fill the parent Paper's full width - combined with the fit-content
+    // Paper width below, the table shrinks to its actual content width
+    // instead of leaving a wide empty gap after the last column.
+    layoutMode: "grid",
+    // fit-content shrinks the Paper to the columns' actual total width; mx:
+    // "auto" then centers that narrower block in the page instead of leaving
+    // it flush against the left edge (nothing else sits beside this table).
+    muiTablePaperProps: { sx: { width: "fit-content", maxWidth: "100%", mx: "auto", boxShadow: "none" } },
     displayColumnDefOptions: {
       "mrt-row-actions": { header: "Action", size: 90 },
     },
+    muiTableBodyRowProps: ({ row }) => ({
+      sx: selectedRowHighlightSx(row.original.itemCode === editTarget?.itemCode),
+    }),
     renderRowActions: ({ row }) => (
       <Box sx={{ display: "flex", gap: 0.5 }}>
         <IconButton color="primary" size="small" onClick={() => handleStartEdit(row.original)}>
@@ -298,6 +325,7 @@ export default function GeneralStockMasterWorkspace() {
           size="small"
           disabled={isDeleting || row.original.qtyInHand > 0}
           onClick={() => handleRequestDelete(row.original.itemCode, row.original.description)}
+          sx={deleteRowIconButtonSx}
         >
           <DeleteIcon fontSize="small" />
         </IconButton>
@@ -311,10 +339,10 @@ export default function GeneralStockMasterWorkspace() {
   });
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#fafafa" }}>
+    <Box sx={{ width: "100%", py: 1, px: 3 }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          <Typography variant="h5" sx={workspaceHeadingSx}>
             Stock Master Entry (General Inventory)
           </Typography>
           {isEditing && (
@@ -342,6 +370,8 @@ export default function GeneralStockMasterWorkspace() {
                 handleResetLine();
               }}
               disabled={isStoresLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {storesList.map((s) => (
                 <MenuItem key={s.code} value={s.code}>
@@ -353,7 +383,7 @@ export default function GeneralStockMasterWorkspace() {
 
           {isEditing ? (
             <Grid size={{ xs: 12, sm: 8, md: 9 }}>
-              <Alert severity="info" variant="outlined" sx={{ py: 0.5 }}>
+              <Alert severity="info" variant="outlined" sx={{ py: 0.5, color: DASHBOARD_COLORS.textPrimary }}>
                 Editing <strong>{editTarget?.itemCode}</strong> — {editTarget?.description}
               </Alert>
             </Grid>
@@ -371,6 +401,8 @@ export default function GeneralStockMasterWorkspace() {
                     setSelectedItemCode("");
                   }}
                   disabled={isCatalogLoading}
+                  sx={dropdownFieldSx}
+                  slotProps={dropdownMenuSlotProps}
                 >
                   {catalog.map((g) => (
                     <MenuItem key={g.stockCode} value={g.stockCode}>
@@ -389,6 +421,8 @@ export default function GeneralStockMasterWorkspace() {
                   value={selectedItemCode}
                   onChange={(e) => setSelectedItemCode(e.target.value)}
                   disabled={!selectedStockCode}
+                  sx={dropdownFieldSx}
+                  slotProps={dropdownMenuSlotProps}
                 >
                   {itemsForSelectedStock.map((item) => (
                     <MenuItem key={item.itemCode} value={item.itemCode}>
@@ -410,7 +444,7 @@ export default function GeneralStockMasterWorkspace() {
         )}
 
         {!isHeaderValid ? (
-          <Alert severity="info" variant="outlined" sx={{ m: 2, fontWeight: "bold" }}>
+          <Alert severity="info" variant="outlined" sx={{ m: 2, fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>
             Select a Store, Stock Category and Item Code to continue.
           </Alert>
         ) : (
@@ -425,6 +459,7 @@ export default function GeneralStockMasterWorkspace() {
                     value={feature1}
                     onChange={(e) => setFeature1(e.target.value.toUpperCase())}
                     slotProps={{ htmlInput: { maxLength: 4 } }}
+                    sx={dropdownFieldSx}
                   />
                 </Grid>
               )}
@@ -437,6 +472,7 @@ export default function GeneralStockMasterWorkspace() {
                     value={feature2}
                     onChange={(e) => setFeature2(e.target.value.toUpperCase())}
                     slotProps={{ htmlInput: { maxLength: 4 } }}
+                    sx={dropdownFieldSx}
                   />
                 </Grid>
               )}
@@ -449,6 +485,7 @@ export default function GeneralStockMasterWorkspace() {
                     value={feature3}
                     onChange={(e) => setFeature3(e.target.value.toUpperCase())}
                     slotProps={{ htmlInput: { maxLength: 4 } }}
+                    sx={dropdownFieldSx}
                   />
                 </Grid>
               )}
@@ -461,6 +498,7 @@ export default function GeneralStockMasterWorkspace() {
                     value={feature4}
                     onChange={(e) => setFeature4(e.target.value.toUpperCase())}
                     slotProps={{ htmlInput: { maxLength: 4 } }}
+                    sx={dropdownFieldSx}
                   />
                 </Grid>
               )}
@@ -472,6 +510,7 @@ export default function GeneralStockMasterWorkspace() {
                   fullWidth
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
+                  sx={dropdownFieldSx}
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -482,6 +521,8 @@ export default function GeneralStockMasterWorkspace() {
                   fullWidth
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
+                  sx={dropdownFieldSx}
+                  slotProps={dropdownMenuSlotProps}
                 >
                   {systemUnits.map((u: Unit) => (
                     <MenuItem key={u.id} value={u.code}>
@@ -498,6 +539,8 @@ export default function GeneralStockMasterWorkspace() {
                   fullWidth
                   value={currencyCode}
                   onChange={(e) => setCurrencyCode(e.target.value)}
+                  sx={dropdownFieldSx}
+                  slotProps={dropdownMenuSlotProps}
                 >
                   {currenciesList.map((c) => (
                     <MenuItem key={c.code} value={c.code}>
@@ -516,6 +559,7 @@ export default function GeneralStockMasterWorkspace() {
                   value={reorderLevel === 0 ? "" : reorderLevel}
                   onChange={(e) => setReorderLevel(Number(e.target.value))}
                   slotProps={{ htmlInput: { min: 0 } }}
+                  sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -527,6 +571,7 @@ export default function GeneralStockMasterWorkspace() {
                   value={reorderQuantity === 0 ? "" : reorderQuantity}
                   onChange={(e) => setReorderQuantity(Number(e.target.value))}
                   slotProps={{ htmlInput: { min: 0 } }}
+                  sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -538,6 +583,7 @@ export default function GeneralStockMasterWorkspace() {
                   value={minStock === 0 ? "" : minStock}
                   onChange={(e) => setMinStock(Number(e.target.value))}
                   slotProps={{ htmlInput: { min: 0 } }}
+                  sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -549,6 +595,7 @@ export default function GeneralStockMasterWorkspace() {
                   value={maxStock === 0 ? "" : maxStock}
                   onChange={(e) => setMaxStock(Number(e.target.value))}
                   slotProps={{ htmlInput: { min: 0 } }}
+                  sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
                 />
               </Grid>
             </Grid>
@@ -558,7 +605,6 @@ export default function GeneralStockMasterWorkspace() {
                 gap: 2,
                 mt: 3,
                 pt: 2,
-                borderTop: "1px dashed #ccc",
                 display: "flex",
                 justifyContent: "flex-end",
               }}
@@ -570,6 +616,7 @@ export default function GeneralStockMasterWorkspace() {
                 startIcon={<DeleteIcon />}
                 onClick={handleResetLine}
                 disabled={isSubmitting || isUpdating}
+                sx={{ minWidth: 190, height: 32, color: "#8B93A1", borderColor: "#8B93A1" }}
               >
                 {isEditing ? "Cancel" : "Clear"}
               </Button>
@@ -580,8 +627,21 @@ export default function GeneralStockMasterWorkspace() {
                 startIcon={<SendIcon />}
                 onClick={handleRequestCommit}
                 disabled={isSubmitting || isUpdating || !isFormValid}
+                sx={{
+                  ...primaryActionButtonSx,
+                  minWidth: 190,
+                  height: 32,
+                  "&.Mui-disabled": {
+                    background: "rgba(139,147,161,0.15)",
+                    color: "#8B93A1",
+                    border: "1px solid rgba(139,147,161,0.4)",
+                    boxShadow: "none",
+                  },
+                }}
               >
-                {isEditing ? "Update Stock Master" : "Save Stock Master"}
+                <span style={themedButtonLabelStyle}>
+                  {isEditing ? "Update Stock Master" : "Save Stock Master"}
+                </span>
               </Button>
             </Box>
           </>
@@ -590,7 +650,7 @@ export default function GeneralStockMasterWorkspace() {
         {selectedStore && (
           <>
             <Divider sx={{ my: 3 }} />
-            <Typography variant="subtitle2" sx={{ fontWeight: "bold", textTransform: "uppercase", mb: 1 }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1 }}>
               Existing Items at {selectedStore}
             </Typography>
             <MaterialReactTable table={table} />

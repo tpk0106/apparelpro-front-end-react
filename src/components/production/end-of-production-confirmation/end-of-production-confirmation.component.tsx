@@ -25,19 +25,19 @@ import {
 } from "../../../tanstack-hooks/end-of-production-confirmation.hooks";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import ConfirmDialog from "../../common/confirm-dialog";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import {
+  workspaceHeadingSx,
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  dateIconFieldSx,
+} from "../../../themes/workspace-theme";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-const selectFieldSx = {
-  "& .MuiOutlinedInput-input": { color: "#F4F6F8" },
-};
-
-const dateFieldSx = {
-  "& .MuiOutlinedInput-input": { color: "#F4F6F8" },
-  "& input::-webkit-calendar-picker-indicator": { filter: "invert(1)" },
-};
-
 const EndOfProductionConfirmation = () => {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<GarmentType | null>(null);
@@ -107,11 +107,14 @@ const EndOfProductionConfirmation = () => {
     <div className="flex flex-col w-[80%] mx-auto justify-around mt-10 mb-12">
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">End of Production Confirmation</Typography>
+          <Typography sx={workspaceHeadingSx}>End of Production Confirmation</Typography>
         </ThemeProvider>
       </div>
 
-      <Card variant="outlined" sx={{ p: 2, mb: 2 }}>
+      <Card
+        variant="outlined"
+        sx={{ p: 2, mb: 2, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}
+      >
         <Grid container spacing={2} sx={{ alignItems: "center" }}>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Autocomplete
@@ -127,12 +130,13 @@ const EndOfProductionConfirmation = () => {
               isOptionEqualToValue={(option, value) =>
                 option.buyerCode === value?.buyerCode
               }
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Buyer"
                   size="small"
-                  sx={selectFieldSx}
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -147,12 +151,13 @@ const EndOfProductionConfirmation = () => {
                 setSelectedType(null);
                 setSelectedStyle(null);
               }}
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Order"
                   size="small"
-                  sx={selectFieldSx}
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -168,12 +173,13 @@ const EndOfProductionConfirmation = () => {
                 setSelectedStyle(null);
               }}
               isOptionEqualToValue={(option, value) => option.id === value?.id}
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Garment Type"
                   size="small"
-                  sx={selectFieldSx}
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -186,12 +192,13 @@ const EndOfProductionConfirmation = () => {
               value={selectedStyle}
               onChange={(_, val) => setSelectedStyle(val)}
               isOptionEqualToValue={(option, value) => option.id === value?.id}
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Style"
                   size="small"
-                  sx={selectFieldSx}
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -199,12 +206,15 @@ const EndOfProductionConfirmation = () => {
         </Grid>
       </Card>
 
-      {isLoading && <Typography>Loading...</Typography>}
+      {isLoading && <Typography sx={{ color: DASHBOARD_COLORS.textSecondary }}>Loading...</Typography>}
       {isError && <Alert severity="info">{error.message}</Alert>}
 
       {status && (
-        <Card variant="outlined" sx={{ p: 2 }}>
-          <Typography sx={{ mb: 1, color: "#F4F6F8" }}>
+        <Card
+          variant="outlined"
+          sx={{ p: 2, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}
+        >
+          <Typography sx={{ mb: 1, color: DASHBOARD_COLORS.textPrimary }}>
             Current End of Production Date:{" "}
             {status.currentProductionEndDate ?? "Not set"}
           </Typography>
@@ -223,14 +233,15 @@ const EndOfProductionConfirmation = () => {
               slotProps={{ inputLabel: { shrink: true } }}
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              sx={dateFieldSx}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
             <Button
               variant="contained"
               disabled={!status.hasProductionEntries || !endDate}
               onClick={() => setConfirmOpen(true)}
+              sx={primaryActionButtonSx}
             >
-              Confirm End of Production
+              <span style={themedButtonLabelStyle}>Confirm End of Production</span>
             </Button>
           </Box>
         </Card>

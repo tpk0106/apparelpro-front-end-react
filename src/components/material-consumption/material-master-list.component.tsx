@@ -6,16 +6,11 @@ import {
 } from "material-react-table";
 import { Box, Typography } from "@mui/material";
 import { useApparelProTable } from "../../themes/useApparelProTable";
-import { copperTextColor } from "../../themes/button-color-themes";
-
-// Highlight for the actively selected item row/cell (this file) and, in
-// consumption-ledger-grid.component.tsx, the ledger row currently loaded
-// into the edit form - was a saturated amber (#ffca28/#e65100), now copper to
-// match the rest of the theme. Dark text stays for contrast against the
-// lighter copper fill.
-const highlightBg = copperTextColor;
-const highlightBorder = "#6B4420";
-const highlightText = "#2B1B0E";
+import {
+  selectedRowHighlightSx,
+  selectedRowHighlightBg,
+  selectedRowHighlightText,
+} from "../../themes/workspace-theme";
 import type {
   MaterialCatalogGroup,
   MaterialCatalogItem,
@@ -202,8 +197,8 @@ function MaterialCatalogItemsTable({
             fontWeight: "bold",
             ...(row.original &&
               isItemSelected(row.original) && {
-                backgroundColor: `${highlightBg} !important`,
-                color: `${highlightText} !important`,
+                backgroundColor: `${selectedRowHighlightBg} !important`,
+                color: `${selectedRowHighlightText} !important`,
               }),
           },
         }),
@@ -221,8 +216,8 @@ function MaterialCatalogItemsTable({
           sx: {
             ...(row.original &&
               isItemSelected(row.original) && {
-                backgroundColor: `${highlightBg} !important`,
-                color: `${highlightText} !important`,
+                backgroundColor: `${selectedRowHighlightBg} !important`,
+                color: `${selectedRowHighlightText} !important`,
                 fontWeight: "bold",
               }),
           },
@@ -260,15 +255,10 @@ function MaterialCatalogItemsTable({
           // Persistent highlight for the actively selected row only - no custom
           // hover override here, so hover falls back to the shared hook's own
           // default black-bg/blue-text styling, identical to any non-nested
-          // useApparelProTable table (e.g. the ledger grid).
-          // A saturated amber + left border is used instead of a pale tint so
-          // the highlight stays visible regardless of which alternating-row
-          // shade (#4B9CD3 / #7CB9E8) the shared theme put underneath it.
-          ...(isSelected && {
-            backgroundColor: `${highlightBg} !important`,
-            borderLeft: `4px solid ${highlightBorder} !important`,
-            "& td": { color: `${highlightText} !important`, fontWeight: "bold" },
-          }),
+          // useApparelProTable table (e.g. the ledger grid). This is the
+          // canonical "selected row" pattern - see selectedRowHighlightSx in
+          // workspace-theme.ts, which every other table in the app should use too.
+          ...selectedRowHighlightSx(isSelected),
         },
       };
     },

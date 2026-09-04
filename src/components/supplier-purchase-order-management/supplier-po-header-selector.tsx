@@ -233,7 +233,6 @@ export default function SupplierPOHeaderSelector({
         mb: 3,
         backgroundColor: DASHBOARD_COLORS.cardBg,
         borderColor: DASHBOARD_COLORS.border,
-        borderLeft: `5px solid ${copperTextColor}`,
       }}
     >
       <Box

@@ -12,6 +12,8 @@ import {
 import type { GeneralPoLineItemRow } from "../../interfaces/general-inventory/general-po.types";
 import type { GeneralStore } from "../../interfaces/general-inventory/general-inventory.types";
 import GeneralPoLineRow from "./general-po-line-row";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { plainTableHeaderRowSx, plainTableHeaderCellSx } from "../../themes/workspace-theme";
 
 interface LinesGridProps {
   storesList: GeneralStore[];
@@ -42,17 +44,17 @@ export default function GeneralPoLinesGrid({
 
   return (
     <Box sx={{ width: "100%", overflowX: "auto", mt: 2 }}>
-      <Table size="small" sx={{ minWidth: 900, border: "1px solid #e0e0e0" }}>
-        <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
-          <TableRow>
-            <TableCell sx={{ fontWeight: "bold" }}>Store</TableCell>
-            <TableCell sx={{ fontWeight: "bold" }}>Item Code</TableCell>
-            <TableCell sx={{ fontWeight: "bold" }}>Ref No</TableCell>
-            <TableCell sx={{ fontWeight: "bold" }}>Unit</TableCell>
-            <TableCell sx={{ fontWeight: "bold" }}>Quantity</TableCell>
-            <TableCell sx={{ fontWeight: "bold" }}>Price</TableCell>
-            <TableCell sx={{ fontWeight: "bold" }}>Delivery Date</TableCell>
-            <TableCell sx={{ fontWeight: "bold", textAlign: "center" }}>Action</TableCell>
+      <Table size="small" sx={{ minWidth: 900, border: `1px solid ${DASHBOARD_COLORS.border}` }}>
+        <TableHead>
+          <TableRow sx={plainTableHeaderRowSx()}>
+            <TableCell sx={plainTableHeaderCellSx()}>Store</TableCell>
+            <TableCell sx={plainTableHeaderCellSx()}>Item Code</TableCell>
+            <TableCell sx={plainTableHeaderCellSx()}>Ref No</TableCell>
+            <TableCell sx={plainTableHeaderCellSx()}>Unit</TableCell>
+            <TableCell sx={plainTableHeaderCellSx()}>Quantity</TableCell>
+            <TableCell sx={plainTableHeaderCellSx()}>Price</TableCell>
+            <TableCell sx={plainTableHeaderCellSx()}>Delivery Date</TableCell>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), textAlign: "center" }}>Action</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -60,6 +62,7 @@ export default function GeneralPoLinesGrid({
             <GeneralPoLineRow
               key={idx}
               row={row}
+              index={idx}
               storesList={storesList}
               onChange={(field, value) => handleUpdateLineCell(idx, field, value)}
               onRemove={() => handleRemoveRow(idx)}

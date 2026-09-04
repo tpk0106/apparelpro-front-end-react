@@ -22,11 +22,22 @@ import type { GeneralStockItemAvailability } from "../../interfaces/general-inve
 import { useCreateGeneralDGNMutation } from "../../tanstack-hooks/general-inventory/general-dgn.hooks";
 import { useGetGeneralStoresQuery } from "../../tanstack-hooks/general-inventory/general-inventory-strn.hooks";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  workspaceSectionLabelSx,
+  dateIconFieldSx,
+} from "../../themes/workspace-theme";
 
 // Replicates GI_DGN1.PRG's "DAMAGED GOODS NOTE (General)" entry screen - writes off a
 // quantity of an item at a General store as damaged. Same balance-ceiling semantics as
 // STRN (can't write off more than QtyInHand - ShadowBalance).
 export default function DamagedGoodsNoteWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const { mutateAsync: commitDGN, isPending: isSubmitting } =
     useCreateGeneralDGNMutation();
 
@@ -55,7 +66,7 @@ export default function DamagedGoodsNoteWorkspace() {
   const hasAnyExceededBalance = lineItems.some((item, idx) => {
     const balance = rowStockBalances[idx];
     return balance
-      ? Number(item.quantity) > balance.netAvailableBalance
+      ? Number(item.quantity) > 0 && Number(item.quantity) > balance.netAvailableBalance
       : false;
   });
   const isFormValid =
@@ -140,9 +151,9 @@ export default function DamagedGoodsNoteWorkspace() {
   };
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#fafafa" }}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }}>
+    <Box sx={{ width: "100%", py: 1, px: 3 }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
+        <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
           Damaged Goods Note (General Inventory)
         </Typography>
 
@@ -156,6 +167,7 @@ export default function DamagedGoodsNoteWorkspace() {
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
 
@@ -172,6 +184,8 @@ export default function DamagedGoodsNoteWorkspace() {
                 setRowStockBalances({});
               }}
               disabled={isStoresLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {storesList.map((s) => (
                 <MenuItem key={s.code} value={s.code}>
@@ -198,7 +212,7 @@ export default function DamagedGoodsNoteWorkspace() {
           <Alert
             severity="info"
             variant="outlined"
-            sx={{ m: 2, fontWeight: "bold" }}
+            sx={{ m: 2, fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}
           >
             Select a Transaction Date and Stores to start the write-off list.
           </Alert>
@@ -214,7 +228,7 @@ export default function DamagedGoodsNoteWorkspace() {
             >
               <Typography
                 variant="subtitle2"
-                sx={{ fontWeight: "bold", textTransform: "uppercase" }}
+                sx={workspaceSectionLabelSx}
               >
                 Damaged Items
               </Typography>
@@ -224,8 +238,9 @@ export default function DamagedGoodsNoteWorkspace() {
                 size="small"
                 startIcon={<AddCircleOutlined />}
                 onClick={handleAddBlankRow}
+                sx={primaryActionButtonSx}
               >
-                Add Item
+                <span style={themedButtonLabelStyle}>Add Item</span>
               </Button>
             </Box>
 
@@ -244,7 +259,6 @@ export default function DamagedGoodsNoteWorkspace() {
             gap: 2,
             mt: 3,
             pt: 2,
-            borderTop: "1px dashed #ccc",
             display: "flex",
             justifyContent: "flex-end",
           }}
@@ -256,6 +270,7 @@ export default function DamagedGoodsNoteWorkspace() {
             startIcon={<DeleteIcon />}
             onClick={handleResetForm}
             disabled={isSubmitting}
+            sx={{ minWidth: 190, height: 32, color: "#8B93A1", borderColor: "#8B93A1" }}
           >
             Cancel Note
           </Button>
@@ -266,8 +281,19 @@ export default function DamagedGoodsNoteWorkspace() {
             startIcon={<SendIcon />}
             onClick={handleRequestCommit}
             disabled={isSubmitting || !isFormValid}
+            sx={{
+              ...primaryActionButtonSx,
+              minWidth: 190,
+              height: 32,
+              "&.Mui-disabled": {
+                background: "rgba(139,147,161,0.15)",
+                color: "#8B93A1",
+                border: "1px solid rgba(139,147,161,0.4)",
+                boxShadow: "none",
+              },
+            }}
           >
-            Post Damaged Goods Note
+            <span style={themedButtonLabelStyle}>Save Damaged Goods Note</span>
           </Button>
         </Box>
       </Paper>

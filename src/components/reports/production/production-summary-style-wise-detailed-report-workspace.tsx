@@ -10,6 +10,8 @@ import {
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import { withReadableReportTable } from "../../../themes/report-table-theme";
 import { DateRangeFilterCard } from "./production-summary-style-wise-report-shared";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { workspaceHeadingSx } from "../../../themes/workspace-theme";
 
 const ProductionSummaryStyleWiseDetailedReportWorkspace = () => {
   const [startDate, setStartDate] = useState("");
@@ -23,7 +25,7 @@ const ProductionSummaryStyleWiseDetailedReportWorkspace = () => {
     <div className="flex flex-col w-[95%] mx-auto justify-around mt-10 mb-12">
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">Production Summary (Style Wise) - Detailed</Typography>
+          <Typography sx={workspaceHeadingSx}>Production Summary (Style Wise) - Detailed</Typography>
         </ThemeProvider>
       </div>
 
@@ -38,12 +40,12 @@ const ProductionSummaryStyleWiseDetailedReportWorkspace = () => {
         captionText={report ? `Value uses final section: ${report.finalSectionDescription} · broken down by production line` : undefined}
       />
 
-      {isLoading && <Typography>Loading...</Typography>}
+      {isLoading && <Typography sx={{ color: DASHBOARD_COLORS.textSecondary }}>Loading...</Typography>}
       {isError && <Alert severity="info">{error.message}</Alert>}
 
       {report && (
         <ThemeProvider theme={withReadableReportTable}>
-          <TableContainer component={Card} variant="outlined">
+          <TableContainer component={Card} variant="outlined" sx={{ backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}>
             <Table size="small">
               <TableHead>
                 <TableRow>

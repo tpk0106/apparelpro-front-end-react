@@ -20,13 +20,15 @@ import {
 } from "../../../tanstack-hooks/production-summary-monthly-report.hooks";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import { withReadableReportTable } from "../../../themes/report-table-theme";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import {
+  workspaceHeadingSx,
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  dateIconFieldSx,
+} from "../../../themes/workspace-theme";
 
 const currentMonth = () => new Date().toISOString().slice(0, 7);
-
-const dateFieldSx = {
-  "& .MuiOutlinedInput-input": { color: "#F4F6F8" },
-  "& input::-webkit-calendar-picker-indicator": { filter: "invert(1)" },
-};
 
 const pct = (est: number | null, act: number | null) =>
   est && act && est > 0 ? `${((act / est) * 100).toFixed(1)}%` : "-";
@@ -41,37 +43,38 @@ const ProductionSummaryMonthlyReportWorkspace = () => {
     <div className="flex flex-col w-[95%] mx-auto justify-around mt-10 mb-12">
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">Production Summary (Monthly)</Typography>
+          <Typography sx={workspaceHeadingSx}>Production Summary (Monthly)</Typography>
         </ThemeProvider>
       </div>
 
-      <Card variant="outlined" sx={{ p: 2, mb: 2, display: "flex", alignItems: "center", gap: 2 }}>
+      <Card variant="outlined" sx={{ p: 2, mb: 2, display: "flex", alignItems: "center", gap: 2, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}>
         <TextField
           label="Month" type="month" size="small"
           slotProps={{ inputLabel: { shrink: true } }}
           value={monthValue} onChange={(e) => setMonthValue(e.target.value)}
-          sx={dateFieldSx}
+          sx={dateIconFieldSx}
         />
         <Button
           variant="contained"
           disabled={!report || isDownloading || year === null || month === null}
           onClick={() => downloadPdf({ year: year!, month: month! })}
+          sx={primaryActionButtonSx}
         >
-          {isDownloading ? "Preparing PDF..." : "Print / Download PDF"}
+          <span style={themedButtonLabelStyle}>{isDownloading ? "Preparing PDF..." : "Print / Download PDF"}</span>
         </Button>
         {report && (
-          <Typography variant="caption" sx={{ display: "block", mt: 1, color: "text.secondary" }}>
+          <Typography variant="caption" sx={{ display: "block", mt: 1, color: DASHBOARD_COLORS.textSecondary }}>
             Final section: {report.finalSectionDescription}
           </Typography>
         )}
       </Card>
 
-      {isLoading && <Typography>Loading...</Typography>}
+      {isLoading && <Typography sx={{ color: DASHBOARD_COLORS.textSecondary }}>Loading...</Typography>}
       {isError && <Alert severity="info">{error.message}</Alert>}
 
       {report && (
         <ThemeProvider theme={withReadableReportTable}>
-        <TableContainer component={Card} variant="outlined">
+        <TableContainer component={Card} variant="outlined" sx={{ backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}>
           <Table size="small">
             <TableHead>
               <TableRow>

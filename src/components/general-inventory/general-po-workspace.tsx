@@ -27,12 +27,23 @@ import { useGetGeneralStoresQuery } from "../../tanstack-hooks/general-inventory
 import { useGetSuppliersQuery, useGetBasis, useGetCurrenciesQuery } from "../../tanstack-hooks/custom-hooks";
 import type { Supplier } from "../../interfaces/references/Supplier";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  workspaceSectionLabelSx,
+  dateIconFieldSx,
+} from "../../themes/workspace-theme";
 
 // Replicates GI_PORD1.PRG's "PURCHASE ORDER ENTRY (General)" entry screen - a
 // master-detail upsert. New/Existing choice mirrors legacy's "New Purchase Order...?
 // Yes/No" prompt: Existing looks up a P/O by number and lets its lines be edited/added,
 // same as legacy's edit flow.
 export default function GeneralPoWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const { mutateAsync: commitPO, isPending: isSubmitting } =
     useCreateGeneralPOMutation();
 
@@ -223,9 +234,9 @@ export default function GeneralPoWorkspace() {
   };
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#fafafa" }}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }}>
+    <Box sx={{ width: "100%", py: 1, px: 3 }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
+        <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
           Purchase Order Entry (General Inventory)
         </Typography>
 
@@ -251,6 +262,8 @@ export default function GeneralPoWorkspace() {
                   setLineItems([]);
                 }
               }}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               <MenuItem value="new">New Purchase Order</MenuItem>
               <MenuItem value="existing">Existing Purchase Order</MenuItem>
@@ -270,6 +283,7 @@ export default function GeneralPoWorkspace() {
                     if (e.key === "Enter") handleLoadExisting();
                   }}
                   placeholder="e.g. 000001"
+                  sx={dropdownFieldSx}
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 2 }}>
@@ -308,6 +322,8 @@ export default function GeneralPoWorkspace() {
                     setSelectedSupplier(supplier);
                   }}
                   disabled={isSuppliersLoading}
+                  sx={dropdownFieldSx}
+                  slotProps={dropdownMenuSlotProps}
                 >
                   {suppliersList.map((s) => (
                     <MenuItem key={s.supplierCode} value={String(s.supplierCode)}>
@@ -326,6 +342,7 @@ export default function GeneralPoWorkspace() {
                   value={orderDate}
                   onChange={(e) => setOrderDate(e.target.value)}
                   slotProps={{ inputLabel: { shrink: true } }}
+                  sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
                 />
               </Grid>
 
@@ -338,6 +355,8 @@ export default function GeneralPoWorkspace() {
                   value={basisCode}
                   onChange={(e) => setBasisCode(e.target.value)}
                   disabled={isBasisLoading}
+                  sx={dropdownFieldSx}
+                  slotProps={dropdownMenuSlotProps}
                 >
                   {basisList.map((b) => (
                     <MenuItem key={b.code} value={b.code}>
@@ -356,6 +375,8 @@ export default function GeneralPoWorkspace() {
                   value={currencyCode}
                   onChange={(e) => setCurrencyCode(e.target.value)}
                   disabled={isCurrenciesLoading}
+                  sx={dropdownFieldSx}
+                  slotProps={dropdownMenuSlotProps}
                 >
                   {currenciesList.map((c) => (
                     <MenuItem key={c.code} value={c.code}>
@@ -372,6 +393,7 @@ export default function GeneralPoWorkspace() {
                   fullWidth
                   value={proformaInvoiceNo}
                   onChange={(e) => setProformaInvoiceNo(e.target.value)}
+                  sx={dropdownFieldSx}
                 />
               </Grid>
 
@@ -384,6 +406,7 @@ export default function GeneralPoWorkspace() {
                   value={proformaInvoiceDate}
                   onChange={(e) => setProformaInvoiceDate(e.target.value)}
                   slotProps={{ inputLabel: { shrink: true } }}
+                  sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
                 />
               </Grid>
             </Grid>
@@ -397,13 +420,13 @@ export default function GeneralPoWorkspace() {
             )}
 
             {!isHeaderValid ? (
-              <Alert severity="info" variant="outlined" sx={{ m: 2, fontWeight: "bold" }}>
+              <Alert severity="info" variant="outlined" sx={{ m: 2, fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>
                 Select a Supplier, Basis and Currency to start the order list.
               </Alert>
             ) : (
               <Box>
                 <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: "bold", textTransform: "uppercase" }}>
+                  <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>
                     Order Items
                   </Typography>
                   <Button
@@ -413,8 +436,9 @@ export default function GeneralPoWorkspace() {
                     startIcon={<AddCircleOutlined />}
                     onClick={handleAddBlankRow}
                     disabled={isStoresLoading}
+                    sx={primaryActionButtonSx}
                   >
-                    Add Item
+                    <span style={themedButtonLabelStyle}>Add Item</span>
                   </Button>
                 </Box>
 
@@ -431,7 +455,6 @@ export default function GeneralPoWorkspace() {
                 gap: 2,
                 mt: 3,
                 pt: 2,
-                borderTop: "1px dashed #ccc",
                 display: "flex",
                 justifyContent: "flex-end",
               }}
@@ -443,6 +466,7 @@ export default function GeneralPoWorkspace() {
                 startIcon={<DeleteIcon />}
                 onClick={handleResetForm}
                 disabled={isSubmitting}
+                sx={{ minWidth: 190, height: 32, color: "#8B93A1", borderColor: "#8B93A1" }}
               >
                 Cancel
               </Button>
@@ -453,8 +477,19 @@ export default function GeneralPoWorkspace() {
                 startIcon={<SendIcon />}
                 onClick={handleRequestCommit}
                 disabled={isSubmitting || !isFormValid}
+                sx={{
+                  ...primaryActionButtonSx,
+                  minWidth: 190,
+                  height: 32,
+                  "&.Mui-disabled": {
+                    background: "rgba(139,147,161,0.15)",
+                    color: "#8B93A1",
+                    border: "1px solid rgba(139,147,161,0.4)",
+                    boxShadow: "none",
+                  },
+                }}
               >
-                Save Purchase Order
+                <span style={themedButtonLabelStyle}>Save Purchase Order</span>
               </Button>
             </Box>
           </>

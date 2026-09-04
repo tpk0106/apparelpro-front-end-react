@@ -1,9 +1,10 @@
 import { Button, Card, TextField, Typography } from "@mui/material";
-
-export const dateFieldSx = {
-  "& .MuiOutlinedInput-input": { color: "#F4F6F8" },
-  "& input::-webkit-calendar-picker-indicator": { filter: "invert(1)" },
-};
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  dateIconFieldSx,
+} from "../../../themes/workspace-theme";
 
 interface DateRangeFilterCardProps {
   startDate: string;
@@ -26,24 +27,24 @@ export const DateRangeFilterCard = ({
   isDownloading,
   captionText,
 }: DateRangeFilterCardProps) => (
-  <Card variant="outlined" sx={{ p: 2, mb: 2, display: "flex", alignItems: "center", gap: 2 }}>
+  <Card variant="outlined" sx={{ p: 2, mb: 2, display: "flex", alignItems: "center", gap: 2, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}>
     <TextField
       label="Start Date" type="date" size="small"
       slotProps={{ inputLabel: { shrink: true } }}
       value={startDate} onChange={(e) => onStartDateChange(e.target.value)}
-      sx={dateFieldSx}
+      sx={dateIconFieldSx}
     />
     <TextField
       label="End Date" type="date" size="small"
       slotProps={{ inputLabel: { shrink: true } }}
       value={endDate} onChange={(e) => onEndDateChange(e.target.value)}
-      sx={dateFieldSx}
+      sx={dateIconFieldSx}
     />
-    <Button variant="contained" disabled={downloadDisabled} onClick={onDownloadPdf}>
-      {isDownloading ? "Preparing PDF..." : "Print / Download PDF"}
+    <Button variant="contained" disabled={downloadDisabled} onClick={onDownloadPdf} sx={primaryActionButtonSx}>
+      <span style={themedButtonLabelStyle}>{isDownloading ? "Preparing PDF..." : "Print / Download PDF"}</span>
     </Button>
     {captionText && (
-      <Typography variant="caption" sx={{ color: "text.secondary" }}>
+      <Typography variant="caption" sx={{ color: DASHBOARD_COLORS.textSecondary }}>
         {captionText}
       </Typography>
     )}

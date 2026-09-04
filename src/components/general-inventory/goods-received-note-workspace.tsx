@@ -25,13 +25,25 @@ import {
   useGetReceivableLinesByPoQuery,
   useCommitGeneralGrnMutation,
 } from "../../tanstack-hooks/general-inventory/general-grn.hooks";
-import { useGetCurrenciesQuery } from "../../tanstack-hooks/custom-hooks";
+import { useGetCurrenciesQuery, useGetSuppliersLookup } from "../../tanstack-hooks/custom-hooks";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  workspaceInfoCaptionSx,
+  workspaceSectionLabelSx,
+  dateIconFieldSx,
+} from "../../themes/workspace-theme";
 
 // Replicates GI_GRN1.PRG's "GOODS RECEIVED NOTE (General)" entry screen - always raised
 // against exactly one General Purchase Order. Store is a per-line field here (GI's PO
 // can span multiple stores), unlike Orderwise's single-store-per-PO GRN.
 export default function GoodsReceivedNoteWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const [poNumberInput, setPoNumberInput] = useState("");
   const [lookupPoNumber, setLookupPoNumber] = useState("");
   const [transactionDate, setTransactionDate] = useState<string>(
@@ -67,6 +79,8 @@ export default function GoodsReceivedNoteWorkspace() {
     filterQuery: null,
   });
   const currenciesList = currencyPageData?.items ?? [];
+
+  const { data: suppliersList = [], isLoading: isSuppliersLoading } = useGetSuppliersLookup();
 
   const isHeaderReady = !!lookupResult;
 
@@ -107,7 +121,7 @@ export default function GoodsReceivedNoteWorkspace() {
   }
 
   const hasExceededMaxStock = lines.some(
-    (l) => l.qtyInHand + l.quantity > l.maxStock,
+    (l) => l.quantity > 0 && l.qtyInHand + l.quantity > l.maxStock,
   );
   const isFormValid =
     isHeaderReady &&
@@ -207,12 +221,12 @@ export default function GoodsReceivedNoteWorkspace() {
   };
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#fafafa" }}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }}>
+    <Box sx={{ width: "100%", py: 1, px: 3 }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
+        <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
           Goods Received Note (General Inventory)
         </Typography>
-        <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 3 }}>
+        <Typography variant="caption" sx={{ ...workspaceInfoCaptionSx, mb: 3 }}>
           GRN Number is allocated by the server on commit - it is never entered manually.
         </Typography>
 
@@ -226,6 +240,7 @@ export default function GoodsReceivedNoteWorkspace() {
               onChange={(e) => setPoNumberInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleLookup()}
               placeholder="e.g. 000001"
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
@@ -248,17 +263,27 @@ export default function GoodsReceivedNoteWorkspace() {
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <TextField
-              label="Supplier Code"
+              select
+              label="Supplier"
               size="small"
               fullWidth
               value={supplierCode}
               onChange={(e) => setSupplierCode(e.target.value)}
-              disabled={!isHeaderReady}
-            />
+              disabled={!isHeaderReady || isSuppliersLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
+            >
+              {suppliersList.map((s) => (
+                <MenuItem key={s.supplierCode} value={String(s.supplierCode)}>
+                  {s.name}
+                </MenuItem>
+              ))}
+            </TextField>
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2.5 }}>
             <TextField
@@ -269,6 +294,8 @@ export default function GoodsReceivedNoteWorkspace() {
               value={currencyCode}
               onChange={(e) => setCurrencyCode(e.target.value)}
               disabled={!isHeaderReady}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {currenciesList.map((c) => (
                 <MenuItem key={c.code} value={c.code}>
@@ -285,6 +312,7 @@ export default function GoodsReceivedNoteWorkspace() {
               value={invoiceNumber}
               onChange={(e) => setInvoiceNumber(e.target.value)}
               disabled={!isHeaderReady}
+              sx={dropdownFieldSx}
             />
           </Grid>
         </Grid>
@@ -304,16 +332,16 @@ export default function GoodsReceivedNoteWorkspace() {
         )}
 
         {!isHeaderReady ? (
-          <Alert severity="info" variant="outlined">
+          <Alert severity="info" variant="outlined" sx={{ color: DASHBOARD_COLORS.textPrimary }}>
             Enter a known P/O number and click Look Up to load its items.
           </Alert>
         ) : (
           <Box>
             <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: "bold", textTransform: "uppercase" }}>
+              <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>
                 Material Lines
               </Typography>
-              <Typography variant="caption" sx={{ color: "text.secondary" }}>
+              <Typography variant="caption" sx={workspaceInfoCaptionSx}>
                 {lines.length} line(s) loaded from P/O {lookupPoNumber}
               </Typography>
             </Box>
@@ -328,7 +356,7 @@ export default function GoodsReceivedNoteWorkspace() {
           </Box>
         )}
 
-        <Box sx={{ gap: 2, mt: 3, pt: 2, borderTop: "1px dashed rgba(139,147,161,0.3)", display: "flex", justifyContent: "flex-end" }}>
+        <Box sx={{ gap: 2, mt: 3, pt: 2, display: "flex", justifyContent: "flex-end" }}>
           <Button
             variant="outlined"
             color="inherit"
@@ -336,6 +364,7 @@ export default function GoodsReceivedNoteWorkspace() {
             startIcon={<DeleteIcon />}
             onClick={handleReset}
             disabled={isSubmitting}
+            sx={{ minWidth: 190, height: 32, color: "#8B93A1", borderColor: "#8B93A1" }}
           >
             Cancel GRN
           </Button>
@@ -346,8 +375,19 @@ export default function GoodsReceivedNoteWorkspace() {
             startIcon={<SendIcon />}
             onClick={handleRequestCommit}
             disabled={isSubmitting || !isFormValid}
+            sx={{
+              ...primaryActionButtonSx,
+              minWidth: 190,
+              height: 32,
+              "&.Mui-disabled": {
+                background: "rgba(139,147,161,0.15)",
+                color: "#8B93A1",
+                border: "1px solid rgba(139,147,161,0.4)",
+                boxShadow: "none",
+              },
+            }}
           >
-            Confirm All Entries
+            <span style={themedButtonLabelStyle}>Save Goods Received Note</span>
           </Button>
         </Box>
       </Paper>

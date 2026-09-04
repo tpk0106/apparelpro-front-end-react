@@ -5,7 +5,6 @@ import TrimSheetApprovalCard from "./trim-sheet-approval-card";
 import type { TrimSheetApprovalScopeContext } from "./trim-sheet-approval.types";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 import { workspaceHeadingSx } from "../../../themes/workspace-theme";
-import { copperTextColor } from "../../../themes/button-color-themes";
 
 export default function TrimSheetApprovalWorkspace() {
   const [scope, setScope] = useState<TrimSheetApprovalScopeContext | null>(
@@ -32,8 +31,6 @@ export default function TrimSheetApprovalWorkspace() {
           sx={{
             p: 3,
             backgroundColor: DASHBOARD_COLORS.cardBg,
-            border: `1px solid ${DASHBOARD_COLORS.border}`,
-            borderTop: `4px solid ${copperTextColor}`,
           }}
         >
           <TrimSheetApprovalCard

@@ -6,7 +6,6 @@ import PartShipmentsGrid from "./part-shipments-grid";
 import { useGetPartShipmentsLedgerQuery } from "../../services/order-management/part-shipment.service";
 import type { Style } from "../../interfaces/order-management/Style";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
-import { copperTextColor } from "../../themes/button-color-themes";
 
 interface WorkspaceProps {
   buyerCode: number;
@@ -55,8 +54,6 @@ export default function PartShipmentsWorkspace({
             p: 3,
             mt: 2,
             backgroundColor: DASHBOARD_COLORS.cardBg,
-            border: `1px solid ${DASHBOARD_COLORS.border}`,
-            borderTop: `4px solid ${copperTextColor}`,
           }}
         >
           <Box

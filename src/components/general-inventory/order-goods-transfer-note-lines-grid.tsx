@@ -17,6 +17,15 @@ import type {
   OrderGtnLineItemRow,
   OrderGtnTransferableStockRow,
 } from "../../interfaces/general-inventory/general-ogtn.types";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import {
+  plainTableHeaderRowSx,
+  plainTableHeaderCellSx,
+  plainTableBodyRowSx,
+  deleteRowIconButtonSx,
+  numberFieldNoSpinnerSx,
+} from "../../themes/workspace-theme";
 
 interface LinesGridProps {
   storeCode: string;
@@ -33,6 +42,9 @@ export default function OrderGoodsTransferNoteLinesGrid({
   lineItems,
   setLineItems,
 }: LinesGridProps) {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
+
   const usedItemCodes = useMemo(
     () =>
       new Set(
@@ -59,19 +71,19 @@ export default function OrderGoodsTransferNoteLinesGrid({
 
   return (
     <Box sx={{ width: "100%", overflowX: "auto", mt: 2 }}>
-      <Table size="small" sx={{ minWidth: 550, border: "1px solid #e0e0e0" }}>
-        <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
-          <TableRow>
-            <TableCell sx={{ fontWeight: "bold", width: "45%" }}>
+      <Table size="small" sx={{ minWidth: 550, border: `1px solid ${DASHBOARD_COLORS.border}` }}>
+        <TableHead>
+          <TableRow sx={plainTableHeaderRowSx()}>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "45%" }}>
               Item Code
             </TableCell>
-            <TableCell sx={{ fontWeight: "bold", width: "20%" }}>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "20%" }}>
               Unit
             </TableCell>
-            <TableCell sx={{ fontWeight: "bold", width: "25%" }}>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "25%" }}>
               Transfer Qty
             </TableCell>
-            <TableCell sx={{ fontWeight: "bold", width: "10%", textAlign: "center" }}>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "10%", textAlign: "center" }}>
               Action
             </TableCell>
           </TableRow>
@@ -82,7 +94,9 @@ export default function OrderGoodsTransferNoteLinesGrid({
               (s) => s.itemCode === row.itemCode,
             );
             const hasExceededBalance =
-              matchedStock && Number(row.quantity) > matchedStock.availableBalance;
+              matchedStock &&
+              Number(row.quantity) > 0 &&
+              Number(row.quantity) > matchedStock.availableBalance;
 
             const availableChoicesForRow = transferableStock.filter(
               (item) =>
@@ -93,7 +107,7 @@ export default function OrderGoodsTransferNoteLinesGrid({
             return (
               <TableRow
                 key={idx}
-                sx={{ backgroundColor: hasExceededBalance ? "#fff3e0" : "inherit" }}
+                sx={plainTableBodyRowSx(idx, Boolean(hasExceededBalance))}
               >
                 <TableCell>
                   <TextField
@@ -101,6 +115,8 @@ export default function OrderGoodsTransferNoteLinesGrid({
                     size="small"
                     variant="standard"
                     fullWidth
+                    sx={dropdownFieldSx}
+                    slotProps={dropdownMenuSlotProps}
                     value={row.itemCode}
                     disabled={isStockLoading || availableChoicesForRow.length === 0}
                     onChange={(e) => {
@@ -143,6 +159,7 @@ export default function OrderGoodsTransferNoteLinesGrid({
                     size="small"
                     variant="standard"
                     fullWidth
+                    sx={dropdownFieldSx}
                     value={row.unit}
                     disabled
                   />
@@ -154,6 +171,7 @@ export default function OrderGoodsTransferNoteLinesGrid({
                     size="small"
                     variant="standard"
                     fullWidth
+                    sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
                     value={row.quantity === 0 ? "" : row.quantity}
                     onChange={(e) =>
                       handleUpdateLineCell(idx, "quantity", Number(e.target.value))
@@ -176,6 +194,7 @@ export default function OrderGoodsTransferNoteLinesGrid({
                     color="error"
                     size="small"
                     onClick={() => handleRemoveRow(idx)}
+                    sx={deleteRowIconButtonSx}
                   >
                     <DeleteIcon fontSize="small" />
                   </IconButton>

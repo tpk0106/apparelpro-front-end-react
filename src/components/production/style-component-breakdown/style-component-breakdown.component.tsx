@@ -7,6 +7,8 @@ import StyleComponentBreakdownTable from "./style-component-breakdown-table.comp
 import { useGetComponentBreakdownByStyle } from "../../../tanstack-hooks/production-style-breakdown.hooks";
 import type { StyleComponentBreakdown } from "../../../interfaces/production/StyleComponentBreakdown";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { workspaceHeadingSx } from "../../../themes/workspace-theme";
 
 const StyleComponentBreakdownWorkspace = () => {
   const [scope, setScope] = useState<StyleScope | null>(null);
@@ -31,17 +33,17 @@ const StyleComponentBreakdownWorkspace = () => {
   );
 
   return (
-    <div className="flex flex-col w-[80%] mx-auto justify-around mt-10">
+    <div className="flex flex-col w-[80%] mx-auto justify-around mt-10 mb-12">
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">Style wise Component Breakdown</Typography>
+          <Typography sx={workspaceHeadingSx}>Style wise Component Breakdown</Typography>
         </ThemeProvider>
       </div>
 
       <StyleScopePicker onScopeChange={setScope} />
 
       {scope && (
-        <Box>
+        <Box sx={{ backgroundColor: DASHBOARD_COLORS.cardBg, border: `1px solid ${DASHBOARD_COLORS.border}`, borderRadius: 1, p: 1 }}>
           <StyleComponentBreakdownTable
             scope={scope}
             rows={scopedRows}

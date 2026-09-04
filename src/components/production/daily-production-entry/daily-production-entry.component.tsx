@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { toast } from "react-toastify";
 import {
   Box,
   Card,
@@ -23,10 +24,20 @@ import {
 import type { DailyProductionEntry } from "../../../interfaces/production/DailyProductionEntry";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import ConfirmDialog from "../../common/confirm-dialog";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import {
+  workspaceHeadingSx,
+  dateIconFieldSx,
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+} from "../../../themes/workspace-theme";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
 const DailyProductionEntryWorkspace = () => {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const [scope, setScope] = useState<StyleScope | null>(null);
   const [lineCode, setLineCode] = useState("");
   const [date, setDate] = useState(today());
@@ -75,6 +86,30 @@ const DailyProductionEntryWorkspace = () => {
 
   const { mutateAsync: bulkSave, isPending: isSaving } = useBulkSaveDailyProductionEntriesMutation();
 
+  // Mirrors legacy PR_DPRO1.PRG's rules for this same screen: Hours must be
+  // in (0, 24] ("valid hours > 0 .and. hours <= 24"), and a section can't
+  // report a quantity without Unit and Hours filled in first (legacy hard-blocks
+  // entering a quantity with "Please enter [Buyer/Order/Type/Style/Line/Unit/Hours]
+  // First" - Buyer/Order/Type/Style/Line are already required just to reach this
+  // table here, so Unit/Hours are what's left to enforce at the row level).
+  // Previously none of this was checked - Save fired unconditionally, even
+  // with every row still blank.
+  const getEntryValidationError = (): string | null => {
+    const rowsWithQuantity = rows.filter((r) => r.quantity > 0);
+    if (rowsWithQuantity.length === 0) {
+      return "Enter at least one section's quantity before saving.";
+    }
+    for (const r of rowsWithQuantity) {
+      if (r.hours <= 0 || r.hours > 24) {
+        return `Enter valid Hours (0-24) for ${r.sectionDescription}.`;
+      }
+      if (!r.unit.trim()) {
+        return `Select a Unit for ${r.sectionDescription}.`;
+      }
+    }
+    return null;
+  };
+
   const doSave = async () => {
     if (!entryScope) return;
     await bulkSave({
@@ -90,6 +125,11 @@ const DailyProductionEntryWorkspace = () => {
   };
 
   const handleSaveClick = () => {
+    const validationError = getEntryValidationError();
+    if (validationError) {
+      toast.warning(validationError);
+      return;
+    }
     // Warn before slipping the schedule - mirrors DailyProductionEntryService's
     // own "current slot" resolution (last allocation by start date) so the
     // warning only fires when the save is actually about to trigger the
@@ -102,22 +142,27 @@ const DailyProductionEntryWorkspace = () => {
   };
 
   return (
-    <div className="flex flex-col w-[80%] mx-auto justify-around mt-10">
+    <div className="flex flex-col w-[80%] mx-auto justify-around mt-10 mb-12">
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">Actual Production Entry</Typography>
+          <Typography sx={workspaceHeadingSx}>Actual Production Entry</Typography>
         </ThemeProvider>
       </div>
 
       <StyleScopePicker onScopeChange={(s) => { setScope(s); setLineCode(""); }} />
 
       {scope && (
-        <Card variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Card
+          variant="outlined"
+          sx={{ p: 2, mb: 2, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}
+        >
           <Grid container spacing={2}>
             <Grid size={{ xs: 6, sm: 3 }}>
               <TextField
                 select label="Line" size="small" fullWidth
                 value={lineCode} onChange={(e) => setLineCode(e.target.value)}
+                sx={dropdownFieldSx}
+                slotProps={dropdownMenuSlotProps}
               >
                 {lineOptions.map((l) => (
                   <MenuItem key={l.lineCode} value={l.lineCode}>{l.lineCode} - {l.description}</MenuItem>
@@ -129,6 +174,7 @@ const DailyProductionEntryWorkspace = () => {
                 label="Date" type="date" size="small" fullWidth
                 slotProps={{ inputLabel: { shrink: true } }}
                 value={date} onChange={(e) => setDate(e.target.value)}
+                sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
               />
             </Grid>
           </Grid>
@@ -136,7 +182,10 @@ const DailyProductionEntryWorkspace = () => {
       )}
 
       {entryScope && (
-        <Card variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Card
+          variant="outlined"
+          sx={{ p: 2, mb: 2, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}
+        >
           <DailyProductionEntryTable
             rows={rows}
             unitOptions={unitOptions}
@@ -144,8 +193,8 @@ const DailyProductionEntryWorkspace = () => {
             isLoading={isLoading}
           />
           <Box sx={{ mt: 2, textAlign: "right" }}>
-            <Button variant="contained" onClick={handleSaveClick} disabled={isSaving}>
-              {isSaving ? "Saving..." : "Save entries"}
+            <Button variant="contained" onClick={handleSaveClick} disabled={isSaving} sx={primaryActionButtonSx}>
+              <span style={themedButtonLabelStyle}>{isSaving ? "Saving..." : "Save entries"}</span>
             </Button>
           </Box>
         </Card>

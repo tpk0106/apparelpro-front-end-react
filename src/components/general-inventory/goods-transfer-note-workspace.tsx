@@ -22,11 +22,22 @@ import type { GeneralStockItemAvailability } from "../../interfaces/general-inve
 import { useCreateGeneralGTNMutation } from "../../tanstack-hooks/general-inventory/general-gtn.hooks";
 import { useGetGeneralStoresQuery } from "../../tanstack-hooks/general-inventory/general-inventory-strn.hooks";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  workspaceSectionLabelSx,
+  dateIconFieldSx,
+} from "../../themes/workspace-theme";
 
 // Replicates GI_GGTN1.PRG's "GOODS TRANSFER NOTE (General)" entry screen - an atomic
 // stock move between two General stores. Unlike STRN/GIN, there's no reservation or
 // department/order scope: just From Stores, To Stores, Date, and the item list.
 export default function GoodsTransferNoteWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const { mutateAsync: commitGTN, isPending: isSubmitting } =
     useCreateGeneralGTNMutation();
 
@@ -59,7 +70,7 @@ export default function GoodsTransferNoteWorkspace() {
   const hasAnyExceededBalance = lineItems.some((item, idx) => {
     const balance = rowStockBalances[idx];
     return balance
-      ? Number(item.quantity) > balance.netAvailableBalance
+      ? Number(item.quantity) > 0 && Number(item.quantity) > balance.netAvailableBalance
       : false;
   });
   const isFormValid =
@@ -146,9 +157,9 @@ export default function GoodsTransferNoteWorkspace() {
   };
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#fafafa" }}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }}>
+    <Box sx={{ width: "100%", py: 1, px: 3 }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
+        <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
           Goods Transfer Note (General Inventory)
         </Typography>
 
@@ -162,6 +173,7 @@ export default function GoodsTransferNoteWorkspace() {
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
 
@@ -174,6 +186,8 @@ export default function GoodsTransferNoteWorkspace() {
               value={fromStore}
               onChange={(e) => setFromStore(e.target.value)}
               disabled={isStoresLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {storesList.map((s) => (
                 <MenuItem key={s.code} value={s.code} disabled={s.code === toStore}>
@@ -192,6 +206,8 @@ export default function GoodsTransferNoteWorkspace() {
               value={toStore}
               onChange={(e) => setToStore(e.target.value)}
               disabled={isStoresLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {storesList.map((s) => (
                 <MenuItem key={s.code} value={s.code} disabled={s.code === fromStore}>
@@ -218,7 +234,7 @@ export default function GoodsTransferNoteWorkspace() {
           <Alert
             severity="info"
             variant="outlined"
-            sx={{ m: 2, fontWeight: "bold" }}
+            sx={{ m: 2, fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}
           >
             Select a Transaction Date, and two different From/To Stores to start
             the transfer list.
@@ -235,7 +251,7 @@ export default function GoodsTransferNoteWorkspace() {
             >
               <Typography
                 variant="subtitle2"
-                sx={{ fontWeight: "bold", textTransform: "uppercase" }}
+                sx={workspaceSectionLabelSx}
               >
                 Transfer Items
               </Typography>
@@ -245,8 +261,9 @@ export default function GoodsTransferNoteWorkspace() {
                 size="small"
                 startIcon={<AddCircleOutlined />}
                 onClick={handleAddBlankRow}
+                sx={primaryActionButtonSx}
               >
-                Add Item
+                <span style={themedButtonLabelStyle}>Add Item</span>
               </Button>
             </Box>
 
@@ -265,7 +282,6 @@ export default function GoodsTransferNoteWorkspace() {
             gap: 2,
             mt: 3,
             pt: 2,
-            borderTop: "1px dashed #ccc",
             display: "flex",
             justifyContent: "flex-end",
           }}
@@ -277,6 +293,7 @@ export default function GoodsTransferNoteWorkspace() {
             startIcon={<DeleteIcon />}
             onClick={handleResetForm}
             disabled={isSubmitting}
+            sx={{ minWidth: 190, height: 32, color: "#8B93A1", borderColor: "#8B93A1" }}
           >
             Cancel Note
           </Button>
@@ -287,8 +304,19 @@ export default function GoodsTransferNoteWorkspace() {
             startIcon={<SendIcon />}
             onClick={handleRequestCommit}
             disabled={isSubmitting || !isFormValid}
+            sx={{
+              ...primaryActionButtonSx,
+              minWidth: 190,
+              height: 32,
+              "&.Mui-disabled": {
+                background: "rgba(139,147,161,0.15)",
+                color: "#8B93A1",
+                border: "1px solid rgba(139,147,161,0.4)",
+                boxShadow: "none",
+              },
+            }}
           >
-            Post Transfer Note
+            <span style={themedButtonLabelStyle}>Save Transfer Note</span>
           </Button>
         </Box>
       </Paper>

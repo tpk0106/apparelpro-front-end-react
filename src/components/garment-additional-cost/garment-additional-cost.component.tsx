@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Box, Typography, Alert } from "@mui/material";
+import { Box, ThemeProvider, Typography, Alert } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import ConsumptionScopeHeader from "../material-consumption/consumption-scope-header.component";
 import type {
@@ -14,6 +14,7 @@ import GarmentAdditionalCostEntryForm from "./garment-additional-cost-entry-form
 import GarmentAdditionalCostGrid from "./garment-additional-cost-grid.component";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 import { workspaceHeadingSx } from "../../themes/workspace-theme";
+import { asideMenuTitleTypographyTheme } from "../../themes/themes";
 
 // RETIRED (2026-09-03): this screen used to carry its own isolated "mockup"
 // dark-card styling (see garment-additional-cost.types.ts's commented-out
@@ -60,21 +61,11 @@ export default function GarmentAdditionalCostPage() {
 
   return (
     <Box sx={{ width: "100%", py: 1, px: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
-      <Typography
-        sx={{ ...workspaceHeadingSx, textTransform: "uppercase", fontSize: "20px", mb: 0.5 }}
-      >
-        Additional Costs per Garment
-      </Typography>
-      <Typography
-        sx={{
-          textAlign: "center",
-          color: DASHBOARD_COLORS.textSecondary,
-          fontSize: "12px",
-          mb: 2.5,
-        }}
-      >
-        Order Management &rsaquo; Material Consumption &rsaquo; Additional Costs per Garment
-      </Typography>
+      <ThemeProvider theme={asideMenuTitleTypographyTheme}>
+        <Typography sx={{ ...workspaceHeadingSx, textTransform: "uppercase", mb: 2 }}>
+          Additional Costs per Garment
+        </Typography>
+      </ThemeProvider>
 
       <ConsumptionScopeHeader onScopeChange={handleScopeContextChange} />
 

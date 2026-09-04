@@ -113,7 +113,6 @@ export default function StyleShippingSummaryCard({
               gap: 2,
               backgroundColor: DASHBOARD_COLORS.cardBg,
               borderColor: DASHBOARD_COLORS.border,
-              borderLeft: `5px solid ${copperTextColor}`,
             }}
           >
             <InventoryIcon sx={{ color: copperTextColor, fontSize: "32px" }} />
@@ -198,7 +197,6 @@ export default function StyleShippingSummaryCard({
               alignItems: "center",
               gap: 2,
               borderColor: DASHBOARD_COLORS.border,
-              borderLeft: `5px solid ${copperTextColor}`,
               backgroundColor:
                 metrics.remainingUnscheduledBalance <= 0
                   ? "rgba(159,174,94,0.18)"

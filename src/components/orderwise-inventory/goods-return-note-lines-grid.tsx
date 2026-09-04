@@ -4,6 +4,11 @@ import type { MRT_ColumnDef } from "material-react-table";
 import { MaterialReactTable } from "material-react-table";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useApparelProTable } from "../../themes/useApparelProTable";
+import {
+  noteTableHeadCellUppercaseSx,
+  deleteRowIconButtonSx,
+  numberFieldNoSpinnerSx,
+} from "../../themes/workspace-theme";
 import type { RtnLineItemRow } from "./goods-return-note.types";
 
 interface GoodsReturnNoteLinesGridProps {
@@ -84,7 +89,7 @@ export default function GoodsReturnNoteLinesGrid({
                 style: { fontFamily: '"JetBrains Mono", monospace' },
               },
             }}
-            sx={{ width: 100 }}
+            sx={{ width: 100, ...numberFieldNoSpinnerSx }}
           />
         ),
       },
@@ -113,6 +118,7 @@ export default function GoodsReturnNoteLinesGrid({
   );
 
   const table = useApparelProTable<RtnLineItemRowView>({
+    muiTableHeadCellProps: noteTableHeadCellUppercaseSx,
     columns,
     data: rows,
     enableEditing: false,
@@ -132,6 +138,7 @@ export default function GoodsReturnNoteLinesGrid({
         color="error"
         size="small"
         onClick={() => handleRemoveLine(row.index)}
+        sx={deleteRowIconButtonSx}
       >
         <DeleteIcon fontSize="small" />
       </IconButton>

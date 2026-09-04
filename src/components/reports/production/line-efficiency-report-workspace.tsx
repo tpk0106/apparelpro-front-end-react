@@ -12,19 +12,20 @@ import {
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import { withReadableReportTable } from "../../../themes/report-table-theme";
 import LineEfficiencyBarChart from "./line-efficiency-bar-chart.component";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import {
+  workspaceHeadingSx,
+  workspaceSectionLabelSx,
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  dateIconFieldSx,
+} from "../../../themes/workspace-theme";
 
 const currentMonth = () => new Date().toISOString().slice(0, 7);
 
-const dateFieldSx = {
-  "& .MuiOutlinedInput-input": { color: "#F4F6F8" },
-  "& input::-webkit-calendar-picker-indicator": { filter: "invert(1)" },
-};
-
-const selectFieldSx = {
-  "& .MuiOutlinedInput-input": { color: "#F4F6F8" },
-};
-
 const LineEfficiencyReportWorkspace = () => {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const [selectedLine, setSelectedLine] = useState<ProductionLine | null>(null);
   const [monthValue, setMonthValue] = useState(currentMonth());
   const [year, month] = monthValue ? monthValue.split("-").map(Number) : [null, null];
@@ -45,11 +46,11 @@ const LineEfficiencyReportWorkspace = () => {
     <div className="flex flex-col w-[95%] mx-auto justify-around mt-10 mb-12">
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">Production Line Efficiency</Typography>
+          <Typography sx={workspaceHeadingSx}>Production Line Efficiency</Typography>
         </ThemeProvider>
       </div>
 
-      <Card variant="outlined" sx={{ p: 2, mb: 2, display: "flex", alignItems: "center", gap: 2 }}>
+      <Card variant="outlined" sx={{ p: 2, mb: 2, display: "flex", alignItems: "center", gap: 2, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}>
         <Autocomplete
           options={linesList}
           sx={{ minWidth: 220 }}
@@ -57,35 +58,37 @@ const LineEfficiencyReportWorkspace = () => {
           value={selectedLine}
           onChange={(_, val) => setSelectedLine(val)}
           isOptionEqualToValue={(option, value) => option.lineCode === value?.lineCode}
-          renderInput={(params) => <TextField {...params} label="Line" size="small" sx={selectFieldSx} />}
+          slotProps={{ listbox: { sx: dropdownListboxSx } }}
+          renderInput={(params) => <TextField {...params} label="Line" size="small" sx={dropdownFieldSx} />}
         />
         <TextField
           label="Month" type="month" size="small"
           slotProps={{ inputLabel: { shrink: true } }}
           value={monthValue} onChange={(e) => setMonthValue(e.target.value)}
-          sx={dateFieldSx}
+          sx={dateIconFieldSx}
         />
         <Button
           variant="contained"
           disabled={!report || isDownloading || !scope}
           onClick={() => downloadPdf(scope!)}
+          sx={primaryActionButtonSx}
         >
-          {isDownloading ? "Preparing PDF..." : "Print / Download PDF"}
+          <span style={themedButtonLabelStyle}>{isDownloading ? "Preparing PDF..." : "Print / Download PDF"}</span>
         </Button>
         {report && (
-          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+          <Typography variant="caption" sx={{ color: DASHBOARD_COLORS.textSecondary }}>
             Final section: {report.finalSectionDescription} · Work Hours/Day: {report.workHoursPerDay}
           </Typography>
         )}
       </Card>
 
-      {isLoading && <Typography>Loading...</Typography>}
+      {isLoading && <Typography sx={{ color: DASHBOARD_COLORS.textSecondary }}>Loading...</Typography>}
       {isError && <Alert severity="info">{error.message}</Alert>}
 
       {report && (
         <>
-          <Card variant="outlined" sx={{ p: 2, mb: 2 }}>
-            <Typography variant="subtitle2" sx={{ mb: 1, color: "#F4F6F8" }}>
+          <Card variant="outlined" sx={{ p: 2, mb: 2, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1 }}>
               {report.lineCode} — {report.lineDescription}
             </Typography>
             <Box sx={{ display: "flex", alignItems: "flex-end", gap: 0.5, height: 260, borderLeft: "1px solid", borderBottom: "1px solid", borderColor: "divider", p: 1, overflowX: "auto" }}>
@@ -113,7 +116,7 @@ const LineEfficiencyReportWorkspace = () => {
           </Card>
 
           <ThemeProvider theme={withReadableReportTable}>
-            <TableContainer component={Card} variant="outlined">
+            <TableContainer component={Card} variant="outlined" sx={{ backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}>
               <Table size="small">
                 <TableHead>
                   <TableRow>
@@ -137,8 +140,8 @@ const LineEfficiencyReportWorkspace = () => {
             </TableContainer>
           </ThemeProvider>
 
-          <Card variant="outlined" sx={{ p: 2, mt: 2 }}>
-            <Typography variant="subtitle2" sx={{ mb: 1, color: "#F4F6F8" }}>
+          <Card variant="outlined" sx={{ p: 2, mt: 2, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1 }}>
               Efficiency Trend — {report.lineCode} — {report.lineDescription}
             </Typography>
             <LineEfficiencyBarChart days={report.days} monthlyAverage={report.monthlyAverageEfficiencyPercent} />

@@ -35,6 +35,7 @@ import {
   themedButtonLabelStyle,
   workspaceHeadingSx,
   workspaceInfoCaptionSx,
+  dateIconFieldSx,
 } from "../../themes/workspace-theme";
 
 const LOOKUP_PAGE = {
@@ -173,8 +174,8 @@ export default function AdditionalGoodsReceiptNoteWorkspace() {
   };
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.pageBg }}>
+    <Box sx={{ width: "100%", py: 1, px: 3 }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
           Additional Goods Receipt Note (ARN)
         </Typography>
@@ -248,7 +249,7 @@ export default function AdditionalGoodsReceiptNoteWorkspace() {
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
-              sx={dropdownFieldSx}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
         </Grid>
@@ -323,7 +324,7 @@ export default function AdditionalGoodsReceiptNoteWorkspace() {
                   },
                 }}
               >
-                <span style={themedButtonLabelStyle}>Confirm All Entries</span>
+                <span style={themedButtonLabelStyle}>Save Additional Goods Receipt Note</span>
               </Button>
             </Box>
           </Box>

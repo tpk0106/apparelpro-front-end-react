@@ -524,22 +524,14 @@ const apparelProDarkTheme = createTheme({
             },
           },
 
-          // 4. DATA ROW HOVER STATE OVERRIDES: Slate dark row hover pop
-          // 🚀 THE FIX: Target only '.MuiTableBodyRow-root' to protect headers and footers from turning black on hover
-          "&.MuiTableBodyRow-root:hover": {
-            backgroundColor: "#141922 !important",
-            "& td": {
-              //  color: "#F4F6F8 !important",
-              color: "##4169E1 !important",
-            },
-            "& .MuiSvgIcon-root, & .MuiIconButton-root, & .MuiIconButton-root .MuiSvgIcon-root":
-              {
-                color: "#4169E1 !important", // Pinned to the identical matching color
-              },
-            "& .MuiIconButton-root:hover": {
-              backgroundColor: "rgba(99, 102, 241, 0.12) !important",
-            },
-          },
+          // REMOVED (2026-09-03): this targeted ".MuiTableBodyRow-root", a
+          // class that doesn't exist anywhere in the codebase (confirmed via
+          // grep) - MUI's real row class is "MuiTableRow-root", with no
+          // "Body" in it. The selector never matched anything, so this block
+          // was always dead - removed instead of left as confusing, inert
+          // near-black (#141922) hover styling that looked like a plausible
+          // culprit for hand-rolled tables' hover-turns-black reports but
+          // never actually fired.
         },
       },
     },

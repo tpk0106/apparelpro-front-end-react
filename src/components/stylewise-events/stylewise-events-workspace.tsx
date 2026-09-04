@@ -7,7 +7,6 @@ import type { SelectedHeaderContext } from "../stylewise-events/stylewise-events
 import StylewiseEventsApprovalCard from "./stylewise-events-approval-card";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 import { workspaceHeadingSx } from "../../themes/workspace-theme";
-import { copperTextColor } from "../../themes/button-color-themes";
 import { asideMenuTitleTypographyTheme } from "../../themes/themes";
 
 // Import your live query hook cleanly from your active Redux slice service
@@ -68,8 +67,6 @@ export default function StylewiseEventsWorkspace() {
           sx={{
             p: 3,
             backgroundColor: DASHBOARD_COLORS.cardBg,
-            border: `1px solid ${DASHBOARD_COLORS.border}`,
-            borderTop: `4px solid ${copperTextColor}`,
           }}
         >
           {/* 1. PASS REAL SERVER RECOGNITION FIELDS STRAIGHT DOWN */}

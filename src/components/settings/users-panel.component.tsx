@@ -8,6 +8,8 @@ import {
 } from "../../tanstack-hooks/custom-hooks";
 import type { UserWithGroups } from "../../interfaces/register/UserWithGroups";
 import type { Group } from "../../interfaces/register/Group";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 
 interface UserRowProps {
   user: UserWithGroups;
@@ -19,6 +21,8 @@ interface UserRowProps {
 
 const UserRow = ({ user, availableGroups, onAssign, onRemove, isMutating }: UserRowProps) => {
   const [selectedGroupId, setSelectedGroupId] = useState("");
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
 
   // Only offer groups the user isn't already a member of - the dropdown
   // should always represent an action that would actually change something.
@@ -40,7 +44,7 @@ const UserRow = ({ user, availableGroups, onAssign, onRemove, isMutating }: User
       }}
     >
       <Box sx={{ minWidth: 220, flexShrink: 0 }}>
-        <Typography sx={{ fontSize: "13.5px", fontWeight: 500 }}>
+        <Typography sx={{ fontSize: "13.5px", fontWeight: 500, color: DASHBOARD_COLORS.textPrimary }}>
           {user.knownAs || user.userName}
         </Typography>
         <Typography sx={{ fontSize: "12px", color: "text.secondary" }}>
@@ -63,6 +67,15 @@ const UserRow = ({ user, availableGroups, onAssign, onRemove, isMutating }: User
               size="small"
               disabled={isMutating}
               onDelete={group ? () => onRemove(user.id, group.id) : undefined}
+              sx={{
+                backgroundColor: "#ffffff",
+                color: "#1a1710",
+                fontWeight: 500,
+                "& .MuiChip-deleteIcon": {
+                  color: "rgba(26, 23, 16, 0.5)",
+                  "&:hover": { color: "#1a1710" },
+                },
+              }}
             />
           );
         })}
@@ -78,8 +91,10 @@ const UserRow = ({ user, availableGroups, onAssign, onRemove, isMutating }: User
           setSelectedGroupId("");
           if (groupId) onAssign(user.id, groupId);
         }}
-        sx={{ minWidth: 170, flexShrink: 0 }}
-        slotProps={{ select: { displayEmpty: true } }}
+        sx={{ minWidth: 170, flexShrink: 0, ...dropdownFieldSx }}
+        slotProps={{
+          select: { ...dropdownMenuSlotProps.select, displayEmpty: true },
+        }}
       >
         <MenuItem value="" disabled>
           {assignableGroups.length === 0 ? "All groups assigned" : "+ Add group"}
@@ -129,8 +144,11 @@ const UsersPanel = () => {
 
       <Box
         sx={{
+          width: "100%",
           borderRadius: "14px",
           border: "1px solid rgba(139, 147, 161, 0.15)",
+          borderLeft: "1px solid rgba(139, 147, 161, 0.15)",
+          borderRight: "1px solid rgba(139, 147, 161, 0.15)",
           overflow: "hidden",
         }}
       >

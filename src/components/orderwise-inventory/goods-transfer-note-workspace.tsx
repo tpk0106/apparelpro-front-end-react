@@ -38,6 +38,7 @@ import {
   workspaceHeadingSx,
   workspaceInfoCaptionSx,
   workspaceSectionLabelSx,
+  dateIconFieldSx,
 } from "../../themes/workspace-theme";
 
 export default function GoodsTransferNoteWorkspace() {
@@ -272,12 +273,11 @@ export default function GoodsTransferNoteWorkspace() {
   };
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
+    <Box sx={{ width: "100%", py: 1, px: 3 }}>
       <Paper
         elevation={3}
         sx={{
           p: 3,
-          borderTop: `4px solid ${DASHBOARD_COLORS.accent}`,
           backgroundColor: DASHBOARD_COLORS.pageBg,
         }}
       >
@@ -387,7 +387,7 @@ export default function GoodsTransferNoteWorkspace() {
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
-              sx={dropdownFieldSx}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
         </Grid>
@@ -535,7 +535,7 @@ export default function GoodsTransferNoteWorkspace() {
                   },
                 }}
               >
-                <span style={themedButtonLabelStyle}>Confirm All Entries</span>
+                <span style={themedButtonLabelStyle}>Save Goods Transfer Note</span>
               </Button>
             </Box>
           </Box>

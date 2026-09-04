@@ -28,6 +28,15 @@ import { useGetGeneralStoresQuery } from "../../tanstack-hooks/general-inventory
 import { useGetSuppliersQuery } from "../../tanstack-hooks/custom-hooks";
 import type { Supplier } from "../../interfaces/references/Supplier";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  workspaceSectionLabelSx,
+  dateIconFieldSx,
+} from "../../themes/workspace-theme";
 
 const STOCK_TYPE_OPTIONS: { value: GeneralSrtnStockTypeValue; label: string }[] = [
   { value: GeneralSrtnStockType.Regular, label: "Regular" },
@@ -38,6 +47,8 @@ const STOCK_TYPE_OPTIONS: { value: GeneralSrtnStockTypeValue; label: string }[] 
 // returns decrement QtyInHand/Value like a GIN; Damaged stock returns decrement only
 // DamagedQuantity (the physical stock already left when it was written off via DGN).
 export default function SupplierReturnNoteWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const { mutateAsync: commitSRTN, isPending: isSubmitting } =
     useCreateGeneralSRTNMutation();
 
@@ -87,7 +98,7 @@ export default function SupplierReturnNoteWorkspace() {
     lineItems.some((item, idx) => {
       const balance = rowStockBalances[idx];
       return balance
-        ? Number(item.quantity) > balance.netAvailableBalance
+        ? Number(item.quantity) > 0 && Number(item.quantity) > balance.netAvailableBalance
         : false;
     });
   const isFormValid =
@@ -177,9 +188,9 @@ export default function SupplierReturnNoteWorkspace() {
   };
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#fafafa" }}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }}>
+    <Box sx={{ width: "100%", py: 1, px: 3 }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
+        <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
           Supplier Return Note (General Inventory)
         </Typography>
 
@@ -193,6 +204,7 @@ export default function SupplierReturnNoteWorkspace() {
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
 
@@ -209,6 +221,8 @@ export default function SupplierReturnNoteWorkspace() {
                 setRowStockBalances({});
               }}
               disabled={isStoresLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {storesList.map((s) => (
                 <MenuItem key={s.code} value={s.code}>
@@ -231,6 +245,8 @@ export default function SupplierReturnNoteWorkspace() {
                 setSelectedSupplier(supplier);
               }}
               disabled={isSuppliersLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {suppliersList.map((s) => (
                 <MenuItem key={s.supplierCode} value={String(s.supplierCode)}>
@@ -252,6 +268,8 @@ export default function SupplierReturnNoteWorkspace() {
                 setLineItems([]);
                 setRowStockBalances({});
               }}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {STOCK_TYPE_OPTIONS.map((opt) => (
                 <MenuItem key={opt.value} value={opt.value}>
@@ -278,7 +296,7 @@ export default function SupplierReturnNoteWorkspace() {
           <Alert
             severity="info"
             variant="outlined"
-            sx={{ m: 2, fontWeight: "bold" }}
+            sx={{ m: 2, fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}
           >
             Select a Transaction Date, Stores and Supplier to start the return
             list.
@@ -295,7 +313,7 @@ export default function SupplierReturnNoteWorkspace() {
             >
               <Typography
                 variant="subtitle2"
-                sx={{ fontWeight: "bold", textTransform: "uppercase" }}
+                sx={workspaceSectionLabelSx}
               >
                 Returned Items
               </Typography>
@@ -305,8 +323,9 @@ export default function SupplierReturnNoteWorkspace() {
                 size="small"
                 startIcon={<AddCircleOutlined />}
                 onClick={handleAddBlankRow}
+                sx={primaryActionButtonSx}
               >
-                Add Item
+                <span style={themedButtonLabelStyle}>Add Item</span>
               </Button>
             </Box>
 
@@ -326,7 +345,6 @@ export default function SupplierReturnNoteWorkspace() {
             gap: 2,
             mt: 3,
             pt: 2,
-            borderTop: "1px dashed #ccc",
             display: "flex",
             justifyContent: "flex-end",
           }}
@@ -338,6 +356,7 @@ export default function SupplierReturnNoteWorkspace() {
             startIcon={<DeleteIcon />}
             onClick={handleResetForm}
             disabled={isSubmitting}
+            sx={{ minWidth: 190, height: 32, color: "#8B93A1", borderColor: "#8B93A1" }}
           >
             Cancel Note
           </Button>
@@ -348,8 +367,19 @@ export default function SupplierReturnNoteWorkspace() {
             startIcon={<SendIcon />}
             onClick={handleRequestCommit}
             disabled={isSubmitting || !isFormValid}
+            sx={{
+              ...primaryActionButtonSx,
+              minWidth: 190,
+              height: 32,
+              "&.Mui-disabled": {
+                background: "rgba(139,147,161,0.15)",
+                color: "#8B93A1",
+                border: "1px solid rgba(139,147,161,0.4)",
+                boxShadow: "none",
+              },
+            }}
           >
-            Post Return Note
+            <span style={themedButtonLabelStyle}>Save Supplier Return Note</span>
           </Button>
         </Box>
       </Paper>

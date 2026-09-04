@@ -31,12 +31,16 @@ import {
 } from "../../../tanstack-hooks/production-analysis-summary-report.hooks";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import { withReadableReportTable } from "../../../themes/report-table-theme";
-
-const selectFieldSx = {
-  "& .MuiOutlinedInput-input": { color: "#F4F6F8" },
-};
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import {
+  workspaceHeadingSx,
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+} from "../../../themes/workspace-theme";
 
 const ProductionAnalysisSummaryReportWorkspace = () => {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<GarmentType | null>(null);
@@ -94,13 +98,13 @@ const ProductionAnalysisSummaryReportWorkspace = () => {
     <div className="flex flex-col w-[95%] mx-auto justify-around mt-10 mb-12">
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">
+          <Typography sx={workspaceHeadingSx}>
             Production Analysis Summary (Style)
           </Typography>
         </ThemeProvider>
       </div>
 
-      <Card variant="outlined" sx={{ p: 2, mb: 2 }}>
+      <Card variant="outlined" sx={{ p: 2, mb: 2, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}>
         <Grid container spacing={2} sx={{ alignItems: "center" }}>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Autocomplete
@@ -116,12 +120,13 @@ const ProductionAnalysisSummaryReportWorkspace = () => {
               isOptionEqualToValue={(option, value) =>
                 option.buyerCode === value?.buyerCode
               }
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Buyer"
                   size="small"
-                  sx={selectFieldSx}
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -136,12 +141,13 @@ const ProductionAnalysisSummaryReportWorkspace = () => {
                 setSelectedType(null);
                 setSelectedStyle(null);
               }}
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Order"
                   size="small"
-                  sx={selectFieldSx}
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -157,12 +163,13 @@ const ProductionAnalysisSummaryReportWorkspace = () => {
                 setSelectedStyle(null);
               }}
               isOptionEqualToValue={(option, value) => option.id === value?.id}
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Garment Type"
                   size="small"
-                  sx={selectFieldSx}
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -175,12 +182,13 @@ const ProductionAnalysisSummaryReportWorkspace = () => {
               value={selectedStyle}
               onChange={(_, val) => setSelectedStyle(val)}
               isOptionEqualToValue={(option, value) => option.id === value?.id}
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Style"
                   size="small"
-                  sx={selectFieldSx}
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -192,19 +200,20 @@ const ProductionAnalysisSummaryReportWorkspace = () => {
             variant="contained"
             disabled={!report || isDownloading || !scope}
             onClick={() => downloadPdf(scope!)}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Preparing PDF..." : "Print / Download PDF"}
+            <span style={themedButtonLabelStyle}>{isDownloading ? "Preparing PDF..." : "Print / Download PDF"}</span>
           </Button>
         </Box>
       </Card>
 
-      {isLoading && <Typography>Loading...</Typography>}
+      {isLoading && <Typography sx={{ color: DASHBOARD_COLORS.textSecondary }}>Loading...</Typography>}
       {isError && <Alert severity="info">{error.message}</Alert>}
 
       {report && (
         <>
           <ThemeProvider theme={withReadableReportTable}>
-            <TableContainer component={Card} variant="outlined">
+            <TableContainer component={Card} variant="outlined" sx={{ backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}>
               <Table size="small">
                 <TableHead>
                   <TableRow>
@@ -269,14 +278,14 @@ const ProductionAnalysisSummaryReportWorkspace = () => {
             </TableContainer>
           </ThemeProvider>
 
-          <Card variant="outlined" sx={{ p: 2, mt: 2 }}>
-            <Typography sx={{ color: "#F4F6F8" }}>
+          <Card variant="outlined" sx={{ p: 2, mt: 2, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}>
+            <Typography sx={{ color: DASHBOARD_COLORS.textPrimary }}>
               AVERAGE PRODUCTION QUANTITY ON FINAL OUTPUT -{" "}
               {report.finalSectionDescription}:{" "}
               {report.averageProductionQuantityOnFinalOutput.toFixed(2)} [
               {report.finalOutputProductionDays} day(s)]
             </Typography>
-            <Typography sx={{ mt: 1, color: "#F4F6F8" }}>
+            <Typography sx={{ mt: 1, color: DASHBOARD_COLORS.textPrimary }}>
               Total No. of days taken for Production:{" "}
               {report.totalDaysTakenForProduction}
             </Typography>

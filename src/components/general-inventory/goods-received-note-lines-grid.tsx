@@ -4,6 +4,11 @@ import type { MRT_ColumnDef } from "material-react-table";
 import { MaterialReactTable } from "material-react-table";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useApparelProTable } from "../../themes/useApparelProTable";
+import {
+  noteTableHeadCellUppercaseSx,
+  deleteRowIconButtonSx,
+  numberFieldNoSpinnerSx,
+} from "../../themes/workspace-theme";
 import type { GeneralGrnLineItemRow } from "../../interfaces/general-inventory/general-grn.types";
 
 interface GoodsReceivedNoteLinesGridProps {
@@ -45,7 +50,7 @@ export default function GoodsReceivedNoteLinesGrid({
         const quantity = Number(line.quantity || 0);
         return {
           ...line,
-          exceedsMaxStock: line.qtyInHand + quantity > line.maxStock,
+          exceedsMaxStock: quantity > 0 && line.qtyInHand + quantity > line.maxStock,
         };
       }),
     [lines],
@@ -78,7 +83,7 @@ export default function GoodsReceivedNoteLinesGrid({
             slotProps={{
               htmlInput: { min: 0, style: { fontFamily: '"JetBrains Mono", monospace' } },
             }}
-            sx={{ width: 100 }}
+            sx={{ width: 100, ...numberFieldNoSpinnerSx }}
           />
         ),
       },
@@ -96,7 +101,7 @@ export default function GoodsReceivedNoteLinesGrid({
             slotProps={{
               htmlInput: { min: 0, step: "0.0001", style: { fontFamily: '"JetBrains Mono", monospace' } },
             }}
-            sx={{ width: 100 }}
+            sx={{ width: 100, ...numberFieldNoSpinnerSx }}
           />
         ),
       },
@@ -122,6 +127,7 @@ export default function GoodsReceivedNoteLinesGrid({
   );
 
   const table = useApparelProTable<GrnLineItemRowView>({
+    muiTableHeadCellProps: noteTableHeadCellUppercaseSx,
     columns,
     data: rows,
     enableEditing: false,
@@ -137,7 +143,7 @@ export default function GoodsReceivedNoteLinesGrid({
       "mrt-row-actions": { header: "Action", size: 70 },
     },
     renderRowActions: ({ row }) => (
-      <IconButton color="error" size="small" onClick={() => handleRemoveLine(row.index)}>
+      <IconButton color="error" size="small" onClick={() => handleRemoveLine(row.index)} sx={deleteRowIconButtonSx}>
         <DeleteIcon fontSize="small" />
       </IconButton>
     ),

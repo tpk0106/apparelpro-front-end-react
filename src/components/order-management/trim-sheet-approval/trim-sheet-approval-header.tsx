@@ -15,7 +15,6 @@ import type { TrimSheetApprovalScopeContext } from "./trim-sheet-approval.types"
 import type { GarmentTypeServiceModel } from "../../material-consumption/material-consumption.types";
 import type { Buyer } from "../../../interfaces/references/Buyer";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
-import { copperTextColor } from "../../../themes/button-color-themes";
 import { useDropdownTheme } from "../../../themes/useDropdownTheme";
 
 interface TrimSheetApprovalHeaderProps {
@@ -113,7 +112,6 @@ export default function TrimSheetApprovalHeader({
         mb: 3,
         backgroundColor: DASHBOARD_COLORS.cardBg,
         borderColor: DASHBOARD_COLORS.border,
-        borderLeft: `5px solid ${copperTextColor}`,
       }}
     >
       <Typography

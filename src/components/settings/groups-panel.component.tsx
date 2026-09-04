@@ -15,12 +15,15 @@ import {
   useCreateGroupMutation,
   useDeleteGroupMutation,
 } from "../../tanstack-hooks/custom-hooks";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
 
 // Groups panel (Settings > Users & Groups). A "Group" here is a plain
 // AspNetRoles row - see the backend design doc for why we reused Roles
 // rather than introducing a new Group table.
 const GroupsPanel = () => {
   const [newGroupName, setNewGroupName] = useState("");
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const { data: groups, isLoading, isError } = useGetGroupsQuery();
   const createGroupMutation = useCreateGroupMutation();
   const deleteGroupMutation = useDeleteGroupMutation();
@@ -48,17 +51,18 @@ const GroupsPanel = () => {
           onKeyDown={(event) => {
             if (event.key === "Enter") handleCreateGroup();
           }}
-          sx={{ minWidth: 260 }}
+          sx={{ minWidth: 260, ...dropdownFieldSx }}
         />
         <Button
           variant="contained"
           onClick={handleCreateGroup}
           disabled={!newGroupName.trim() || createGroupMutation.isPending}
+          sx={primaryActionButtonSx}
         >
           {createGroupMutation.isPending ? (
             <CircularProgress size={18} sx={{ color: "#fff" }} />
           ) : (
-            "Create Group"
+            <span style={themedButtonLabelStyle}>Create Group</span>
           )}
         </Button>
       </Box>
@@ -77,8 +81,11 @@ const GroupsPanel = () => {
 
       <Box
         sx={{
+          width: "100%",
           borderRadius: "14px",
           border: "1px solid rgba(139, 147, 161, 0.15)",
+          borderLeft: "1px solid rgba(139, 147, 161, 0.15)",
+          borderRight: "1px solid rgba(139, 147, 161, 0.15)",
           overflow: "hidden",
         }}
       >

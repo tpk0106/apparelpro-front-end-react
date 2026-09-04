@@ -18,6 +18,23 @@ import { useGetAllSections } from "../../tanstack-hooks/production-reference.hoo
 import StyleScopePicker from "../production/style-scope/style-scope-picker.component";
 import type { SystemParameter } from "../../interfaces/system-configuration/SystemParameter";
 import { isAdministrator } from "../../auth/jwt.util";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
+
+// Boolean parameters render as a Switch, not a MUI Radio - there's no actual
+// Radio control in this panel - but it's the only checked/unchecked toggle
+// here, so it gets the same copper treatment requested for radio buttons.
+const copperSwitchSx = {
+  "& .MuiSwitch-switchBase.Mui-checked": { color: copperTextColor },
+  "& .MuiSwitch-switchBase.Mui-checked:hover": {
+    backgroundColor: "rgba(201, 128, 61, 0.08)",
+  },
+  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+    backgroundColor: `${copperTextColor} !important`,
+  },
+};
 
 // Parameters whose Value is a foreign-key-shaped code (rather than a plain
 // Text value) get a dedicated dropdown here instead of a free-text box, so
@@ -55,7 +72,7 @@ const DashboardPinRow = ({ parameters, isAdmin, onSave }: DashboardPinRowProps) 
 
   return (
     <Box sx={{ px: 2.5, py: 2.25 }}>
-      <Typography sx={{ fontSize: "13.5px", fontWeight: 500, color: "#F4F6F8" }}>Fallback dashboard style</Typography>
+      <Typography sx={{ fontSize: "13.5px", fontWeight: 600, color: DASHBOARD_COLORS.accentStrong }}>Fallback dashboard style</Typography>
       <Typography sx={{ fontSize: "12px", color: "text.secondary", mt: 0.5, mb: 1.5, maxWidth: 520, lineHeight: 1.5 }}>
         Shown on the home dashboard only when no Actual Production Entry or Daily Production Time
         Ticket rows exist yet.
@@ -69,14 +86,16 @@ const DashboardPinRow = ({ parameters, isAdmin, onSave }: DashboardPinRowProps) 
           {isAdmin && (
             <Button
               size="small"
+              variant="contained"
               onClick={() => {
                 onSave("DashboardPinnedBuyerCode", "");
                 onSave("DashboardPinnedOrder", "");
                 onSave("DashboardPinnedTypeCode", "");
                 onSave("DashboardPinnedStyleCode", "");
               }}
+              sx={primaryActionButtonSx}
             >
-              Clear
+              <span style={themedButtonLabelStyle}>Clear</span>
             </Button>
           )}
         </Box>
@@ -139,6 +158,8 @@ const ParameterRow = ({
   const disabled = !isAdmin || isSaving;
   const isSectionCodeParameter = SECTION_CODE_PARAMETER_KEYS.has(parameter.parameterKey);
   const { data: sections = [] } = useGetAllSections();
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
 
   return (
     <Box
@@ -154,7 +175,7 @@ const ParameterRow = ({
       }}
     >
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography sx={{ fontSize: "13.5px", fontWeight: 500 }}>
+        <Typography sx={{ fontSize: "13.5px", fontWeight: 600, color: DASHBOARD_COLORS.accentStrong }}>
           {formatParameterKeyAsLabel(parameter.parameterKey)}
         </Typography>
         {parameter.description && (
@@ -191,6 +212,7 @@ const ParameterRow = ({
                 event.target.checked ? "true" : "false",
               )
             }
+            sx={copperSwitchSx}
           />
         )}
 
@@ -246,7 +268,8 @@ const ParameterRow = ({
             onChange={(event) =>
               onSave(parameter.parameterKey, event.target.value)
             }
-            sx={{ minWidth: 160 }}
+            sx={{ minWidth: 160, ...dropdownFieldSx }}
+            slotProps={dropdownMenuSlotProps}
           >
             {parseSelectOptions(parameter.options).map((option) => (
               <MenuItem key={option.value} value={option.value}>
@@ -263,7 +286,8 @@ const ParameterRow = ({
             value={parameter.value}
             disabled={disabled}
             onChange={(event) => onSave(parameter.parameterKey, event.target.value)}
-            sx={{ minWidth: 220 }}
+            sx={{ minWidth: 220, ...dropdownFieldSx }}
+            slotProps={dropdownMenuSlotProps}
           >
             {sections.map((section) => (
               <MenuItem key={section.code} value={section.code}>
@@ -319,10 +343,7 @@ const SystemParametersPanel = () => {
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          System Parameters
-        </Typography>
-        <Typography sx={{ fontSize: "13px", color: "text.secondary", mt: 0.5 }}>
+        <Typography sx={{ fontSize: "13px", color: "text.secondary" }}>
           Global configuration for order validation and system behaviour.
           Changes apply immediately across all users.
         </Typography>
@@ -377,11 +398,10 @@ const SystemParametersPanel = () => {
                 py: 1.75,
                 px: 2.5,
                 borderBottom: "1px solid rgba(139, 147, 161, 0.15)",
-                backgroundColor: "rgba(96, 165, 250, 0.06)",
-                color: "#ffffff",
+                backgroundColor: "rgba(201, 128, 61, 0.08)",
               }}
             >
-              <Typography sx={{ fontSize: "13.5px", fontWeight: 600 }}>
+              <Typography sx={{ fontSize: "13.5px", fontWeight: 600, color: copperTextColor, textTransform: "uppercase" }}>
                 {category}
               </Typography>
             </Box>

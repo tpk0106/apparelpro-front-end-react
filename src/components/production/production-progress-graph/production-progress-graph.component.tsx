@@ -20,12 +20,12 @@ import {
 import { useGetProductionProgressReport } from "../../../tanstack-hooks/production-progress-report.hooks";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import ProductionProgressChart from "./production-progress-chart.component";
-
-const selectFieldSx = {
-  "& .MuiOutlinedInput-input": { color: "#F4F6F8" },
-};
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import { workspaceHeadingSx, workspaceSectionLabelSx } from "../../../themes/workspace-theme";
 
 const ProductionProgressGraph = () => {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<GarmentType | null>(null);
@@ -79,11 +79,14 @@ const ProductionProgressGraph = () => {
     <div className="flex flex-col w-[95%] mx-auto justify-around mt-10 mb-12">
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">Production Progress Graph</Typography>
+          <Typography sx={workspaceHeadingSx}>Production Progress Graph</Typography>
         </ThemeProvider>
       </div>
 
-      <Card variant="outlined" sx={{ p: 2, mb: 2 }}>
+      <Card
+        variant="outlined"
+        sx={{ p: 2, mb: 2, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}
+      >
         <Grid container spacing={2} sx={{ alignItems: "center" }}>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Autocomplete
@@ -99,12 +102,13 @@ const ProductionProgressGraph = () => {
               isOptionEqualToValue={(option, value) =>
                 option.buyerCode === value?.buyerCode
               }
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Buyer"
                   size="small"
-                  sx={selectFieldSx}
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -119,12 +123,13 @@ const ProductionProgressGraph = () => {
                 setSelectedType(null);
                 setSelectedStyle(null);
               }}
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Order"
                   size="small"
-                  sx={selectFieldSx}
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -140,12 +145,13 @@ const ProductionProgressGraph = () => {
                 setSelectedStyle(null);
               }}
               isOptionEqualToValue={(option, value) => option.id === value?.id}
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Garment Type"
                   size="small"
-                  sx={selectFieldSx}
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -158,12 +164,13 @@ const ProductionProgressGraph = () => {
               value={selectedStyle}
               onChange={(_, val) => setSelectedStyle(val)}
               isOptionEqualToValue={(option, value) => option.id === value?.id}
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Style"
                   size="small"
-                  sx={selectFieldSx}
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -171,18 +178,21 @@ const ProductionProgressGraph = () => {
         </Grid>
       </Card>
 
-      {isLoading && <Typography>Loading...</Typography>}
+      {isLoading && <Typography sx={{ color: DASHBOARD_COLORS.textSecondary }}>Loading...</Typography>}
       {isError && <Alert severity="info">{error.message}</Alert>}
 
       {report && (
-        <Card variant="outlined" sx={{ p: 2 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1, color: "#F4F6F8" }}>
+        <Card
+          variant="outlined"
+          sx={{ p: 2, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}
+        >
+          <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1 }}>
             Production Progress for Buyer: {report.buyerName} — Order:{" "}
             {report.order} — Style: {report.styleCode}
           </Typography>
           <Typography
             variant="caption"
-            sx={{ mb: 2, display: "block", color: "text.secondary" }}
+            sx={{ mb: 2, display: "block", color: DASHBOARD_COLORS.textSecondary }}
           >
             Actual is measured on the final section:{" "}
             {report.finalSectionDescription}

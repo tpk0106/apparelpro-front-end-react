@@ -4,6 +4,11 @@ import type { MRT_ColumnDef } from "material-react-table";
 import { MaterialReactTable } from "material-react-table";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useApparelProTable } from "../../themes/useApparelProTable";
+import {
+  noteTableHeadCellUppercaseSx,
+  deleteRowIconButtonSx,
+  numberFieldNoSpinnerSx,
+} from "../../themes/workspace-theme";
 import type { GtnLineItemRow } from "./goods-transfer-note.types";
 
 interface GoodsTransferNoteLinesGridProps {
@@ -78,7 +83,7 @@ export default function GoodsTransferNoteLinesGrid({
                 style: { fontFamily: '"JetBrains Mono", monospace' },
               },
             }}
-            sx={{ width: 100 }}
+            sx={{ width: 100, ...numberFieldNoSpinnerSx }}
           />
         ),
       },
@@ -107,6 +112,7 @@ export default function GoodsTransferNoteLinesGrid({
   );
 
   const table = useApparelProTable<GtnLineItemRowView>({
+    muiTableHeadCellProps: noteTableHeadCellUppercaseSx,
     columns,
     data: rows,
     enableEditing: false,
@@ -126,6 +132,7 @@ export default function GoodsTransferNoteLinesGrid({
         color="error"
         size="small"
         onClick={() => handleRemoveLine(row.index)}
+        sx={deleteRowIconButtonSx}
       >
         <DeleteIcon fontSize="small" />
       </IconButton>

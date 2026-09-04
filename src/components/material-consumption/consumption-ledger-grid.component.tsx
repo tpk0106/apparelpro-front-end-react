@@ -28,15 +28,14 @@ import EditIcon from "@mui/icons-material/Edit"; // Add this icon import
 import { useApparelProTable } from "../../themes/useApparelProTable";
 import ConfirmDialog from "../common/confirm-dialog";
 import CopyFromStyleDialog from "./copy-from-style-dialog.component";
-import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
-import { copperTextColor } from "../../themes/button-color-themes";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  selectedRowHighlightBg as highlightBg,
+  selectedRowHighlightBorder as highlightBorder,
+  selectedRowHighlightText as highlightText,
+} from "../../themes/workspace-theme";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
-
-// Same copper highlight as material-master-list.component.tsx's actively
-// selected item row - was a saturated amber (#ffca28/#e65100).
-const highlightBg = copperTextColor;
-const highlightBorder = "#6B4420";
-const highlightText = "#2B1B0E";
 
 interface LedgerGridProps {
   styleContext: StyleContext;

@@ -3,6 +3,7 @@ import { TextField, Chip } from "@mui/material";
 import type { MRT_ColumnDef } from "material-react-table";
 import { MaterialReactTable } from "material-react-table";
 import { useApparelProTable } from "../../themes/useApparelProTable";
+import { noteTableHeadCellUppercaseSx, numberFieldNoSpinnerSx } from "../../themes/workspace-theme";
 import type { AinLineItemRow } from "./additional-issue-note.types";
 
 interface AdditionalIssueNoteLinesGridProps {
@@ -98,7 +99,7 @@ export default function AdditionalIssueNoteLinesGrid({
                   style: { fontFamily: '"JetBrains Mono", monospace' },
                 },
               }}
-              sx={{ width: 100 }}
+              sx={{ width: 100, ...numberFieldNoSpinnerSx }}
             />
           );
         },
@@ -108,6 +109,7 @@ export default function AdditionalIssueNoteLinesGrid({
   );
 
   const table = useApparelProTable<AinLineItemRow>({
+    muiTableHeadCellProps: noteTableHeadCellUppercaseSx,
     columns,
     data: lines,
     enableEditing: false,

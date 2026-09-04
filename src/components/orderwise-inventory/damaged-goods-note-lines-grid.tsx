@@ -4,6 +4,11 @@ import type { MRT_ColumnDef } from "material-react-table";
 import { MaterialReactTable } from "material-react-table";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useApparelProTable } from "../../themes/useApparelProTable";
+import {
+  noteTableHeadCellUppercaseSx,
+  deleteRowIconButtonSx,
+  numberFieldNoSpinnerSx,
+} from "../../themes/workspace-theme";
 import type { DgnLineItemRow } from "./damaged-goods-note.types";
 
 interface DamagedGoodsNoteLinesGridProps {
@@ -75,7 +80,7 @@ export default function DamagedGoodsNoteLinesGrid({
                 style: { fontFamily: '"JetBrains Mono", monospace' },
               },
             }}
-            sx={{ width: 100 }}
+            sx={{ width: 100, ...numberFieldNoSpinnerSx }}
           />
         ),
       },
@@ -101,6 +106,7 @@ export default function DamagedGoodsNoteLinesGrid({
   );
 
   const table = useApparelProTable<DgnLineItemRowView>({
+    muiTableHeadCellProps: noteTableHeadCellUppercaseSx,
     columns,
     data: rows,
     enableEditing: false,
@@ -120,6 +126,7 @@ export default function DamagedGoodsNoteLinesGrid({
         color="error"
         size="small"
         onClick={() => handleRemoveLine(row.index)}
+        sx={deleteRowIconButtonSx}
       >
         <DeleteIcon fontSize="small" />
       </IconButton>

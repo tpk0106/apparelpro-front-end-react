@@ -14,6 +14,14 @@ import type { EstimatedProductionEntryScope } from "../../../services/production
 import { useGetHolidays } from "../../../tanstack-hooks/production-line-allocation.hooks";
 import { useBulkSaveEstimatedProductionEntriesMutation } from "../../../tanstack-hooks/estimated-production-entry.hooks";
 import { useApparelProTable } from "../../../themes/useApparelProTable";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  deleteRowIconButtonSx,
+  dateIconFieldSx,
+  numberFieldNoSpinnerSx,
+} from "../../../themes/workspace-theme";
 import ConfirmDialog from "../../common/confirm-dialog";
 
 const rowSchema = z.object({
@@ -44,6 +52,7 @@ interface Props {
 }
 
 const EstimatedProductionEntryTable = ({ scope, unit, rows, setRows, isLoading, onSaveError }: Props) => {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [rowToDelete, setRowToDelete] = useState<MRT_Row<EstimatedProductionEntry> | null>(null);
 
@@ -66,10 +75,23 @@ const EstimatedProductionEntryTable = ({ scope, unit, rows, setRows, isLoading, 
 
   const columns = useMemo<MRT_ColumnDef<EstimatedProductionEntry>[]>(
     () => [
-      { accessorKey: "date", header: "Date", size: 150, muiEditTextFieldProps: { type: "date" } },
-      { accessorKey: "quantity", header: "Estimated Output", size: 150, muiEditTextFieldProps: { type: "number" } },
+      {
+        accessorKey: "date",
+        header: "Date",
+        size: 150,
+        muiEditTextFieldProps: {
+          type: "date",
+          sx: { ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) },
+        },
+      },
+      {
+        accessorKey: "quantity",
+        header: "Estimated Output",
+        size: 150,
+        muiEditTextFieldProps: { type: "number", sx: { ...dropdownFieldSx, ...numberFieldNoSpinnerSx } },
+      },
     ],
-    [],
+    [dropdownFieldSx],
   );
 
   const buildRow = (values: EstimatedProductionEntry): EstimatedProductionEntry => ({
@@ -167,11 +189,16 @@ const EstimatedProductionEntryTable = ({ scope, unit, rows, setRows, isLoading, 
       ) : null,
     renderTopToolbarCustomActions: ({ table }) => (
       <Box sx={{ display: "flex", gap: "1rem" }}>
-        <Button variant="contained" onClick={() => table.setCreatingRow(true)}>
-          Add date
+        <Button variant="contained" onClick={() => table.setCreatingRow(true)} sx={primaryActionButtonSx}>
+          <span style={themedButtonLabelStyle}>Add date</span>
         </Button>
-        <Button variant="outlined" onClick={handleSaveAll} disabled={isSaving}>
-          {isSaving ? "Saving..." : "Save"}
+        <Button
+          variant="contained"
+          onClick={handleSaveAll}
+          disabled={isSaving}
+          sx={primaryActionButtonSx}
+        >
+          <span style={themedButtonLabelStyle}>{isSaving ? "Saving..." : "Save"}</span>
         </Button>
       </Box>
     ),
@@ -183,7 +210,7 @@ const EstimatedProductionEntryTable = ({ scope, unit, rows, setRows, isLoading, 
           </IconButton>
         </Tooltip>
         <Tooltip title="Delete">
-          <IconButton color="error" onClick={() => openDeleteConfirmModal(row)}>
+          <IconButton color="error" onClick={() => openDeleteConfirmModal(row)} sx={deleteRowIconButtonSx}>
             <DeleteForeverOutlinedIcon />
           </IconButton>
         </Tooltip>

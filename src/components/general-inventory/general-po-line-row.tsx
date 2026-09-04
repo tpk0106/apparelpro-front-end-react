@@ -7,9 +7,17 @@ import type { GeneralStore } from "../../interfaces/general-inventory/general-in
 import { useGetAvailableGeneralStockChoicesQuery } from "../../tanstack-hooks/general-inventory/general-inventory-strn.hooks";
 import { useGetUnits } from "../../tanstack-hooks/custom-hooks";
 import type { Unit } from "../../interfaces/references/Unit";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import {
+  plainTableBodyRowSx,
+  deleteRowIconButtonSx,
+  dateIconFieldSx,
+  numberFieldNoSpinnerSx,
+} from "../../themes/workspace-theme";
 
 interface Props {
   row: GeneralPoLineItemRow;
+  index: number;
   storesList: GeneralStore[];
   onChange: (field: keyof GeneralPoLineItemRow, value: string | number | null) => void;
   onRemove: () => void;
@@ -19,7 +27,10 @@ interface Props {
 // line can point at a different Store, so the item picker must be scoped per-row -
 // this keeps the STRN available-choices hook call legitimately per-row instead of
 // conditionally invoked inside a loop.
-export default function GeneralPoLineRow({ row, storesList, onChange, onRemove }: Props) {
+export default function GeneralPoLineRow({ row, index, storesList, onChange, onRemove }: Props) {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
+
   const { data: stockChoicesList = [], isLoading: isStockLoading } =
     useGetAvailableGeneralStockChoicesQuery(row.storeCode, !!row.storeCode);
 
@@ -34,13 +45,15 @@ export default function GeneralPoLineRow({ row, storesList, onChange, onRemove }
   const systemUnits = useMemo(() => unitsPageData?.items || [], [unitsPageData]);
 
   return (
-    <TableRow>
+    <TableRow sx={plainTableBodyRowSx(index)}>
       <TableCell>
         <TextField
           select
           size="small"
           variant="standard"
           fullWidth
+          sx={dropdownFieldSx}
+          slotProps={dropdownMenuSlotProps}
           value={row.storeCode}
           onChange={(e) => {
             onChange("storeCode", e.target.value);
@@ -61,6 +74,8 @@ export default function GeneralPoLineRow({ row, storesList, onChange, onRemove }
           size="small"
           variant="standard"
           fullWidth
+          sx={dropdownFieldSx}
+          slotProps={dropdownMenuSlotProps}
           value={row.itemCode}
           disabled={!row.storeCode || isStockLoading}
           onChange={(e) => {
@@ -82,6 +97,7 @@ export default function GeneralPoLineRow({ row, storesList, onChange, onRemove }
           size="small"
           variant="standard"
           fullWidth
+          sx={dropdownFieldSx}
           value={row.refNo ?? ""}
           onChange={(e) => onChange("refNo", e.target.value)}
         />
@@ -93,6 +109,8 @@ export default function GeneralPoLineRow({ row, storesList, onChange, onRemove }
           size="small"
           variant="standard"
           fullWidth
+          sx={dropdownFieldSx}
+          slotProps={dropdownMenuSlotProps}
           value={row.unit}
           onChange={(e) => onChange("unit", e.target.value)}
         >
@@ -110,6 +128,7 @@ export default function GeneralPoLineRow({ row, storesList, onChange, onRemove }
           size="small"
           variant="standard"
           fullWidth
+          sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
           value={row.orderedQuantity === 0 ? "" : row.orderedQuantity}
           onChange={(e) => onChange("orderedQuantity", Number(e.target.value))}
           slotProps={{ htmlInput: { min: 0 } }}
@@ -122,6 +141,7 @@ export default function GeneralPoLineRow({ row, storesList, onChange, onRemove }
           size="small"
           variant="standard"
           fullWidth
+          sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
           value={row.price === 0 ? "" : row.price}
           onChange={(e) => onChange("price", Number(e.target.value))}
           slotProps={{ htmlInput: { min: 0, step: "0.0001" } }}
@@ -134,13 +154,14 @@ export default function GeneralPoLineRow({ row, storesList, onChange, onRemove }
           size="small"
           variant="standard"
           fullWidth
+          sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
           value={row.expectedDate ?? ""}
           onChange={(e) => onChange("expectedDate", e.target.value || null)}
         />
       </TableCell>
 
       <TableCell sx={{ textAlign: "center" }}>
-        <IconButton color="error" size="small" onClick={onRemove}>
+        <IconButton color="error" size="small" onClick={onRemove} sx={deleteRowIconButtonSx}>
           <DeleteIcon fontSize="small" />
         </IconButton>
       </TableCell>

@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 // Inside your Routes.tsx or App.tsx
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import GlobalRouter from "./auth/globalRouter";
 
 import DashboardHome from "./components/dashboard/dashboard.component";
 import ProductionSummaryDailyReportWorkspace from "./components/reports/production/production-summary-daily-report-workspace";
@@ -22,9 +24,8 @@ import EndOfProductionConfirmation from "./components/production/end-of-producti
 import MainMenu from "./navigation/main-menu.component";
 import SignInForm from "./sign-in/sign-in-form.component";
 import SignupForm from "./sign-up/sign-up-form.component";
-// import Currencies from "./components/references/currency/currency.component";
+
 import Country from "./components/references/country/country.component";
-// import GarmentTypes from "./components/references/garment-types/garment-type.component";
 import Currencies from "./components/references/currency-tanstack/currencies.component";
 import GarmentTypes from "./components/references/garment-type-tanstack/garment-type.component";
 import Bank from "./components/references/bank-tan-stack/bank.component";
@@ -137,8 +138,19 @@ import DailyProductionEntryWorkspace from "./components/production/daily-product
 
 function App() {
   const location = useLocation();
+  const navigate = useNavigate();
   // Look at the routing memory state right inside the router
   const userToEdit = location.state;
+
+  // AxiosInterceptor (axiosClient.ts) redirects to the sign-in page on
+  // session expiry / failed token refresh, but it lives outside React and
+  // has no access to a router hook - it calls GlobalRouter.navigate instead,
+  // which stays null until something wires it up. Without this, a stale
+  // session silently clears its tokens and leaves the user stuck on the
+  // current (now permanently 401ing) page instead of being sent to sign in.
+  useEffect(() => {
+    GlobalRouter.navigate = navigate;
+  }, [navigate]);
 
   // 🚀 Create your unique token key!
   // If editing John, key is "John@mail.com". If registering, key is "register".
@@ -159,14 +171,30 @@ function App() {
         <Route index path="country" element={<Country />} />
         <Route index path="unit" element={<Units />} />
         <Route index path="item-feature" element={<ItemFeatures />} />
-        <Route index path="order-item-feature" element={<OrderItemFeatures />} />
+        <Route
+          index
+          path="order-item-feature"
+          element={<OrderItemFeatures />}
+        />
         <Route index path="garment-type-items" element={<GarmentTypeItems />} />
         <Route index path="stock-reference" element={<StockReference />} />
-        <Route index path="order-item-catalog" element={<OrderItemCatalogPage />} />
-        <Route index path="currency-conversion" element={<CurrencyConversionPage />} />
+        <Route
+          index
+          path="order-item-catalog"
+          element={<OrderItemCatalogPage />}
+        />
+        <Route
+          index
+          path="currency-conversion"
+          element={<CurrencyConversionPage />}
+        />
         <Route index path="additional-cost" element={<AdditionalCosts />} />
         <Route index path="sub-contractor" element={<SubContractors />} />
-        <Route index path="additional" element={<GarmentAdditionalCostPage />} />
+        <Route
+          index
+          path="additional"
+          element={<GarmentAdditionalCostPage />}
+        />
         <Route index path="subcont" element={<SubContractPage />} />
         <Route index path="buyers" element={<Buyers />} />
         <Route index path="garment-type" element={<GarmentTypes />} />
@@ -180,11 +208,7 @@ function App() {
           element={<NonProductiveHourCodes />}
         />
         <Route index path="machine-type" element={<MachineTypes />} />
-        <Route
-          index
-          path="garment-component"
-          element={<GarmentComponents />}
-        />
+        <Route index path="garment-component" element={<GarmentComponents />} />
         <Route index path="employee" element={<Employees />} />
         <Route
           index
@@ -325,18 +349,38 @@ function App() {
           element={<TrimSheetApprovalWorkspace />}
         />
         <Route index path="srn" element={<StoresRequisitionWorkspace />} />
-        <Route index path="general-srn" element={<GeneralStoresRequisitionWorkspace />} />
+        <Route
+          index
+          path="general-srn"
+          element={<GeneralStoresRequisitionWorkspace />}
+        />
         <Route index path="gin" element={<GoodsIssueNoteWorkspace />} />
-        <Route index path="general-gin" element={<GeneralGoodsIssueNoteWorkspace />} />
-        <Route index path="general-gin-print" element={<GeneralGinPrintReportWorkspace />} />
+        <Route
+          index
+          path="general-gin"
+          element={<GeneralGoodsIssueNoteWorkspace />}
+        />
+        <Route
+          index
+          path="general-gin-print"
+          element={<GeneralGinPrintReportWorkspace />}
+        />
         <Route
           index
           path="gin-cascade"
           element={<GoodsIssueNoteCascadeWorkspace />}
         />
         <Route index path="grn" element={<GoodsReceivedNoteWorkspace />} />
-        <Route index path="general-grn" element={<GeneralGoodsReceivedNoteWorkspace />} />
-        <Route index path="general-grn-print" element={<GeneralGrnPrintReportWorkspace />} />
+        <Route
+          index
+          path="general-grn"
+          element={<GeneralGoodsReceivedNoteWorkspace />}
+        />
+        <Route
+          index
+          path="general-grn-print"
+          element={<GeneralGrnPrintReportWorkspace />}
+        />
         <Route
           index
           path="grn-cascade"
@@ -344,29 +388,113 @@ function App() {
         />
         <Route index path="rtn" element={<GoodsReturnNoteWorkspace />} />
         <Route index path="gtn" element={<GoodsTransferNoteWorkspace />} />
-        <Route index path="general-gtn" element={<GeneralGoodsTransferNoteWorkspace />} />
-        <Route index path="general-gtn-print" element={<GeneralGtnPrintReportWorkspace />} />
-        <Route index path="general-ogtn" element={<OrderGoodsTransferNoteWorkspace />} />
-        <Route index path="general-ogtn-print" element={<GeneralOgtnPrintReportWorkspace />} />
-        <Route index path="general-rtn" element={<GeneralGoodsReturnNoteWorkspace />} />
-        <Route index path="general-rtn-print" element={<GeneralRtnPrintReportWorkspace />} />
-        <Route index path="general-dgn" element={<GeneralDamagedGoodsNoteWorkspace />} />
-        <Route index path="general-dgn-print" element={<GeneralDgnPrintReportWorkspace />} />
-        <Route index path="general-srtn" element={<GeneralSupplierReturnNoteWorkspace />} />
-        <Route index path="general-srtn-print" element={<GeneralSrtnPrintReportWorkspace />} />
+        <Route
+          index
+          path="general-gtn"
+          element={<GeneralGoodsTransferNoteWorkspace />}
+        />
+        <Route
+          index
+          path="general-gtn-print"
+          element={<GeneralGtnPrintReportWorkspace />}
+        />
+        <Route
+          index
+          path="general-ogtn"
+          element={<OrderGoodsTransferNoteWorkspace />}
+        />
+        <Route
+          index
+          path="general-ogtn-print"
+          element={<GeneralOgtnPrintReportWorkspace />}
+        />
+        <Route
+          index
+          path="general-rtn"
+          element={<GeneralGoodsReturnNoteWorkspace />}
+        />
+        <Route
+          index
+          path="general-rtn-print"
+          element={<GeneralRtnPrintReportWorkspace />}
+        />
+        <Route
+          index
+          path="general-dgn"
+          element={<GeneralDamagedGoodsNoteWorkspace />}
+        />
+        <Route
+          index
+          path="general-dgn-print"
+          element={<GeneralDgnPrintReportWorkspace />}
+        />
+        <Route
+          index
+          path="general-srtn"
+          element={<GeneralSupplierReturnNoteWorkspace />}
+        />
+        <Route
+          index
+          path="general-srtn-print"
+          element={<GeneralSrtnPrintReportWorkspace />}
+        />
         <Route index path="general-po" element={<GeneralPoWorkspace />} />
-        <Route index path="general-po-print" element={<GeneralPoPrintReportWorkspace />} />
-        <Route index path="general-stock-master" element={<GeneralStockMasterWorkspace />} />
+        <Route
+          index
+          path="general-po-print"
+          element={<GeneralPoPrintReportWorkspace />}
+        />
+        <Route
+          index
+          path="general-stock-master"
+          element={<GeneralStockMasterWorkspace />}
+        />
         <Route index path="general-san" element={<GeneralSanWorkspace />} />
-        <Route index path="general-san-print" element={<GeneralSanPrintReportWorkspace />} />
-        <Route index path="general-stock-status-report" element={<GeneralStockStatusReportWorkspace />} />
-        <Route index path="general-stock-movement-report" element={<GeneralStockMovementReportWorkspace />} />
-        <Route index path="general-stock-valuation-report" element={<GeneralStockValuationReportWorkspace />} />
-        <Route index path="general-stock-reorder-report" element={<GeneralStockReorderReportWorkspace />} />
-        <Route index path="general-transaction-list-report" element={<GeneralTransactionListReportWorkspace />} />
-        <Route index path="general-purchase-order-list-report" element={<GeneralPurchaseOrderListReportWorkspace />} />
-        <Route index path="general-stock-summary-report" element={<GeneralStockSummaryReportWorkspace />} />
-        <Route index path="general-grn-listing-report" element={<GeneralGrnListingReportWorkspace />} />
+        <Route
+          index
+          path="general-san-print"
+          element={<GeneralSanPrintReportWorkspace />}
+        />
+        <Route
+          index
+          path="general-stock-status-report"
+          element={<GeneralStockStatusReportWorkspace />}
+        />
+        <Route
+          index
+          path="general-stock-movement-report"
+          element={<GeneralStockMovementReportWorkspace />}
+        />
+        <Route
+          index
+          path="general-stock-valuation-report"
+          element={<GeneralStockValuationReportWorkspace />}
+        />
+        <Route
+          index
+          path="general-stock-reorder-report"
+          element={<GeneralStockReorderReportWorkspace />}
+        />
+        <Route
+          index
+          path="general-transaction-list-report"
+          element={<GeneralTransactionListReportWorkspace />}
+        />
+        <Route
+          index
+          path="general-purchase-order-list-report"
+          element={<GeneralPurchaseOrderListReportWorkspace />}
+        />
+        <Route
+          index
+          path="general-stock-summary-report"
+          element={<GeneralStockSummaryReportWorkspace />}
+        />
+        <Route
+          index
+          path="general-grn-listing-report"
+          element={<GeneralGrnListingReportWorkspace />}
+        />
         <Route
           index
           path="supplier-return-note"
@@ -375,17 +503,53 @@ function App() {
         <Route index path="dgn" element={<DamagedGoodsNoteWorkspace />} />
         <Route index path="san" element={<StockAdjustmentNoteWorkspace />} />
         <Route index path="ain" element={<AdditionalIssueNoteWorkspace />} />
-        <Route index path="arn" element={<AdditionalGoodsReceiptNoteWorkspace />} />
+        <Route
+          index
+          path="arn"
+          element={<AdditionalGoodsReceiptNoteWorkspace />}
+        />
         <Route index path="ain-print" element={<AinPrintReportWorkspace />} />
         <Route index path="arn-print" element={<ArnPrintReportWorkspace />} />
-        <Route index path="stock-valuation-report" element={<StockValuationReportWorkspace />} />
-        <Route index path="stock-valuation-monthly-report" element={<StockValuationMonthlyReportWorkspace />} />
-        <Route index path="orderwise-stock-status-report" element={<OrderwiseStockStatusReportWorkspace />} />
-        <Route index path="orderwise-transaction-list-report" element={<OrderwiseTransactionListReportWorkspace />} />
-        <Route index path="item-wise-stock-balance-report" element={<ItemWiseStockBalanceWorkspace />} />
-        <Route index path="raw-material-control-sheet-report" element={<RawMaterialControlSheetWorkspace />} />
-        <Route index path="orderwise-stock-summary-report" element={<OrderwiseStockSummaryReportWorkspace />} />
-        <Route index path="orderwise-grn-listing-report" element={<OrderwiseGrnListingReportWorkspace />} />
+        <Route
+          index
+          path="stock-valuation-report"
+          element={<StockValuationReportWorkspace />}
+        />
+        <Route
+          index
+          path="stock-valuation-monthly-report"
+          element={<StockValuationMonthlyReportWorkspace />}
+        />
+        <Route
+          index
+          path="orderwise-stock-status-report"
+          element={<OrderwiseStockStatusReportWorkspace />}
+        />
+        <Route
+          index
+          path="orderwise-transaction-list-report"
+          element={<OrderwiseTransactionListReportWorkspace />}
+        />
+        <Route
+          index
+          path="item-wise-stock-balance-report"
+          element={<ItemWiseStockBalanceWorkspace />}
+        />
+        <Route
+          index
+          path="raw-material-control-sheet-report"
+          element={<RawMaterialControlSheetWorkspace />}
+        />
+        <Route
+          index
+          path="orderwise-stock-summary-report"
+          element={<OrderwiseStockSummaryReportWorkspace />}
+        />
+        <Route
+          index
+          path="orderwise-grn-listing-report"
+          element={<OrderwiseGrnListingReportWorkspace />}
+        />
         <Route
           index
           path="stock-movement-report"
@@ -397,7 +561,11 @@ function App() {
           element={<StockMovementItemReportWorkspace />}
         />
         <Route index path="strn-print" element={<StrnPrintReportWorkspace />} />
-        <Route index path="general-strn-print" element={<GeneralStrnPrintReportWorkspace />} />
+        <Route
+          index
+          path="general-strn-print"
+          element={<GeneralStrnPrintReportWorkspace />}
+        />
         <Route
           index
           path="trim-sheet-report"

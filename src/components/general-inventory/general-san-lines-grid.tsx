@@ -17,6 +17,16 @@ import type { GeneralSanLineItemRow } from "../../interfaces/general-inventory/g
 import { useGetAvailableGeneralStockChoicesQuery } from "../../tanstack-hooks/general-inventory/general-inventory-strn.hooks";
 import { useGetUnits, useGetCurrenciesQuery } from "../../tanstack-hooks/custom-hooks";
 import type { Unit } from "../../interfaces/references/Unit";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import {
+  plainTableHeaderRowSx,
+  plainTableHeaderCellSx,
+  plainTableBodyRowSx,
+  deleteRowIconButtonSx,
+  numberFieldNoSpinnerSx,
+} from "../../themes/workspace-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
 
 interface LinesGridProps {
   storeCode: string;
@@ -30,6 +40,9 @@ interface LinesGridProps {
 // item's own master currency; the server converts it before valuing (same pattern GRN
 // already uses), so a per-line Currency picker sits alongside Price here.
 export default function GeneralSanLinesGrid({ storeCode, lineItems, setLineItems }: LinesGridProps) {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
+
   const { data: stockChoicesList = [], isLoading: isStockLoading } =
     useGetAvailableGeneralStockChoicesQuery(storeCode, !!storeCode);
 
@@ -79,15 +92,15 @@ export default function GeneralSanLinesGrid({ storeCode, lineItems, setLineItems
 
   return (
     <Box sx={{ width: "100%", overflowX: "auto", mt: 2 }}>
-      <Table size="small" sx={{ minWidth: 750, border: "1px solid #e0e0e0" }}>
-        <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
-          <TableRow>
-            <TableCell sx={{ fontWeight: "bold", width: "30%" }}>Item Code</TableCell>
-            <TableCell sx={{ fontWeight: "bold", width: "15%" }}>Unit</TableCell>
-            <TableCell sx={{ fontWeight: "bold", width: "18%" }}>New Qty. In Hand</TableCell>
-            <TableCell sx={{ fontWeight: "bold", width: "17%" }}>Price</TableCell>
-            <TableCell sx={{ fontWeight: "bold", width: "12%" }}>Currency</TableCell>
-            <TableCell sx={{ fontWeight: "bold", width: "8%", textAlign: "center" }}>Action</TableCell>
+      <Table size="small" sx={{ minWidth: 750, border: `1px solid ${DASHBOARD_COLORS.border}` }}>
+        <TableHead>
+          <TableRow sx={plainTableHeaderRowSx()}>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "30%" }}>Item Code</TableCell>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "15%" }}>Unit</TableCell>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "18%" }}>New Qty. In Hand</TableCell>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "17%" }}>Price</TableCell>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "12%" }}>Currency</TableCell>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "8%", textAlign: "center" }}>Action</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -98,13 +111,15 @@ export default function GeneralSanLinesGrid({ storeCode, lineItems, setLineItems
             const matchedChoice = stockChoicesList.find((opt) => opt.itemCode === row.itemCode);
 
             return (
-              <TableRow key={idx}>
+              <TableRow key={idx} sx={plainTableBodyRowSx(idx)}>
                 <TableCell>
                   <TextField
                     select
                     size="small"
                     variant="standard"
                     fullWidth
+                    sx={dropdownFieldSx}
+                    slotProps={dropdownMenuSlotProps}
                     value={row.itemCode}
                     disabled={isStockLoading || availableChoicesForRow.length === 0}
                     onChange={(e) => {
@@ -125,7 +140,7 @@ export default function GeneralSanLinesGrid({ storeCode, lineItems, setLineItems
                   {matchedChoice && (
                     <Typography
                       variant="caption"
-                      sx={{ mt: 0.5, display: "block", color: "text.secondary" }}
+                      sx={{ mt: 0.5, display: "block", color: copperTextColor }}
                     >
                       Currently recorded: {matchedChoice.qtyInHand.toLocaleString()} {matchedChoice.unit}
                     </Typography>
@@ -138,6 +153,8 @@ export default function GeneralSanLinesGrid({ storeCode, lineItems, setLineItems
                     size="small"
                     variant="standard"
                     fullWidth
+                    sx={dropdownFieldSx}
+                    slotProps={dropdownMenuSlotProps}
                     value={row.unit}
                     onChange={(e) => handleUpdateLineCell(idx, "unit", e.target.value)}
                   >
@@ -155,6 +172,7 @@ export default function GeneralSanLinesGrid({ storeCode, lineItems, setLineItems
                     size="small"
                     variant="standard"
                     fullWidth
+                    sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
                     value={row.quantity === 0 ? "" : row.quantity}
                     onChange={(e) => handleUpdateLineCell(idx, "quantity", Number(e.target.value))}
                     slotProps={{ htmlInput: { min: 0 } }}
@@ -167,6 +185,7 @@ export default function GeneralSanLinesGrid({ storeCode, lineItems, setLineItems
                     size="small"
                     variant="standard"
                     fullWidth
+                    sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
                     value={row.price === 0 ? "" : row.price}
                     onChange={(e) => handleUpdateLineCell(idx, "price", Number(e.target.value))}
                     slotProps={{ htmlInput: { min: 0, step: "0.01" } }}
@@ -179,6 +198,8 @@ export default function GeneralSanLinesGrid({ storeCode, lineItems, setLineItems
                     size="small"
                     variant="standard"
                     fullWidth
+                    sx={dropdownFieldSx}
+                    slotProps={dropdownMenuSlotProps}
                     value={row.currencyCode}
                     onChange={(e) => handleUpdateLineCell(idx, "currencyCode", e.target.value)}
                   >
@@ -191,7 +212,7 @@ export default function GeneralSanLinesGrid({ storeCode, lineItems, setLineItems
                 </TableCell>
 
                 <TableCell sx={{ textAlign: "center" }}>
-                  <IconButton color="error" size="small" onClick={() => handleRemoveRow(idx)}>
+                  <IconButton color="error" size="small" onClick={() => handleRemoveRow(idx)} sx={deleteRowIconButtonSx}>
                     <DeleteIcon fontSize="small" />
                   </IconButton>
                 </TableCell>

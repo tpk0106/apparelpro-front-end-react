@@ -10,9 +10,11 @@ import {
   MenuItem,
   IconButton,
   Typography,
+  Chip,
   //   Badge,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import BalanceDeficitWarning from "../common/balance-deficit-warning";
 
 // Import your strict, validated type interfaces
 import type {
@@ -30,7 +32,15 @@ import type { Unit } from "../../interfaces/references/Unit";
 import type { Basis } from "../../interfaces/references/Basis";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 import { useDropdownTheme } from "../../themes/useDropdownTheme";
-import { plainTableBodyRowSx, plainTableHeaderCellSx, plainTableHeaderRowSx } from "../../themes/workspace-theme";
+import {
+  plainTableBodyRowSx,
+  plainTableHeaderCellSx,
+  plainTableHeaderRowSx,
+  deleteRowIconButtonSx,
+  balanceDeficitTextColor,
+  numberFieldNoSpinnerSx,
+} from "../../themes/workspace-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
 
 // 1. Ensure you import the Autocomplete component near the top of StoresRequisitionLinesGrid.tsx:
 // import Autocomplete from "@mui/material/Autocomplete";
@@ -179,17 +189,22 @@ export default function StoresRequisitionLinesGrid({
             TableHead's own background - see workspace-theme.ts. */}
         <TableHead>
           <TableRow sx={plainTableHeaderRowSx()}>
-            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "30%" }}>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "23%" }}>
               Item Code
             </TableCell>
-            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "15%" }}>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "13%" }}>
               Basis (Store)
             </TableCell>
-            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "15%" }}>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "10%" }}>
               Unit
             </TableCell>
-            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "20%" }}>
+            <TableCell sx={{ ...plainTableHeaderCellSx(), width: "17%" }}>
               Requested Qty
+            </TableCell>
+            <TableCell
+              sx={{ ...plainTableHeaderCellSx(), width: "14%", textAlign: "center" }}
+            >
+              Available
             </TableCell>
             <TableCell
               sx={{ ...plainTableHeaderCellSx(), width: "10%", textAlign: "center" }}
@@ -204,6 +219,7 @@ export default function StoresRequisitionLinesGrid({
             const balanceMetrics = rowStockBalances[idx];
             const hasExceededBalance =
               balanceMetrics &&
+              Number(row.quantity) > 0 &&
               Number(row.quantity) > balanceMetrics.netAvailableBalance;
 
             // Exclude items already selected on OTHER rows, but keep this
@@ -216,7 +232,7 @@ export default function StoresRequisitionLinesGrid({
             );
 
             return (
-              <TableRow key={idx} sx={plainTableBodyRowSx(!!hasExceededBalance)}>
+              <TableRow key={idx} sx={plainTableBodyRowSx(idx, !!hasExceededBalance)}>
                 {/* Cell 1: Item Code Input Input */}
 
                 {/* Cell 1: REPLACED THE BLIND TEXTFIELD WITH AN AUTOCOMPLETE SEARCH SELECTION CARD */}
@@ -296,7 +312,7 @@ export default function StoresRequisitionLinesGrid({
                           sx={{
                             mt: 0.5,
                             display: "block",
-                            color: "text.secondary",
+                            color: copperTextColor,
                           }}
                         >
                           Ordered:{" "}
@@ -307,146 +323,7 @@ export default function StoresRequisitionLinesGrid({
                     );
                   })()}
 
-                  {/* Live inventory balance indicator text badges continue perfectly below */}
-                  {balanceMetrics && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        mt: 0.5,
-                        fontWeight: "bold",
-                        color: hasExceededBalance ? "#d32f2f" : "#2e7d32",
-                        display: "block",
-                      }}
-                    >
-                      {balanceMetrics.description} (Avail:{" "}
-                      {balanceMetrics.netAvailableBalance.toLocaleString()}{" "}
-                      {balanceMetrics.unit})
-                    </Typography>
-                  )}
                 </TableCell>
-                {/* <TableCell>
-                  <Autocomplete
-                    options={stockChoicesList}
-                    loading={isStockLoading}
-                    // Displays both the code and the readable name together (e.g. "0202BT - BLUE PLASTIC BUTTONS")
-                    getOptionLabel={(option: any) =>
-                      option ? `${option.itemCode} - ${option.description}` : ""
-                    }
-                    value={
-                      stockChoicesList.find(
-                        (opt: any) => opt.itemCode === row.itemCode,
-                      ) || null
-                    }
-                    onChange={(_, selectedOption: any) => {
-                      if (selectedOption) {
-                        // AUTOMATED FILL-OUT: Pulls the correct parameters straight out of your database selection row!
-                        handleUpdateLineCell(
-                          idx,
-                          "itemCode",
-                          selectedOption.itemCode,
-                        );
-                        handleUpdateLineCell(
-                          idx,
-                          "storeCode",
-                          selectedOption.storeCode || defaultStoreCode,
-                        );
-                        handleUpdateLineCell(
-                          idx,
-                          "unit",
-                          selectedOption.unit || "PCS",
-                        );
-
-                        
-                        const completedRow = {
-                          stockCode: selectedOption.stockCode,
-                          itemCode: selectedOption.itemCode,
-                          storeCode:
-                            selectedOption.storeCode || defaultStoreCode,
-                          unit: selectedOption.unit || "PCS",
-                          quantity: row.quantity,
-                        };
-                        handleExecuteCellBlurCheck(idx, completedRow);
-                      }
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        placeholder="Search Item Code or Description... [F1]"
-                        size="small"
-                        variant="standard"
-                        fullWidth
-                        slotProps={{
-                          htmlInput: {
-                            ...params.inputProps,
-                            style: {
-                              fontSize: "13px",
-                              fontFamily: "monospace",
-                            },
-                          },
-                        }}
-                      />
-                    )}
-                  />
-
-                  
-                  {balanceMetrics && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        mt: 0.5,
-                        fontWeight: "bold",
-                        color: hasExceededBalance ? "#d32f2f" : "#2e7d32",
-                        display: "block",
-                      }}
-                    >
-                      {balanceMetrics.description} (Avail:{" "}
-                      {balanceMetrics.netAvailableBalance.toLocaleString()}{" "}
-                      {balanceMetrics.unit})
-                    </Typography>
-                  )}
-                </TableCell> */}
-
-                {/* <TableCell>
-                  <TextField
-                    size="small"
-                    variant="standard"
-                    fullWidth
-                    placeholder="e.g., 0202BT"
-                    value={row.itemCode}
-                    onChange={(e) =>
-                      handleUpdateLineCell(
-                        idx,
-                        "itemCode",
-                        e.target.value.toUpperCase(),
-                      )
-                    }
-                    onBlur={() => handleExecuteCellBlurCheck(idx, row)}
-                    slotProps={{
-                      htmlInput: {
-                        style: {
-                          fontSize: "13px",
-                          fontFamily: "monospace",
-                          textTransform: "uppercase",
-                        },
-                      },
-                    }}
-                  />
-                  {balanceMetrics && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        mt: 0.5,
-                        fontWeight: "bold",
-                        color: hasExceededBalance ? "#d32f2f" : "#2e7d32",
-                        display: "block",
-                      }}
-                    >
-                      {balanceMetrics.description} (Avail:{" "}
-                      {balanceMetrics.netAvailableBalance.toLocaleString()}{" "}
-                      {balanceMetrics.unit})
-                    </Typography>
-                  )}
-                </TableCell> */}
 
                 {/* Cell 2: Basis Selection - sourced from the Basis (od_bref) master
                     table. Previously a free-text input (placeholder "STR") that let
@@ -513,7 +390,6 @@ export default function StoresRequisitionLinesGrid({
                     size="small"
                     variant="standard"
                     fullWidth
-                    sx={dropdownFieldSx}
                     value={row.quantity === 0 ? "" : row.quantity}
                     onChange={(e) =>
                       handleUpdateLineCell(
@@ -529,15 +405,38 @@ export default function StoresRequisitionLinesGrid({
                         min: 0,
                       },
                     }}
+                    sx={{
+                      ...dropdownFieldSx,
+                      ...numberFieldNoSpinnerSx,
+                      "& .Mui-error": { color: `${balanceDeficitTextColor} !important` },
+                      "& .MuiInput-underline.Mui-error:after": {
+                        borderBottomColor: `${balanceDeficitTextColor} !important`,
+                      },
+                    }}
                   />
                   {hasExceededBalance && (
-                    <Typography
-                      variant="caption"
-                      color="error"
-                      sx={{ fontWeight: "bold", display: "block", mt: 0.5 }}
-                    >
-                      ⚠️ Allocation Deficit: Attempt to exceed balance quantity!
-                    </Typography>
+                    <BalanceDeficitWarning message="Allocation Deficit: Attempt to exceed balance quantity!" />
+                  )}
+                </TableCell>
+
+                {/* Cell 4b: Available Balance — moved out of the Item Code cell's
+                    inline caption (was low-contrast green text, easy to miss and
+                    only visible for whichever row you'd last touched) into its own
+                    column, always visible for every row at once. Same Chip
+                    treatment as goods-issue-note-lines-grid.tsx's "Available"
+                    column, for one consistent way of showing this across the app. */}
+                <TableCell sx={{ textAlign: "center" }}>
+                  {balanceMetrics && (
+                    <Chip
+                      size="small"
+                      variant="filled"
+                      color={hasExceededBalance ? "error" : "primary"}
+                      label={`${balanceMetrics.netAvailableBalance.toLocaleString()} ${balanceMetrics.unit}`}
+                      sx={{
+                        border: "1px solid #FFFFFF",
+                        "& .MuiChip-label": { color: "#FFFFFF" },
+                      }}
+                    />
                   )}
                 </TableCell>
 
@@ -547,6 +446,7 @@ export default function StoresRequisitionLinesGrid({
                     color="error"
                     size="small"
                     onClick={() => handleRemoveRow(idx)}
+                    sx={deleteRowIconButtonSx}
                   >
                     <DeleteIcon fontSize="small" />
                   </IconButton>

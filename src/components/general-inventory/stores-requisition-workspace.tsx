@@ -27,12 +27,23 @@ import {
 } from "../../tanstack-hooks/general-inventory/general-inventory-strn.hooks";
 import { useGetAllDepartmentsQuery } from "../../tanstack-hooks/common.hooks";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  workspaceSectionLabelSx,
+  dateIconFieldSx,
+} from "../../themes/workspace-theme";
 
 // Replicates GI_STRN1.PRG's "STORES REQUISITION NOTE (General)" entry screen. Unlike
 // Orderwise's STRN, this is never tied to a Buyer/Order - Store and Department are the
 // only header-level scope, matching the legacy screen exactly (SRN No / Date / From
 // Stores / To Department, no Buyer/Order prompt at all).
 export default function StoresRequisitionWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const { mutateAsync: commitSTRN, isPending: isSubmitting } =
     useCreateGeneralSTRNMutation();
 
@@ -67,7 +78,7 @@ export default function StoresRequisitionWorkspace() {
   const hasAnyExceededBalance = lineItems.some((item, idx) => {
     const balance = rowStockBalances[idx];
     return balance
-      ? Number(item.quantity) > balance.netAvailableBalance
+      ? Number(item.quantity) > 0 && Number(item.quantity) > balance.netAvailableBalance
       : false;
   });
   const isFormValid =
@@ -154,14 +165,14 @@ export default function StoresRequisitionWorkspace() {
   };
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
+    <Box sx={{ width: "100%", py: 1, px: 3 }}>
       <Paper
         elevation={3}
-        sx={{ p: 3, borderTop: "4px solid #1a237e", backgroundColor: "#fafafa" }}
+        sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}
       >
         <Typography
           variant="h5"
-          sx={{ fontWeight: "bold", color: "#1a237e", mb: 3, textAlign: "center" }}
+          sx={{ ...workspaceHeadingSx, mb: 3 }}
         >
           Stores Requisition Note (General Inventory)
         </Typography>
@@ -176,6 +187,7 @@ export default function StoresRequisitionWorkspace() {
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
 
@@ -188,6 +200,8 @@ export default function StoresRequisitionWorkspace() {
               value={selectedStore}
               onChange={(e) => setSelectedStore(e.target.value)}
               disabled={isStoresLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {storesList.map((s) => (
                 <MenuItem key={s.code} value={s.code}>
@@ -206,6 +220,8 @@ export default function StoresRequisitionWorkspace() {
               value={selectedDept}
               onChange={(e) => setSelectedDept(e.target.value)}
               disabled={isDeptsLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {dbDepartments.map((dept) => (
                 <MenuItem key={dept.departmentCode} value={dept.departmentCode}>
@@ -232,7 +248,7 @@ export default function StoresRequisitionWorkspace() {
           <Alert
             severity="info"
             variant="outlined"
-            sx={{ m: 2, fontWeight: "bold", color: "#1a237e" }}
+            sx={{ m: 2, fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}
           >
             Select a Transaction Date, Store and Department to start the
             material list.
@@ -249,7 +265,7 @@ export default function StoresRequisitionWorkspace() {
             >
               <Typography
                 variant="subtitle2"
-                sx={{ fontWeight: "bold", color: "#1a237e", textTransform: "uppercase" }}
+                sx={workspaceSectionLabelSx}
               >
                 Material Requisition Items
               </Typography>
@@ -259,8 +275,9 @@ export default function StoresRequisitionWorkspace() {
                 size="small"
                 startIcon={<AddCircleOutlined />}
                 onClick={handleAddBlankRow}
+                sx={primaryActionButtonSx}
               >
-                Add Item
+                <span style={themedButtonLabelStyle}>Add Item</span>
               </Button>
             </Box>
 
@@ -279,7 +296,6 @@ export default function StoresRequisitionWorkspace() {
             gap: 2,
             mt: 3,
             pt: 2,
-            borderTop: "1px dashed #ccc",
             display: "flex",
             justifyContent: "flex-end",
           }}
@@ -291,6 +307,7 @@ export default function StoresRequisitionWorkspace() {
             startIcon={<DeleteIcon />}
             onClick={handleResetForm}
             disabled={isSubmitting}
+            sx={{ minWidth: 190, height: 32, color: "#8B93A1", borderColor: "#8B93A1" }}
           >
             Cancel Note
           </Button>
@@ -301,8 +318,19 @@ export default function StoresRequisitionWorkspace() {
             startIcon={<SendIcon />}
             onClick={handleRequestCommit}
             disabled={isSubmitting || !isFormValid}
+            sx={{
+              ...primaryActionButtonSx,
+              minWidth: 190,
+              height: 32,
+              "&.Mui-disabled": {
+                background: "rgba(139,147,161,0.15)",
+                color: "#8B93A1",
+                border: "1px solid rgba(139,147,161,0.4)",
+                boxShadow: "none",
+              },
+            }}
           >
-            Save Requisition Note
+            <span style={themedButtonLabelStyle}>Save Requisition Note</span>
           </Button>
         </Box>
       </Paper>

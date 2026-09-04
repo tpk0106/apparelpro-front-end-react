@@ -31,12 +31,17 @@ import {
 } from "../../../tanstack-hooks/operation-breakdown-report.hooks";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import { withReadableReportTable } from "../../../themes/report-table-theme";
-
-const selectFieldSx = {
-  "& .MuiOutlinedInput-input": { color: "#F4F6F8" },
-};
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import {
+  workspaceHeadingSx,
+  workspaceSectionLabelSx,
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+} from "../../../themes/workspace-theme";
 
 const OperationBreakdownReportWorkspace = () => {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<GarmentType | null>(null);
@@ -92,11 +97,11 @@ const OperationBreakdownReportWorkspace = () => {
     <div className="flex flex-col w-[95%] mx-auto justify-around mt-10 mb-12">
       <div className="text-center mt-3 mx-2">
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="black">Operation Breakdown</Typography>
+          <Typography sx={workspaceHeadingSx}>Operation Breakdown</Typography>
         </ThemeProvider>
       </div>
 
-      <Card variant="outlined" sx={{ p: 2, mb: 2 }}>
+      <Card variant="outlined" sx={{ p: 2, mb: 2, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}>
         <Grid container spacing={2} sx={{ alignItems: "center" }}>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Autocomplete
@@ -112,12 +117,13 @@ const OperationBreakdownReportWorkspace = () => {
               isOptionEqualToValue={(option, value) =>
                 option.buyerCode === value?.buyerCode
               }
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Buyer"
                   size="small"
-                  sx={selectFieldSx}
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -132,12 +138,13 @@ const OperationBreakdownReportWorkspace = () => {
                 setSelectedType(null);
                 setSelectedStyle(null);
               }}
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Order"
                   size="small"
-                  sx={selectFieldSx}
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -153,12 +160,13 @@ const OperationBreakdownReportWorkspace = () => {
                 setSelectedStyle(null);
               }}
               isOptionEqualToValue={(option, value) => option.id === value?.id}
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Garment Type"
                   size="small"
-                  sx={selectFieldSx}
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -171,12 +179,13 @@ const OperationBreakdownReportWorkspace = () => {
               value={selectedStyle}
               onChange={(_, val) => setSelectedStyle(val)}
               isOptionEqualToValue={(option, value) => option.id === value?.id}
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label="Style"
                   size="small"
-                  sx={selectFieldSx}
+                  sx={dropdownFieldSx}
                 />
               )}
             />
@@ -188,11 +197,12 @@ const OperationBreakdownReportWorkspace = () => {
             variant="contained"
             disabled={!report || isDownloading || !scope}
             onClick={() => downloadPdf(scope!)}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Preparing PDF..." : "Print / Download PDF"}
+            <span style={themedButtonLabelStyle}>{isDownloading ? "Preparing PDF..." : "Print / Download PDF"}</span>
           </Button>
           {report && (
-            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+            <Typography variant="caption" sx={{ color: DASHBOARD_COLORS.textSecondary }}>
               Eff1: {report.eff1Percent}% · Eff2: {report.eff2Percent}% · Work
               Hours/Day: {report.workHoursPerDay}
             </Typography>
@@ -200,17 +210,17 @@ const OperationBreakdownReportWorkspace = () => {
         </Box>
       </Card>
 
-      {isLoading && <Typography>Loading...</Typography>}
+      {isLoading && <Typography sx={{ color: DASHBOARD_COLORS.textSecondary }}>Loading...</Typography>}
       {isError && <Alert severity="info">{error.message}</Alert>}
 
       {report &&
         report.groups.map((group) => (
           <Box key={group.componentCode} sx={{ mb: 3 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
+            <Typography variant="subtitle1" sx={{ ...workspaceSectionLabelSx, mb: 1 }}>
               {group.componentCode} — {group.componentDescription}
             </Typography>
             <ThemeProvider theme={withReadableReportTable}>
-              <TableContainer component={Card} variant="outlined">
+              <TableContainer component={Card} variant="outlined" sx={{ backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}>
                 <Table size="small">
                   <TableHead>
                     <TableRow>

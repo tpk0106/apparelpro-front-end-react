@@ -5,9 +5,11 @@ import axios, {
   type AxiosError,
 } from "axios";
 import { APPARELPRO_ENDPOINTS } from "../api/api-configurations";
-import type { TokenAPIModel } from "../interfaces/definitions";
+import { USER_CREDENTIALS, type TokenAPIModel } from "../interfaces/definitions";
 import GlobalRouter from "./globalRouter";
 import GlobalAccessDeniedNotifier from "./accessDeniedNotifier";
+import { store } from "../sagaStore/sagaStore";
+import { signOutSuccess } from "../sagaStore/user/user.action";
 
 // 1. Export standard AppError shape for TanStack React Query error generics
 export interface AppError {
@@ -230,8 +232,16 @@ class AxiosInterceptor {
   private handleLogout(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.refreshTokenKey);
+    // SignInForm bounces straight back to "/" whenever it sees a leftover
+    // USER_KEY in localStorage or a non-null currentUser in Redux (both set
+    // on login by user.saga.ts) - clearing only the two token keys above
+    // left those in place, so an expired session redirected to sign-in and
+    // was immediately redirected right back, in a loop, on every request.
+    localStorage.removeItem(USER_CREDENTIALS.USER_KEY);
+    localStorage.removeItem(USER_CREDENTIALS.USER_ID);
+    store.dispatch(signOutSuccess());
     if (GlobalRouter && typeof GlobalRouter.navigate === "function") {
-      GlobalRouter.navigate("/auth");
+      GlobalRouter.navigate("/sign-in");
     }
   }
 

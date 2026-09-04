@@ -4,6 +4,11 @@ import type { MRT_ColumnDef } from "material-react-table";
 import { MaterialReactTable } from "material-react-table";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useApparelProTable } from "../../themes/useApparelProTable";
+import {
+  noteTableHeadCellUppercaseSx,
+  deleteRowIconButtonSx,
+  numberFieldNoSpinnerSx,
+} from "../../themes/workspace-theme";
 import type { GinLineItemRow } from "./goods-issue-note.types";
 
 interface GoodsIssueNoteLinesGridProps {
@@ -84,7 +89,7 @@ export default function GoodsIssueNoteLinesGrid({
             slotProps={{
               htmlInput: { min: 0, style: { fontFamily: '"JetBrains Mono", monospace' } },
             }}
-            sx={{ width: 100 }}
+            sx={{ width: 100, ...numberFieldNoSpinnerSx }}
           />
         ),
       },
@@ -113,6 +118,7 @@ export default function GoodsIssueNoteLinesGrid({
   );
 
   const table = useApparelProTable<GinLineItemRowView>({
+    muiTableHeadCellProps: noteTableHeadCellUppercaseSx,
     columns,
     data: rows,
     enableEditing: false,
@@ -128,7 +134,7 @@ export default function GoodsIssueNoteLinesGrid({
       "mrt-row-actions": { header: "Action", size: 70 },
     },
     renderRowActions: ({ row }) => (
-      <IconButton color="error" size="small" onClick={() => handleRemoveLine(row.index)}>
+      <IconButton color="error" size="small" onClick={() => handleRemoveLine(row.index)} sx={deleteRowIconButtonSx}>
         <DeleteIcon fontSize="small" />
       </IconButton>
     ),

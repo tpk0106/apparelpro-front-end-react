@@ -16,6 +16,13 @@ import {
   useGetMachineTypes,
 } from "../../../tanstack-hooks/production-reference.hooks";
 import { useApparelProTable } from "../../../themes/useApparelProTable";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  deleteRowIconButtonSx,
+  numberFieldNoSpinnerSx,
+} from "../../../themes/workspace-theme";
 import ConfirmDialog from "../../common/confirm-dialog";
 
 const rowSchema = z.object({
@@ -55,6 +62,8 @@ const OperationBreakdownGrid = ({
 }: Props) => {
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [rowToDelete, setRowToDelete] = useState<MRT_Row<StyleOperationBreakdown> | null>(null);
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownSelectMenuProps = { slotProps: { paper: { sx: dropdownListboxSx } } };
 
   const { data: operationPageData } = useGetOperations({
     pageIndex: 0,
@@ -78,7 +87,12 @@ const OperationBreakdownGrid = ({
 
   const columns = useMemo<MRT_ColumnDef<StyleOperationBreakdown>[]>(
     () => [
-      { accessorKey: "operationNumber", header: "Op. No.", size: 90, muiEditTextFieldProps: { type: "number" } },
+      {
+        accessorKey: "operationNumber",
+        header: "Op. No.",
+        size: 90,
+        muiEditTextFieldProps: { type: "number", sx: { ...dropdownFieldSx, ...numberFieldNoSpinnerSx } },
+      },
       {
         accessorKey: "operationCode",
         header: "Operation",
@@ -88,6 +102,11 @@ const OperationBreakdownGrid = ({
           value: o.operationCode,
           label: `${o.operationCode} - ${o.description}`,
         })),
+        muiEditTextFieldProps: {
+          select: true,
+          sx: dropdownFieldSx,
+          slotProps: { select: { MenuProps: dropdownSelectMenuProps } },
+        },
         Cell: ({ cell }) => {
           const code = cell.getValue<string>();
           const match = operationOptions.find((o) => o.operationCode === code);
@@ -103,13 +122,23 @@ const OperationBreakdownGrid = ({
           value: m.code,
           label: `${m.code} - ${m.description}`,
         })),
+        muiEditTextFieldProps: {
+          select: true,
+          sx: dropdownFieldSx,
+          slotProps: { select: { MenuProps: dropdownSelectMenuProps } },
+        },
         Cell: ({ cell }) => {
           const code = cell.getValue<string>();
           const match = machineTypeOptions.find((m) => m.code === code);
           return match ? `${match.code} - ${match.description}` : code;
         },
       },
-      { accessorKey: "sam", header: "SAM", size: 90, muiEditTextFieldProps: { type: "number" } },
+      {
+        accessorKey: "sam",
+        header: "SAM",
+        size: 90,
+        muiEditTextFieldProps: { type: "number", sx: { ...dropdownFieldSx, ...numberFieldNoSpinnerSx } },
+      },
       {
         accessorKey: "quota",
         header: "Quota",
@@ -210,8 +239,9 @@ const OperationBreakdownGrid = ({
         variant="contained"
         size="small"
         onClick={() => table.setCreatingRow(true)}
+        sx={primaryActionButtonSx}
       >
-        Add operation
+        <span style={themedButtonLabelStyle}>Add operation</span>
       </Button>
     ),
     renderRowActions: ({ row }) => (
@@ -222,7 +252,7 @@ const OperationBreakdownGrid = ({
           </IconButton>
         </Tooltip>
         <Tooltip title="Delete">
-          <IconButton size="small" color="error" onClick={() => openDeleteConfirmModal(row)}>
+          <IconButton size="small" color="error" onClick={() => openDeleteConfirmModal(row)} sx={deleteRowIconButtonSx}>
             <DeleteForeverOutlinedIcon fontSize="small" />
           </IconButton>
         </Tooltip>

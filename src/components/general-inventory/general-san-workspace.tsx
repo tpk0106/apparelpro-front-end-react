@@ -21,11 +21,22 @@ import type { GeneralSanLineItemRow } from "../../interfaces/general-inventory/g
 import { useCreateGeneralSANMutation } from "../../tanstack-hooks/general-inventory/general-san.hooks";
 import { useGetGeneralStoresQuery } from "../../tanstack-hooks/general-inventory/general-inventory-strn.hooks";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  workspaceSectionLabelSx,
+  dateIconFieldSx,
+} from "../../themes/workspace-theme";
 
 // Replicates GI_SAN1.PRG's "STOCK ADJUSTMENT NOTE (General)" entry screen - a physical
 // stock-take correction that SETS QtyInHand to the entered quantity, not an add/subtract
 // delta. No balance ceiling to validate client-side (any non-negative count is valid).
 export default function GeneralSanWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const { mutateAsync: commitSAN, isPending: isSubmitting } =
     useCreateGeneralSANMutation();
 
@@ -126,9 +137,9 @@ export default function GeneralSanWorkspace() {
   };
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#fafafa" }}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }}>
+    <Box sx={{ width: "100%", py: 1, px: 3 }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
+        <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
           Stock Adjustment Note (General Inventory)
         </Typography>
 
@@ -142,6 +153,7 @@ export default function GeneralSanWorkspace() {
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
 
@@ -157,6 +169,8 @@ export default function GeneralSanWorkspace() {
                 setLineItems([]);
               }}
               disabled={isStoresLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {storesList.map((s) => (
                 <MenuItem key={s.code} value={s.code}>
@@ -176,13 +190,13 @@ export default function GeneralSanWorkspace() {
         )}
 
         {!isHeaderValid ? (
-          <Alert severity="info" variant="outlined" sx={{ m: 2, fontWeight: "bold" }}>
+          <Alert severity="info" variant="outlined" sx={{ m: 2, fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>
             Select a Transaction Date and Stores to start the adjustment list.
           </Alert>
         ) : (
           <Box>
             <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: "bold", textTransform: "uppercase" }}>
+              <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>
                 Adjusted Items
               </Typography>
               <Button
@@ -191,8 +205,9 @@ export default function GeneralSanWorkspace() {
                 size="small"
                 startIcon={<AddCircleOutlined />}
                 onClick={handleAddBlankRow}
+                sx={primaryActionButtonSx}
               >
-                Add Item
+                <span style={themedButtonLabelStyle}>Add Item</span>
               </Button>
             </Box>
 
@@ -205,7 +220,6 @@ export default function GeneralSanWorkspace() {
             gap: 2,
             mt: 3,
             pt: 2,
-            borderTop: "1px dashed #ccc",
             display: "flex",
             justifyContent: "flex-end",
           }}
@@ -217,6 +231,7 @@ export default function GeneralSanWorkspace() {
             startIcon={<DeleteIcon />}
             onClick={handleResetForm}
             disabled={isSubmitting}
+            sx={{ minWidth: 190, height: 32, color: "#8B93A1", borderColor: "#8B93A1" }}
           >
             Cancel Note
           </Button>
@@ -227,8 +242,19 @@ export default function GeneralSanWorkspace() {
             startIcon={<SendIcon />}
             onClick={handleRequestCommit}
             disabled={isSubmitting || !isFormValid}
+            sx={{
+              ...primaryActionButtonSx,
+              minWidth: 190,
+              height: 32,
+              "&.Mui-disabled": {
+                background: "rgba(139,147,161,0.15)",
+                color: "#8B93A1",
+                border: "1px solid rgba(139,147,161,0.4)",
+                boxShadow: "none",
+              },
+            }}
           >
-            Post Adjustment Note
+            <span style={themedButtonLabelStyle}>Save Adjustment Note</span>
           </Button>
         </Box>
       </Paper>

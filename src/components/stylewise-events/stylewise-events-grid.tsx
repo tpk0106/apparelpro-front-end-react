@@ -417,7 +417,7 @@ export default function StylewiseEventsGrid({
             sx={primaryActionButtonSx}
             disabled={!customEventCode.trim()}
           >
-            <span style={themedButtonLabelStyle}>Inject Row</span>
+            <span style={themedButtonLabelStyle}>Save</span>
           </Button>
         </DialogActions>
       </Dialog>

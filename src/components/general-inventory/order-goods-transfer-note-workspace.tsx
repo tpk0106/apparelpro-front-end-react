@@ -33,6 +33,15 @@ import {
 } from "../../tanstack-hooks/custom-hooks";
 import type { Buyer } from "../../interfaces/references/Buyer";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  workspaceSectionLabelSx,
+  dateIconFieldSx,
+} from "../../themes/workspace-theme";
 
 const DIRECTION_OPTIONS: { value: OrderGtnDirectionType; label: string }[] = [
   { value: OrderGtnDirection.GeneralToOrder, label: "General Stores -> Buyer/Order" },
@@ -45,6 +54,8 @@ const DIRECTION_OPTIONS: { value: OrderGtnDirectionType; label: string }[] = [
 // store concept General Inventory has (Orderwise's own stock has no separate store
 // master - see useGetGeneralStoresQuery usage below, shared with STRN/GTN(General)).
 export default function OrderGoodsTransferNoteWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const { mutateAsync: commitOGTN, isPending: isSubmitting } =
     useCreateOrderGTNMutation();
 
@@ -106,7 +117,9 @@ export default function OrderGoodsTransferNoteWorkspace() {
   const hasAnyPositiveQuantity = lineItems.some((item) => item.quantity > 0);
   const hasAnyExceededBalance = lineItems.some((item) => {
     const stock = transferableStock.find((s) => s.itemCode === item.itemCode);
-    return stock ? Number(item.quantity) > stock.availableBalance : false;
+    return stock && Number(item.quantity) > 0
+      ? Number(item.quantity) > stock.availableBalance
+      : false;
   });
   const isFormValid =
     isHeaderValid &&
@@ -215,9 +228,9 @@ export default function OrderGoodsTransferNoteWorkspace() {
   };
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#fafafa" }}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }}>
+    <Box sx={{ width: "100%", py: 1, px: 3 }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
+        <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
           Goods Transfer Note (Orders) — General Inventory
         </Typography>
 
@@ -230,6 +243,8 @@ export default function OrderGoodsTransferNoteWorkspace() {
               fullWidth
               value={direction}
               onChange={(e) => handleDirectionChange(e.target.value as OrderGtnDirectionType)}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {DIRECTION_OPTIONS.map((opt) => (
                 <MenuItem key={opt.value} value={opt.value}>
@@ -251,6 +266,8 @@ export default function OrderGoodsTransferNoteWorkspace() {
                 setLineItems([]);
               }}
               disabled={isStoresLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {storesList.map((s) => (
                 <MenuItem key={s.code} value={s.code}>
@@ -269,6 +286,8 @@ export default function OrderGoodsTransferNoteWorkspace() {
               value={selectedBuyer ? String(selectedBuyer.buyerCode) : ""}
               onChange={(e) => handleBuyerChange(e.target.value)}
               disabled={isBuyersLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {buyersList.map((b) => (
                 <MenuItem key={b.buyerCode} value={String(b.buyerCode)}>
@@ -287,6 +306,8 @@ export default function OrderGoodsTransferNoteWorkspace() {
               value={selectedOrder}
               onChange={(e) => handleOrderChange(e.target.value)}
               disabled={!selectedBuyer || isOrdersLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {ordersList.map((orderStr) => (
                 <MenuItem key={orderStr} value={orderStr}>
@@ -305,6 +326,7 @@ export default function OrderGoodsTransferNoteWorkspace() {
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
         </Grid>
@@ -325,7 +347,7 @@ export default function OrderGoodsTransferNoteWorkspace() {
           <Alert
             severity="info"
             variant="outlined"
-            sx={{ m: 2, fontWeight: "bold" }}
+            sx={{ m: 2, fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}
           >
             Select a Direction, Store, Buyer and Order to start the transfer
             list.
@@ -342,7 +364,7 @@ export default function OrderGoodsTransferNoteWorkspace() {
             >
               <Typography
                 variant="subtitle2"
-                sx={{ fontWeight: "bold", textTransform: "uppercase" }}
+                sx={workspaceSectionLabelSx}
               >
                 Transfer Items
               </Typography>
@@ -352,8 +374,9 @@ export default function OrderGoodsTransferNoteWorkspace() {
                 size="small"
                 startIcon={<AddCircleOutlined />}
                 onClick={handleAddBlankRow}
+                sx={primaryActionButtonSx}
               >
-                Add Item
+                <span style={themedButtonLabelStyle}>Add Item</span>
               </Button>
             </Box>
 
@@ -372,7 +395,6 @@ export default function OrderGoodsTransferNoteWorkspace() {
             gap: 2,
             mt: 3,
             pt: 2,
-            borderTop: "1px dashed #ccc",
             display: "flex",
             justifyContent: "flex-end",
           }}
@@ -384,6 +406,7 @@ export default function OrderGoodsTransferNoteWorkspace() {
             startIcon={<DeleteIcon />}
             onClick={handleResetForm}
             disabled={isSubmitting}
+            sx={{ minWidth: 190, height: 32, color: "#8B93A1", borderColor: "#8B93A1" }}
           >
             Cancel Note
           </Button>
@@ -394,8 +417,19 @@ export default function OrderGoodsTransferNoteWorkspace() {
             startIcon={<SendIcon />}
             onClick={handleRequestCommit}
             disabled={isSubmitting || !isFormValid}
+            sx={{
+              ...primaryActionButtonSx,
+              minWidth: 190,
+              height: 32,
+              "&.Mui-disabled": {
+                background: "rgba(139,147,161,0.15)",
+                color: "#8B93A1",
+                border: "1px solid rgba(139,147,161,0.4)",
+                boxShadow: "none",
+              },
+            }}
           >
-            Post Transfer Note
+            <span style={themedButtonLabelStyle}>Save Transfer Note</span>
           </Button>
         </Box>
       </Paper>

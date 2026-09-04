@@ -611,7 +611,6 @@ export default function SupplierPurchaseOrderWorkspace() {
                     variant="outlined"
                     sx={{
                       p: 2,
-                      border: `1px solid ${copperTextColor}`,
                       backgroundColor: "rgba(159,174,94,0.1)",
                     }}
                   >

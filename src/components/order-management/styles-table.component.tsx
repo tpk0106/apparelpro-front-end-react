@@ -26,6 +26,7 @@ import type {
 
 import GridOnIcon from "@mui/icons-material/GridOn"; // Clear spreadsheet matrix layout icon
 import { useApparelProTable } from "../../themes/useApparelProTable";
+import { selectedRowHighlightSx } from "../../themes/workspace-theme";
 
 interface Props {
   columns: MRT_ColumnDef<Style>[];
@@ -64,7 +65,7 @@ const StyleTable = ({
   // validationErrors,
   setValidationErrors,
   onSelectStyleForBreakdown,
-  activeSelectedStyle: _activeSelectedStyle,
+  activeSelectedStyle,
 }: Props) => {
   // 1. Ensure validationErrors is initialized cleanly as an empty object
   // const [validationErrors, setValidationErrors] = useState<
@@ -249,25 +250,20 @@ const StyleTable = ({
     columns,
     data: data,
 
-    // 1. ADD THIS STATE BLOCK: Force Material React Table to track your selection natively!
-    // state: {
-    //   pagination: pagination,
-    //   showAlertBanner: isError,
-    //   // Dynamically flags the row index as selected if it matches the parent's active scope code
-    //   rowSelection: useMemo(() => {
-    //     if (!activeSelectedStyle?.styleCode) return {};
-
-    //     // Find the index of the row matching our active style code string
-    //     const matchingIndex = data.findIndex(
-    //       (item: any) =>
-    //         String(item?.styleCode).trim().toUpperCase() ===
-    //         String(activeSelectedStyle.styleCode).trim().toUpperCase(),
-    //     );
-
-    //     // Return a keyed selection map (e.g., { "0": true }) to force the grid to select it natively
-    //     return matchingIndex !== -1 ? { [String(matchingIndex)]: true } : {};
-    //   }, [data, activeSelectedStyle]),
-    // },
+    // Highlight the style currently loaded into the Color/Size Breakdown tab
+    // (set via the GridOnIcon action below) with the app's canonical
+    // selected-row treatment - same copper highlight as Material Consumption
+    // and Stock Master Entry. This only tracks that external "loaded for
+    // breakdown" selection; it's independent of (and merges cleanly with,
+    // via useApparelProTable's own muiTableBodyRowProps) MRT's own built-in
+    // editingRow styling from the Edit action, which is untouched here.
+    muiTableBodyRowProps: ({ row }) => ({
+      sx: selectedRowHighlightSx(
+        !!activeSelectedStyle &&
+          String(row.original.styleCode).trim().toUpperCase() ===
+            String(activeSelectedStyle.styleCode).trim().toUpperCase(),
+      ),
+    }),
 
     // 🚀 THE CRITICAL FIX: Explicitly bind your initial pagination keys here!
     initialState: {

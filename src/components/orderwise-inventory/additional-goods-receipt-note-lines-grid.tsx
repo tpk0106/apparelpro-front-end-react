@@ -66,6 +66,7 @@ export default function AdditionalGoodsReceiptNoteLinesGrid({
             <AdditionalGoodsReceiptNoteLineRow
               key={idx}
               row={row}
+              index={idx}
               buyersList={buyersList}
               onChange={(field, value) => handleUpdateLineCell(idx, field, value)}
               onRemove={() => handleRemoveRow(idx)}

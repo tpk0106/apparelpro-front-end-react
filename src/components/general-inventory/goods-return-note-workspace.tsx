@@ -22,11 +22,22 @@ import { useCreateGeneralRTNMutation } from "../../tanstack-hooks/general-invent
 import { useGetGeneralStoresQuery } from "../../tanstack-hooks/general-inventory/general-inventory-strn.hooks";
 import { useGetAllDepartmentsQuery } from "../../tanstack-hooks/common.hooks";
 import type { AppError } from "../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  workspaceSectionLabelSx,
+  dateIconFieldSx,
+} from "../../themes/workspace-theme";
 
 // Replicates GI_RTN1.PRG's "GOODS RETURN NOTE (General)" entry screen - material
 // returning from a Department back into a General store. The reverse of GIN, but not
 // linked back to the originating GIN (legacy doesn't track that link either).
 export default function GoodsReturnNoteWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const { mutateAsync: commitRTN, isPending: isSubmitting } =
     useCreateGeneralRTNMutation();
 
@@ -135,9 +146,9 @@ export default function GoodsReturnNoteWorkspace() {
   };
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#fafafa" }}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }}>
+    <Box sx={{ width: "100%", py: 1, px: 3 }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
+        <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
           Goods Return Note (General Inventory)
         </Typography>
 
@@ -151,6 +162,7 @@ export default function GoodsReturnNoteWorkspace() {
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
 
@@ -163,6 +175,8 @@ export default function GoodsReturnNoteWorkspace() {
               value={selectedDept}
               onChange={(e) => setSelectedDept(e.target.value)}
               disabled={isDeptsLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {dbDepartments.map((dept) => (
                 <MenuItem key={dept.departmentCode} value={dept.departmentCode}>
@@ -184,6 +198,8 @@ export default function GoodsReturnNoteWorkspace() {
                 setLineItems([]);
               }}
               disabled={isStoresLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {storesList.map((s) => (
                 <MenuItem key={s.code} value={s.code}>
@@ -210,7 +226,7 @@ export default function GoodsReturnNoteWorkspace() {
           <Alert
             severity="info"
             variant="outlined"
-            sx={{ m: 2, fontWeight: "bold" }}
+            sx={{ m: 2, fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}
           >
             Select a Transaction Date, Department and Stores to start the
             return list.
@@ -227,7 +243,7 @@ export default function GoodsReturnNoteWorkspace() {
             >
               <Typography
                 variant="subtitle2"
-                sx={{ fontWeight: "bold", textTransform: "uppercase" }}
+                sx={workspaceSectionLabelSx}
               >
                 Returned Items
               </Typography>
@@ -237,8 +253,9 @@ export default function GoodsReturnNoteWorkspace() {
                 size="small"
                 startIcon={<AddCircleOutlined />}
                 onClick={handleAddBlankRow}
+                sx={primaryActionButtonSx}
               >
-                Add Item
+                <span style={themedButtonLabelStyle}>Add Item</span>
               </Button>
             </Box>
 
@@ -255,7 +272,6 @@ export default function GoodsReturnNoteWorkspace() {
             gap: 2,
             mt: 3,
             pt: 2,
-            borderTop: "1px dashed #ccc",
             display: "flex",
             justifyContent: "flex-end",
           }}
@@ -267,6 +283,7 @@ export default function GoodsReturnNoteWorkspace() {
             startIcon={<DeleteIcon />}
             onClick={handleResetForm}
             disabled={isSubmitting}
+            sx={{ minWidth: 190, height: 32, color: "#8B93A1", borderColor: "#8B93A1" }}
           >
             Cancel Note
           </Button>
@@ -277,8 +294,19 @@ export default function GoodsReturnNoteWorkspace() {
             startIcon={<SendIcon />}
             onClick={handleRequestCommit}
             disabled={isSubmitting || !isFormValid}
+            sx={{
+              ...primaryActionButtonSx,
+              minWidth: 190,
+              height: 32,
+              "&.Mui-disabled": {
+                background: "rgba(139,147,161,0.15)",
+                color: "#8B93A1",
+                border: "1px solid rgba(139,147,161,0.4)",
+                boxShadow: "none",
+              },
+            }}
           >
-            Post Return Note
+            <span style={themedButtonLabelStyle}>Save</span>
           </Button>
         </Box>
       </Paper>

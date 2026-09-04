@@ -12,6 +12,14 @@ import {
   useUpdateRolePermissionsMutation,
 } from "../../tanstack-hooks/custom-hooks";
 import type { Permission } from "../../interfaces/register/Permission";
+import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
+import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
+
+const copperCheckboxSx = {
+  color: "rgba(201, 128, 61, 0.5)",
+  "&.Mui-checked": { color: copperTextColor },
+};
 
 // Permission Matrix panel (Settings > Users & Groups). Talks to the already-
 // deployed PermissionsController (api/permissions/catalog, /matrix, /role) -
@@ -127,14 +135,21 @@ const PermissionMatrixPanel = () => {
               justifyContent: "flex-end",
               gap: 1.5,
               mb: 2,
-              width: "95%",
-              mx: "auto",
+              width: "100%",
             }}
           >
             <Button
               variant="outlined"
               disabled={dirtyRoleIds.length === 0 || updateMutation.isPending}
               onClick={handleCancel}
+              sx={{
+                color: copperTextColor,
+                borderColor: copperTextColor,
+                "&:hover": {
+                  borderColor: copperTextColor,
+                  backgroundColor: "rgba(201, 128, 61, 0.08)",
+                },
+              }}
             >
               Cancel
             </Button>
@@ -142,26 +157,30 @@ const PermissionMatrixPanel = () => {
               variant="contained"
               disabled={dirtyRoleIds.length === 0 || updateMutation.isPending}
               onClick={handleSave}
+              sx={primaryActionButtonSx}
             >
               {updateMutation.isPending ? (
                 <CircularProgress size={18} sx={{ color: "#fff" }} />
-              ) : dirtyRoleIds.length > 0 ? (
-                `Save Changes (${dirtyRoleIds.length})`
               ) : (
-                "Save Changes"
+                <span style={themedButtonLabelStyle}>
+                  {dirtyRoleIds.length > 0
+                    ? `Save Changes (${dirtyRoleIds.length})`
+                    : "Save Changes"}
+                </span>
               )}
             </Button>
           </Box>
 
           <Box
             sx={{
-              width: "95%",
-              mx: "auto",
+              width: "100%",
               overflowX: "auto",
               overflowY: "auto",
               maxHeight: "65vh",
               borderRadius: "14px",
               border: "1px solid rgba(139, 147, 161, 0.15)",
+              borderLeft: "1px solid rgba(139, 147, 161, 0.15)",
+              borderRight: "1px solid rgba(139, 147, 161, 0.15)",
             }}
           >
             <Box
@@ -183,10 +202,7 @@ const PermissionMatrixPanel = () => {
                       top: 0,
                       left: 0,
                       zIndex: 3,
-                      // Explicit blue/white pairing (same #60a5fa as the primary
-                      // buttons) - "background.paper" was rendering the label
-                      // invisible against this table's actual surface.
-                      backgroundColor: "#60a5fa",
+                      backgroundColor: copperTextColor,
                       color: "#ffffff",
                     }}
                   >
@@ -205,8 +221,8 @@ const PermissionMatrixPanel = () => {
                         position: "sticky",
                         top: 0,
                         zIndex: 2,
-                        backgroundColor: "#141922",
-                        color: "#ffffff",
+                        backgroundColor: DASHBOARD_COLORS.cardBg,
+                        color: DASHBOARD_COLORS.textPrimary,
                       }}
                     >
                       {role.roleName}
@@ -226,7 +242,7 @@ const PermissionMatrixPanel = () => {
                             fontSize: "12px",
                             fontWeight: 600,
                             color: "text.secondary",
-                            backgroundColor: "rgba(96, 165, 250, 0.06)",
+                            backgroundColor: "rgba(201, 128, 61, 0.08)",
                             py: 1,
                             px: 2,
                           }}
@@ -248,8 +264,7 @@ const PermissionMatrixPanel = () => {
                               position: "sticky",
                               left: 0,
                               zIndex: 1,
-                              // Same fix as the header cell above.
-                              backgroundColor: "#60a5fa",
+                              backgroundColor: copperTextColor,
                               color: "#ffffff",
                             }}
                           >
@@ -275,6 +290,7 @@ const PermissionMatrixPanel = () => {
                                 onChange={() =>
                                   handleToggle(role.roleId, permission.key)
                                 }
+                                sx={copperCheckboxSx}
                               />
                             </Box>
                           ))}

@@ -7,6 +7,7 @@ import {
   type MRT_TableOptions,
 } from "material-react-table";
 import { Box, Button, IconButton, Tooltip } from "@mui/material";
+import { toast } from "react-toastify";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
 import type { StyleComponentBreakdown } from "../../../interfaces/production/StyleComponentBreakdown";
@@ -14,6 +15,13 @@ import type { StyleScope } from "../style-scope/style-scope-picker.component";
 import { useGetGarmentComponents } from "../../../tanstack-hooks/production-reference.hooks";
 import { useBulkSaveComponentBreakdownMutation } from "../../../tanstack-hooks/production-style-breakdown.hooks";
 import { useApparelProTable } from "../../../themes/useApparelProTable";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  deleteRowIconButtonSx,
+  numberFieldNoSpinnerSx,
+} from "../../../themes/workspace-theme";
 import ConfirmDialog from "../../common/confirm-dialog";
 
 const rowSchema = z.object({
@@ -44,6 +52,8 @@ interface Props {
 const StyleComponentBreakdownTable = ({ scope, rows, setRows, isLoading }: Props) => {
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [rowToDelete, setRowToDelete] = useState<MRT_Row<StyleComponentBreakdown> | null>(null);
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownSelectMenuProps = { slotProps: { paper: { sx: dropdownListboxSx } } };
 
   const { data: componentPageData } = useGetGarmentComponents({
     pageIndex: 0,
@@ -63,7 +73,7 @@ const StyleComponentBreakdownTable = ({ scope, rows, setRows, isLoading }: Props
         accessorKey: "componentSequence",
         header: "Sequence",
         size: 120,
-        muiEditTextFieldProps: { type: "number" },
+        muiEditTextFieldProps: { type: "number", sx: { ...dropdownFieldSx, ...numberFieldNoSpinnerSx } },
       },
       {
         accessorKey: "componentCode",
@@ -74,6 +84,11 @@ const StyleComponentBreakdownTable = ({ scope, rows, setRows, isLoading }: Props
           value: c.componentCode,
           label: `${c.componentCode} - ${c.description}`,
         })),
+        muiEditTextFieldProps: {
+          select: true,
+          sx: dropdownFieldSx,
+          slotProps: { select: { MenuProps: dropdownSelectMenuProps } },
+        },
         Cell: ({ cell }) => {
           const code = cell.getValue<string>();
           const match = componentOptions.find((c) => c.componentCode === code);
@@ -121,6 +136,10 @@ const StyleComponentBreakdownTable = ({ scope, rows, setRows, isLoading }: Props
   };
 
   const handleSaveAll = async () => {
+    if (rows.length === 0) {
+      toast.warning("Add at least one component before saving.");
+      return;
+    }
     await bulkSave({ scope, records: rows });
   };
 
@@ -147,11 +166,16 @@ const StyleComponentBreakdownTable = ({ scope, rows, setRows, isLoading }: Props
       ) : null,
     renderTopToolbarCustomActions: ({ table }) => (
       <Box sx={{ display: "flex", gap: "1rem" }}>
-        <Button variant="contained" onClick={() => table.setCreatingRow(true)}>
-          Add component
+        <Button variant="contained" onClick={() => table.setCreatingRow(true)} sx={primaryActionButtonSx}>
+          <span style={themedButtonLabelStyle}>Add component</span>
         </Button>
-        <Button variant="outlined" onClick={handleSaveAll} disabled={isSaving}>
-          {isSaving ? "Saving..." : "Save"}
+        <Button
+          variant="contained"
+          onClick={handleSaveAll}
+          disabled={isSaving}
+          sx={primaryActionButtonSx}
+        >
+          <span style={themedButtonLabelStyle}>{isSaving ? "Saving..." : "Save"}</span>
         </Button>
       </Box>
     ),
@@ -163,7 +187,7 @@ const StyleComponentBreakdownTable = ({ scope, rows, setRows, isLoading }: Props
           </IconButton>
         </Tooltip>
         <Tooltip title="Delete">
-          <IconButton color="error" onClick={() => openDeleteConfirmModal(row)}>
+          <IconButton color="error" onClick={() => openDeleteConfirmModal(row)} sx={deleteRowIconButtonSx}>
             <DeleteForeverOutlinedIcon />
           </IconButton>
         </Tooltip>

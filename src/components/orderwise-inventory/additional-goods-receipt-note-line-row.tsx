@@ -6,10 +6,15 @@ import type { Buyer } from "../../interfaces/references/Buyer";
 import { useGetAllPurchaseOrdersByBuyerCode } from "../../tanstack-hooks/custom-hooks";
 import { useGetReceivableStockByBuyerOrderQuery } from "../../tanstack-hooks/additional-goods-receipt-note.hooks";
 import { useDropdownTheme } from "../../themes/useDropdownTheme";
-import { plainTableBodyRowSx } from "../../themes/workspace-theme";
+import {
+  plainTableBodyRowSx,
+  deleteRowIconButtonSx,
+  numberFieldNoSpinnerSx,
+} from "../../themes/workspace-theme";
 
 interface Props {
   row: ArnLineItemRow;
+  index: number;
   buyersList: Buyer[];
   onChange: (field: keyof ArnLineItemRow, value: string | number | boolean | null) => void;
   onRemove: () => void;
@@ -18,7 +23,7 @@ interface Props {
 // A separate component per row (not a shared hook call in the parent) because each
 // line can point at a different Buyer/Order, so the item picker must be scoped
 // per-row - same reasoning as GeneralPoLineRow's per-row Store-scoped item picker.
-export default function AdditionalGoodsReceiptNoteLineRow({ row, buyersList, onChange, onRemove }: Props) {
+export default function AdditionalGoodsReceiptNoteLineRow({ row, index, buyersList, onChange, onRemove }: Props) {
   const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
 
@@ -65,7 +70,7 @@ export default function AdditionalGoodsReceiptNoteLineRow({ row, buyersList, onC
   const isOverReceivable = row.isSemiFinishedGarment && row.quantity > row.receivableBalance;
 
   return (
-    <TableRow sx={plainTableBodyRowSx(isOverReceivable)}>
+    <TableRow sx={plainTableBodyRowSx(index, isOverReceivable)}>
       <TableCell>
         <TextField
           select
@@ -148,7 +153,7 @@ export default function AdditionalGoodsReceiptNoteLineRow({ row, buyersList, onC
           size="small"
           variant="standard"
           fullWidth
-          sx={dropdownFieldSx}
+          sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
           error={isOverReceivable}
           value={row.quantity === 0 ? "" : row.quantity}
           onChange={(e) => onChange("quantity", Number(e.target.value))}
@@ -162,7 +167,7 @@ export default function AdditionalGoodsReceiptNoteLineRow({ row, buyersList, onC
           size="small"
           variant="standard"
           fullWidth
-          sx={dropdownFieldSx}
+          sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
           value={row.price === 0 ? "" : row.price}
           onChange={(e) => onChange("price", Number(e.target.value))}
           slotProps={{ htmlInput: { min: 0, step: "0.0001" } }}
@@ -170,7 +175,7 @@ export default function AdditionalGoodsReceiptNoteLineRow({ row, buyersList, onC
       </TableCell>
 
       <TableCell sx={{ textAlign: "center" }}>
-        <IconButton color="error" size="small" onClick={onRemove}>
+        <IconButton color="error" size="small" onClick={onRemove} sx={deleteRowIconButtonSx}>
           <DeleteIcon fontSize="small" />
         </IconButton>
       </TableCell>
