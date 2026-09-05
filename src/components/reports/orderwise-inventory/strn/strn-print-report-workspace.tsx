@@ -75,7 +75,7 @@ export default function StrnPrintReportWorkspace() {
       >
         <Box sx={{ textAlign: "center", mb: 3 }}>
           <Typography variant="h5" sx={workspaceHeadingSx}>
-            Stores Requisition Note — Print
+            Stores Requisition Note — Print (ORDERWISE)
           </Typography>
         </Box>
 

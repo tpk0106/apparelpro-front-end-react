@@ -243,7 +243,7 @@ export default function StoresRequisitionWorkspace() {
         }}
       >
         <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
-          Stores Requisition Note (STRN)
+          Stores Requisition Note (STRN) (ORDERWISE)
         </Typography>
 
         {/* SECTION 1: DOCUMENT HEADER DATA CAPTURE TRACK PANEL - its own card,

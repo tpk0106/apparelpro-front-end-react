@@ -177,7 +177,7 @@ export default function AdditionalGoodsReceiptNoteWorkspace() {
     <Box sx={{ width: "100%", py: 1, px: 3 }}>
       <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
-          Additional Goods Receipt Note (ARN)
+          Additional Goods Receipt Note (ARN) (ORDERWISE)
         </Typography>
         <Typography variant="caption" sx={{ ...workspaceInfoCaptionSx, mb: 3 }}>
           ARN Number is allocated by the server on commit — it is never entered manually. Receives processed

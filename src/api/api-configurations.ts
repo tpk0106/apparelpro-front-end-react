@@ -563,31 +563,52 @@ export const APPARELPRO_ENDPOINTS = {
       ISSUABLE_LINES: "api/orderwise-inventory-gin/issuable-lines",
       COMMIT: "api/orderwise-inventory-gin/commit",
       PENDING_STRNS: "api/orderwise-inventory-gin/pending-strns",
+      PRINT: "api/orderwise-inventory-gin/print",
+      PRINT_PDF: "api/orderwise-inventory-gin/print/pdf",
     },
     GRN: {
       RECEIVABLE_LINES: "api/orderwise-inventory-grn/receivable-lines",
       COMMIT: "api/orderwise-inventory-grn/commit",
       PENDING_POS: "api/orderwise-inventory-grn/pending-pos",
+      PRINT: "api/orderwise-inventory-grn/print",
+      PRINT_PDF: "api/orderwise-inventory-grn/print/pdf",
     },
     RTN: {
       RETURNABLE_STOCK: "api/orderwise-inventory-rtn/returnable-stock",
       COMMIT: "api/orderwise-inventory-rtn/commit",
+      PRINT: "api/orderwise-inventory-rtn/print",
+      PRINT_PDF: "api/orderwise-inventory-rtn/print/pdf",
     },
     GTN: {
       TRANSFERABLE_STOCK: "api/orderwise-inventory-gtn/transferable-stock",
       COMMIT: "api/orderwise-inventory-gtn/commit",
+      PRINT: "api/orderwise-inventory-gtn/print",
+      PRINT_PDF: "api/orderwise-inventory-gtn/print/pdf",
+    },
+    DTN: {
+      FROM_STOCK: "api/orderwise-inventory-dtn/from-stock",
+      TO_ORDER_ITEMS: "api/orderwise-inventory-dtn/to-order-items",
+      COMMIT: "api/orderwise-inventory-dtn/commit",
+      PRINT: "api/orderwise-inventory-dtn/print",
+      PRINT_PDF: "api/orderwise-inventory-dtn/print/pdf",
     },
     SRN: {
       RETURNABLE_STOCK: "api/orderwise-inventory-srn/returnable-stock",
       COMMIT: "api/orderwise-inventory-srn/commit",
+      PRINT: "api/orderwise-inventory-srn/print",
+      PRINT_PDF: "api/orderwise-inventory-srn/print/pdf",
     },
     DGN: {
       DAMAGEABLE_STOCK: "api/orderwise-inventory-dgn/damageable-stock",
       COMMIT: "api/orderwise-inventory-dgn/commit",
+      PRINT: "api/orderwise-inventory-dgn/print",
+      PRINT_PDF: "api/orderwise-inventory-dgn/print/pdf",
     },
     SAN: {
       ADJUSTABLE_STOCK: "api/orderwise-inventory-san/adjustable-stock",
       COMMIT: "api/orderwise-inventory-san/commit",
+      PRINT: "api/orderwise-inventory-san/print",
+      PRINT_PDF: "api/orderwise-inventory-san/print/pdf",
     },
     // Additional Issue Note (2026-08-09) - built from legacy IN_AIN3.PRG. Backed by
     // AINController. GetIssuableStock only takes buyerCode/order (no note-specific

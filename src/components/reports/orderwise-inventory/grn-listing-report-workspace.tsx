@@ -157,10 +157,18 @@ export default function GrnListingReportWorkspace() {
       },
       { accessorKey: "currency", header: "Curr", size: 55, enableSorting: false },
       { accessorKey: "supplierName", header: "Supplier", size: 160 },
-      { accessorKey: "buyerCode", header: "Buyer", size: 60 },
+      {
+        accessorKey: "buyerCode",
+        header: "Buyer",
+        size: 130,
+        Cell: ({ cell }) => {
+          const code = cell.getValue<number>();
+          return buyersList.find((b) => b.buyerCode === code)?.name ?? code;
+        },
+      },
       { accessorKey: "order", header: "Order", size: 90 },
     ],
-    [],
+    [buyersList],
   );
 
   const isLoading = isHeaderLoading || isLinesLoading;

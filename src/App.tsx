@@ -120,6 +120,15 @@ import GarmentAdditionalCostPage from "./components/garment-additional-cost/garm
 import SubContractPage from "./components/sub-contract/sub-contract.component";
 import SettingsPage from "./components/settings/settings.component";
 import StrnPrintReportWorkspace from "./components/reports/orderwise-inventory/strn/strn-print-report-workspace";
+import GinPrintReportWorkspace from "./components/reports/orderwise-inventory/gin/gin-print-report-workspace";
+import GrnPrintReportWorkspace from "./components/reports/orderwise-inventory/grn/grn-print-report-workspace";
+import RtnPrintReportWorkspace from "./components/reports/orderwise-inventory/rtn/rtn-print-report-workspace";
+import GtnPrintReportWorkspace from "./components/reports/orderwise-inventory/gtn/gtn-print-report-workspace";
+import SrnPrintReportWorkspace from "./components/reports/orderwise-inventory/srn/srn-print-report-workspace";
+import DgnPrintReportWorkspace from "./components/reports/orderwise-inventory/dgn/dgn-print-report-workspace";
+import SanPrintReportWorkspace from "./components/reports/orderwise-inventory/san/san-print-report-workspace";
+import DtnPrintReportWorkspace from "./components/reports/orderwise-inventory/dtn/dtn-print-report-workspace";
+import DirectTransferNoteWorkspace from "./components/orderwise-inventory/direct-transfer-note-workspace";
 import GeneralStrnPrintReportWorkspace from "./components/reports/general-inventory/strn/general-strn-print-report-workspace";
 import ProductionLines from "./components/references/production/production-line-tanstack/production-line.component";
 import Operations from "./components/references/production/operation-tanstack/operation.component";
@@ -388,6 +397,7 @@ function App() {
         />
         <Route index path="rtn" element={<GoodsReturnNoteWorkspace />} />
         <Route index path="gtn" element={<GoodsTransferNoteWorkspace />} />
+        <Route index path="dtn" element={<DirectTransferNoteWorkspace />} />
         <Route
           index
           path="general-gtn"
@@ -561,6 +571,14 @@ function App() {
           element={<StockMovementItemReportWorkspace />}
         />
         <Route index path="strn-print" element={<StrnPrintReportWorkspace />} />
+        <Route index path="gin-print" element={<GinPrintReportWorkspace />} />
+        <Route index path="grn-print" element={<GrnPrintReportWorkspace />} />
+        <Route index path="rtn-print" element={<RtnPrintReportWorkspace />} />
+        <Route index path="gtn-print" element={<GtnPrintReportWorkspace />} />
+        <Route index path="srn-print" element={<SrnPrintReportWorkspace />} />
+        <Route index path="dgn-print" element={<DgnPrintReportWorkspace />} />
+        <Route index path="san-print" element={<SanPrintReportWorkspace />} />
+        <Route index path="dtn-print" element={<DtnPrintReportWorkspace />} />
         <Route
           index
           path="general-strn-print"

@@ -219,7 +219,7 @@ export default function GoodsReceivedNoteCascadeWorkspace() {
         }}
       >
         <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
-          Goods Received Note (GRN)
+          Goods Received Note (GRN) (ORDERWISE)
         </Typography>
         <Typography
           variant="caption"

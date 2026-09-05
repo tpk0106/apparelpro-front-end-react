@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 
 import { useApparelProTable } from "../../../themes/useApparelProTable";
 import KpiTile from "../../common/kpi-tile";
+import { useGetBuyersQuery } from "../../../tanstack-hooks/custom-hooks";
 import {
   useGetTransactionListReportHeaderQuery,
   useGetTransactionListReportLinesQuery,
@@ -68,6 +69,23 @@ export default function TransactionListReportWorkspace() {
   } | null>(null);
 
   const isReady = !!searchedParams;
+
+  // Buyer lookup only - this report has no Buyer filter (it's a flat log
+  // across every buyer), but each line still carries a raw buyerCode that
+  // needs a name to display, so fetch the full list purely to resolve names.
+  const { data: buyerPageData } = useGetBuyersQuery({
+    pageIndex: 0,
+    pageSize: 999,
+    sortColumn: "name",
+    sortOrder: "asc",
+    filterColumn: null,
+    filterQuery: null,
+  });
+  const buyerNameByCode = useMemo(() => {
+    const map = new Map<number, string>();
+    (buyerPageData?.items ?? []).forEach((b) => map.set(b.buyerCode, b.name));
+    return map;
+  }, [buyerPageData]);
 
   const {
     data: header,
@@ -132,10 +150,18 @@ export default function TransactionListReportWorkspace() {
       },
       { accessorKey: "currency", header: "Curr", size: 55, enableSorting: false },
       { accessorKey: "supplierName", header: "Supplier", size: 160 },
-      { accessorKey: "buyerCode", header: "Buyer", size: 60 },
+      {
+        accessorKey: "buyerCode",
+        header: "Buyer",
+        size: 130,
+        Cell: ({ cell }) => {
+          const code = cell.getValue<number>();
+          return buyerNameByCode.get(code) ?? code;
+        },
+      },
       { accessorKey: "order", header: "Order", size: 90 },
     ],
-    [],
+    [buyerNameByCode],
   );
 
   const isLoading = isHeaderLoading || isLinesLoading;

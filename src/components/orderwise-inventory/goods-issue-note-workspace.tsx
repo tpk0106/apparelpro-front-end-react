@@ -218,7 +218,7 @@ export default function GoodsIssueNoteWorkspace() {
         }}
       >
         <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
-          Goods Issue Note (GIN)
+          Goods Issue Note (GIN) (ORDERWISE)
         </Typography>
         <Typography
           variant="caption"

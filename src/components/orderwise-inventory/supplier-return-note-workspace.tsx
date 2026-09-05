@@ -244,7 +244,7 @@ export default function SupplierReturnNoteWorkspace() {
         }}
       >
         <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
-          Supplier Return Note (SRN)
+          Supplier Return Note (SRN) (ORDERWISE)
         </Typography>
         <Typography variant="caption" sx={{ ...workspaceInfoCaptionSx, mb: 3 }}>
           SRN Number is allocated by the server on commit — it is never entered

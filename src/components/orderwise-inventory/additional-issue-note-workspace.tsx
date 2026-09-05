@@ -264,7 +264,7 @@ export default function AdditionalIssueNoteWorkspace() {
         }}
       >
         <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
-          Additional Issue Note (AIN)
+          Additional Issue Note (AIN) (ORDERWISE)
         </Typography>
         <Typography
           variant="caption"

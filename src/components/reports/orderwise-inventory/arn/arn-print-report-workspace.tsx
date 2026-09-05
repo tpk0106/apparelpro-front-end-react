@@ -58,7 +58,7 @@ export default function ArnPrintReportWorkspace() {
       <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Box sx={{ textAlign: "center", mb: 3 }}>
           <Typography variant="h5" sx={workspaceHeadingSx}>
-            Additional Goods Receipt Note — Print
+            Additional Goods Receipt Note — Print (ORDERWISE)
           </Typography>
         </Box>
 

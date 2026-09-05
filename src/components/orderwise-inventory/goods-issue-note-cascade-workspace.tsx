@@ -258,7 +258,7 @@ export default function GoodsIssueNoteCascadeWorkspace() {
         }}
       >
         <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
-          Goods Issue Note (GIN)
+          Goods Issue Note (GIN) (ORDERWISE)
         </Typography>
         {/* <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 3 }}>
           GIN Number is allocated by the server on commit — it is never entered manually.

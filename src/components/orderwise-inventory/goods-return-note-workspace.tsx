@@ -231,7 +231,7 @@ export default function GoodsReturnNoteWorkspace() {
         }}
       >
         <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
-          Goods Return Note (RTN)
+          Goods Return Note (RTN) (ORDERWISE)
         </Typography>
         <Typography
           variant="caption"

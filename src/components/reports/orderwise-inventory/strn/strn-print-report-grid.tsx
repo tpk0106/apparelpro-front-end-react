@@ -36,7 +36,7 @@ export default function StrnPrintReportGrid({
           </span>
         ),
       },
-      { accessorKey: "storeCode", header: "Store", size: 100 },
+      { accessorKey: "storeCode", header: "Basis", size: 100 },
     ],
     [],
   );

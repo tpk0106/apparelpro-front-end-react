@@ -305,6 +305,12 @@ export const navbarData = [
         pinned: false,
       },
       {
+        routerLink: "dtn",
+        icon: null,
+        label: "Direct Goods Transfer Note",
+        pinned: false,
+      },
+      {
         routerLink: "supplier-return-note",
         icon: null,
         label: "Supplier Return Note",

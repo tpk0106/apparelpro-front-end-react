@@ -58,7 +58,7 @@ export default function AinPrintReportWorkspace() {
       <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Box sx={{ textAlign: "center", mb: 3 }}>
           <Typography variant="h5" sx={workspaceHeadingSx}>
-            Additional Issue Note — Print
+            Additional Issue Note — Print (ORDERWISE)
           </Typography>
         </Box>
 

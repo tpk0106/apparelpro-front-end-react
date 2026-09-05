@@ -227,7 +227,7 @@ export default function StockAdjustmentNoteWorkspace() {
         }}
       >
         <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
-          Stock Adjustment Note (SAN)
+          Stock Adjustment Note (SAN) (ORDERWISE)
         </Typography>
         <Typography
           variant="caption"

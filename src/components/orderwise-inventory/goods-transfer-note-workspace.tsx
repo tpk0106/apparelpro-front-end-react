@@ -282,7 +282,7 @@ export default function GoodsTransferNoteWorkspace() {
         }}
       >
         <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
-          Goods Transfer Note (GTN)
+          Goods Transfer Note (GTN) (ORDERWISE)
         </Typography>
         <Typography
           variant="caption"

@@ -230,7 +230,7 @@ export default function DamagedGoodsNoteWorkspace() {
         }}
       >
         <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 3 }}>
-          Damaged Goods Note (DGN)
+          Damaged Goods Note (DGN) (ORDERWISE)
         </Typography>
         <Typography
           variant="caption"
