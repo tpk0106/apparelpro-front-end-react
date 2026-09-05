@@ -786,12 +786,6 @@ export const navbarData = [
         pinned: false,
       },
       {
-        routerLink: "stock-movement",
-        icon: null,
-        label: "Stock Movement (for an Order)",
-        pinned: false,
-      },
-      {
         routerLink: "orderwise-transaction-list-report",
         icon: null,
         label: "List of Transactions",

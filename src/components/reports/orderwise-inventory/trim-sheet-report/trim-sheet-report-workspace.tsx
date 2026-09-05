@@ -62,26 +62,23 @@ export default function TrimSheetReportWorkspace() {
   };
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
+    <Box sx={{ width: "95%", mx: "auto", p: 1 }}>
       <Paper
         elevation={3}
         sx={{
           p: 3,
-          borderTop: `4px solid ${DASHBOARD_COLORS.accent}`,
           backgroundColor: DASHBOARD_COLORS.pageBg,
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            mb: 2,
-          }}
-        >
+        <Box sx={{ textAlign: "center", mb: 2 }}>
           <Typography variant="h5" sx={workspaceHeadingSx}>
             Trim Sheet Report
           </Typography>
+        </Box>
+
+        <TrimSheetReportHeader onScopeLock={setScope} />
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
           <Button
             variant="contained"
             startIcon={
@@ -100,8 +97,6 @@ export default function TrimSheetReportWorkspace() {
             </span>
           </Button>
         </Box>
-
-        <TrimSheetReportHeader onScopeLock={setScope} />
 
         {!isReady ? (
           <Paper

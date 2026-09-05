@@ -140,7 +140,13 @@ export const noteTableHeadCellUppercaseSx = {
 // #B7AE86) via a filter on the black glyph. Spread this alongside a field's
 // own sx (it has no overlapping keys with dropdownFieldSx/selectFieldSx).
 export const dateIconFieldSx: SxProps<Theme> = {
-  "& input[type='date']::-webkit-calendar-picker-indicator": {
+  // Was scoped to input[type='date'] only, which silently never matched
+  // type="month" fields (Production Summary Monthly, Employee Efficiency
+  // Monthly, Line Efficiency, etc.) - their calendar icon stayed the
+  // browser's default black glyph, invisible on this app's dark fields.
+  // Every native date-ish input type gets the same picker-indicator
+  // pseudo-element, so drop the type qualifier to cover all of them.
+  "& input::-webkit-calendar-picker-indicator": {
     filter:
       "invert(78%) sepia(11%) saturate(694%) hue-rotate(358deg) brightness(88%) contrast(85%)",
     cursor: "pointer",

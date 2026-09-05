@@ -10,6 +10,7 @@ import {
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import { withReadableReportTable } from "../../../themes/report-table-theme";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
 import {
   workspaceHeadingSx,
   primaryActionButtonSx,
@@ -20,6 +21,7 @@ import {
 const currentMonth = () => new Date().toISOString().slice(0, 7);
 
 const MonthlyEmployeeEfficiencyReportWorkspace = () => {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const [monthValue, setMonthValue] = useState(currentMonth());
   const [year, month] = monthValue ? monthValue.split("-").map(Number) : [null, null];
   const { data: report, isLoading, isError, error } = useGetMonthlyEmployeeEfficiencyReport(year, month);
@@ -38,7 +40,7 @@ const MonthlyEmployeeEfficiencyReportWorkspace = () => {
           label="Month" type="month" size="small"
           slotProps={{ inputLabel: { shrink: true } }}
           value={monthValue} onChange={(e) => setMonthValue(e.target.value)}
-          sx={dateIconFieldSx}
+          sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
         />
         <Button
           variant="contained"

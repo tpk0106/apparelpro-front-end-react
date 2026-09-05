@@ -8,7 +8,12 @@ import { toast } from "react-toastify";
 
 import { useApparelProTable } from "../../../themes/useApparelProTable";
 import KpiTile from "../../common/kpi-tile";
-import { useGetBuyersQuery, useGetAllPurchaseOrdersByBuyerCode } from "../../../tanstack-hooks/custom-hooks";
+import {
+  useGetBuyersQuery,
+  useGetAllPurchaseOrdersByBuyerCode,
+  useGetBasis,
+  useGetSuppliersLookup,
+} from "../../../tanstack-hooks/custom-hooks";
 import {
   useGetGrnListingReportHeaderQuery,
   useGetGrnListingReportLinesQuery,
@@ -23,6 +28,7 @@ import {
   primaryActionButtonSx,
   themedButtonLabelStyle,
   workspaceHeadingSx,
+  dateIconFieldSx,
 } from "../../../themes/workspace-theme";
 
 // Unifies legacy IN_GRN3.PRG ("GRN LISTING - DATE WISE", optional Basis filter) and
@@ -61,6 +67,18 @@ export default function GrnListingReportWorkspace() {
     selectedBuyer?.buyerCode ?? 0,
     !!selectedBuyer,
   );
+
+  const { data: basisPage, isLoading: isBasisLoading } = useGetBasis({
+    pageIndex: 0,
+    pageSize: 999,
+    sortColumn: "description",
+    sortOrder: "asc",
+    filterColumn: null,
+    filterQuery: null,
+  });
+  const basisList = basisPage?.items ?? [];
+
+  const { data: suppliersList = [], isLoading: isSuppliersLoading } = useGetSuppliersLookup();
 
   const isReady = !!searchedParams;
   const hasDateRange = !!fromDate && !!toDate;
@@ -164,26 +182,15 @@ export default function GrnListingReportWorkspace() {
   });
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.pageBg }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+    <Box sx={{ width: "95%", mx: "auto", p: 1 }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
+        <Box sx={{ textAlign: "center", mb: 3 }}>
           <Typography variant="h5" sx={workspaceHeadingSx}>
             GRN Listing (Orderwise Inventory)
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<PictureAsPdfIcon />}
-            onClick={handleDownloadPdf}
-            disabled={!isReady || isError || isDownloading}
-            sx={primaryActionButtonSx}
-          >
-            <span style={themedButtonLabelStyle}>
-              {isDownloading ? "Generating..." : "Download PDF"}
-            </span>
-          </Button>
         </Box>
 
-        <Grid container spacing={2} sx={{ mb: 1 }}>
+        <Grid container spacing={2} sx={{ mb: 1, alignItems: "center" }}>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <TextField
               type="date"
@@ -193,7 +200,7 @@ export default function GrnListingReportWorkspace() {
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
-              sx={dropdownFieldSx}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
@@ -205,18 +212,28 @@ export default function GrnListingReportWorkspace() {
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
-              sx={dropdownFieldSx}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <TextField
+              select
               label="Basis (optional)"
               size="small"
               fullWidth
               value={storeCode}
               onChange={(e) => setStoreCode(e.target.value)}
+              disabled={isBasisLoading}
+              slotProps={{ select: { displayEmpty: true, MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } }, inputLabel: { shrink: true } }}
               sx={dropdownFieldSx}
-            />
+            >
+              <MenuItem value="">None</MenuItem>
+              {basisList.map((b) => (
+                <MenuItem key={b.code} value={b.code}>
+                  {b.code} - {b.description}
+                </MenuItem>
+              ))}
+            </TextField>
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <TextField
@@ -259,16 +276,26 @@ export default function GrnListingReportWorkspace() {
             </TextField>
           </Grid>
         </Grid>
-        <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <TextField
-              label="Supplier Code (optional)"
+              select
+              label="Supplier (optional)"
               size="small"
               fullWidth
               value={supplierCode}
               onChange={(e) => setSupplierCode(e.target.value)}
+              disabled={isSuppliersLoading}
+              slotProps={{ select: { displayEmpty: true, MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } }, inputLabel: { shrink: true } }}
               sx={dropdownFieldSx}
-            />
+            >
+              <MenuItem value="">None</MenuItem>
+              {suppliersList.map((s) => (
+                <MenuItem key={s.supplierCode} value={String(s.supplierCode)}>
+                  {s.name}
+                </MenuItem>
+              ))}
+            </TextField>
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <Button
@@ -282,6 +309,20 @@ export default function GrnListingReportWorkspace() {
             </Button>
           </Grid>
         </Grid>
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+          <Button
+            variant="contained"
+            startIcon={<PictureAsPdfIcon />}
+            onClick={handleDownloadPdf}
+            disabled={!isReady || isError || isDownloading}
+            sx={primaryActionButtonSx}
+          >
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
+          </Button>
+        </Box>
 
         {!isReady ? (
           <Alert severity="info" variant="outlined">

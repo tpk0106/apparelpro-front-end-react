@@ -1,5 +1,6 @@
 import { Button, Card, TextField, Typography } from "@mui/material";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
 import {
   primaryActionButtonSx,
   themedButtonLabelStyle,
@@ -26,19 +27,21 @@ export const DateRangeFilterCard = ({
   downloadDisabled,
   isDownloading,
   captionText,
-}: DateRangeFilterCardProps) => (
+}: DateRangeFilterCardProps) => {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
+  return (
   <Card variant="outlined" sx={{ p: 2, mb: 2, display: "flex", alignItems: "center", gap: 2, backgroundColor: DASHBOARD_COLORS.cardBg, borderColor: DASHBOARD_COLORS.border }}>
     <TextField
       label="Start Date" type="date" size="small"
       slotProps={{ inputLabel: { shrink: true } }}
       value={startDate} onChange={(e) => onStartDateChange(e.target.value)}
-      sx={dateIconFieldSx}
+      sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
     />
     <TextField
       label="End Date" type="date" size="small"
       slotProps={{ inputLabel: { shrink: true } }}
       value={endDate} onChange={(e) => onEndDateChange(e.target.value)}
-      sx={dateIconFieldSx}
+      sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
     />
     <Button variant="contained" disabled={downloadDisabled} onClick={onDownloadPdf} sx={primaryActionButtonSx}>
       <span style={themedButtonLabelStyle}>{isDownloading ? "Preparing PDF..." : "Print / Download PDF"}</span>
@@ -49,4 +52,5 @@ export const DateRangeFilterCard = ({
       </Typography>
     )}
   </Card>
-);
+  );
+};

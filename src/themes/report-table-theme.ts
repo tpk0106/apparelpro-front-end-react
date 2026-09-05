@@ -1,5 +1,5 @@
 import { createTheme, type Theme } from "@mui/material";
-import { DASHBOARD_COLORS } from "../components/dashboard/dashboard-theme";
+import { oliveCopperTableTheme } from "./table-color-themes";
 
 // The app-wide theme skins MuiTableRow/MuiTableCell for Material React
 // Table grids (forced blue zebra rows, !important black cell text, blue
@@ -10,9 +10,13 @@ import { DASHBOARD_COLORS } from "../components/dashboard/dashboard-theme";
 // replaces those specific values for any table wrapped in this theme,
 // rather than fighting a CSS specificity/!important war.
 //
-// Colors pulled from DASHBOARD_COLORS/the olive-copper table palette so every
-// report table matches the rest of the app instead of the old flat dark-grey
-// (#20242C) header that predated that palette.
+// Pulls straight from oliveCopperTableTheme (the same palette every MRT
+// table in the app uses via useApparelProTable) instead of a flatter
+// DASHBOARD_COLORS-only look - a header/body sharing near-identical dark
+// tones read as "no theme" next to the bold olive header band every other
+// table in the app has, so this matches that band exactly for consistency.
+const t = oliveCopperTableTheme;
+
 export const withReadableReportTable = (outerTheme: Theme) =>
   createTheme(outerTheme, {
     components: {
@@ -20,19 +24,19 @@ export const withReadableReportTable = (outerTheme: Theme) =>
         styleOverrides: {
           root: {
             transition: "none",
-            "&:nth-of-type(even)": { backgroundColor: "transparent !important" },
-            "&:nth-of-type(odd)": { backgroundColor: "rgba(147,168,60,0.10) !important" },
-            "& td": { color: `${DASHBOARD_COLORS.textPrimary} !important` },
+            "&:nth-of-type(even)": { backgroundColor: `${t.rowBg} !important` },
+            "&:nth-of-type(odd)": { backgroundColor: `${t.rowAltBg} !important` },
+            "& td": { color: `${t.rowText} !important` },
             "& .MuiSvgIcon-root, & .MuiIconButton-root, & .MuiIconButton-root .MuiSvgIcon-root": {
-              color: `${DASHBOARD_COLORS.textPrimary} !important`,
+              color: `${t.rowIconColor} !important`,
             },
             "&.Mui-editingRow, &[data-editing='true']": {
-              backgroundColor: "transparent !important",
-              "& td": { color: `${DASHBOARD_COLORS.textPrimary} !important` },
+              backgroundColor: `${t.rowBg} !important`,
+              "& td": { color: `${t.rowText} !important` },
             },
-            "&.MuiTableBodyRow-root:hover": {
-              backgroundColor: "rgba(147,168,60,0.16) !important",
-              "& td": { color: `${DASHBOARD_COLORS.textPrimary} !important` },
+            "&.MuiTableBodyRow-root:hover, &:hover": {
+              backgroundColor: `${t.rowHoverBg} !important`,
+              "& td": { color: `${t.rowHoverText} !important` },
             },
           },
         },
@@ -41,18 +45,18 @@ export const withReadableReportTable = (outerTheme: Theme) =>
         styleOverrides: {
           body: {
             backgroundColor: "transparent",
-            color: DASHBOARD_COLORS.textPrimary,
-            borderBottom: `1px solid ${DASHBOARD_COLORS.border}`,
+            color: t.rowText,
+            borderBottom: `1px solid ${t.rowBorder}`,
           },
           head: {
-            backgroundColor: DASHBOARD_COLORS.cardBg,
-            color: DASHBOARD_COLORS.accentStrong,
-            fontWeight: 600,
-            borderBottom: `2px solid ${DASHBOARD_COLORS.borderStrong}`,
+            backgroundColor: t.headerBg,
+            color: t.headerText,
+            fontWeight: 700,
+            borderBottom: `2px solid ${t.headerBg}`,
           },
           footer: {
-            backgroundColor: DASHBOARD_COLORS.cardBg,
-            color: DASHBOARD_COLORS.textPrimary,
+            backgroundColor: t.footerBg,
+            color: t.footerText,
           },
         },
       },

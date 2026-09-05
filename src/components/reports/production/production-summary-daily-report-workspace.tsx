@@ -21,6 +21,7 @@ import {
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import { withReadableReportTable } from "../../../themes/report-table-theme";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
 import {
   workspaceHeadingSx,
   primaryActionButtonSx,
@@ -31,6 +32,7 @@ import {
 const today = () => new Date().toISOString().slice(0, 10);
 
 const ProductionSummaryDailyReportWorkspace = () => {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const [date, setDate] = useState(today());
   const { data: report, isLoading, isError, error } = useGetProductionSummaryDailyReport(date);
   const { mutateAsync: downloadPdf, isPending: isDownloading } = useDownloadProductionSummaryDailyReportPdfMutation();
@@ -51,7 +53,7 @@ const ProductionSummaryDailyReportWorkspace = () => {
           label="Date" type="date" size="small"
           slotProps={{ inputLabel: { shrink: true } }}
           value={date} onChange={(e) => setDate(e.target.value)}
-          sx={dateIconFieldSx}
+          sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
         />
         <Button
           variant="contained"

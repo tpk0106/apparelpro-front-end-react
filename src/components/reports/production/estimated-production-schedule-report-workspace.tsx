@@ -10,6 +10,7 @@ import {
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import { withReadableReportTable } from "../../../themes/report-table-theme";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
 import {
   workspaceHeadingSx,
   primaryActionButtonSx,
@@ -25,6 +26,7 @@ const inOneMonth = () => {
 };
 
 const EstimatedProductionScheduleReportWorkspace = () => {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const [fromDate, setFromDate] = useState(today());
   const [toDate, setToDate] = useState(inOneMonth());
   const { data: report, isLoading, isError, error } = useGetEstimatedProductionScheduleReport(fromDate, toDate);
@@ -43,13 +45,13 @@ const EstimatedProductionScheduleReportWorkspace = () => {
           label="From Date" type="date" size="small"
           slotProps={{ inputLabel: { shrink: true } }}
           value={fromDate} onChange={(e) => setFromDate(e.target.value)}
-          sx={dateIconFieldSx}
+          sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
         />
         <TextField
           label="To Date" type="date" size="small"
           slotProps={{ inputLabel: { shrink: true } }}
           value={toDate} onChange={(e) => setToDate(e.target.value)}
-          sx={dateIconFieldSx}
+          sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
         />
         <Button
           variant="contained"

@@ -199,7 +199,7 @@ export default function StylewiseEventsGrid({
               handleCellEditSave(row, "scheduledDate", e.target.value || null)
             }
             slotProps={{ htmlInput: { style: { fontSize: "13px" } } }}
-            sx={dateIconFieldSx}
+            sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
           />
         ),
       },
@@ -221,7 +221,7 @@ export default function StylewiseEventsGrid({
               handleCellEditSave(row, "actualDate", e.target.value || null)
             }
             slotProps={{ htmlInput: { style: { fontSize: "13px" } } }}
-            sx={dateIconFieldSx}
+            sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
           />
         ),
       },

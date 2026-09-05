@@ -49,7 +49,7 @@ const DailyEmployeeEfficiencyReportWorkspace = () => {
               label="Date" type="date" size="small" fullWidth
               slotProps={{ inputLabel: { shrink: true } }}
               value={date} onChange={(e) => setDate(e.target.value)}
-              sx={dateIconFieldSx}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>

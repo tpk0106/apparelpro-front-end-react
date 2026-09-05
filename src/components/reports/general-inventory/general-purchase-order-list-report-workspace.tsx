@@ -95,23 +95,15 @@ export default function GeneralPurchaseOrderListReportWorkspace() {
   });
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: "4px solid #60a5fa", backgroundColor: "#f9f9f9" }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+    <Box sx={{ width: "95%", mx: "auto", p: 1 }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: "#f9f9f9" }}>
+        <Box sx={{ textAlign: "center", mb: 3 }}>
           <Typography variant="h5" sx={{ fontWeight: "bold" }}>
             List of P/O's (General Inventory)
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<PictureAsPdfIcon />}
-            onClick={handleDownloadPdf}
-            disabled={!isReady || isError || isDownloading}
-          >
-            {isDownloading ? "Generating..." : "Download PDF"}
-          </Button>
         </Box>
 
-        <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <TextField
               type="date"
@@ -146,6 +138,17 @@ export default function GeneralPurchaseOrderListReportWorkspace() {
             </Button>
           </Grid>
         </Grid>
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+          <Button
+            variant="contained"
+            startIcon={<PictureAsPdfIcon />}
+            onClick={handleDownloadPdf}
+            disabled={!isReady || isError || isDownloading}
+          >
+            {isDownloading ? "Generating..." : "Download PDF"}
+          </Button>
+        </Box>
 
         {!isReady ? (
           <Alert severity="info" variant="outlined">

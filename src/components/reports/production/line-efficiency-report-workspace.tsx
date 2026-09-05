@@ -65,7 +65,7 @@ const LineEfficiencyReportWorkspace = () => {
           label="Month" type="month" size="small"
           slotProps={{ inputLabel: { shrink: true } }}
           value={monthValue} onChange={(e) => setMonthValue(e.target.value)}
-          sx={dateIconFieldSx}
+          sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
         />
         <Button
           variant="contained"

@@ -21,6 +21,7 @@ import {
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import { withReadableReportTable } from "../../../themes/report-table-theme";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
 import {
   workspaceHeadingSx,
   primaryActionButtonSx,
@@ -33,6 +34,7 @@ const currentMonth = () => new Date().toISOString().slice(0, 7);
 const pct = (est: number, act: number) => (est > 0 && act > 0 ? `${((act / est) * 100).toFixed(1)}%` : "-");
 
 const ProductionSummaryMonthlyOverviewReportWorkspace = () => {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const [monthValue, setMonthValue] = useState(currentMonth());
   const [year, month] = monthValue ? monthValue.split("-").map(Number) : [null, null];
   const { data: report, isLoading, isError, error } = useGetProductionSummaryMonthlyOverviewReport(year, month);
@@ -51,7 +53,7 @@ const ProductionSummaryMonthlyOverviewReportWorkspace = () => {
           label="Month" type="month" size="small"
           slotProps={{ inputLabel: { shrink: true } }}
           value={monthValue} onChange={(e) => setMonthValue(e.target.value)}
-          sx={dateIconFieldSx}
+          sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
         />
         <Button
           variant="contained"

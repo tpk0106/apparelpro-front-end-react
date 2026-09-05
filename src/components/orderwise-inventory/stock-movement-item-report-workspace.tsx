@@ -137,47 +137,23 @@ export default function StockMovementItemReportWorkspace() {
   };
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
+    <Box sx={{ width: "95%", mx: "auto", p: 1 }}>
       <Paper
         elevation={3}
         sx={{
           px: { xs: 1, sm: 1.5, md: 2 },
           py: 3,
           width: "100%",
-          borderTop: `4px solid ${DASHBOARD_COLORS.accent}`,
           backgroundColor: DASHBOARD_COLORS.pageBg,
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            mb: 3,
-          }}
-        >
-          <Box>
-            <Typography variant="h5" sx={{ ...workspaceHeadingSx, mb: 0.5 }}>
-              Stock Movement — for an Item
-            </Typography>
-            <Typography variant="caption" sx={workspaceInfoCaptionSx}>
-              Legacy reference: in_smve1.prg
-            </Typography>
-          </Box>
-          <Button
-            variant="contained"
-            startIcon={<PictureAsPdfIcon />}
-            onClick={handleExportPdf}
-            disabled={!isReady || isHeaderError || isDownloading}
-            sx={primaryActionButtonSx}
-          >
-            <span style={themedButtonLabelStyle}>
-              {isDownloading ? "Generating..." : "Export PDF"}
-            </span>
-          </Button>
+        <Box sx={{ textAlign: "center", mb: 3 }}>
+          <Typography variant="h5" sx={workspaceHeadingSx}>
+            Stock Movement — for an Item
+          </Typography>
         </Box>
 
-        <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <TextField
               select
@@ -239,6 +215,20 @@ export default function StockMovementItemReportWorkspace() {
           </Grid>
         </Grid>
 
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+          <Button
+            variant="contained"
+            startIcon={<PictureAsPdfIcon />}
+            onClick={handleExportPdf}
+            disabled={!isReady || isHeaderError || isDownloading}
+            sx={primaryActionButtonSx}
+          >
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Export PDF"}
+            </span>
+          </Button>
+        </Box>
+
         {!isReady ? (
           <Alert severity="info" variant="outlined">
             Select a Buyer, Order and Item to load its stock movement history.
@@ -255,13 +245,13 @@ export default function StockMovementItemReportWorkspace() {
                 label="Description"
                 value={header?.description}
                 loading={isHeaderLoading}
-                size={{ xs: 12, sm: 6, md: 4 }}
+                size={{ xs: 12, sm: 6, md: 5 }}
               />
               <KpiTile
                 label="Unit"
                 value={header?.unit}
                 loading={isHeaderLoading}
-                size={{ xs: 12, sm: 6, md: 2 }}
+                size={{ xs: 12, sm: 6, md: 1 }}
               />
               <KpiTile
                 label="Order Qty"
@@ -303,8 +293,7 @@ export default function StockMovementItemReportWorkspace() {
             <Typography variant="caption" sx={workspaceInfoCaptionSx}>
               * Additional Issue Note (4X) is shown for reference but never affects
               the running balance, and Stock Adjustment Note (3A) sets the balance
-              directly rather than adding to it — both replicate legacy IN_SMVE1.PRG
-              exactly.
+              directly rather than adding to it.
             </Typography>
           </>
         )}

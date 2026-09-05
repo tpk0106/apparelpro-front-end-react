@@ -145,26 +145,15 @@ export default function StockStatusReportWorkspace() {
   });
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, borderTop: `4px solid ${DASHBOARD_COLORS.accent}`, backgroundColor: DASHBOARD_COLORS.pageBg }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
+    <Box sx={{ width: "95%", mx: "auto", p: 1 }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
+        <Box sx={{ textAlign: "center", mb: 3 }}>
           <Typography variant="h5" sx={workspaceHeadingSx}>
             Stock Status Report (Orderwise Inventory)
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<PictureAsPdfIcon />}
-            onClick={handleDownloadPdf}
-            disabled={!isReady || isError || isDownloading}
-            sx={primaryActionButtonSx}
-          >
-            <span style={themedButtonLabelStyle}>
-              {isDownloading ? "Generating..." : "Download PDF"}
-            </span>
-          </Button>
         </Box>
 
-        <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <TextField
               select
@@ -215,6 +204,20 @@ export default function StockStatusReportWorkspace() {
             </Button>
           </Grid>
         </Grid>
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+          <Button
+            variant="contained"
+            startIcon={<PictureAsPdfIcon />}
+            onClick={handleDownloadPdf}
+            disabled={!isReady || isError || isDownloading}
+            sx={primaryActionButtonSx}
+          >
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
+          </Button>
+        </Box>
 
         {!isReady ? (
           <Alert severity="info" variant="outlined">
