@@ -25,10 +25,22 @@ import {
 } from "../../../tanstack-hooks/general-inventory/general-stock-reorder-report.hooks";
 import type { GeneralStockReorderReportLine } from "../../../interfaces/general-inventory/general-stock-reorder-report.types";
 import type { AppError } from "../../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+} from "../../../themes/workspace-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
 
 // Replicates GI_ROL.PRG's "STOCK RE-ORDER REPORT" - a current-snapshot listing
 // straight off GeneralStockMasters for a Store, filtered to QtyInHand <= ReorderLevel.
 export default function GeneralStockReorderReportWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } =
+    useDropdownTheme();
+  const dropdownMenuSlotProps = {
+    select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } },
+  };
   const [selectedStore, setSelectedStore] = useState<string>("");
   const [searchedStore, setSearchedStore] = useState<string | null>(null);
 
@@ -117,9 +129,9 @@ export default function GeneralStockReorderReportWorkspace() {
 
   return (
     <Box sx={{ width: "95%", mx: "auto", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, backgroundColor: "#f9f9f9" }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Box sx={{ textAlign: "center", mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          <Typography variant="h5" sx={workspaceHeadingSx}>
             Stock Re-order Report (General Inventory)
           </Typography>
         </Box>
@@ -134,6 +146,8 @@ export default function GeneralStockReorderReportWorkspace() {
               value={selectedStore}
               onChange={(e) => setSelectedStore(e.target.value)}
               disabled={isStoresLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {storesList.map((s) => (
                 <MenuItem key={s.code} value={s.code}>
@@ -144,13 +158,14 @@ export default function GeneralStockReorderReportWorkspace() {
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <Button
-              variant="outlined"
+              variant="contained"
               startIcon={<SearchIcon />}
               onClick={handleLoad}
               disabled={!selectedStore}
               fullWidth
+              sx={primaryActionButtonSx}
             >
-              Load
+              <span style={themedButtonLabelStyle}>Load</span>
             </Button>
           </Grid>
         </Grid>
@@ -161,8 +176,11 @@ export default function GeneralStockReorderReportWorkspace() {
             startIcon={<PictureAsPdfIcon />}
             onClick={handleDownloadPdf}
             disabled={!isReady || isError || isDownloading}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Generating..." : "Download PDF"}
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
           </Button>
         </Box>
 

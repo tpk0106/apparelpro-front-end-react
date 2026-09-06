@@ -9,6 +9,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import { toast } from "react-toastify";
 
 import {
   useGetSystemParametersQuery,
@@ -248,6 +249,11 @@ const ParameterRow = ({
             defaultValue={parameter.value}
             disabled={disabled}
             onBlur={(event) => {
+              if (event.target.value.trim() === "") {
+                toast.warning("Value can't be blank - reverted to the previous value.");
+                event.target.value = parameter.value;
+                return;
+              }
               if (event.target.value !== parameter.value) {
                 onSave(parameter.parameterKey, event.target.value);
               }
@@ -303,6 +309,11 @@ const ParameterRow = ({
             defaultValue={parameter.value}
             disabled={disabled}
             onBlur={(event) => {
+              if (event.target.value.trim() === "") {
+                toast.warning("Value can't be blank - reverted to the previous value.");
+                event.target.value = parameter.value;
+                return;
+              }
               if (event.target.value !== parameter.value) {
                 onSave(parameter.parameterKey, event.target.value);
               }

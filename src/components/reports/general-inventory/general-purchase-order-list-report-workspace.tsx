@@ -23,10 +23,19 @@ import {
 } from "../../../tanstack-hooks/general-inventory/general-purchase-order-list-report.hooks";
 import type { GeneralPurchaseOrderListReportLine } from "../../../interfaces/general-inventory/general-purchase-order-list-report.types";
 import type { AppError } from "../../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  dateIconFieldSx,
+} from "../../../themes/workspace-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
 
 // Replicates GI_PLIST.PRG's "LIST OF P/O's (General)" - a flat GeneralPurchaseOrders
 // listing for a date range. No transaction replay - a P/O never moves stock on its own.
 export default function GeneralPurchaseOrderListReportWorkspace() {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
 
@@ -96,9 +105,9 @@ export default function GeneralPurchaseOrderListReportWorkspace() {
 
   return (
     <Box sx={{ width: "95%", mx: "auto", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, backgroundColor: "#f9f9f9" }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Box sx={{ textAlign: "center", mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          <Typography variant="h5" sx={workspaceHeadingSx}>
             List of P/O's (General Inventory)
           </Typography>
         </Box>
@@ -113,6 +122,7 @@ export default function GeneralPurchaseOrderListReportWorkspace() {
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -124,17 +134,19 @@ export default function GeneralPurchaseOrderListReportWorkspace() {
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <Button
-              variant="outlined"
+              variant="contained"
               startIcon={<SearchIcon />}
               onClick={handleLoad}
               disabled={!fromDate || !toDate}
               fullWidth
+              sx={primaryActionButtonSx}
             >
-              Load
+              <span style={themedButtonLabelStyle}>Load</span>
             </Button>
           </Grid>
         </Grid>
@@ -145,8 +157,11 @@ export default function GeneralPurchaseOrderListReportWorkspace() {
             startIcon={<PictureAsPdfIcon />}
             onClick={handleDownloadPdf}
             disabled={!isReady || isError || isDownloading}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Generating..." : "Download PDF"}
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
           </Button>
         </Box>
 

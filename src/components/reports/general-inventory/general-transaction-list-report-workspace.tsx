@@ -24,6 +24,14 @@ import {
 } from "../../../tanstack-hooks/general-inventory/general-transaction-list-report.hooks";
 import type { GeneralTransactionListReportLine } from "../../../interfaces/general-inventory/general-transaction-list-report.types";
 import type { AppError } from "../../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  dateIconFieldSx,
+} from "../../../themes/workspace-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
 
 const TRANSACTION_TYPE_OPTIONS: { code: string; label: string }[] = [
   { code: "", label: "All Transactions" },
@@ -43,6 +51,8 @@ const TRANSACTION_TYPE_OPTIONS: { code: string; label: string }[] = [
 // matches legacy's "Stock/Item" entry (first 6 chars of the 22-char composite
 // ItemCode) - this report has no physical Store filter, it spans every store.
 export default function GeneralTransactionListReportWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } =
+    useDropdownTheme();
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
   const [transactionTypeCode, setTransactionTypeCode] = useState<string>("");
@@ -130,9 +140,9 @@ export default function GeneralTransactionListReportWorkspace() {
 
   return (
     <Box sx={{ width: "95%", mx: "auto", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, backgroundColor: "#f9f9f9" }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Box sx={{ textAlign: "center", mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          <Typography variant="h5" sx={workspaceHeadingSx}>
             List of Transactions (General Inventory)
           </Typography>
         </Box>
@@ -147,6 +157,7 @@ export default function GeneralTransactionListReportWorkspace() {
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
@@ -158,6 +169,7 @@ export default function GeneralTransactionListReportWorkspace() {
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
+              sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -168,7 +180,14 @@ export default function GeneralTransactionListReportWorkspace() {
               fullWidth
               value={transactionTypeCode}
               onChange={(e) => setTransactionTypeCode(e.target.value)}
-              slotProps={{ select: { displayEmpty: true }, inputLabel: { shrink: true } }}
+              slotProps={{
+                select: {
+                  displayEmpty: true,
+                  MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } },
+                },
+                inputLabel: { shrink: true },
+              }}
+              sx={dropdownFieldSx}
             >
               {TRANSACTION_TYPE_OPTIONS.map((opt) => (
                 <MenuItem key={opt.code} value={opt.code}>
@@ -185,17 +204,19 @@ export default function GeneralTransactionListReportWorkspace() {
               value={itemCodePrefix}
               onChange={(e) => setItemCodePrefix(e.target.value)}
               placeholder="optional"
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <Button
-              variant="outlined"
+              variant="contained"
               startIcon={<SearchIcon />}
               onClick={handleLoad}
               disabled={!fromDate || !toDate}
               fullWidth
+              sx={primaryActionButtonSx}
             >
-              Load
+              <span style={themedButtonLabelStyle}>Load</span>
             </Button>
           </Grid>
         </Grid>
@@ -206,8 +227,11 @@ export default function GeneralTransactionListReportWorkspace() {
             startIcon={<PictureAsPdfIcon />}
             onClick={handleDownloadPdf}
             disabled={!isReady || isError || isDownloading}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Generating..." : "Download PDF"}
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
           </Button>
         </Box>
 

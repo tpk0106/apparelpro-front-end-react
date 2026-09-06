@@ -25,6 +25,14 @@ import {
 } from "../../../tanstack-hooks/general-inventory/general-stock-status-report.hooks";
 import type { GeneralStockStatusReportLine } from "../../../interfaces/general-inventory/general-stock-status-report.types";
 import type { AppError } from "../../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+  numberFieldNoSpinnerSx,
+} from "../../../themes/workspace-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -36,6 +44,11 @@ const MONTH_NAMES = [
 // GeneralStockTransactions rather than a stored gi_monst read (that table was
 // deliberately never built for this system).
 export default function GeneralStockStatusReportWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } =
+    useDropdownTheme();
+  const dropdownMenuSlotProps = {
+    select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } },
+  };
   const now = new Date();
   const [selectedStore, setSelectedStore] = useState<string>("");
   const [selectedMonth, setSelectedMonth] = useState<number>(now.getMonth() + 1);
@@ -167,9 +180,9 @@ export default function GeneralStockStatusReportWorkspace() {
 
   return (
     <Box sx={{ width: "95%", mx: "auto", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, backgroundColor: "#f9f9f9" }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Box sx={{ textAlign: "center", mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          <Typography variant="h5" sx={workspaceHeadingSx}>
             Stock Status Report (General Inventory)
           </Typography>
         </Box>
@@ -184,6 +197,8 @@ export default function GeneralStockStatusReportWorkspace() {
               value={selectedStore}
               onChange={(e) => setSelectedStore(e.target.value)}
               disabled={isStoresLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {storesList.map((s) => (
                 <MenuItem key={s.code} value={s.code}>
@@ -200,6 +215,8 @@ export default function GeneralStockStatusReportWorkspace() {
               fullWidth
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(Number(e.target.value))}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {MONTH_NAMES.map((name, idx) => (
                 <MenuItem key={name} value={idx + 1}>
@@ -217,17 +234,19 @@ export default function GeneralStockStatusReportWorkspace() {
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
               slotProps={{ htmlInput: { min: 2000, max: 2100 } }}
+              sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <Button
-              variant="outlined"
+              variant="contained"
               startIcon={<SearchIcon />}
               onClick={handleLoad}
               disabled={!selectedStore}
               fullWidth
+              sx={primaryActionButtonSx}
             >
-              Load
+              <span style={themedButtonLabelStyle}>Load</span>
             </Button>
           </Grid>
         </Grid>
@@ -238,8 +257,11 @@ export default function GeneralStockStatusReportWorkspace() {
             startIcon={<PictureAsPdfIcon />}
             onClick={handleDownloadPdf}
             disabled={!isReady || isError || isDownloading}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Generating..." : "Download PDF"}
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
           </Button>
         </Box>
 

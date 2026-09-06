@@ -26,11 +26,23 @@ import {
 } from "../../../tanstack-hooks/general-inventory/general-stock-valuation-report.hooks";
 import type { GeneralStockValuationReportLine } from "../../../interfaces/general-inventory/general-stock-valuation-report.types";
 import type { AppError } from "../../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+} from "../../../themes/workspace-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
 
 // Replicates GI_SVAL.PRG's "STOCK VALUATION REPORT" - a current-snapshot listing
 // straight off GeneralStockMasters for a Store and Item Code range, no month/date
 // filter (unlike Stock Status/Movement, this needs no transaction replay).
 export default function GeneralStockValuationReportWorkspace() {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } =
+    useDropdownTheme();
+  const dropdownMenuSlotProps = {
+    select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } },
+  };
   const [selectedStore, setSelectedStore] = useState<string>("");
   const [fromItemCode, setFromItemCode] = useState<string>("");
   const [toItemCode, setToItemCode] = useState<string>("");
@@ -164,9 +176,9 @@ export default function GeneralStockValuationReportWorkspace() {
 
   return (
     <Box sx={{ width: "95%", mx: "auto", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, backgroundColor: "#f9f9f9" }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Box sx={{ textAlign: "center", mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          <Typography variant="h5" sx={workspaceHeadingSx}>
             Stock Valuation Report (General Inventory)
           </Typography>
         </Box>
@@ -181,6 +193,8 @@ export default function GeneralStockValuationReportWorkspace() {
               value={selectedStore}
               onChange={(e) => handleStoreChange(e.target.value)}
               disabled={isStoresLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {storesList.map((s) => (
                 <MenuItem key={s.code} value={s.code}>
@@ -198,6 +212,8 @@ export default function GeneralStockValuationReportWorkspace() {
               value={fromItemCode}
               onChange={(e) => setFromItemCode(e.target.value)}
               disabled={!selectedStore || isItemsLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {itemsList.map((item) => (
                 <MenuItem key={item.itemCode} value={item.itemCode}>
@@ -215,6 +231,8 @@ export default function GeneralStockValuationReportWorkspace() {
               value={toItemCode}
               onChange={(e) => setToItemCode(e.target.value)}
               disabled={!selectedStore || isItemsLoading}
+              sx={dropdownFieldSx}
+              slotProps={dropdownMenuSlotProps}
             >
               {itemsList.map((item) => (
                 <MenuItem key={item.itemCode} value={item.itemCode}>
@@ -225,13 +243,14 @@ export default function GeneralStockValuationReportWorkspace() {
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <Button
-              variant="outlined"
+              variant="contained"
               startIcon={<SearchIcon />}
               onClick={handleLoad}
               disabled={!selectedStore || !fromItemCode || !toItemCode}
               fullWidth
+              sx={primaryActionButtonSx}
             >
-              Load
+              <span style={themedButtonLabelStyle}>Load</span>
             </Button>
           </Grid>
         </Grid>
@@ -242,8 +261,11 @@ export default function GeneralStockValuationReportWorkspace() {
             startIcon={<PictureAsPdfIcon />}
             onClick={handleDownloadPdf}
             disabled={!isReady || isError || isDownloading}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Generating..." : "Download PDF"}
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
           </Button>
         </Box>
 

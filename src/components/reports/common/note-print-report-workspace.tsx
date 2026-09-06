@@ -7,6 +7,13 @@ import { toast } from "react-toastify";
 import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 
 import type { AppError } from "../../../auth/axiosClient";
+import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+} from "../../../themes/workspace-theme";
+import { useDropdownTheme } from "../../../themes/useDropdownTheme";
 
 interface NotePrintReportWorkspaceProps<TDetails> {
   // e.g. "Goods Issue Note (General Inventory) — Print"
@@ -38,6 +45,7 @@ export default function NotePrintReportWorkspace<TDetails>({
   renderKpiTiles,
   renderGrid,
 }: NotePrintReportWorkspaceProps<TDetails>) {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const [numberInput, setNumberInput] = useState<string>("");
   const [searchedNumber, setSearchedNumber] = useState<string>("");
 
@@ -64,9 +72,9 @@ export default function NotePrintReportWorkspace<TDetails>({
 
   return (
     <Box sx={{ width: "95%", mx: "auto", p: 1 }}>
-      <Paper elevation={3} sx={{ p: 3, backgroundColor: "#f9f9f9" }}>
+      <Paper elevation={3} sx={{ p: 3, backgroundColor: DASHBOARD_COLORS.pageBg }}>
         <Box sx={{ textAlign: "center", mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          <Typography variant="h5" sx={workspaceHeadingSx}>
             {title}
           </Typography>
         </Box>
@@ -83,17 +91,19 @@ export default function NotePrintReportWorkspace<TDetails>({
                 if (e.key === "Enter") handleLoad();
               }}
               placeholder="e.g. 000001"
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Button
-              variant="outlined"
+              variant="contained"
               startIcon={<SearchIcon />}
               onClick={handleLoad}
               disabled={!numberInput.trim()}
               fullWidth
+              sx={primaryActionButtonSx}
             >
-              Load
+              <span style={themedButtonLabelStyle}>Load</span>
             </Button>
           </Grid>
         </Grid>
@@ -104,8 +114,11 @@ export default function NotePrintReportWorkspace<TDetails>({
             startIcon={<PictureAsPdfIcon />}
             onClick={handleDownloadPdf}
             disabled={!isReady || !details || isDownloading}
+            sx={primaryActionButtonSx}
           >
-            {isDownloading ? "Generating..." : "Download PDF"}
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
           </Button>
         </Box>
 

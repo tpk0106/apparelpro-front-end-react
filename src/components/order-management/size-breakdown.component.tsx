@@ -226,7 +226,7 @@ export default function SizeBreakdown({
 
       console.log("Syncing matrix params", fullPayload.params);
       console.log("Syncing matrix data...", fullPayload.payload);
-      createNewColorSizeBreakdownDetails(fullPayload);
+      await createNewColorSizeBreakdownDetails(fullPayload);
       setNotice({
         title: "Save Successful",
         message:

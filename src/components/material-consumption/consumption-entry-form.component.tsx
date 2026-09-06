@@ -233,6 +233,19 @@ export default function ConsumptionEntryForm({
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Required-field gap found in the app-wide validation audit (see
+  // garment-additional-cost-entry-form.component.tsx for the same pattern):
+  // the Save button's own disabled condition only checked calculatedTotal/
+  // isSaving, so Final Purchase Unit, Supplier and Unit Price could all be
+  // left blank/zero and the mutation would still fire. Description has no
+  // `required` marker on its field either, so it's deliberately left out here.
+  const getEntryValidationError = (): string | null => {
+    if (!form.finalItemUnit) return "Select a Final Purchase Unit before saving.";
+    if (!form.supplierCode) return "Select a Supplier before saving.";
+    if (!(Number(form.unitPrice) > 0)) return "Enter a Unit Purchase Price greater than 0 before saving.";
+    return null;
+  };
+
   const handleRunCalculation = async () => {
     setErrorBanner(null);
     try {
@@ -855,9 +868,16 @@ export default function ConsumptionEntryForm({
               (calculateConsumption
                 ? calculatedTotal === null
                 : !(calculatedTotal !== null && calculatedTotal > 0)) ||
-              isSaving
+              isSaving ||
+              getEntryValidationError() !== null
             }
             onClick={async () => {
+              const validationError = getEntryValidationError();
+              if (validationError) {
+                toast.warning(validationError);
+                return;
+              }
+
               // console.log("ready to save form :", form.feature1);
               // console.log("ready to save form :", form.feature2);
               const payload = {
