@@ -26,7 +26,7 @@ import type {
 } from "./garment-additional-cost.types";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 import { useDropdownTheme } from "../../themes/useDropdownTheme";
-import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
+import { primaryActionButtonSx, themedButtonLabelStyle, numberFieldNoSpinnerSx } from "../../themes/workspace-theme";
 import { copperTextColor } from "../../themes/button-color-themes";
 
 interface FormState {
@@ -501,7 +501,7 @@ export default function GarmentAdditionalCostEntryForm({
             type="number"
             size="small"
             fullWidth
-            sx={dropdownFieldSx}
+            sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
             value={form.quantity}
             onChange={(e) => handleChange("quantity", e.target.value)}
           />
@@ -513,7 +513,7 @@ export default function GarmentAdditionalCostEntryForm({
             type="number"
             size="small"
             fullWidth
-            sx={dropdownFieldSx}
+            sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
             value={form.cost}
             onChange={(e) => handleChange("cost", e.target.value)}
           />

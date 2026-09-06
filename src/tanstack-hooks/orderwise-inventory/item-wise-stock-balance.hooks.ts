@@ -5,9 +5,11 @@ import {
   getItemWiseStockBalanceHeader,
   getItemWiseStockBalanceLines,
   downloadItemWiseStockBalancePdf,
+  searchItemCodes,
   type ItemWiseStockBalanceParams,
 } from "../../services/reports/orderwise-inventory/item-wise-stock-balance.service";
 import type {
+  ItemCodeSearchResult,
   ItemWiseStockBalanceHeader,
   ItemWiseStockBalanceLine,
 } from "../../interfaces/orderwise-inventory/item-wise-stock-balance.types";
@@ -33,6 +35,22 @@ export const useGetItemWiseStockBalanceLinesQuery = (params: ItemWiseStockBalanc
     },
     enabled,
     retry: false,
+  });
+};
+
+// Type-ahead search for the From/To Item range Autocomplete pickers - only
+// fires once the operator has typed at least 2 characters, matching the
+// "few characters, get matching composite codes back" design from the
+// deferral note (project_item_stock_balance_autocomplete_todo memory).
+export const useSearchItemCodesQuery = (query: string) => {
+  return useQuery<ItemCodeSearchResult[], AppError>({
+    queryKey: ["itemWiseStockBalanceItemSearch", query],
+    queryFn: async () => {
+      const response: AxiosResponse<ItemCodeSearchResult[]> = await searchItemCodes(query);
+      return response.data;
+    },
+    enabled: query.trim().length >= 2,
+    placeholderData: (previousData) => previousData,
   });
 };
 

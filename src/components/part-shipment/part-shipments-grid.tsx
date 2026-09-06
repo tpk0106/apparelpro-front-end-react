@@ -31,7 +31,7 @@ import {
 } from "../../services/order-management/part-shipment.service";
 import { useApparelProTable } from "../../themes/useApparelProTable";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
-import { dateIconFieldSx, primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
+import { dateIconFieldSx, primaryActionButtonSx, themedButtonLabelStyle, numberFieldNoSpinnerSx } from "../../themes/workspace-theme";
 import { useDropdownTheme } from "../../themes/useDropdownTheme";
 
 // Import your existing live master lookup hook for units reference validation
@@ -390,6 +390,7 @@ export default function PartShipmentsGrid({
                 style: { fontSize: "13px", fontFamily: "monospace" },
               },
             }}
+            sx={numberFieldNoSpinnerSx}
           />
         ),
       },
@@ -681,7 +682,7 @@ export default function PartShipmentsGrid({
                     quantity: Number(e.target.value),
                   }))
                 }
-                sx={dropdownFieldSx}
+                sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
               />
               <TextField
                 select

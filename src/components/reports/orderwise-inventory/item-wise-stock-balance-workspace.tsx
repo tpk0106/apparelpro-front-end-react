@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Alert, Box, Button, Divider, Paper, TextField, Typography } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, Autocomplete, Box, Button, Divider, Paper, TextField, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { MaterialReactTable, type MRT_ColumnDef } from "material-react-table";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
@@ -12,6 +12,7 @@ import {
   useGetItemWiseStockBalanceHeaderQuery,
   useGetItemWiseStockBalanceLinesQuery,
   useDownloadItemWiseStockBalancePdfMutation,
+  useSearchItemCodesQuery,
 } from "../../../tanstack-hooks/orderwise-inventory/item-wise-stock-balance.hooks";
 import type { ItemWiseStockBalanceLine } from "../../../interfaces/orderwise-inventory/item-wise-stock-balance.types";
 import type { AppError } from "../../../auth/axiosClient";
@@ -27,10 +28,30 @@ import {
 // (every Buyer/Order), filtered to a 6-char Stock+Item code range, grouped Stock
 // Type -> Item group -> individual lines. Zero-balance items excluded.
 export default function ItemWiseStockBalanceWorkspace() {
-  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const [fromRange, setFromRange] = useState<string>("");
   const [toRange, setToRange] = useState<string>("");
   const [searchedParams, setSearchedParams] = useState<{ fromRange: string; toRange: string } | null>(null);
+
+  // Debounced type-ahead search for both range pickers - waits 300ms after the
+  // operator stops typing before hitting the search endpoint, so a fast typist
+  // doesn't fire a request per keystroke. See project_item_stock_balance_autocomplete_todo
+  // memory for why this replaced two plain free-text inputs.
+  const [debouncedFromQuery, setDebouncedFromQuery] = useState("");
+  const [debouncedToQuery, setDebouncedToQuery] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedFromQuery(fromRange), 300);
+    return () => clearTimeout(timer);
+  }, [fromRange]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedToQuery(toRange), 300);
+    return () => clearTimeout(timer);
+  }, [toRange]);
+
+  const { data: fromOptions = [] } = useSearchItemCodesQuery(debouncedFromQuery);
+  const { data: toOptions = [] } = useSearchItemCodesQuery(debouncedToQuery);
 
   const isReady = !!searchedParams;
 
@@ -73,7 +94,7 @@ export default function ItemWiseStockBalanceWorkspace() {
           if (row.rowType === "GrandTotal") return "TOTAL VALUE";
           if (row.rowType === "StockTypeSubtotal") return `${row.stockTypeCode} - ${row.stockTypeDescription} (Total)`;
           if (row.rowType === "ItemGroupSubtotal") return `${row.itemGroupCode} - ${row.itemGroupDescription} (Total)`;
-          return `${row.buyerCode}/${row.order} - ${row.itemCode}`;
+          return `${row.buyerName}/${row.order} - ${row.itemCode}`;
         },
         Cell: ({ row }) => {
           const line = row.original;
@@ -86,7 +107,7 @@ export default function ItemWiseStockBalanceWorkspace() {
                 ? `${line.stockTypeCode} - ${line.stockTypeDescription} (Total)`
                 : line.rowType === "ItemGroupSubtotal"
                   ? `${line.itemGroupCode} - ${line.itemGroupDescription} (Total)`
-                  : `${line.buyerCode}/${line.order} - ${line.itemCode}`;
+                  : `${line.buyerName}/${line.order} - ${line.itemCode}`;
           return <span style={{ fontWeight: bold ? 700 : 400, fontSize: big ? "1.05em" : undefined }}>{label}</span>;
         },
       },
@@ -158,27 +179,75 @@ export default function ItemWiseStockBalanceWorkspace() {
 
         <Grid container spacing={2} sx={{ mb: 3, alignItems: "center" }}>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <TextField
-              label="From Stock/Item (6 char)"
-              size="small"
-              fullWidth
-              value={fromRange}
-              onChange={(e) => setFromRange(e.target.value)}
-              placeholder="e.g. 02TISS"
-              slotProps={{ htmlInput: { maxLength: 6 } }}
-              sx={dropdownFieldSx}
+            <Autocomplete
+              freeSolo
+              options={fromOptions}
+              filterOptions={(options) => options}
+              getOptionLabel={(option) =>
+                typeof option === "string" ? option : `${option.code} - ${option.description}`
+              }
+              inputValue={fromRange}
+              onInputChange={(_, value, reason) => {
+                // "reset" fires right after onChange sets the picked option's
+                // code, carrying the full "CODE - description" label instead
+                // of just the code - ignore it here so it doesn't clobber
+                // what onChange below already set.
+                if (reason === "reset") return;
+                setFromRange(value.toUpperCase().slice(0, 6));
+              }}
+              onChange={(_, value) => {
+                if (value && typeof value !== "string") setFromRange(value.code);
+              }}
+              isOptionEqualToValue={(option, value) =>
+                (typeof option === "string" ? option : option.code) ===
+                (typeof value === "string" ? value : value.code)
+              }
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="From Stock/Item (6 char)"
+                  size="small"
+                  fullWidth
+                  placeholder="e.g. 02TISS"
+                  slotProps={{ ...params.slotProps, htmlInput: { ...params.slotProps?.htmlInput, maxLength: 6 } }}
+                  sx={dropdownFieldSx}
+                />
+              )}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <TextField
-              label="To Stock/Item (6 char)"
-              size="small"
-              fullWidth
-              value={toRange}
-              onChange={(e) => setToRange(e.target.value)}
-              placeholder="e.g. 02TISS"
-              slotProps={{ htmlInput: { maxLength: 6 } }}
-              sx={dropdownFieldSx}
+            <Autocomplete
+              freeSolo
+              options={toOptions}
+              filterOptions={(options) => options}
+              getOptionLabel={(option) =>
+                typeof option === "string" ? option : `${option.code} - ${option.description}`
+              }
+              inputValue={toRange}
+              onInputChange={(_, value, reason) => {
+                if (reason === "reset") return;
+                setToRange(value.toUpperCase().slice(0, 6));
+              }}
+              onChange={(_, value) => {
+                if (value && typeof value !== "string") setToRange(value.code);
+              }}
+              isOptionEqualToValue={(option, value) =>
+                (typeof option === "string" ? option : option.code) ===
+                (typeof value === "string" ? value : value.code)
+              }
+              slotProps={{ listbox: { sx: dropdownListboxSx } }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="To Stock/Item (6 char)"
+                  size="small"
+                  fullWidth
+                  placeholder="e.g. 02TISS"
+                  slotProps={{ ...params.slotProps, htmlInput: { ...params.slotProps?.htmlInput, maxLength: 6 } }}
+                  sx={dropdownFieldSx}
+                />
+              )}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>

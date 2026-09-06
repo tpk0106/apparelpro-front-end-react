@@ -22,7 +22,7 @@ import { isAdministrator } from "../../auth/jwt.util";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 import { copperTextColor } from "../../themes/button-color-themes";
 import { useDropdownTheme } from "../../themes/useDropdownTheme";
-import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
+import { primaryActionButtonSx, themedButtonLabelStyle, numberFieldNoSpinnerSx } from "../../themes/workspace-theme";
 
 // Boolean parameters render as a Switch, not a MUI Radio - there's no actual
 // Radio control in this panel - but it's the only checked/unchecked toggle
@@ -258,7 +258,7 @@ const ParameterRow = ({
                 onSave(parameter.parameterKey, event.target.value);
               }
             }}
-            sx={{ width: 100 }}
+            sx={{ width: 100, ...numberFieldNoSpinnerSx }}
             slotProps={{
               htmlInput: { style: { textAlign: "right", color: "#fffffF" } },
             }}

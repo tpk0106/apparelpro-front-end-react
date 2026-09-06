@@ -40,7 +40,7 @@ import type { Unit } from "../../interfaces/references/Unit";
 import type { AppError } from "../../auth/axiosClient";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 import { useDropdownTheme } from "../../themes/useDropdownTheme";
-import { primaryActionButtonSx, themedButtonLabelStyle, numberFieldNoSpinnerSx } from "../../themes/workspace-theme";
+import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
 import { copperTextColor } from "../../themes/button-color-themes";
 
 interface EntryFormProps {
@@ -646,7 +646,7 @@ export default function ConsumptionEntryForm({
               onChange={(e) =>
                 handleInputChange("quantityPerGarment", e.target.value)
               }
-              sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
+              sx={dropdownFieldSx}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
@@ -659,7 +659,7 @@ export default function ConsumptionEntryForm({
               onChange={(e) =>
                 handleInputChange("allowancePercentage", e.target.value)
               }
-              sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
+              sx={dropdownFieldSx}
             />
           </Grid>
           </>
@@ -685,7 +685,7 @@ export default function ConsumptionEntryForm({
               helperText={`Enter the total quantity required, in ${
                 form.finalItemUnit || "the selected purchase unit"
               }.`}
-              sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
+              sx={dropdownFieldSx}
             />
           </Grid>
           )}
@@ -798,7 +798,7 @@ export default function ConsumptionEntryForm({
               fullWidth
               value={form.unitPrice}
               onChange={(e) => handleInputChange("unitPrice", e.target.value)}
-              sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
+              sx={dropdownFieldSx}
             />
           </Grid>
         </Grid>

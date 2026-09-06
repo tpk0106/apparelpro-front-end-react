@@ -11,12 +11,19 @@ export interface ItemWiseStockBalanceHeader {
 
 export type ItemWiseStockBalanceRowType = "Item" | "ItemGroupSubtotal" | "StockTypeSubtotal" | "GrandTotal";
 
+// Type-ahead search result backing the From/To Item range Autocomplete pickers.
+export interface ItemCodeSearchResult {
+  code: string;
+  description: string;
+}
+
 export interface ItemWiseStockBalanceLine {
   stockTypeCode: string;
   stockTypeDescription: string;
   itemGroupCode: string;
   itemGroupDescription: string;
   buyerCode: number;
+  buyerName: string;
   order: string;
   itemCode: string;
   description: string;

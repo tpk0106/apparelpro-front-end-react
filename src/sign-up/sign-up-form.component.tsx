@@ -31,6 +31,7 @@ import { loadCountries } from "../services/references/country.service";
 import type { Country } from "../interfaces/references/Country";
 import type { User } from "../interfaces/register/User";
 import { asideMenuTitleTypographyTheme } from "../themes/themes";
+import { numberFieldNoSpinnerSx } from "../themes/workspace-theme";
 import { AddressType, GENDER_MAP } from "../interfaces/definitions";
 import SelectList from "../lib/select-list.component";
 import type { SignupFormData } from "../interfaces/register/signup";
@@ -575,6 +576,7 @@ const SignupForm = () => {
                     size="small"
                     value={signupFormData.phoneNumber}
                     onChange={handleChange}
+                    sx={numberFieldNoSpinnerSx}
                   />
                 </FormControl>
               </div>

@@ -23,6 +23,7 @@ import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import GarmentTypeItemsTable from "./garment-type-items-table.component";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import { numberFieldNoSpinnerSx } from "../../../themes/workspace-theme";
 
 // Replicates OD_ITM1.PRG (Update) / OD_ITM2.PRG (List) - Reference Files >
 // B. Order Management > G. Type / Item in legacy (RF_MENU.PRG). Global theme
@@ -164,6 +165,7 @@ const GarmentTypeItems = () => {
         muiEditTextFieldProps: {
           type: "number",
           required: true,
+          sx: numberFieldNoSpinnerSx,
         },
       },
     ],

@@ -16,6 +16,7 @@ import type { Unit } from "../../interfaces/references/Unit";
 import type { GarmentType } from "../../interfaces/references/GarmentType";
 import { asideMenuTitleTypographyTheme } from "../../themes/themes";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { numberFieldNoSpinnerSx } from "../../themes/workspace-theme";
 
 interface styleProps {
   buyerCode: number;
@@ -281,6 +282,7 @@ const Styles = ({
           required: true,
           error: !!validationErrors?.quantity,
           helperText: validationErrors?.quantity,
+          sx: numberFieldNoSpinnerSx,
           // Prevent typing negative numbers or floats via native HTML inputs
           slotProps: {
             htmlInput: { min: 1, step: 1 },
@@ -311,6 +313,7 @@ const Styles = ({
           required: true,
           error: !!validationErrors?.unitPrice,
           helperText: validationErrors?.unitPrice,
+          sx: numberFieldNoSpinnerSx,
           // Support decimal currency floats cleanly
           slotProps: {
             htmlInput: { min: 0.01, step: 0.01 },

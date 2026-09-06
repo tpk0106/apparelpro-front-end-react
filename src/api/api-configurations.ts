@@ -654,6 +654,7 @@ export const APPARELPRO_ENDPOINTS = {
       HEADER: "api/item-wise-stock-balance-reports/header",
       LINES: "api/item-wise-stock-balance-reports/lines",
       PDF: "api/item-wise-stock-balance-reports/pdf",
+      ITEM_SEARCH: "api/item-wise-stock-balance-reports/item-search",
     },
     RAW_MATERIAL_CONTROL_SHEET_REPORT: {
       HEADER: "api/raw-material-control-sheet-reports/header",

@@ -14,6 +14,7 @@ import type { Currency } from "../../../interfaces/references/Currency";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import CurrencyConversionTable from "./currency-conversion-table.component";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
+import { numberFieldNoSpinnerSx } from "../../../themes/workspace-theme";
 
 // Currency Conversion (od_conv-style flat From/To rate table) - Reference Data >
 // General > Currency Conversion. Backend rebuilt 2026-08-09 (was previously a
@@ -150,6 +151,7 @@ const CurrencyConversionPage = () => {
           type: "number",
           required: true,
           error: !!validationErrors?.value,
+          sx: numberFieldNoSpinnerSx,
           onBlur: (event) => {
             const numericValue = Number(event.currentTarget.value);
             const validationError =

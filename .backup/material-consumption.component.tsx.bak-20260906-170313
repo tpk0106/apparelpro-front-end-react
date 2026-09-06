@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Box, Paper, Typography, Alert } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import ConsumptionScopeHeader from "./consumption-scope-header.component";
@@ -22,37 +22,6 @@ import ConsumptionLedgerGrid from "./consumption-ledger-grid.component";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 import { workspaceHeadingSx } from "../../themes/workspace-theme";
 
-// THIRD ATTEMPT AT THIS BUG (see feedback_material_consumption_panel_height /
-// project_material_consumption_height_todo memory): the previous
-// ResizeObserver-based "measure the form, mirror it onto the list" approach
-// worked for the placeholder state but drifted out of sync again once
-// ConsumptionEntryForm actually mounted (its content height changes several
-// times as loading states resolve, and again whenever the Calculate
-// Consumptions toggle or Feature1-4 fields change what's rendered - each of
-// those re-fires the observer, but kept the two panels chasing each other's
-// height instead of ever landing on one fixed number).
-//
-// This attempt removes the "measure and mirror" mechanism entirely: both
-// panels get the SAME hardcoded height, chosen generously enough to fit the
-// tallest realistic form state (edit mode, a material with all 4 dynamic
-// Feature fields, Calculate Consumptions = Yes, and a Total Requirement line
-// showing after Calculate has run) without scrolling. A shorter state (fewer
-// features, manual entry mode, before Calculate has run) will show empty
-// space below its content instead - a deliberate tradeoff the user explicitly
-// chose over any form of scrolling, since a scrollbar that only appears in
-// some states/modes was rejected twice before as "looks broken".
-//
-// If a future content addition ever needs more room than this, bump this one
-// constant - do not reintroduce ResizeObserver/measured-height syncing for
-// this pair of panels, it has failed three times now.
-//
-// TUNED (2026-09-06): 760 -> 660 (trimmed a ~10-15% gap) -> 600 (user reported
-// a further small ~10-15% gap remained at 660 - ~66-99px - and asked to trim
-// 75% of that gap, i.e. remove ~62px). If it still leaves a gap or now clips
-// content, adjust this single number - see the comment block above for why
-// nothing else about the mechanism should change.
-const MATERIAL_CONSUMPTION_PANEL_HEIGHT = 600;
-
 export default function MaterialConsumption() {
   const [scopeContext, setScopeContext] = useState<SelectedScopeContext | null>(
     null,
@@ -66,9 +35,28 @@ export default function MaterialConsumption() {
   const [editingRow, setEditingRow] =
     useState<StyleMaterialConsumptionLedgerRow | null>(null);
 
-  // Scroll target for the "jump back up to the form" behavior below - the top
-  // Grid row containing both the Materials list and the form panel.
-  const formSectionRef = useRef<HTMLDivElement | null>(null);
+  // Measures the form panel's own real rendered height (never the reverse -
+  // the form's sx below is untouched, still just its natural minHeight/
+  // content) and mirrors that exact pixel value onto the Materials list
+  // panel next to it. A plain measured height, not CSS flex/grid stretch -
+  // stretch was tried twice for this same pair of panels and produced a
+  // "huge empty space" bug both times (see project memory); reading the
+  // form's real size with ResizeObserver and applying it as a literal height
+  // sidesteps whatever stretch was doing.
+  const formPanelRef = useRef<HTMLDivElement | null>(null);
+  const [formPanelHeight, setFormPanelHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    const node = formPanelRef.current;
+    if (!node) return;
+
+    const observer = new ResizeObserver((entries) => {
+      const measuredHeight = entries[0]?.contentRect.height;
+      if (measuredHeight) setFormPanelHeight(measuredHeight);
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   // Memoized callback handler tracking context alterations
   const handleScopeContextChange = useCallback(
@@ -123,7 +111,7 @@ export default function MaterialConsumption() {
       {scopeContext ? (
         <Box>
           {/* Top Panel: Split Master Checklist & Data Form Controls */}
-          <Grid ref={formSectionRef} container spacing={3}>
+          <Grid container spacing={3}>
             {/* <Grid size={{ xs: 12, md: 4 }}>
               <Paper elevation={2} sx={{ p: 2, minHeight: "420px" }}>
                 <MaterialMasterList
@@ -137,15 +125,15 @@ export default function MaterialConsumption() {
                 elevation={2}
                 sx={{
                   p: 2,
-                  // Same fixed height as the form panel opposite it (see
-                  // MATERIAL_CONSUMPTION_PANEL_HEIGHT above) - not measured,
-                  // not stretched, just the same literal number on both. The
-                  // panel itself never scrolls (overflow: hidden) - only the
-                  // MaterialMasterList table's own internal scroll region
-                  // (set via muiTableContainerProps) scrolls, avoiding the
-                  // confusing double-scrollbar of both this Paper and the
-                  // table scrolling at once.
-                  height: `${MATERIAL_CONSUMPTION_PANEL_HEIGHT}px`,
+                  // Mirrors the form panel's actual measured height (see
+                  // formPanelHeight above) - falls back to 480px before the
+                  // first measurement lands. The panel itself never scrolls
+                  // (overflow: hidden) - only the MaterialMasterList table's
+                  // own internal scroll region (set via
+                  // muiTableContainerProps) scrolls, avoiding the confusing
+                  // double-scrollbar of both this Paper and the table
+                  // scrolling at once.
+                  height: formPanelHeight ? `${formPanelHeight}px` : "480px",
                   overflow: "hidden",
                   display: "flex",
                   flexDirection: "column",
@@ -178,19 +166,11 @@ export default function MaterialConsumption() {
             </Grid>
             <Grid size={{ xs: 12, md: 8 }}>
               <Paper
+                ref={formPanelRef}
                 elevation={2}
                 sx={{
                   p: 2,
-                  // Same fixed height as the list panel opposite it (see
-                  // MATERIAL_CONSUMPTION_PANEL_HEIGHT above), not a natural
-                  // minHeight that grows with content - that growth is
-                  // exactly what put the two panels out of sync before.
-                  // overflow: hidden is a safety net (matches the list
-                  // panel's own overflow handling), not the expected path -
-                  // the fixed height is chosen to comfortably fit the
-                  // tallest realistic form state without clipping anything.
-                  height: `${MATERIAL_CONSUMPTION_PANEL_HEIGHT}px`,
-                  overflow: "hidden",
+                  minHeight: "480px",
                   backgroundColor: DASHBOARD_COLORS.cardBg,
                   border: `1px solid ${DASHBOARD_COLORS.border}`,
                 }}
@@ -251,14 +231,6 @@ export default function MaterialConsumption() {
                   description: "Editing Active Item Line",
                 });
                 setEditingRow(row); // Set form to edit values
-                // Clicking Edit on a bottom-row ledger entry (especially far
-                // down a long list) left the form off-screen above, with no
-                // indication it had actually loaded - scroll it back into
-                // view so the operator sees their selection immediately.
-                formSectionRef.current?.scrollIntoView({
-                  behavior: "smooth",
-                  block: "start",
-                });
               }}
             />
           </Paper>

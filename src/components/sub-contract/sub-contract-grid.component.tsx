@@ -27,7 +27,7 @@ import {
   getDropdownSelectMenuProps,
   getDropdownMenuItemSx,
 } from "../../themes/dropdown-color-themes";
-import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
+import { primaryActionButtonSx, themedButtonLabelStyle, numberFieldNoSpinnerSx } from "../../themes/workspace-theme";
 
 // Module-scope (not useDropdownTheme()) since columns/selectMenuProps below
 // are built outside the component body - same underlying theme data either
@@ -211,7 +211,7 @@ export default function SubContractGrid({
         muiEditTextFieldProps: {
           type: "number",
           required: true,
-          sx: dropdownFieldSx,
+          sx: { ...dropdownFieldSx, ...numberFieldNoSpinnerSx },
           error: !!validationErrors.subQuantity,
           helperText: validationErrors.subQuantity,
           onChange: () =>
@@ -226,7 +226,7 @@ export default function SubContractGrid({
         muiEditTextFieldProps: {
           type: "number",
           required: true,
-          sx: dropdownFieldSx,
+          sx: { ...dropdownFieldSx, ...numberFieldNoSpinnerSx },
           error: !!validationErrors.costPerGarment,
           helperText: validationErrors.costPerGarment,
           onChange: () =>
@@ -282,7 +282,7 @@ export default function SubContractGrid({
         Cell: ({ cell }) => cell.getValue<number>().toLocaleString(),
         muiEditTextFieldProps: {
           type: "number",
-          sx: dropdownFieldSx,
+          sx: { ...dropdownFieldSx, ...numberFieldNoSpinnerSx },
           error: !!validationErrors.receivedQuantity,
           helperText: validationErrors.receivedQuantity,
           onChange: () =>

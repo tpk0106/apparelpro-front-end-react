@@ -15,6 +15,7 @@ import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
 import OrderItemFeatureTable from "./order-item-feature-table.component";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 import { useDropdownTheme } from "../../../themes/useDropdownTheme";
+import { numberFieldNoSpinnerSx } from "../../../themes/workspace-theme";
 
 const OrderItemFeatures = () => {
   const { listboxSx: dropdownListboxSx } = useDropdownTheme();
@@ -203,6 +204,7 @@ const OrderItemFeatures = () => {
         enableSorting: false,
         muiEditTextFieldProps: {
           type: "number",
+          sx: numberFieldNoSpinnerSx,
         },
       },
     ],

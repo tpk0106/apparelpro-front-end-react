@@ -1,6 +1,7 @@
 import { client } from "../../../auth/axiosClient";
 import { APPARELPRO_ENDPOINTS } from "../../../api/api-configurations";
 import type {
+  ItemCodeSearchResult,
   ItemWiseStockBalanceHeader,
   ItemWiseStockBalanceLine,
 } from "../../../interfaces/orderwise-inventory/item-wise-stock-balance.types";
@@ -31,5 +32,17 @@ const downloadItemWiseStockBalancePdf = async (params: ReportParams) => {
   );
 };
 
-export { getItemWiseStockBalanceHeader, getItemWiseStockBalanceLines, downloadItemWiseStockBalancePdf };
+const searchItemCodes = async (query: string) => {
+  return await client.get<ItemCodeSearchResult[]>(
+    APPARELPRO_ENDPOINTS.ORDER_WISE_INVENTORY.ITEM_WISE_STOCK_BALANCE_REPORT.ITEM_SEARCH,
+    { params: { query } },
+  );
+};
+
+export {
+  getItemWiseStockBalanceHeader,
+  getItemWiseStockBalanceLines,
+  downloadItemWiseStockBalancePdf,
+  searchItemCodes,
+};
 export type { ReportParams as ItemWiseStockBalanceParams };

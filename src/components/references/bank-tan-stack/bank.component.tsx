@@ -14,6 +14,7 @@ import { Box, MenuItem, ThemeProvider, Typography } from "@mui/material";
 import type { Currency } from "../../../interfaces/references/Currency";
 import { DASHBOARD_COLORS } from "../../dashboard/dashboard-theme";
 import { asideMenuTitleTypographyTheme } from "../../../themes/themes";
+import { numberFieldNoSpinnerSx } from "../../../themes/workspace-theme";
 
 const Banks = () => {
   const [validationErrors, setValidationErrors] =
@@ -194,6 +195,7 @@ const Banks = () => {
 
         muiEditTextFieldProps: {
           type: "number",
+          sx: numberFieldNoSpinnerSx,
         },
       },
       {

@@ -9,6 +9,7 @@ import { Box, ThemeProvider, Typography } from "@mui/material";
 import type { ProductionLine } from "../../../../interfaces/production/ProductionLine";
 import { asideMenuTitleTypographyTheme } from "../../../../themes/themes";
 import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import { numberFieldNoSpinnerSx } from "../../../../themes/workspace-theme";
 
 const ProductionLines = () => {
   const [pagination, setPagination] = useState<MRT_PaginationState>({
@@ -54,7 +55,7 @@ const ProductionLines = () => {
         accessorKey: "numberOfMachines",
         header: "Machines",
         size: 100,
-        muiEditTextFieldProps: { type: "number" },
+        muiEditTextFieldProps: { type: "number", sx: numberFieldNoSpinnerSx },
       },
       {
         accessorKey: "currencyCode",
@@ -65,13 +66,13 @@ const ProductionLines = () => {
         accessorKey: "lineCostPerDay",
         header: "Line Cost / Day",
         size: 150,
-        muiEditTextFieldProps: { type: "number" },
+        muiEditTextFieldProps: { type: "number", sx: numberFieldNoSpinnerSx },
       },
       {
         accessorKey: "minimumProductionPerOrder",
         header: "Min. Production / Order",
         size: 180,
-        muiEditTextFieldProps: { type: "number" },
+        muiEditTextFieldProps: { type: "number", sx: numberFieldNoSpinnerSx },
       },
       {
         accessorKey: "unitCode",

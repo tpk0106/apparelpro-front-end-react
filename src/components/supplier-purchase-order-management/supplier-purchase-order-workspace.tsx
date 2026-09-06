@@ -43,7 +43,7 @@ import type {
 import { useGetUnits } from "../../tanstack-hooks/custom-hooks";
 import type { Unit } from "../../interfaces/references/Unit";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
-import { workspaceHeadingSx, primaryActionButtonSx, themedButtonLabelStyle, dateIconFieldSx } from "../../themes/workspace-theme";
+import { workspaceHeadingSx, primaryActionButtonSx, themedButtonLabelStyle, dateIconFieldSx, numberFieldNoSpinnerSx } from "../../themes/workspace-theme";
 import { copperTextColor } from "../../themes/button-color-themes";
 import { useDropdownTheme } from "../../themes/useDropdownTheme";
 
@@ -673,7 +673,7 @@ export default function SupplierPurchaseOrderWorkspace() {
                           onChange={(e) =>
                             handleInputChange("orderQuantity", e.target.value)
                           }
-                          sx={dropdownFieldSx}
+                          sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
                         />
                       </Grid>
                       <Grid size={{ xs: 12 }}>
@@ -686,7 +686,7 @@ export default function SupplierPurchaseOrderWorkspace() {
                           onChange={(e) =>
                             handleInputChange("unitPrice", e.target.value)
                           }
-                          sx={dropdownFieldSx}
+                          sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
                         />
                       </Grid>
                       <Grid size={{ xs: 12 }}>

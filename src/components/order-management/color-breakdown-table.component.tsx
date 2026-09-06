@@ -8,6 +8,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
 import { useApparelProTable } from "../../themes/useApparelProTable";
+import { numberFieldNoSpinnerSx } from "../../themes/workspace-theme";
 import InfoDialog from "../common/info-dialog";
 import ConfirmDialog from "../common/confirm-dialog";
 
@@ -126,6 +127,7 @@ const ColorBreakdownTable = ({
         muiEditTextFieldProps: {
           type: "number",
           required: true,
+          sx: numberFieldNoSpinnerSx,
         },
       },
     ],
