@@ -7,6 +7,7 @@ import type {
   DailyTrendPoint,
   DailyTrendSeries,
   OrderManagementSummary,
+  OrderPipelineResult,
   OrderwiseInventorySummary,
   ProductionProgress,
 } from "../interfaces/dashboard/Dashboard";
@@ -17,6 +18,8 @@ import {
   loadDailyTrendAllSections,
   loadOrderManagementSummary,
   loadOrderwiseInventorySummary,
+  loadOrderPipeline,
+  type OrderPipelineParams,
 } from "../services/dashboard/dashboard.service";
 
 export const useGetCurrentStyle = () => {
@@ -106,6 +109,17 @@ export const useGetOrderManagementSummary = (scope: StyleScope | null) => {
       }
     },
     enabled: !!scope,
+  });
+};
+
+export const useGetOrderPipeline = (params: OrderPipelineParams) => {
+  return useQuery<OrderPipelineResult, Error>({
+    queryKey: ["dashboard", "orderPipeline", params],
+    queryFn: async () => {
+      const response: AxiosResponse<OrderPipelineResult> = await loadOrderPipeline(params);
+      return response.data;
+    },
+    placeholderData: (previousData) => previousData,
   });
 };
 

@@ -59,6 +59,76 @@ export type OrderwiseInventorySummary = {
   items: StockItemMovement[];
 };
 
+// Order pipeline (2026-09-06): mirrors ApparelPro.WebApi.APIModels.Dashboard.OrderPipeline*
+// exactly. Stage: 0 Merchandising, 1 Approval, 2 Supplier PO, 3 GRN,
+// 4 Production, 5 Shipment, 6 Complete. See each *StageDetail type for what
+// "done" means at that stage and why (backend comments have the full story -
+// none of this is a stored status flag except Approval's ApprovedDate).
+export type MerchandisingStageDetail = {
+  styleSaved: boolean;
+  breakdownDone: boolean;
+  consumptionDone: boolean;
+};
+
+export type ApprovalStageDetail = {
+  isApproved: boolean;
+  approvedBy: string | null;
+  approvedDate: string | null;
+};
+
+export type SupplierPoStageDetail = {
+  raisedQuantity: number;
+  raisedValue: number;
+  outstandingQuantity: number;
+  outstandingValue: number;
+  currency: string;
+};
+
+export type GrnStageDetail = {
+  orderedQuantity: number;
+  receivedQuantity: number;
+  orderedValue: number;
+  receivedValue: number;
+};
+
+export type ProductionStageDetail = {
+  targetQuantity: number;
+  actualQuantity: number;
+};
+
+export type ShipmentStageDetail = {
+  targetQuantity: number;
+  scheduledQuantity: number;
+  targetValue: number;
+  scheduledValue: number;
+};
+
+export type OrderPipelineRow = {
+  buyerCode: number;
+  buyerName: string;
+  order: string;
+  typeCode: number;
+  styleCode: string;
+  quantity: number | null;
+  unit: string | null;
+  stage: number;
+  daysInStage: number;
+  isOverdue: boolean;
+  merchandising: MerchandisingStageDetail;
+  approval: ApprovalStageDetail;
+  supplierPo: SupplierPoStageDetail;
+  grn: GrnStageDetail;
+  production: ProductionStageDetail;
+  shipment: ShipmentStageDetail;
+};
+
+export type OrderPipelineResult = {
+  items: OrderPipelineRow[];
+  totalItems: number;
+  stageCounts: number[];
+  overdueCount: number;
+};
+
 export type OrderManagementSummary = {
   buyerCode: number;
   order: string;

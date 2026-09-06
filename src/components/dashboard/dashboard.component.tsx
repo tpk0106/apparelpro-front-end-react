@@ -10,6 +10,7 @@ import FulfillmentMeter from "./fulfillment-meter.component";
 import ColorSizeMixBars from "./color-size-mix.component";
 import StockItemMovementBars from "./stock-item-movement.component";
 import StockAlerts from "./stock-alerts.component";
+import OrderPipelinePanel from "./order-pipeline-panel.component";
 import KpiTile from "../common/kpi-tile";
 import {
   useGetCurrentStyle,
@@ -105,6 +106,8 @@ const DashboardHome = () => {
           <Typography sx={{ color: DASHBOARD_COLORS.accentStrong }}>Floor pulse</Typography>
         </ThemeProvider>
       </div>
+
+      <OrderPipelinePanel />
 
       <Card variant="outlined" sx={{ p: 2, mb: 2, display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap", ...CARD_SX }}>
         {activeScope ? (

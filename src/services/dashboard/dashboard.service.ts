@@ -55,6 +55,21 @@ const loadOrderwiseInventorySummary = async (buyerCode: number, order: string) =
   });
 };
 
+interface OrderPipelineParams {
+  pageNumber: number;
+  pageSize: number;
+  buyerCode?: number | null;
+  stage?: number | null;
+  search?: string | null;
+  overdueOnly?: boolean | null;
+}
+
+const loadOrderPipeline = async (params: OrderPipelineParams) => {
+  return await client.get(APPARELPRO_ENDPOINTS.REFERENCE_SECTION.DASHBOARD.ORDER_PIPELINE, {
+    params,
+  });
+};
+
 export {
   loadCurrentStyle,
   loadProductionProgress,
@@ -62,4 +77,6 @@ export {
   loadDailyTrendAllSections,
   loadOrderManagementSummary,
   loadOrderwiseInventorySummary,
+  loadOrderPipeline,
 };
+export type { OrderPipelineParams };

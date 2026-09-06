@@ -227,6 +227,7 @@ export const APPARELPRO_ENDPOINTS = {
       DAILY_TREND_ALL_SECTIONS: "api/dashboard/daily-trend-all-sections",
       ORDER_MANAGEMENT_SUMMARY: "api/dashboard/order-management-summary",
       ORDERWISE_INVENTORY_SUMMARY: "api/dashboard/orderwise-inventory-summary",
+      ORDER_PIPELINE: "api/dashboard/order-pipeline",
     },
     SUBSCRIPTION: {
       GET: "api/subscription/list",
