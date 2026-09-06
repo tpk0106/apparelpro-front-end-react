@@ -5,6 +5,14 @@ import Grid from "@mui/material/Grid";
 import { useGetBasis } from "../../../../tanstack-hooks/custom-hooks";
 import type { Basis } from "../../../../interfaces/references/Basis";
 import type { OutstandingPurchaseOrderListReportQueryParams } from "../../../../services/reports/order-management/outstanding-purchase-order-list-report.service";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../../themes/useDropdownTheme";
+import {
+  dateIconFieldSx,
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceInfoCaptionSx,
+} from "../../../../themes/workspace-theme";
 
 interface OutstandingPurchaseOrderListReportHeaderProps {
   // Broadcasts the submitted Start Date/End Date/Basis criteria up to the workspace
@@ -21,6 +29,7 @@ interface OutstandingPurchaseOrderListReportHeaderProps {
 export default function OutstandingPurchaseOrderListReportHeader({
   onScopeLock,
 }: OutstandingPurchaseOrderListReportHeaderProps) {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [selectedBasis, setSelectedBasis] = useState<Basis | null>(null);
@@ -62,16 +71,15 @@ export default function OutstandingPurchaseOrderListReportHeader({
       sx={{
         p: 2.5,
         mb: 3,
-        backgroundColor: "#fafafa",
-        borderLeft: "5px solid #1a237e",
+        backgroundColor: DASHBOARD_COLORS.cardBg,
+        border: `1px solid ${DASHBOARD_COLORS.border}`,
       }}
     >
       <Typography
         variant="caption"
         sx={{
-          display: "block",
+          ...workspaceInfoCaptionSx,
           fontWeight: "bold",
-          color: "text.secondary",
           mb: 2,
           textTransform: "uppercase",
         }}
@@ -89,6 +97,7 @@ export default function OutstandingPurchaseOrderListReportHeader({
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
+            sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
           />
         </Grid>
 
@@ -101,6 +110,7 @@ export default function OutstandingPurchaseOrderListReportHeader({
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
+            sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
           />
         </Grid>
 
@@ -112,15 +122,21 @@ export default function OutstandingPurchaseOrderListReportHeader({
             onChange={(_, v: Basis | null) => setSelectedBasis(v)}
             loading={isBasisLoading}
             isOptionEqualToValue={(o, v) => o.code === v?.code}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(p) => (
-              <TextField {...p} label="Basis (optional)" size="small" />
+              <TextField {...p} label="Basis (optional)" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Button variant="contained" fullWidth onClick={handleViewReport}>
-            View Report
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={handleViewReport}
+            sx={primaryActionButtonSx}
+          >
+            <span style={themedButtonLabelStyle}>View Report</span>
           </Button>
         </Grid>
 

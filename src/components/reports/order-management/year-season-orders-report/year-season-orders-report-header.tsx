@@ -4,6 +4,9 @@ import Grid from "@mui/material/Grid";
 
 import { useGetSeasons } from "../../../../tanstack-hooks/custom-hooks";
 import type { YearSeasonOrdersReportScopeContext } from "./year-season-orders-report.types";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../../themes/useDropdownTheme";
+import { numberFieldNoSpinnerSx, workspaceInfoCaptionSx } from "../../../../themes/workspace-theme";
 
 interface YearSeasonOrdersReportHeaderProps {
   onScopeChange: (scope: YearSeasonOrdersReportScopeContext) => void;
@@ -14,6 +17,7 @@ interface YearSeasonOrdersReportHeaderProps {
 export default function YearSeasonOrdersReportHeader({
   onScopeChange,
 }: YearSeasonOrdersReportHeaderProps) {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const [yearInput, setYearInput] = useState("");
   const [season, setSeason] = useState("");
 
@@ -56,16 +60,15 @@ export default function YearSeasonOrdersReportHeader({
       sx={{
         p: 2.5,
         mb: 3,
-        backgroundColor: "#fafafa",
-        borderLeft: "5px solid #1a237e",
+        backgroundColor: DASHBOARD_COLORS.cardBg,
+        border: `1px solid ${DASHBOARD_COLORS.border}`,
       }}
     >
       <Typography
         variant="caption"
         sx={{
-          display: "block",
+          ...workspaceInfoCaptionSx,
           fontWeight: "bold",
-          color: "text.secondary",
           mb: 2,
           textTransform: "uppercase",
         }}
@@ -83,6 +86,7 @@ export default function YearSeasonOrdersReportHeader({
             value={yearInput}
             onChange={(e) => handleYearChange(e.target.value)}
             slotProps={{ htmlInput: { min: 1900, max: 2100 } }}
+            sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
           />
         </Grid>
 
@@ -94,6 +98,8 @@ export default function YearSeasonOrdersReportHeader({
             fullWidth
             value={season}
             onChange={(e) => handleSeasonChange(e.target.value)}
+            sx={dropdownFieldSx}
+            slotProps={{ select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } }}
           >
             <MenuItem value="">
               <em>All Seasons</em>

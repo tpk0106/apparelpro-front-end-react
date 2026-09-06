@@ -119,6 +119,7 @@ interface CreateBuyerAPIModel {
 
 interface CreatePortDestinationAPIModel {
   code: string;
+  countryCode: string;
   destinationName: string;
 }
 
@@ -135,6 +136,7 @@ interface UpdateBuyerAPIModel {
 
 interface UpdatePortDestinationAPIModel {
   code: string;
+  countryCode: string;
   destinationName: string;
 }
 

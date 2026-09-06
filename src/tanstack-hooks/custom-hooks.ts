@@ -43,7 +43,12 @@ import {
   updateEditUnit,
 } from "../services/references/unit.service";
 import type { PortDestination } from "../interfaces/references/PortDestination";
-import { loadPortDestinations } from "../services/references/port-destination.service";
+import {
+  loadPortDestinations,
+  createNewPortDestination,
+  updateEditPortDestination,
+  removePortDestination,
+} from "../services/references/port-destination.service";
 import type { Buyer } from "../interfaces/references/Buyer";
 import {
   createNewBuyer,
@@ -408,6 +413,61 @@ export const useGetDestinations = (paginate: PaginationData) => {
       return response.data;
     },
     placeholderData: (previousData) => previousData,
+  });
+};
+
+export const useCreatePortDestinationMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, PortDestination>({
+    mutationFn: async (newPortDestination: PortDestination) => {
+      await createNewPortDestination(newPortDestination);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["portDestinationsLookup"] });
+      toast.success("Port Destination created successfully");
+    },
+    onError: (error) => {
+      toast.error(`Creation failed: ${error.message}`);
+    },
+  });
+};
+
+export const useUpdatePortDestinationMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, PortDestination>({
+    mutationFn: async (updatedPortDestination: PortDestination) => {
+      await updateEditPortDestination(
+        updatedPortDestination.code,
+        updatedPortDestination.countryCode,
+        updatedPortDestination,
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["portDestinationsLookup"] });
+      toast.success("Port Destination updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Update failed: ${error.message}`);
+    },
+  });
+};
+
+export const useDeletePortDestinationMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { code: string; countryCode: string }>({
+    mutationFn: async ({ code, countryCode }) => {
+      await removePortDestination(code, countryCode);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["portDestinationsLookup"] });
+      toast.success("Port Destination deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Delete failed: ${error.message}`);
+    },
   });
 };
 

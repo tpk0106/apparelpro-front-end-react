@@ -3,6 +3,9 @@ import { Card, TextField, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 
 import type { PendingEventsReportScopeContext } from "./pending-events-report.types";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../../themes/useDropdownTheme";
+import { dateIconFieldSx, workspaceInfoCaptionSx } from "../../../../themes/workspace-theme";
 
 interface PendingEventsReportHeaderProps {
   onScopeChange: (scope: PendingEventsReportScopeContext) => void;
@@ -15,6 +18,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 export default function PendingEventsReportHeader({
   onScopeChange,
 }: PendingEventsReportHeaderProps) {
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const [asOfDate, setAsOfDate] = useState(today());
 
   const handleDateChange = (value: string) => {
@@ -30,16 +34,15 @@ export default function PendingEventsReportHeader({
       sx={{
         p: 2.5,
         mb: 3,
-        backgroundColor: "#fafafa",
-        borderLeft: "5px solid #1a237e",
+        backgroundColor: DASHBOARD_COLORS.cardBg,
+        border: `1px solid ${DASHBOARD_COLORS.border}`,
       }}
     >
       <Typography
         variant="caption"
         sx={{
-          display: "block",
+          ...workspaceInfoCaptionSx,
           fontWeight: "bold",
-          color: "text.secondary",
           mb: 2,
           textTransform: "uppercase",
         }}
@@ -57,6 +60,7 @@ export default function PendingEventsReportHeader({
             value={asOfDate}
             onChange={(e) => handleDateChange(e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
+            sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
           />
         </Grid>
       </Grid>

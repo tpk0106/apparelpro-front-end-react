@@ -4,6 +4,9 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Grid from "@mui/material/Grid";
 
 import { useGetPurchaseOrderNumbersQuery } from "../../../../tanstack-hooks/purchase-order-list-report.hooks";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../../themes/useDropdownTheme";
+import { workspaceInfoCaptionSx } from "../../../../themes/workspace-theme";
 
 interface PurchaseOrderListReportHeaderProps {
   // Broadcasts the selected Purchase Order No. up to the workspace once chosen;
@@ -18,6 +21,7 @@ interface PurchaseOrderListReportHeaderProps {
 export default function PurchaseOrderListReportHeader({
   onScopeLock,
 }: PurchaseOrderListReportHeaderProps) {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const [selectedPoNumber, setSelectedPoNumber] = useState<string | null>(
     null,
   );
@@ -36,16 +40,15 @@ export default function PurchaseOrderListReportHeader({
       sx={{
         p: 2.5,
         mb: 3,
-        backgroundColor: "#fafafa",
-        borderLeft: "5px solid #1a237e",
+        backgroundColor: DASHBOARD_COLORS.cardBg,
+        border: `1px solid ${DASHBOARD_COLORS.border}`,
       }}
     >
       <Typography
         variant="caption"
         sx={{
-          display: "block",
+          ...workspaceInfoCaptionSx,
           fontWeight: "bold",
-          color: "text.secondary",
           mb: 2,
           textTransform: "uppercase",
         }}
@@ -62,11 +65,13 @@ export default function PurchaseOrderListReportHeader({
             onChange={(_, v: string | null) => handlePoNumberChange(v)}
             loading={isPoNumbersLoading}
             isOptionEqualToValue={(o, v) => o === v}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(p) => (
               <TextField
                 {...p}
                 label="Select Purchase Order No."
                 size="small"
+                sx={dropdownFieldSx}
               />
             )}
           />

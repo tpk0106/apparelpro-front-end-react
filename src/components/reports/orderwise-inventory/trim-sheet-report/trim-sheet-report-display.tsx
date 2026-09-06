@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import {
   Alert,
   Box,
-  Card,
   Chip,
   Divider,
   Paper,
@@ -20,6 +19,13 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { format, parseISO } from "date-fns";
 
 import type { TrimSheetReportDetails } from "./trim-sheet-report.types";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import {
+  plainTableBodyRowSx,
+  plainTableHeaderCellSx,
+  plainTableHeaderRowSx,
+} from "../../../../themes/workspace-theme";
+import KpiTile from "../../../common/kpi-tile";
 
 interface Props {
   report: TrimSheetReportDetails;
@@ -37,6 +43,11 @@ const formatQuantity = (value: number): string =>
     maximumFractionDigits: 3,
   });
 
+const cardSx = {
+  backgroundColor: DASHBOARD_COLORS.cardBg,
+  border: `1px solid ${DASHBOARD_COLORS.border}`,
+};
+
 // Renders the full "TRIM SHEET" report on screen, mirroring OD_TRIM.PRG's printed
 // layout section-by-section: header, material lines grouped by stock code with a
 // subtotal after each group, an honest placeholder for the two cost sources not yet
@@ -46,55 +57,64 @@ const formatQuantity = (value: number): string =>
 export default function TrimSheetReportDisplay({ report }: Props) {
   const currency = report.currencyCode || "N/A";
 
-  console.log('report',report)
-
   return (
     <Box>
-      {/* Header block. FIXED (2026-08-07): this was a plain unstyled <Paper> with no
-          background override, so it silently inherited the app's dark theme surface color
-          with no matching text-color override - the values rendered as dark text on a near-
-          black background, effectively invisible. Restyled as an explicit light Card (same
-          treatment already used by this feature's own selector header in
-          trim-sheet-report-header.tsx: light background + a colored left border), so it reads
-          correctly regardless of the surrounding theme. Also adds Buyer Name and Garment Type
-          name, resolved server-side by TrimSheetReportService - previously only the raw
-          numeric codes were shown. */}
-      <Card
-        variant="outlined"
-        sx={{
-          p: 2,
-          mb: 2.5,
-          backgroundColor: "#fafafa",
-          borderLeft: "5px solid #1a237e",
-        }}
-      >
-        <Grid container spacing={2}>
-          <HeaderField
-            label="Buyer"
-            value={report.buyerName || String(report.buyerCode)}
-          />
-          <HeaderField label="Order" value={report.order} />
-          <HeaderField
-            label="Garment Type"
-            value={report.typeName || String(report.typeCode)}
-          />
-          <HeaderField label="Style" value={report.styleCode} />
-          <HeaderField label="Unit" value={report.unit} />
-          <HeaderField
-            label="Style Quantity"
-            value={formatQuantity(report.styleQuantity)}
-          />
-          <HeaderField
-            label="Unit Price"
-            value={`${formatMoney(report.unitPrice)} ${currency}`}
-          />
-          <HeaderField
-            label="Basis"
-            value={`${report.basisCode} - ${report.basisDescription}`}
-          />
-          <HeaderField label="Report Currency" value={currency} />
-        </Grid>
-      </Card>
+      <Grid container spacing={2} sx={{ mb: 2.5, flexDirection: "row" }} wrap="nowrap">
+        <KpiTile
+          label="Buyer"
+          value={report.buyerName || String(report.buyerCode)}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 18 }}
+        />
+        <KpiTile
+          label="Order"
+          value={report.order}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 10 }}
+        />
+        <KpiTile
+          label="Garment Type"
+          value={report.typeName || String(report.typeCode)}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 10 }}
+        />
+        <KpiTile
+          label="Style"
+          value={report.styleCode}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 8 }}
+        />
+        <KpiTile
+          label="Unit"
+          value={report.unit}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 6 }}
+        />
+        <KpiTile
+          label="Style Quantity"
+          value={formatQuantity(report.styleQuantity)}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 10 }}
+        />
+        <KpiTile
+          label="Unit Price"
+          value={`${formatMoney(report.unitPrice)} ${currency}`}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 10 }}
+        />
+        <KpiTile
+          label="Basis"
+          value={`${report.basisCode} - ${report.basisDescription}`}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 12 }}
+        />
+        <KpiTile
+          label="Report Currency"
+          value={currency}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 6 }}
+        />
+      </Grid>
 
       {/* Material Consumption lines, grouped by stock code with a subtotal after each group */}
       {report.stockGroupSubtotals.map((group) => {
@@ -105,31 +125,47 @@ export default function TrimSheetReportDisplay({ report }: Props) {
           <Paper
             key={group.stockCode}
             variant="outlined"
-            sx={{ mb: 2, overflow: "hidden" }}
+            sx={{ mb: 2, overflow: "hidden", ...cardSx }}
           >
-            <Box sx={{ px: 2, py: 1, backgroundColor: "#eef1f7" }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+            <Box
+              sx={{
+                px: 2,
+                py: 1,
+                backgroundColor: DASHBOARD_COLORS.pageBg,
+                borderBottom: `1px solid ${DASHBOARD_COLORS.border}`,
+              }}
+            >
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}
+              >
                 {group.stockCode} - {group.stockDescription}
               </Typography>
             </Box>
             <TableContainer>
               <Table size="small">
                 <TableHead>
-                  <TableRow>
-                    <TableCell>Item Code</TableCell>
-                    <TableCell>Description</TableCell>
-                    <TableCell align="right">Cons. / Garment</TableCell>
-                    <TableCell align="right">Total Consumption</TableCell>
-                    <TableCell align="right">
+                  <TableRow sx={plainTableHeaderRowSx()}>
+                    <TableCell sx={plainTableHeaderCellSx()}>Item Code</TableCell>
+                    <TableCell sx={plainTableHeaderCellSx()}>Description</TableCell>
+                    <TableCell sx={{ ...plainTableHeaderCellSx(), textAlign: "right" }}>
+                      Cons. / Garment
+                    </TableCell>
+                    <TableCell sx={{ ...plainTableHeaderCellSx(), textAlign: "right" }}>
+                      Total Consumption
+                    </TableCell>
+                    <TableCell sx={{ ...plainTableHeaderCellSx(), textAlign: "right" }}>
                       Unit Price ({currency})
                     </TableCell>
-                    <TableCell align="right">Value ({currency})</TableCell>
-                    <TableCell>Supplier</TableCell>
+                    <TableCell sx={{ ...plainTableHeaderCellSx(), textAlign: "right" }}>
+                      Value ({currency})
+                    </TableCell>
+                    <TableCell sx={plainTableHeaderCellSx()}>Supplier</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {groupLines.map((line, index) => (
-                    <TableRow key={`${line.itemCode}-${index}`}>
+                    <TableRow key={`${line.itemCode}-${index}`} sx={plainTableBodyRowSx(index)}>
                       <TableCell>
                         {line.itemCode}
                         {[
@@ -142,7 +178,7 @@ export default function TrimSheetReportDisplay({ report }: Props) {
                           .join(" / ") && (
                           <Typography
                             variant="caption"
-                            sx={{ display: "block", color: "text.secondary" }}
+                            sx={{ display: "block", color: DASHBOARD_COLORS.textSecondary }}
                           >
                             {[
                               line.feature1,
@@ -185,7 +221,7 @@ export default function TrimSheetReportDisplay({ report }: Props) {
                 </TableBody>
               </Table>
             </TableContainer>
-            <Divider />
+            <Divider sx={{ borderColor: DASHBOARD_COLORS.border }} />
             <Box
               sx={{
                 px: 2,
@@ -193,20 +229,20 @@ export default function TrimSheetReportDisplay({ report }: Props) {
                 display: "flex",
                 justifyContent: "flex-end",
                 gap: 4,
-                backgroundColor: "#fafafa",
+                backgroundColor: DASHBOARD_COLORS.pageBg,
               }}
             >
-              <Typography variant="body2">
+              <Typography variant="body2" sx={{ color: DASHBOARD_COLORS.textPrimary }}>
                 Cost / Garment:{" "}
                 <strong>{formatMoney(group.costPerGarment)}</strong>
               </Typography>
-              <Typography variant="body2">
+              <Typography variant="body2" sx={{ color: DASHBOARD_COLORS.textPrimary }}>
                 Subtotal Value:{" "}
                 <strong>
                   {formatMoney(group.subtotalValue)} {currency}
                 </strong>
               </Typography>
-              <Typography variant="body2">
+              <Typography variant="body2" sx={{ color: DASHBOARD_COLORS.textPrimary }}>
                 % of Unit Price:{" "}
                 <strong>{group.percentageOfUnitPrice.toFixed(2)}%</strong>
               </Typography>
@@ -232,24 +268,36 @@ export default function TrimSheetReportDisplay({ report }: Props) {
       )}
 
       {/* Supplier value summary + grand total */}
-      <Paper variant="outlined" sx={{ mb: 2.5, overflow: "hidden" }}>
-        <Box sx={{ px: 2, py: 1, backgroundColor: "#eef1f7" }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+      <Paper variant="outlined" sx={{ mb: 2.5, overflow: "hidden", ...cardSx }}>
+        <Box
+          sx={{
+            px: 2,
+            py: 1,
+            backgroundColor: DASHBOARD_COLORS.pageBg,
+            borderBottom: `1px solid ${DASHBOARD_COLORS.border}`,
+          }}
+        >
+          <Typography
+            variant="subtitle2"
+            sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}
+          >
             Supplier Value Summary
           </Typography>
         </Box>
         <TableContainer>
           <Table size="small">
             <TableHead>
-              <TableRow>
-                <TableCell>Supplier Code</TableCell>
-                <TableCell>Supplier Name</TableCell>
-                <TableCell align="right">Value ({currency})</TableCell>
+              <TableRow sx={plainTableHeaderRowSx()}>
+                <TableCell sx={plainTableHeaderCellSx()}>Supplier Code</TableCell>
+                <TableCell sx={plainTableHeaderCellSx()}>Supplier Name</TableCell>
+                <TableCell sx={{ ...plainTableHeaderCellSx(), textAlign: "right" }}>
+                  Value ({currency})
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {report.supplierTotals.map((supplier) => (
-                <TableRow key={supplier.supplierCode}>
+              {report.supplierTotals.map((supplier, index) => (
+                <TableRow key={supplier.supplierCode} sx={plainTableBodyRowSx(index)}>
                   <TableCell>{supplier.supplierCode}</TableCell>
                   <TableCell>{supplier.supplierName || "—"}</TableCell>
                   <TableCell align="right">
@@ -257,14 +305,19 @@ export default function TrimSheetReportDisplay({ report }: Props) {
                   </TableCell>
                 </TableRow>
               ))}
-              <TableRow>
+              <TableRow
+                sx={{
+                  ...plainTableBodyRowSx(report.supplierTotals.length),
+                  backgroundColor: `${DASHBOARD_COLORS.pageBg} !important`,
+                }}
+              >
                 <TableCell colSpan={2}>
-                  <Typography sx={{ fontWeight: "bold" }}>
+                  <Typography sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>
                     Total Value - {currency}
                   </Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography sx={{ fontWeight: "bold" }}>
+                  <Typography sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>
                     {formatMoney(report.grandTotalValue)}
                   </Typography>
                 </TableCell>
@@ -278,11 +331,11 @@ export default function TrimSheetReportDisplay({ report }: Props) {
       {report.profit && (
         <Paper
           variant="outlined"
-          sx={{ p: 2, mb: 2.5, backgroundColor: "#fffde7" }}
+          sx={{ p: 2, mb: 2.5, ...cardSx }}
         >
           <Typography
             variant="subtitle2"
-            sx={{ fontWeight: "bold", mb: 1 }}
+            sx={{ fontWeight: "bold", mb: 1, color: DASHBOARD_COLORS.accent }}
           >
             Estimated Profit (restricted view)
           </Typography>
@@ -304,8 +357,8 @@ export default function TrimSheetReportDisplay({ report }: Props) {
                     fontWeight: 700,
                     color:
                       report.profit.estimatedProfitPerGarment < 0
-                        ? "#c62828"
-                        : "#1b5e20",
+                        ? DASHBOARD_COLORS.critical
+                        : DASHBOARD_COLORS.success,
                   }}
                 >
                   {formatMoney(report.profit.estimatedProfitPerGarment)} (
@@ -318,7 +371,7 @@ export default function TrimSheetReportDisplay({ report }: Props) {
       )}
 
       {/* Approval stamp */}
-      <Paper variant="outlined" sx={{ p: 2 }}>
+      <Paper variant="outlined" sx={{ p: 2, ...cardSx }}>
         {report.approvalStamp ? (
           <Typography
             variant="body2"
@@ -326,7 +379,7 @@ export default function TrimSheetReportDisplay({ report }: Props) {
               display: "flex",
               alignItems: "center",
               gap: 1,
-              color: "#1b5e20",
+              color: DASHBOARD_COLORS.success,
               fontWeight: "bold",
             }}
           >
@@ -335,7 +388,7 @@ export default function TrimSheetReportDisplay({ report }: Props) {
             {format(parseISO(report.approvalStamp.approvedDate), "dd-MMM-yyyy")}
           </Typography>
         ) : (
-          <Typography variant="body2" sx={{ fontStyle: "italic", color: "text.secondary" }}>
+          <Typography variant="body2" sx={{ fontStyle: "italic", color: DASHBOARD_COLORS.textSecondary }}>
             Not yet approved.
           </Typography>
         )}
@@ -358,12 +411,12 @@ function HeaderField({
         sx={{
           display: "block",
           textTransform: "uppercase",
-          color: "#5f6b7a",
+          color: DASHBOARD_COLORS.textSecondary,
         }}
       >
         {label}
       </Typography>
-      <Typography variant="body1" sx={{ fontWeight: 600, color: "#1a2027" }}>
+      <Typography variant="body1" sx={{ fontWeight: 600, color: DASHBOARD_COLORS.textPrimary }}>
         {value}
       </Typography>
     </Grid>

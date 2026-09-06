@@ -27,6 +27,7 @@ export interface OrderQuotaDetailRow {
 
 export interface OrderQuotaDetailReport {
   buyerCode: number | null;
+  buyerName: string | null;
   order: string | null;
   rows: OrderQuotaDetailRow[];
 }

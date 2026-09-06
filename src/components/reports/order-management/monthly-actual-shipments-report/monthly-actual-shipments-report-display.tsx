@@ -7,11 +7,17 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 
 import type { MonthlyActualShipmentsReport } from "./monthly-actual-shipments-report.types";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import {
+  plainTableBodyRowSx,
+  plainTableHeaderCellSx,
+  plainTableHeaderRowSx,
+} from "../../../../themes/workspace-theme";
+import KpiTile from "../../../common/kpi-tile";
 
 interface Props {
   report: MonthlyActualShipmentsReport;
@@ -35,19 +41,6 @@ const MONTH_NAMES = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-function HeaderField({ label, value }: { label: string; value: string }) {
-  return (
-    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-      <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>
-        {label}
-      </Typography>
-      <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-        {value}
-      </Typography>
-    </Grid>
-  );
-}
-
 // Renders the "MONTHLY ACTUAL SHIPMENTS" report as one flat table - every commercial
 // invoice line shipped within the selected Month/Year.
 export default function MonthlyActualShipmentsReportDisplay({ report }: Props) {
@@ -56,34 +49,48 @@ export default function MonthlyActualShipmentsReportDisplay({ report }: Props) {
 
   return (
     <Box>
-      <Card
-        variant="outlined"
-        sx={{ p: 2, mb: 2.5, backgroundColor: "#fafafa", borderLeft: "5px solid #1a237e" }}
-      >
-        <Grid container spacing={2}>
-          <HeaderField label="Shipment Month" value={`${MONTH_NAMES[report.month - 1]} ${report.year}`} />
-          <HeaderField label="Total Lines" value={String(report.rows.length)} />
-          <HeaderField label="Total Value" value={formatMoney(totalValue)} />
-        </Grid>
-      </Card>
+      <Grid container spacing={2} sx={{ mb: 2.5, flexDirection: "row" }} wrap="nowrap">
+        <KpiTile
+          label="Shipment Month"
+          value={`${MONTH_NAMES[report.month - 1]} ${report.year}`}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 14 }}
+        />
+        <KpiTile
+          label="Total Lines"
+          value={String(report.rows.length)}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 8 }}
+        />
+        <KpiTile
+          label="Total Value"
+          value={formatMoney(totalValue)}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 10 }}
+        />
+      </Grid>
 
-      <TableContainer component={Card} variant="outlined">
+      <TableContainer
+        component={Card}
+        variant="outlined"
+        sx={{ backgroundColor: DASHBOARD_COLORS.cardBg, border: `1px solid ${DASHBOARD_COLORS.border}` }}
+      >
         <Table size="small">
           <TableHead>
-            <TableRow sx={{ backgroundColor: "#eef1f7" }}>
-              <TableCell>Invoice No.</TableCell>
-              <TableCell>Buyer</TableCell>
-              <TableCell>Order No</TableCell>
-              <TableCell>Style</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell align="right">Quantity</TableCell>
-              <TableCell align="right">Balance</TableCell>
-              <TableCell align="right">Value</TableCell>
+            <TableRow sx={plainTableHeaderRowSx()}>
+              <TableCell sx={plainTableHeaderCellSx()}>Invoice No.</TableCell>
+              <TableCell sx={plainTableHeaderCellSx()}>Buyer</TableCell>
+              <TableCell sx={plainTableHeaderCellSx()}>Order No</TableCell>
+              <TableCell sx={plainTableHeaderCellSx()}>Style</TableCell>
+              <TableCell sx={plainTableHeaderCellSx()}>Date</TableCell>
+              <TableCell sx={{ ...plainTableHeaderCellSx(), textAlign: "right" }}>Quantity</TableCell>
+              <TableCell sx={{ ...plainTableHeaderCellSx(), textAlign: "right" }}>Balance</TableCell>
+              <TableCell sx={{ ...plainTableHeaderCellSx(), textAlign: "right" }}>Value</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {report.rows.map((row, index) => (
-              <TableRow key={`${row.invoiceNumber}-${row.orderNo}-${row.styleCode}-${index}`}>
+              <TableRow key={`${row.invoiceNumber}-${row.orderNo}-${row.styleCode}-${index}`} sx={plainTableBodyRowSx(index)}>
                 <TableCell>{row.invoiceNumber}</TableCell>
                 <TableCell>{row.buyerName}</TableCell>
                 <TableCell>{row.orderNo}</TableCell>
@@ -94,11 +101,11 @@ export default function MonthlyActualShipmentsReportDisplay({ report }: Props) {
                 <TableCell align="right">{formatMoney(row.value)}</TableCell>
               </TableRow>
             ))}
-            <TableRow sx={{ backgroundColor: "#eef1f7" }}>
-              <TableCell colSpan={5} sx={{ fontWeight: "bold" }}>T O T A L</TableCell>
-              <TableCell align="right" sx={{ fontWeight: "bold" }}>{formatQuantity(totalQuantity)}</TableCell>
+            <TableRow sx={{ backgroundColor: `${DASHBOARD_COLORS.pageBg} !important` }}>
+              <TableCell colSpan={5} sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>T O T A L</TableCell>
+              <TableCell align="right" sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>{formatQuantity(totalQuantity)}</TableCell>
               <TableCell />
-              <TableCell align="right" sx={{ fontWeight: "bold" }}>{formatMoney(totalValue)}</TableCell>
+              <TableCell align="right" sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>{formatMoney(totalValue)}</TableCell>
             </TableRow>
           </TableBody>
         </Table>

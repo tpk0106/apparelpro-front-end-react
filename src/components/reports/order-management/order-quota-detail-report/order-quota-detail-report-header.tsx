@@ -10,6 +10,9 @@ import {
 
 import type { OrderQuotaDetailReportScopeContext } from "./order-quota-detail-report.types";
 import type { Buyer } from "../../../../interfaces/references/Buyer";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../../themes/useDropdownTheme";
+import { workspaceInfoCaptionSx } from "../../../../themes/workspace-theme";
 
 interface OrderQuotaDetailReportHeaderProps {
   onScopeChange: (scope: OrderQuotaDetailReportScopeContext) => void;
@@ -21,6 +24,7 @@ interface OrderQuotaDetailReportHeaderProps {
 export default function OrderQuotaDetailReportHeader({
   onScopeChange,
 }: OrderQuotaDetailReportHeaderProps) {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
 
@@ -61,16 +65,15 @@ export default function OrderQuotaDetailReportHeader({
       sx={{
         p: 2.5,
         mb: 3,
-        backgroundColor: "#fafafa",
-        borderLeft: "5px solid #1a237e",
+        backgroundColor: DASHBOARD_COLORS.cardBg,
+        border: `1px solid ${DASHBOARD_COLORS.border}`,
       }}
     >
       <Typography
         variant="caption"
         sx={{
-          display: "block",
+          ...workspaceInfoCaptionSx,
           fontWeight: "bold",
-          color: "text.secondary",
           mb: 2,
           textTransform: "uppercase",
         }}
@@ -87,8 +90,9 @@ export default function OrderQuotaDetailReportHeader({
             onChange={(_, v: Buyer | null) => handleBuyerChange(v)}
             loading={isBuyersLoading}
             isOptionEqualToValue={(o, v) => o.buyerCode === v?.buyerCode}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(p) => (
-              <TextField {...p} label="Buyer (optional)" size="small" />
+              <TextField {...p} label="Buyer (optional)" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>
@@ -102,8 +106,9 @@ export default function OrderQuotaDetailReportHeader({
             onChange={(_, v: string | null) => handleOrderChange(v)}
             loading={isOrdersLoading}
             isOptionEqualToValue={(o, v) => o === v}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(p) => (
-              <TextField {...p} label="Order (optional)" size="small" />
+              <TextField {...p} label="Order (optional)" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>

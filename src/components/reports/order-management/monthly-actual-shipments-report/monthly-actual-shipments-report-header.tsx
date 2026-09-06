@@ -3,6 +3,14 @@ import { Button, Card, MenuItem, TextField, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 
 import type { MonthlyActualShipmentsReportScopeContext } from "./monthly-actual-shipments-report.types";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../../themes/useDropdownTheme";
+import {
+  numberFieldNoSpinnerSx,
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceInfoCaptionSx,
+} from "../../../../themes/workspace-theme";
 
 interface MonthlyActualShipmentsReportHeaderProps {
   onScopeLock: (scope: MonthlyActualShipmentsReportScopeContext | null) => void;
@@ -24,18 +32,24 @@ const MONTHS = [
 ];
 
 const now = new Date();
-const YEARS = Array.from({ length: 8 }, (_, i) => now.getFullYear() - i);
 
 // Month and Year are BOTH mandatory (OD_ACTSP.PRG exits the screen if the Month/Year
 // prompt is left blank) - same "scope lock" pattern as Cost of Production / Post Order
-// Cost Sheet.
+// Cost Sheet. Year is a free-typed number rather than a fixed dropdown list - shipment
+// history isn't bounded to a handful of recent years.
 export default function MonthlyActualShipmentsReportHeader({
   onScopeLock,
 }: MonthlyActualShipmentsReportHeaderProps) {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
+  const dropdownMenuSlotProps = { select: { MenuProps: { slotProps: { paper: { sx: dropdownListboxSx } } } } };
   const [month, setMonth] = useState<number>(now.getMonth() + 1);
-  const [year, setYear] = useState<number>(now.getFullYear());
+  const [yearInput, setYearInput] = useState<string>(String(now.getFullYear()));
+
+  const year = Number(yearInput);
+  const isYearValid = Number.isInteger(year) && year >= 1900 && year <= 2100;
 
   const handleGenerate = () => {
+    if (!isYearValid) return;
     onScopeLock({ month, year });
   };
 
@@ -45,16 +59,15 @@ export default function MonthlyActualShipmentsReportHeader({
       sx={{
         p: 2.5,
         mb: 3,
-        backgroundColor: "#fafafa",
-        borderLeft: "5px solid #1a237e",
+        backgroundColor: DASHBOARD_COLORS.cardBg,
+        border: `1px solid ${DASHBOARD_COLORS.border}`,
       }}
     >
       <Typography
         variant="caption"
         sx={{
-          display: "block",
+          ...workspaceInfoCaptionSx,
           fontWeight: "bold",
-          color: "text.secondary",
           mb: 2,
           textTransform: "uppercase",
         }}
@@ -71,6 +84,8 @@ export default function MonthlyActualShipmentsReportHeader({
             fullWidth
             value={month}
             onChange={(e) => setMonth(Number(e.target.value))}
+            sx={dropdownFieldSx}
+            slotProps={dropdownMenuSlotProps}
           >
             {MONTHS.map((m) => (
               <MenuItem key={m.value} value={m.value}>
@@ -82,24 +97,27 @@ export default function MonthlyActualShipmentsReportHeader({
 
         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
           <TextField
-            select
             label="Year"
             size="small"
             fullWidth
-            value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
-          >
-            {YEARS.map((y) => (
-              <MenuItem key={y} value={y}>
-                {y}
-              </MenuItem>
-            ))}
-          </TextField>
+            type="number"
+            value={yearInput}
+            onChange={(e) => setYearInput(e.target.value)}
+            error={yearInput !== "" && !isYearValid}
+            slotProps={{ htmlInput: { min: 1900, max: 2100 } }}
+            sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
+          />
         </Grid>
 
         <Grid size={{ xs: 12, sm: 4, md: 3 }}>
-          <Button variant="contained" onClick={handleGenerate}>
-            Generate Report
+          <Button
+            variant="contained"
+            onClick={handleGenerate}
+            disabled={!isYearValid}
+            fullWidth
+            sx={primaryActionButtonSx}
+          >
+            <span style={themedButtonLabelStyle}>Generate Report</span>
           </Button>
         </Grid>
       </Grid>

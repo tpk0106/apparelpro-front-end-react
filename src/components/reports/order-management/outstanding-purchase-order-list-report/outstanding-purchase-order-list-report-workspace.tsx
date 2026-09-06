@@ -18,6 +18,12 @@ import {
 } from "../../../../tanstack-hooks/outstanding-purchase-order-list-report.hooks";
 import type { AppError } from "../../../../auth/axiosClient";
 import type { OutstandingPurchaseOrderListReportQueryParams } from "../../../../services/reports/order-management/outstanding-purchase-order-list-report.service";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+} from "../../../../themes/workspace-theme";
 
 // Stable placeholder used only while no scope is submitted (the query is disabled via
 // `isReady` at that point, so this object's contents never reach the network) - same
@@ -58,61 +64,59 @@ export default function OutstandingPurchaseOrderListReportWorkspace() {
   };
 
   return (
-    <Box sx={{ width: "100%", p: 1 }}>
-      <Box
+    <Box sx={{ width: "95%", mx: "auto", p: 1 }}>
+      <Paper
+        elevation={3}
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          mb: 2,
+          p: 3,
+          backgroundColor: DASHBOARD_COLORS.pageBg,
         }}
       >
-        <Typography
-          variant="h5"
-          sx={{ fontWeight: "bold", color: "#1a237e" }}
-        >
-          List of Outstanding P/O's
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={
-            isDownloading ? (
-              <CircularProgress size={18} color="inherit" />
-            ) : (
-              <PictureAsPdfIcon />
-            )
-          }
-          onClick={handleDownloadPdf}
-          disabled={!isReady || !report || isLoading || isDownloading}
-        >
-          {isDownloading ? "Generating..." : "Print (PDF)"}
-        </Button>
-      </Box>
-
-      <OutstandingPurchaseOrderListReportHeader onScopeLock={setScope} />
-
-      {!isReady ? (
-        <Paper
-          elevation={0}
-          variant="outlined"
-          sx={{ p: 3, textAlign: "center", color: "text.secondary" }}
-        >
-          <Typography variant="body2">
-            Select a Start Date and End Date above, then click "View Report".
+        <Box sx={{ textAlign: "center", mb: 3 }}>
+          <Typography variant="h5" sx={workspaceHeadingSx}>
+            List of Outstanding P/O's
           </Typography>
-        </Paper>
-      ) : isLoading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-          <CircularProgress />
         </Box>
-      ) : isError ? (
-        <Alert severity="error" variant="outlined">
-          {error?.message ??
-            "Failed to load the Outstanding P/O List Report for the given criteria."}
-        </Alert>
-      ) : report ? (
-        <OutstandingPurchaseOrderListReportDisplay report={report} />
-      ) : null}
+
+        <OutstandingPurchaseOrderListReportHeader onScopeLock={setScope} />
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+          <Button
+            variant="contained"
+            startIcon={
+              isDownloading ? (
+                <CircularProgress size={18} color="inherit" />
+              ) : (
+                <PictureAsPdfIcon />
+              )
+            }
+            onClick={handleDownloadPdf}
+            disabled={!isReady || !report || isLoading || isDownloading}
+            sx={primaryActionButtonSx}
+          >
+            <span style={themedButtonLabelStyle}>
+              {isDownloading ? "Generating..." : "Download PDF"}
+            </span>
+          </Button>
+        </Box>
+
+        {!isReady ? (
+          <Alert severity="info" variant="outlined">
+            Select a Start Date and End Date above, then click "View Report".
+          </Alert>
+        ) : isLoading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : isError ? (
+          <Alert severity="error" variant="outlined">
+            {error?.message ??
+              "Failed to load the Outstanding P/O List Report for the given criteria."}
+          </Alert>
+        ) : report ? (
+          <OutstandingPurchaseOrderListReportDisplay report={report} />
+        ) : null}
+      </Paper>
     </Box>
   );
 }

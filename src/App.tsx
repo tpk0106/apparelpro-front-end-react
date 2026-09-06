@@ -31,6 +31,7 @@ import GarmentTypes from "./components/references/garment-type-tanstack/garment-
 import Bank from "./components/references/bank-tan-stack/bank.component";
 import Units from "./components/references/unit-tanstack/unit.component";
 import Buyers from "./components/references/buyer-tanstack/buyer.component";
+import PortDestinations from "./components/references/port-destination-tanstack/port-destination.component";
 import Basises from "./components/references/basis-tanstack/basis.component";
 import Seasons from "./components/references/season-tanstack/season.component";
 import OrderConfirmationRoutine from "./components/order-management/order-confirmation.component";
@@ -206,6 +207,11 @@ function App() {
         />
         <Route index path="subcont" element={<SubContractPage />} />
         <Route index path="buyers" element={<Buyers />} />
+        <Route
+          index
+          path="port-destination"
+          element={<PortDestinations />}
+        />
         <Route index path="garment-type" element={<GarmentTypes />} />
         <Route index path="basis" element={<Basises />} />
         <Route index path="season" element={<Seasons />} />

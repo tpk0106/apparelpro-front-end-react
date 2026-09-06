@@ -26,6 +26,7 @@ export interface ScheduledShipmentRow {
 
 export interface ScheduledShipmentsReport {
   buyerCode: number | null;
+  buyerName: string | null;
   order: string | null;
   rows: ScheduledShipmentRow[];
 }

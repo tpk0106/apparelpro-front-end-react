@@ -116,7 +116,6 @@ export default function TrimSheetReportHeader({
         mb: 3,
         backgroundColor: DASHBOARD_COLORS.cardBg,
         border: `1px solid ${DASHBOARD_COLORS.border}`,
-        borderLeft: `5px solid ${DASHBOARD_COLORS.accent}`,
       }}
     >
       <Typography

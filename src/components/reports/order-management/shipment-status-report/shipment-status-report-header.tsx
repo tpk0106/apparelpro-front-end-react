@@ -10,6 +10,9 @@ import {
 
 import type { ShipmentStatusReportScopeContext } from "./shipment-status-report.types";
 import type { Buyer } from "../../../../interfaces/references/Buyer";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../../themes/useDropdownTheme";
+import { workspaceInfoCaptionSx } from "../../../../themes/workspace-theme";
 
 interface ShipmentStatusReportHeaderProps {
   // Broadcasts the fully-resolved Buyer+Order scope up to the workspace once both
@@ -21,6 +24,7 @@ interface ShipmentStatusReportHeaderProps {
 export default function ShipmentStatusReportHeader({
   onScopeLock,
 }: ShipmentStatusReportHeaderProps) {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
 
@@ -70,16 +74,15 @@ export default function ShipmentStatusReportHeader({
       sx={{
         p: 2.5,
         mb: 3,
-        backgroundColor: "#fafafa",
-        borderLeft: "5px solid #1a237e",
+        backgroundColor: DASHBOARD_COLORS.cardBg,
+        border: `1px solid ${DASHBOARD_COLORS.border}`,
       }}
     >
       <Typography
         variant="caption"
         sx={{
-          display: "block",
+          ...workspaceInfoCaptionSx,
           fontWeight: "bold",
-          color: "text.secondary",
           mb: 2,
           textTransform: "uppercase",
         }}
@@ -96,8 +99,9 @@ export default function ShipmentStatusReportHeader({
             onChange={(_, v: Buyer | null) => handleBuyerChange(v)}
             loading={isBuyersLoading}
             isOptionEqualToValue={(o, v) => o.buyerCode === v?.buyerCode}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(p) => (
-              <TextField {...p} label="Select Buyer" size="small" />
+              <TextField {...p} label="Select Buyer" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>
@@ -111,8 +115,9 @@ export default function ShipmentStatusReportHeader({
             onChange={(_, v: string | null) => handleOrderChange(v)}
             loading={isOrdersLoading}
             isOptionEqualToValue={(o, v) => o === v}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(p) => (
-              <TextField {...p} label="Select Order" size="small" />
+              <TextField {...p} label="Select Order" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>

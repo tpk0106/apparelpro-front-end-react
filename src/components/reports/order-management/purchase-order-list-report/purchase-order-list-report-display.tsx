@@ -1,6 +1,5 @@
 import {
   Box,
-  Card,
   Paper,
   Table,
   TableBody,
@@ -8,12 +7,18 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { format, parseISO } from "date-fns";
 
 import type { PurchaseOrderListReport } from "./purchase-order-list-report.types";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import {
+  plainTableBodyRowSx,
+  plainTableHeaderCellSx,
+  plainTableHeaderRowSx,
+} from "../../../../themes/workspace-theme";
+import KpiTile from "../../../common/kpi-tile";
 
 interface Props {
   report: PurchaseOrderListReport;
@@ -40,56 +45,73 @@ const formatMoney = (value: number): string =>
 export default function PurchaseOrderListReportDisplay({ report }: Props) {
   return (
     <Box>
-      <Card
+      <Grid container spacing={2} sx={{ mb: 2.5, flexDirection: "row" }} wrap="nowrap">
+        <KpiTile
+          label="P/O No."
+          value={report.purchaseOrderNumber}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 10 }}
+        />
+        <KpiTile
+          label="Supplier"
+          value={report.supplierName || report.supplierCode}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 20 }}
+        />
+        <KpiTile
+          label="Currency"
+          value={report.currencyCode}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 6 }}
+        />
+        <KpiTile
+          label="P/I No."
+          value={report.proformaInvoiceNo || "-"}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 10 }}
+        />
+        <KpiTile
+          label="P/I Date"
+          value={
+            report.proformaInvoiceDate
+              ? format(parseISO(report.proformaInvoiceDate), "dd-MMM-yyyy")
+              : "-"
+          }
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 10 }}
+        />
+      </Grid>
+
+      <Paper
         variant="outlined"
         sx={{
-          p: 2,
-          mb: 2.5,
-          backgroundColor: "#fafafa",
-          borderLeft: "5px solid #1a237e",
+          overflow: "hidden",
+          backgroundColor: DASHBOARD_COLORS.cardBg,
+          border: `1px solid ${DASHBOARD_COLORS.border}`,
         }}
       >
-        <Grid container spacing={2}>
-          <HeaderField label="P/O No." value={report.purchaseOrderNumber} />
-          <HeaderField
-            label="Supplier"
-            value={report.supplierName || report.supplierCode}
-          />
-          <HeaderField label="Currency" value={report.currencyCode} />
-          <HeaderField
-            label="P/I No."
-            value={report.proformaInvoiceNo || "-"}
-          />
-          <HeaderField
-            label="P/I Date"
-            value={
-              report.proformaInvoiceDate
-                ? format(parseISO(report.proformaInvoiceDate), "dd-MMM-yyyy")
-                : "-"
-            }
-          />
-        </Grid>
-      </Card>
-
-      <Paper variant="outlined" sx={{ overflow: "hidden" }}>
         <TableContainer>
           <Table size="small">
             <TableHead>
-              <TableRow>
-                <TableCell>Item Code</TableCell>
-                <TableCell>Description</TableCell>
-                <TableCell align="right">Order Qty</TableCell>
-                <TableCell>Unit</TableCell>
-                <TableCell align="right">Unit Price</TableCell>
-                <TableCell>Buyer</TableCell>
-                <TableCell>Order</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell>Style</TableCell>
+              <TableRow sx={plainTableHeaderRowSx()}>
+                <TableCell sx={plainTableHeaderCellSx()}>Item Code</TableCell>
+                <TableCell sx={plainTableHeaderCellSx()}>Description</TableCell>
+                <TableCell sx={{ ...plainTableHeaderCellSx(), textAlign: "right" }}>
+                  Order Qty
+                </TableCell>
+                <TableCell sx={plainTableHeaderCellSx()}>Unit</TableCell>
+                <TableCell sx={{ ...plainTableHeaderCellSx(), textAlign: "right" }}>
+                  Unit Price
+                </TableCell>
+                <TableCell sx={plainTableHeaderCellSx()}>Buyer</TableCell>
+                <TableCell sx={plainTableHeaderCellSx()}>Order</TableCell>
+                <TableCell sx={plainTableHeaderCellSx()}>Type</TableCell>
+                <TableCell sx={plainTableHeaderCellSx()}>Style</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {report.lines.map((line, index) => (
-                <TableRow key={`${line.itemCode}-${index}`}>
+                <TableRow key={`${line.itemCode}-${index}`} sx={plainTableBodyRowSx(index)}>
                   <TableCell>{line.itemCode}</TableCell>
                   <TableCell>{line.description}</TableCell>
                   <TableCell align="right">
@@ -114,31 +136,5 @@ export default function PurchaseOrderListReportDisplay({ report }: Props) {
         </TableContainer>
       </Paper>
     </Box>
-  );
-}
-
-function HeaderField({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number;
-}) {
-  return (
-    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-      <Typography
-        variant="caption"
-        sx={{
-          display: "block",
-          textTransform: "uppercase",
-          color: "#5f6b7a",
-        }}
-      >
-        {label}
-      </Typography>
-      <Typography variant="body1" sx={{ fontWeight: 600, color: "#1a2027" }}>
-        {value}
-      </Typography>
-    </Grid>
   );
 }

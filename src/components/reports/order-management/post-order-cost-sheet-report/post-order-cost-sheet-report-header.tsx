@@ -10,6 +10,15 @@ import {
 
 import type { PostOrderCostSheetReportScopeContext } from "./post-order-cost-sheet-report.types";
 import type { Buyer } from "../../../../interfaces/references/Buyer";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import { useDropdownTheme } from "../../../../themes/useDropdownTheme";
+import {
+  dateIconFieldSx,
+  numberFieldNoSpinnerSx,
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceInfoCaptionSx,
+} from "../../../../themes/workspace-theme";
 
 interface PostOrderCostSheetReportHeaderProps {
   onScopeLock: (scope: PostOrderCostSheetReportScopeContext | null) => void;
@@ -22,6 +31,7 @@ interface PostOrderCostSheetReportHeaderProps {
 export default function PostOrderCostSheetReportHeader({
   onScopeLock,
 }: PostOrderCostSheetReportHeaderProps) {
+  const { fieldSx: dropdownFieldSx, listboxSx: dropdownListboxSx } = useDropdownTheme();
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [percentOfTotalValue, setPercentOfTotalValue] = useState<string>("0");
@@ -77,16 +87,15 @@ export default function PostOrderCostSheetReportHeader({
       sx={{
         p: 2.5,
         mb: 3,
-        backgroundColor: "#fafafa",
-        borderLeft: "5px solid #1a237e",
+        backgroundColor: DASHBOARD_COLORS.cardBg,
+        border: `1px solid ${DASHBOARD_COLORS.border}`,
       }}
     >
       <Typography
         variant="caption"
         sx={{
-          display: "block",
+          ...workspaceInfoCaptionSx,
           fontWeight: "bold",
-          color: "text.secondary",
           mb: 2,
           textTransform: "uppercase",
         }}
@@ -103,8 +112,9 @@ export default function PostOrderCostSheetReportHeader({
             onChange={(_, v: Buyer | null) => handleBuyerChange(v)}
             loading={isBuyersLoading}
             isOptionEqualToValue={(o, v) => o.buyerCode === v?.buyerCode}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(p) => (
-              <TextField {...p} label="Select Buyer" size="small" />
+              <TextField {...p} label="Select Buyer" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>
@@ -118,8 +128,9 @@ export default function PostOrderCostSheetReportHeader({
             onChange={(_, v: string | null) => handleOrderChange(v)}
             loading={isOrdersLoading}
             isOptionEqualToValue={(o, v) => o === v}
+            slotProps={{ listbox: { sx: dropdownListboxSx } }}
             renderInput={(p) => (
-              <TextField {...p} label="Select Order" size="small" />
+              <TextField {...p} label="Select Order" size="small" sx={dropdownFieldSx} />
             )}
           />
         </Grid>
@@ -132,6 +143,7 @@ export default function PostOrderCostSheetReportHeader({
             type="number"
             value={percentOfTotalValue}
             onChange={(e) => setPercentOfTotalValue(e.target.value)}
+            sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
           />
         </Grid>
 
@@ -143,6 +155,7 @@ export default function PostOrderCostSheetReportHeader({
             type="number"
             value={freightCharges}
             onChange={(e) => setFreightCharges(e.target.value)}
+            sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
           />
         </Grid>
 
@@ -155,6 +168,7 @@ export default function PostOrderCostSheetReportHeader({
             slotProps={{ inputLabel: { shrink: true } }}
             value={actualShippedDate}
             onChange={(e) => setActualShippedDate(e.target.value)}
+            sx={{ ...dropdownFieldSx, ...(dateIconFieldSx as Record<string, unknown>) }}
           />
         </Grid>
 
@@ -163,8 +177,9 @@ export default function PostOrderCostSheetReportHeader({
             variant="contained"
             disabled={!selectedBuyer || !selectedOrder}
             onClick={handleGenerate}
+            sx={primaryActionButtonSx}
           >
-            Generate Report
+            <span style={themedButtonLabelStyle}>Generate Report</span>
           </Button>
         </Grid>
       </Grid>

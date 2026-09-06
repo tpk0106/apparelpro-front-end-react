@@ -1,6 +1,5 @@
 import {
   Box,
-  Card,
   Paper,
   Table,
   TableBody,
@@ -13,6 +12,13 @@ import {
 import Grid from "@mui/material/Grid";
 
 import type { ColorSizeReport } from "./color-size-report.types";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import {
+  plainTableBodyRowSx,
+  plainTableHeaderCellSx,
+  plainTableHeaderRowSx,
+} from "../../../../themes/workspace-theme";
+import KpiTile from "../../../common/kpi-tile";
 
 interface Props {
   report: ColorSizeReport;
@@ -32,48 +38,66 @@ const formatQuantity = (value: number): string =>
 export default function ColorSizeReportDisplay({ report }: Props) {
   return (
     <Box>
-      <Card
-        variant="outlined"
-        sx={{
-          p: 2,
-          mb: 2.5,
-          backgroundColor: "#fafafa",
-          borderLeft: "5px solid #1a237e",
-        }}
-      >
-        <Grid container spacing={2}>
-          <HeaderField
-            label="Buyer"
-            value={report.buyerName || String(report.buyerCode)}
-          />
-          <HeaderField label="Order" value={report.order} />
-        </Grid>
-      </Card>
+      <Grid container spacing={2} sx={{ mb: 2.5, flexDirection: "row" }} wrap="nowrap">
+        <KpiTile
+          label="Buyer"
+          value={report.buyerName || String(report.buyerCode)}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 20 }}
+        />
+        <KpiTile
+          label="Order"
+          value={report.order}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 10 }}
+        />
+      </Grid>
 
       {report.styles.map((style) => (
-        <Paper key={style.styleCode} variant="outlined" sx={{ mb: 2, overflow: "hidden" }}>
-          <Box sx={{ px: 2, py: 1, backgroundColor: "#eef1f7" }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
+        <Paper
+          key={style.styleCode}
+          variant="outlined"
+          sx={{
+            mb: 2,
+            overflow: "hidden",
+            backgroundColor: DASHBOARD_COLORS.cardBg,
+            border: `1px solid ${DASHBOARD_COLORS.border}`,
+          }}
+        >
+          <Box
+            sx={{
+              px: 2,
+              py: 1,
+              backgroundColor: DASHBOARD_COLORS.pageBg,
+              borderBottom: `1px solid ${DASHBOARD_COLORS.border}`,
+            }}
+          >
+            <Typography
+              variant="subtitle2"
+              sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}
+            >
               Style: {style.styleCode}
             </Typography>
           </Box>
           <TableContainer sx={{ overflowX: "auto" }}>
             <Table size="small">
               <TableHead>
-                <TableRow>
-                  <TableCell>Colour</TableCell>
-                  <TableCell>Description</TableCell>
+                <TableRow sx={plainTableHeaderRowSx()}>
+                  <TableCell sx={plainTableHeaderCellSx()}>Colour</TableCell>
+                  <TableCell sx={plainTableHeaderCellSx()}>Description</TableCell>
                   {report.sizeColumns.map((size) => (
-                    <TableCell key={size} align="right">
+                    <TableCell key={size} sx={{ ...plainTableHeaderCellSx(), textAlign: "right" }}>
                       {size}
                     </TableCell>
                   ))}
-                  <TableCell align="right">Total</TableCell>
+                  <TableCell sx={{ ...plainTableHeaderCellSx(), textAlign: "right" }}>
+                    Total
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {style.colours.map((colour) => (
-                  <TableRow key={colour.colorCode}>
+                {style.colours.map((colour, index) => (
+                  <TableRow key={colour.colorCode} sx={plainTableBodyRowSx(index)}>
                     <TableCell>{colour.colorCode}</TableCell>
                     <TableCell>{colour.description || "—"}</TableCell>
                     {report.sizeColumns.map((size) => (
@@ -88,19 +112,26 @@ export default function ColorSizeReportDisplay({ report }: Props) {
                     </TableCell>
                   </TableRow>
                 ))}
-                <TableRow sx={{ backgroundColor: "#fafafa" }}>
+                <TableRow
+                  sx={{
+                    ...plainTableBodyRowSx(style.colours.length),
+                    backgroundColor: `${DASHBOARD_COLORS.pageBg} !important`,
+                  }}
+                >
                   <TableCell colSpan={2}>
-                    <Typography sx={{ fontWeight: "bold" }}>Total</Typography>
+                    <Typography sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>
+                      Total
+                    </Typography>
                   </TableCell>
                   {report.sizeColumns.map((size) => (
                     <TableCell key={size} align="right">
-                      <Typography sx={{ fontWeight: "bold" }}>
+                      <Typography sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>
                         {formatQuantity(style.sizeTotals[size] ?? 0)}
                       </Typography>
                     </TableCell>
                   ))}
                   <TableCell align="right">
-                    <Typography sx={{ fontWeight: "bold" }}>
+                    <Typography sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>
                       {formatQuantity(style.grandTotal)}
                     </Typography>
                   </TableCell>
@@ -111,31 +142,5 @@ export default function ColorSizeReportDisplay({ report }: Props) {
         </Paper>
       ))}
     </Box>
-  );
-}
-
-function HeaderField({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number;
-}) {
-  return (
-    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-      <Typography
-        variant="caption"
-        sx={{
-          display: "block",
-          textTransform: "uppercase",
-          color: "#5f6b7a",
-        }}
-      >
-        {label}
-      </Typography>
-      <Typography variant="body1" sx={{ fontWeight: 600, color: "#1a2027" }}>
-        {value}
-      </Typography>
-    </Grid>
   );
 }

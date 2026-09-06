@@ -12,6 +12,13 @@ import {
 import Grid from "@mui/material/Grid";
 
 import type { PendingEventsReport } from "./pending-events-report.types";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import {
+  plainTableBodyRowSx,
+  plainTableHeaderCellSx,
+  plainTableHeaderRowSx,
+} from "../../../../themes/workspace-theme";
+import KpiTile from "../../../common/kpi-tile";
 
 interface Props {
   report: PendingEventsReport;
@@ -25,55 +32,60 @@ const formatDate = (value: string | null): string => {
     : d.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "2-digit" });
 };
 
-function HeaderField({ label, value }: { label: string; value: string }) {
-  return (
-    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-      <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>
-        {label}
-      </Typography>
-      <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-        {value}
-      </Typography>
-    </Grid>
-  );
-}
-
 // Renders the "PENDING EVENTS" report as one card per Buyer/Order/Type/Style group,
 // each listing its still-pending milestone events - mirrors OD_EVPND.PRG's print break
 // on key change.
 export default function PendingEventsReportDisplay({ report }: Props) {
   return (
     <Box>
-      <Card
-        variant="outlined"
-        sx={{ p: 2, mb: 2.5, backgroundColor: "#fafafa", borderLeft: "5px solid #1a237e" }}
-      >
-        <Grid container spacing={2}>
-          <HeaderField label="As Of Date" value={formatDate(report.asOfDate)} />
-          <HeaderField label="Styles With Pending Events" value={String(report.groups.length)} />
-        </Grid>
-      </Card>
+      <Grid container spacing={2} sx={{ mb: 2.5, flexDirection: "row" }} wrap="nowrap">
+        <KpiTile
+          label="As Of Date"
+          value={formatDate(report.asOfDate)}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 10 }}
+        />
+        <KpiTile
+          label="Styles With Pending Events"
+          value={String(report.groups.length)}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 14 }}
+        />
+      </Grid>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {report.groups.map((group, index) => (
-          <Card key={`${group.buyerCode}-${group.order}-${group.typeCode}-${group.styleCode}-${index}`} variant="outlined">
-            <Box sx={{ p: 1.5, backgroundColor: "#eef1f7" }}>
+          <Card
+            key={`${group.buyerCode}-${group.order}-${group.typeCode}-${group.styleCode}-${index}`}
+            variant="outlined"
+            sx={{
+              backgroundColor: DASHBOARD_COLORS.cardBg,
+              border: `1px solid ${DASHBOARD_COLORS.border}`,
+            }}
+          >
+            <Box
+              sx={{
+                p: 1.5,
+                backgroundColor: DASHBOARD_COLORS.pageBg,
+                borderBottom: `1px solid ${DASHBOARD_COLORS.border}`,
+              }}
+            >
               <Grid container spacing={2}>
                 <Grid size={{ xs: 6, sm: 3 }}>
-                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Buyer</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{group.buyerName}</Typography>
+                  <Typography variant="caption" sx={{ color: DASHBOARD_COLORS.textSecondary, display: "block" }}>Buyer</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>{group.buyerName}</Typography>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 3 }}>
-                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Order</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{group.order}</Typography>
+                  <Typography variant="caption" sx={{ color: DASHBOARD_COLORS.textSecondary, display: "block" }}>Order</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>{group.order}</Typography>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 3 }}>
-                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Type</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{group.typeName}</Typography>
+                  <Typography variant="caption" sx={{ color: DASHBOARD_COLORS.textSecondary, display: "block" }}>Type</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>{group.typeName}</Typography>
                 </Grid>
                 <Grid size={{ xs: 6, sm: 3 }}>
-                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Style</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{group.styleCode}</Typography>
+                  <Typography variant="caption" sx={{ color: DASHBOARD_COLORS.textSecondary, display: "block" }}>Style</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>{group.styleCode}</Typography>
                 </Grid>
               </Grid>
             </Box>
@@ -81,17 +93,17 @@ export default function PendingEventsReportDisplay({ report }: Props) {
             <TableContainer>
               <Table size="small">
                 <TableHead>
-                  <TableRow>
-                    <TableCell>Event Code</TableCell>
-                    <TableCell>Description</TableCell>
-                    <TableCell>Scheduled Date</TableCell>
-                    <TableCell>Remarks</TableCell>
-                    <TableCell>Delay</TableCell>
+                  <TableRow sx={plainTableHeaderRowSx()}>
+                    <TableCell sx={plainTableHeaderCellSx()}>Event Code</TableCell>
+                    <TableCell sx={plainTableHeaderCellSx()}>Description</TableCell>
+                    <TableCell sx={plainTableHeaderCellSx()}>Scheduled Date</TableCell>
+                    <TableCell sx={plainTableHeaderCellSx()}>Remarks</TableCell>
+                    <TableCell sx={plainTableHeaderCellSx()}>Delay</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {group.events.map((evt, evtIndex) => (
-                    <TableRow key={`${evt.eventCode}-${evtIndex}`}>
+                    <TableRow key={`${evt.eventCode}-${evtIndex}`} sx={plainTableBodyRowSx(evtIndex)}>
                       <TableCell>{evt.eventCode}</TableCell>
                       <TableCell>{evt.description}</TableCell>
                       <TableCell>{formatDate(evt.scheduledDate)}</TableCell>

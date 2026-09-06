@@ -12,6 +12,13 @@ import {
 import Grid from "@mui/material/Grid";
 
 import type { StockArrivalStatusReport } from "./stock-arrival-status-report.types";
+import { DASHBOARD_COLORS } from "../../../dashboard/dashboard-theme";
+import {
+  plainTableBodyRowSx,
+  plainTableHeaderCellSx,
+  plainTableHeaderRowSx,
+} from "../../../../themes/workspace-theme";
+import KpiTile from "../../../common/kpi-tile";
 
 interface Props {
   report: StockArrivalStatusReport;
@@ -31,57 +38,72 @@ const formatDate = (value: string | null): string => {
     : d.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "2-digit" });
 };
 
-function HeaderField({ label, value }: { label: string; value: string }) {
-  return (
-    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-      <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>
-        {label}
-      </Typography>
-      <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-        {value}
-      </Typography>
-    </Grid>
-  );
-}
-
 // Renders the "STOCK ARRIVAL STATUS REPORT" as one card per budgeted material item,
 // each with its own nested table of Purchase Order lines - mirrors OD_STARV.PRG's
 // nested od_sacc2 -> od_podet print loop.
 export default function StockArrivalStatusReportDisplay({ report }: Props) {
   return (
     <Box>
-      <Card
-        variant="outlined"
-        sx={{ p: 2, mb: 2.5, backgroundColor: "#fafafa", borderLeft: "5px solid #1a237e" }}
-      >
-        <Grid container spacing={2}>
-          <HeaderField label="Buyer" value={`${report.buyerName} (${report.buyerCode})`} />
-          <HeaderField label="Order" value={report.order} />
-          <HeaderField label="Report Date" value={formatDate(report.asOfDate)} />
-          <HeaderField label="Total Order Qty" value={`${formatQuantity(report.totalOrderQuantity)} ${report.unit}`} />
-        </Grid>
-      </Card>
+      <Grid container spacing={2} sx={{ mb: 2.5, flexDirection: "row" }} wrap="nowrap">
+        <KpiTile
+          label="Buyer"
+          value={report.buyerName}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 20 }}
+        />
+        <KpiTile
+          label="Order"
+          value={report.order}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 10 }}
+        />
+        <KpiTile
+          label="Report Date"
+          value={formatDate(report.asOfDate)}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 10 }}
+        />
+        <KpiTile
+          label="Total Order Qty"
+          value={`${formatQuantity(report.totalOrderQuantity)} ${report.unit}`}
+          loading={false}
+          size={{ xs: 12, sm: 6, md: 3, lg: 10 }}
+        />
+      </Grid>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         {report.items.map((item, index) => (
-          <Card key={`${item.itemCode}-${index}`} variant="outlined">
-            <Box sx={{ p: 1.5, backgroundColor: "#eef1f7" }}>
+          <Card
+            key={`${item.itemCode}-${index}`}
+            variant="outlined"
+            sx={{
+              backgroundColor: DASHBOARD_COLORS.cardBg,
+              border: `1px solid ${DASHBOARD_COLORS.border}`,
+            }}
+          >
+            <Box
+              sx={{
+                p: 1.5,
+                backgroundColor: DASHBOARD_COLORS.pageBg,
+                borderBottom: `1px solid ${DASHBOARD_COLORS.border}`,
+              }}
+            >
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, sm: 4 }}>
-                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Item</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{item.itemCode} - {item.description}</Typography>
+                  <Typography variant="caption" sx={{ color: DASHBOARD_COLORS.textSecondary, display: "block" }}>Item</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>{item.itemCode} - {item.description}</Typography>
                 </Grid>
                 <Grid size={{ xs: 4, sm: 2.5 }}>
-                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Order Qty</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{formatQuantity(item.orderedQuantity)} {item.unit}</Typography>
+                  <Typography variant="caption" sx={{ color: DASHBOARD_COLORS.textSecondary, display: "block" }}>Order Qty</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>{formatQuantity(item.orderedQuantity)} {item.unit}</Typography>
                 </Grid>
                 <Grid size={{ xs: 4, sm: 2.5 }}>
-                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Received</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{formatQuantity(item.totalReceivedQuantity)}</Typography>
+                  <Typography variant="caption" sx={{ color: DASHBOARD_COLORS.textSecondary, display: "block" }}>Received</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>{formatQuantity(item.totalReceivedQuantity)}</Typography>
                 </Grid>
                 <Grid size={{ xs: 4, sm: 3 }}>
-                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>Balance to Receive</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: "bold" }}>{formatQuantity(item.balanceToReceive)}</Typography>
+                  <Typography variant="caption" sx={{ color: DASHBOARD_COLORS.textSecondary, display: "block" }}>Balance to Receive</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: "bold", color: DASHBOARD_COLORS.textPrimary }}>{formatQuantity(item.balanceToReceive)}</Typography>
                 </Grid>
               </Grid>
             </Box>
@@ -90,19 +112,19 @@ export default function StockArrivalStatusReportDisplay({ report }: Props) {
               <TableContainer>
                 <Table size="small">
                   <TableHead>
-                    <TableRow>
-                      <TableCell>P/O No</TableCell>
-                      <TableCell align="right">P/O Qty</TableCell>
-                      <TableCell>Store</TableCell>
-                      <TableCell>Supplier</TableCell>
-                      <TableCell>Expected Date</TableCell>
-                      <TableCell>Delay</TableCell>
-                      <TableCell align="right">Supp. Return</TableCell>
+                    <TableRow sx={plainTableHeaderRowSx()}>
+                      <TableCell sx={plainTableHeaderCellSx()}>P/O No</TableCell>
+                      <TableCell sx={{ ...plainTableHeaderCellSx(), textAlign: "right" }}>P/O Qty</TableCell>
+                      <TableCell sx={plainTableHeaderCellSx()}>Store</TableCell>
+                      <TableCell sx={plainTableHeaderCellSx()}>Supplier</TableCell>
+                      <TableCell sx={plainTableHeaderCellSx()}>Expected Date</TableCell>
+                      <TableCell sx={plainTableHeaderCellSx()}>Delay</TableCell>
+                      <TableCell sx={{ ...plainTableHeaderCellSx(), textAlign: "right" }}>Supp. Return</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {item.purchaseOrderLines.map((line, lineIndex) => (
-                      <TableRow key={`${line.purchaseOrderNumber}-${lineIndex}`}>
+                      <TableRow key={`${line.purchaseOrderNumber}-${lineIndex}`} sx={plainTableBodyRowSx(lineIndex)}>
                         <TableCell>{line.purchaseOrderNumber}</TableCell>
                         <TableCell align="right">{formatQuantity(line.orderedQuantity)}</TableCell>
                         <TableCell>{line.storeCode}</TableCell>
@@ -116,7 +138,7 @@ export default function StockArrivalStatusReportDisplay({ report }: Props) {
                 </Table>
               </TableContainer>
             ) : (
-              <Typography variant="body2" sx={{ p: 2, fontStyle: "italic", color: "error.main" }}>
+              <Typography variant="body2" sx={{ p: 2, fontStyle: "italic", color: DASHBOARD_COLORS.critical }}>
                 ** Purchase Order Not Raised **
               </Typography>
             )}
