@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Box, Tab, Tabs } from "@mui/material";
 import SystemParametersPanel from "./system-parameters-panel.component";
 import UsersAndGroupsPanel from "./users-and-groups.component";
+import ToolbarSettingsPanel from "./toolbar-settings-panel.component";
 import { isAdministrator } from "../../auth/jwt.util";
 import { copperTabsSx } from "../../themes/workspace-theme";
 
@@ -21,11 +22,13 @@ const SettingsPage = () => {
           {/* Entirely hidden (not just read-only) for non-Administrators, since
               every endpoint it talks to is [Authorize(Roles = "Administrator")]. */}
           {isAdmin && <Tab label="Users & Groups" />}
+          <Tab label="Toolbar" />
         </Tabs>
       </Box>
 
       {activeTab === 0 && <SystemParametersPanel />}
       {activeTab === 1 && isAdmin && <UsersAndGroupsPanel />}
+      {((isAdmin && activeTab === 2) || (!isAdmin && activeTab === 1)) && <ToolbarSettingsPanel />}
     </Box>
   );
 };

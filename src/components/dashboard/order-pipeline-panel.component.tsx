@@ -20,17 +20,16 @@ const STAGE_LABELS = ["Merchandising", "Approval", "Supplier PO", "GRN receipt",
 const PAGE_SIZE = 10;
 
 // Where each stage's action button sends the merchandiser - real routes
-// mounted in App.tsx, matching the actual entry screen for that step. Stage
-// 5 (Shipment) has no route: Part Shipment's own workspace component exists
-// (src/components/part-shipment/part-shipments-grid.tsx) but is not
-// currently mounted anywhere in App.tsx, so there's nowhere to send this
-// button yet - shown disabled with an explanatory tooltip instead of a dead
-// link. None of these deep-link with the row's own Buyer/Order/Style scope
-// (unverified whether each destination screen even supports a query-string
-// prefill) - v1 just gets the merchandiser to the right screen, not the
-// right screen pre-filled.
+// mounted in App.tsx, matching the actual entry screen for that step.
+// CORRECTED (2026-09-07): Stage 5 (Shipment) was previously believed to have
+// no route (based on an unused top-level import stub in App.tsx) and shown
+// disabled - that was wrong. Part Shipment lives as a TAB inside Order
+// Confirmation, not its own top-level route: /po -> pick a Buyer/Order/Style
+// -> "Shipments/Part Shipment" tab. Routes to /po same as stage 0 - lands one
+// screen short of the actual tab, but that's true of every stage here (none
+// deep-link the row's own Buyer/Order/Style scope yet, or pre-select a tab).
 const STAGE_ACTION_LABELS = ["Open order", "Review trim sheet", "Raise supplier PO", "Open GRN", "Open production", "Plan shipment"];
-const STAGE_ROUTES: (string | null)[] = ["/po", "/trim-sheet-approval", "/supplier-po", "/grn", "/daily-production-entry", null];
+const STAGE_ROUTES: (string | null)[] = ["/po", "/trim-sheet-approval", "/supplier-po", "/grn", "/daily-production-entry", "/po"];
 
 // Matches the approved mockup exactly: copper for anything still pending/
 // outstanding, olive for anything done/complete - not the generic amber/
@@ -40,6 +39,34 @@ const DONE_COLOR = DASHBOARD_COLORS.accentStrong;
 
 const numberFmt = (n: number) => Math.round(n).toLocaleString();
 const moneyFmt = (n: number, currency?: string) => `${currency ? currency + " " : ""}${Math.round(n).toLocaleString()}`;
+
+// Whether THIS SPECIFIC stage's own condition is satisfied for this row -
+// deliberately independent of row.stage (the order's overall pipeline
+// pointer, i.e. which stage it's currently STUCK at). The two are different
+// questions: a style can have its Trim Sheet approved (stage 1's own
+// condition, true) while the order's overall stage is still 0 because
+// Material Consumption hasn't been entered yet - nothing in the schema
+// enforces these sequentially. Using row.stage here previously made a
+// popover contradict itself (e.g. "Status: Approved" in olive right next to
+// "Approved by" in copper) whenever a later stage's own fact had become true
+// ahead of an earlier one. Mirrors each stage's "done" test in
+// DashboardService.GetOrderPipelineAsync exactly.
+function isStageActuallyDone(stage: number, row: OrderPipelineRow): boolean {
+  switch (stage) {
+    case 0:
+      return row.merchandising.breakdownDone && row.merchandising.consumptionDone;
+    case 1:
+      return row.approval.isApproved;
+    case 2:
+      return row.supplierPo.outstandingQuantity <= 0;
+    case 3:
+      return row.grn.orderedQuantity <= 0 || row.grn.receivedQuantity >= row.grn.orderedQuantity;
+    case 4:
+      return row.production.targetQuantity <= 0 || row.production.actualQuantity >= row.production.targetQuantity;
+    default:
+      return row.shipment.targetQuantity <= 0 || row.shipment.scheduledQuantity >= row.shipment.targetQuantity;
+  }
+}
 
 // Small donut chart for Production/Shipment - actual vs target as a single
 // glance-able ring, same visual language as CompletionRing elsewhere on this
@@ -456,7 +483,7 @@ export default function OrderPipelinePanel() {
             <StageDetailContent
               stage={popover.stage}
               row={popover.row}
-              isDone={popover.stage < popover.row.stage || popover.row.stage >= 6}
+              isDone={isStageActuallyDone(popover.stage, popover.row)}
             />
           </>
         )}

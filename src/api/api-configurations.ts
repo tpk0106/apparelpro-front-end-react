@@ -229,6 +229,9 @@ export const APPARELPRO_ENDPOINTS = {
       ORDERWISE_INVENTORY_SUMMARY: "api/dashboard/orderwise-inventory-summary",
       ORDER_PIPELINE: "api/dashboard/order-pipeline",
     },
+    TOOLBAR: {
+      PREFERENCES: "api/toolbar/preferences",
+    },
     SUBSCRIPTION: {
       GET: "api/subscription/list",
       POST: "api/subscription",

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { ExpandMoreOutlined } from "@mui/icons-material";
+import UnfoldLessOutlinedIcon from "@mui/icons-material/UnfoldLessOutlined";
+import UnfoldMoreOutlinedIcon from "@mui/icons-material/UnfoldMoreOutlined";
 import { Link } from "react-router-dom";
 
 import {
@@ -12,6 +14,8 @@ import {
   List,
   ListItem,
   ThemeProvider,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 
 // import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
@@ -48,7 +52,12 @@ const handleMouseLeave = () => {
   }
 };
 
-const Header = () => {
+interface HeaderProps {
+  toolbarCollapsed: boolean;
+  onToggleToolbar: () => void;
+}
+
+const Header = ({ toolbarCollapsed, onToggleToolbar }: HeaderProps) => {
   const [open, setOpen] = useState(0);
   const [pinnedMenuOn, setPinnedMenuOn] = useState(false);
 
@@ -127,6 +136,15 @@ const Header = () => {
               {/* login */}
 
               <div className="flex items-center justify-center gap-4 ">
+                <Tooltip title={toolbarCollapsed ? "Show quick-access toolbar" : "Hide quick-access toolbar"}>
+                  <IconButton onClick={onToggleToolbar} size="small" sx={{ color: "#C9803D" }}>
+                    {toolbarCollapsed ? (
+                      <UnfoldMoreOutlinedIcon fontSize="small" />
+                    ) : (
+                      <UnfoldLessOutlinedIcon fontSize="small" />
+                    )}
+                  </IconButton>
+                </Tooltip>
                 {username && localStorage.getItem(USER_CREDENTIALS.USER_ID) && (
                   <div className="flex items-center">
                     <span className="text-center text-sm font-semibold text-white">
