@@ -855,12 +855,26 @@ export const navbarData = [
   //   ],
   //   tag: "quotaregister",
   // },
-  // {
-  //   routerLink: "importexportdoc",
-  //   icon: "",
-  //   label: "Import/Export Documentation",
-  //   subMenus: null,
-  // },
+  {
+    routerLink: "importexportdoc",
+    icon: "../assets/order-management/Order-Management.png",
+    label: "Import/Export Documentation",
+    subMenus: [
+      {
+        routerLink: "ie-company-setup",
+        icon: null,
+        label: "Company Address Setup",
+        pinned: false,
+      },
+      {
+        routerLink: "commercial-invoice",
+        icon: null,
+        label: "Commercial (Export) Invoice",
+        pinned: false,
+      },
+    ],
+    tag: "importexportdoc",
+  },
   {
     routerLink: "reports",
     icon: "../assets/order-management/Order-Management.png",

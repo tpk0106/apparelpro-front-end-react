@@ -12,6 +12,7 @@ import {
   type MRT_Row,
   type MRT_TableOptions,
 } from "material-react-table";
+import { useState } from "react";
 import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import type { PaginationData } from "../../interfaces/definitions";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
@@ -27,6 +28,7 @@ import type {
 import GridOnIcon from "@mui/icons-material/GridOn"; // Clear spreadsheet matrix layout icon
 import { useApparelProTable } from "../../themes/useApparelProTable";
 import { selectedRowHighlightSx } from "../../themes/workspace-theme";
+import ConfirmDialog from "../common/confirm-dialog";
 
 interface Props {
   columns: MRT_ColumnDef<Style>[];
@@ -150,7 +152,8 @@ const StyleTable = ({
   const { mutateAsync: createStyle } = useCreateStyleMutation();
   const { mutateAsync: updateStyle } = useUpdateStyleMutation();
 
-  const { mutateAsync: deleteStyle } = useDeleteStyleMutation();
+  const { mutateAsync: deleteStyle, isPending: isDeletingStyle } = useDeleteStyleMutation();
+  const [styleToDelete, setStyleToDelete] = useState<Style | null>(null);
 
   // 🚀 CREATE ROW SAVE HANDLER
   const handleCreateStyle: MRT_TableOptions<Style>["onCreatingRowSave"] =
@@ -236,14 +239,17 @@ const StyleTable = ({
   };
 
   // DELETE action
-  const openDeleteConfirmModal = async (row: MRT_Row<Style>) => {
-    if (window.confirm("Are you sure you want to delete this Style?")) {
-      // Pass the row id or target code safely to your hook execution block
-      const deleteStylePayload: DeleteStylePayload = {
-        styleCode: row.original.styleCode,
-      };
-      await deleteStyle(deleteStylePayload);
-    }
+  const openDeleteConfirmModal = (row: MRT_Row<Style>) => {
+    setStyleToDelete(row.original);
+  };
+
+  const handleConfirmDeleteStyle = async () => {
+    if (!styleToDelete) return;
+    const deleteStylePayload: DeleteStylePayload = {
+      styleCode: styleToDelete.styleCode,
+    };
+    await deleteStyle(deleteStylePayload);
+    setStyleToDelete(null);
   };
 
   const table = useApparelProTable<Style>({
@@ -713,7 +719,21 @@ const StyleTable = ({
   //   ),
   // });
 
-  return <MaterialReactTable table={table} />;
+  return (
+    <>
+      <MaterialReactTable table={table} />
+      <ConfirmDialog
+        open={!!styleToDelete}
+        title="Delete Style"
+        message={`Delete style "${styleToDelete?.styleCode}"? This cannot be undone.`}
+        confirmLabel="Delete"
+        confirmColor="error"
+        isConfirming={isDeletingStyle}
+        onConfirm={handleConfirmDeleteStyle}
+        onCancel={() => setStyleToDelete(null)}
+      />
+    </>
+  );
 };
 
 export default StyleTable;

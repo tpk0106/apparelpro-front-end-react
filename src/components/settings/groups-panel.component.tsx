@@ -17,12 +17,14 @@ import {
 } from "../../tanstack-hooks/custom-hooks";
 import { useDropdownTheme } from "../../themes/useDropdownTheme";
 import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
+import ConfirmDialog from "../common/confirm-dialog";
 
 // Groups panel (Settings > Users & Groups). A "Group" here is a plain
 // AspNetRoles row - see the backend design doc for why we reused Roles
 // rather than introducing a new Group table.
 const GroupsPanel = () => {
   const [newGroupName, setNewGroupName] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const { fieldSx: dropdownFieldSx } = useDropdownTheme();
   const { data: groups, isLoading, isError } = useGetGroupsQuery();
   const createGroupMutation = useCreateGroupMutation();
@@ -36,8 +38,11 @@ const GroupsPanel = () => {
     });
   };
 
-  const handleDeleteGroup = (groupId: string) => {
-    deleteGroupMutation.mutate(groupId);
+  const handleConfirmDeleteGroup = () => {
+    if (!deleteTarget) return;
+    deleteGroupMutation.mutate(deleteTarget.id, {
+      onSuccess: () => setDeleteTarget(null),
+    });
   };
 
   return (
@@ -130,7 +135,7 @@ const GroupsPanel = () => {
                   disabled={
                     group.memberCount > 0 || deleteGroupMutation.isPending
                   }
-                  onClick={() => handleDeleteGroup(group.id)}
+                  onClick={() => setDeleteTarget({ id: group.id, name: group.name })}
                 >
                   <DeleteOutlineIcon sx={{ fontSize: 18 }} />
                 </IconButton>
@@ -147,6 +152,17 @@ const GroupsPanel = () => {
           </Box>
         )}
       </Box>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Delete Group"
+        message={`Delete the group "${deleteTarget?.name}"? This cannot be undone.`}
+        confirmLabel="Delete"
+        confirmColor="error"
+        isConfirming={deleteGroupMutation.isPending}
+        onConfirm={handleConfirmDeleteGroup}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </Box>
   );
 };

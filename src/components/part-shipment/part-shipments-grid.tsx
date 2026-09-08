@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 import {
   Box,
   IconButton,
@@ -33,6 +34,7 @@ import { useApparelProTable } from "../../themes/useApparelProTable";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 import { dateIconFieldSx, primaryActionButtonSx, themedButtonLabelStyle, numberFieldNoSpinnerSx } from "../../themes/workspace-theme";
 import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import ConfirmDialog from "../common/confirm-dialog";
 
 // Import your existing live master lookup hook for units reference validation
 import { useGetUnits, useGetDestinations } from "../../tanstack-hooks/custom-hooks";
@@ -202,9 +204,9 @@ export default function PartShipmentsGrid({
 
       try {
         const response = await saveLine(payload).unwrap();
-        if (!response.success) alert(response.message);
+        if (!response.success) toast.error(response.message);
       } catch (err) {
-        alert(
+        toast.error(
           extractErrorMessage(err as FetchBaseQueryError | SerializedError),
         );
       }
@@ -212,17 +214,19 @@ export default function PartShipmentsGrid({
     [buyerCode, order, typeCode, styleCode, saveLine],
   ); // List external bounds variables here safely!
 
-  const handleDeleteRow = async (id: number) => {
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this partial shipment entry? Associated quota blocks will be reversed automatically.",
-      )
-    )
-      return;
+  const [rowPendingDelete, setRowPendingDelete] = useState<number | null>(null);
+  const [isDeletingRow, setIsDeletingRow] = useState(false);
+
+  const handleConfirmDeleteRow = async () => {
+    if (rowPendingDelete == null) return;
+    setIsDeletingRow(true);
     try {
-      await deleteLine(id).unwrap();
+      await deleteLine(rowPendingDelete).unwrap();
+      setRowPendingDelete(null);
     } catch (err) {
-      alert(extractErrorMessage(err as FetchBaseQueryError | SerializedError));
+      toast.error(extractErrorMessage(err as FetchBaseQueryError | SerializedError));
+    } finally {
+      setIsDeletingRow(false);
     }
   };
 
@@ -512,7 +516,7 @@ export default function PartShipmentsGrid({
     renderRowActions: ({ row }) => (
       <IconButton
         color="error"
-        onClick={() => handleDeleteRow(row.original.id)}
+        onClick={() => setRowPendingDelete(row.original.id)}
       >
         <DeleteIcon fontSize="small" />
       </IconButton>
@@ -535,6 +539,17 @@ export default function PartShipmentsGrid({
   return (
     <Box sx={{ mt: 1 }}>
       <MaterialReactTable table={table} />
+
+      <ConfirmDialog
+        open={rowPendingDelete != null}
+        title="Delete Part Shipment Entry"
+        message="Delete this partial shipment entry? Associated quota blocks will be reversed automatically. This cannot be undone."
+        confirmLabel="Delete"
+        confirmColor="error"
+        isConfirming={isDeletingRow}
+        onConfirm={handleConfirmDeleteRow}
+        onCancel={() => setRowPendingDelete(null)}
+      />
 
       {/* Dynamic Pop-up Modal Form Prompt matching Clipper [Ins] manual insertion layout actions */}
       <Dialog

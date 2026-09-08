@@ -24,6 +24,7 @@ import {
   useDeleteCurrency,
   useUpdateCurrency,
 } from "../../../api/custom-hooks";
+import ConfirmDialog from "../../common/confirm-dialog";
 
 interface Props {
   columns: MRT_ColumnDef<Currency>[];
@@ -111,16 +112,20 @@ const CurrencyTable = ({
   const { mutateAsync: updateCurrency, isPending: isUpdatingCurrency } =
     useUpdateCurrency(pagination);
 
-  //DELETE action
-  const openDeleteConfirmModal = (row: MRT_Row<Currency>) => {
-    if (window.confirm("Are you sure you want to delete this Garment Type?")) {
-      deleteCurrency(row.original.id);
-    }
-  };
-
   // call DELETE hook
   const { mutateAsync: deleteCurrency, isPending: isDeletingCurrency } =
     useDeleteCurrency(pagination);
+
+  //DELETE action
+  const [currencyToDelete, setCurrencyToDelete] = useState<Currency | null>(null);
+  const openDeleteConfirmModal = (row: MRT_Row<Currency>) => {
+    setCurrencyToDelete(row.original);
+  };
+  const handleConfirmDeleteCurrency = async () => {
+    if (!currencyToDelete) return;
+    await deleteCurrency(currencyToDelete.id);
+    setCurrencyToDelete(null);
+  };
   //
 
   const table = useMaterialReactTable({
@@ -304,7 +309,21 @@ const CurrencyTable = ({
     ),
   });
 
-  return <MaterialReactTable table={table} />;
+  return (
+    <>
+      <MaterialReactTable table={table} />
+      <ConfirmDialog
+        open={!!currencyToDelete}
+        title="Delete Currency"
+        message={`Delete currency "${currencyToDelete?.code}"? This cannot be undone.`}
+        confirmLabel="Delete"
+        confirmColor="error"
+        isConfirming={isDeletingCurrency}
+        onConfirm={handleConfirmDeleteCurrency}
+        onCancel={() => setCurrencyToDelete(null)}
+      />
+    </>
+  );
 };
 
 export default CurrencyTable;

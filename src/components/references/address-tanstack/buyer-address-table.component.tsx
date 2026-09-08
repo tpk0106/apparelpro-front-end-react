@@ -25,6 +25,7 @@ import type {
   UpdateAddressPayload,
 } from "../../../tanstack-hooks/interfaces";
 import { useApparelProTable } from "../../../themes/useApparelProTable";
+import ConfirmDialog from "../../common/confirm-dialog";
 
 interface Props {
   columns: MRT_ColumnDef<Address>[];
@@ -83,8 +84,9 @@ const BuyerAddressesTable = ({
     useCreateBuyerAddressMutation();
   const { mutateAsync: handleUpdateBuyerAddress } =
     useUpdateBuyerAddressMutation();
-  const { mutateAsync: deleteBuyerAddress } =
+  const { mutateAsync: deleteBuyerAddress, isPending: isDeletingAddress } =
     useDeleteBuyerAddressMutation();
+  const [addressToDelete, setAddressToDelete] = useState<Address | null>(null);
 
   // 2. Your save hooks remain highly intuitive
   const handleCreateBuyerAddress: MRT_TableOptions<Address>["onCreatingRowSave"] =
@@ -137,13 +139,18 @@ const BuyerAddressesTable = ({
 
   //DELETE action
   const openDeleteConfirmModal = (row: MRT_Row<Address>) => {
-    if (window.confirm("Are you sure you want to delete this Garment Type?")) {
-      const deleteAddressPayload: DeleteAddressPayload = {
-        buyerCode: row.original.buyerCode,
-        addressId: row.original.addressId,
-      };
-      deleteBuyerAddress(deleteAddressPayload);
-    }
+    setAddressToDelete(row.original);
+  };
+
+  const handleConfirmDeleteAddress = () => {
+    if (!addressToDelete) return;
+    const deleteAddressPayload: DeleteAddressPayload = {
+      buyerCode: addressToDelete.buyerCode,
+      addressId: addressToDelete.addressId,
+    };
+    deleteBuyerAddress(deleteAddressPayload, {
+      onSuccess: () => setAddressToDelete(null),
+    });
   };
 
   //  CRUD Operations
@@ -382,7 +389,21 @@ const BuyerAddressesTable = ({
     ),
   });
 
-  return <MaterialReactTable table={table} />;
+  return (
+    <>
+      <MaterialReactTable table={table} />
+      <ConfirmDialog
+        open={!!addressToDelete}
+        title="Delete Address"
+        message="Delete this address? This cannot be undone."
+        confirmLabel="Delete"
+        confirmColor="error"
+        isConfirming={isDeletingAddress}
+        onConfirm={handleConfirmDeleteAddress}
+        onCancel={() => setAddressToDelete(null)}
+      />
+    </>
+  );
 };
 
 export default BuyerAddressesTable;

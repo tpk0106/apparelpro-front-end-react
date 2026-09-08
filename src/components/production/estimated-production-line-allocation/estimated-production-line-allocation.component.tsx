@@ -43,6 +43,7 @@ import {
   numberFieldNoSpinnerSx,
   deleteRowIconButtonSx,
 } from "../../../themes/workspace-theme";
+import ConfirmDialog from "../../common/confirm-dialog";
 
 // Buyer + free-typed Style, matching PR_ESTL1.PRG exactly: the legacy screen
 // takes a typed style code (with F1 help), not a cascading Order/Type/Style
@@ -89,7 +90,16 @@ const EstimatedProductionLineAllocationWorkspace = () => {
 
   const { mutateAsync: manualAllocate, isPending: isManualPending } = useManualAllocateEstimatedProductionLineMutation();
   const { mutateAsync: automaticAllocate, isPending: isAutoPending } = useAutomaticAllocateEstimatedProductionLineMutation();
-  const { mutateAsync: deleteAllocation } = useDeleteEstimatedProductionLineAllocationMutation();
+  const { mutateAsync: deleteAllocation, isPending: isDeletingAllocation } = useDeleteEstimatedProductionLineAllocationMutation();
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+
+  const handleConfirmDeleteAllocation = () => {
+    if (!selectedBuyer) return;
+    deleteAllocation(
+      { buyerCode: selectedBuyer.buyerCode, styleCode: styleCode.trim() },
+      { onSettled: () => setIsDeleteConfirmOpen(false) },
+    );
+  };
 
   // Same reasoning as production-line-allocation.component.tsx: Unit/Est.
   // Production per day/Total Quantity/Ship Date have no server-side default
@@ -193,7 +203,7 @@ const EstimatedProductionLineAllocationWorkspace = () => {
                   <IconButton
                     color="error"
                     size="small"
-                    onClick={() => selectedBuyer && deleteAllocation({ buyerCode: selectedBuyer.buyerCode, styleCode: styleCode.trim() })}
+                    onClick={() => setIsDeleteConfirmOpen(true)}
                     sx={deleteRowIconButtonSx}
                   >
                     <DeleteIcon fontSize="small" />
@@ -344,6 +354,17 @@ const EstimatedProductionLineAllocationWorkspace = () => {
           </Card>
         </>
       )}
+
+      <ConfirmDialog
+        open={isDeleteConfirmOpen}
+        title="Delete Line Allocation"
+        message={`Delete the line allocation for style "${styleCode.trim()}"? This cannot be undone.`}
+        confirmLabel="Delete"
+        confirmColor="error"
+        isConfirming={isDeletingAllocation}
+        onConfirm={handleConfirmDeleteAllocation}
+        onCancel={() => setIsDeleteConfirmOpen(false)}
+      />
     </div>
   );
 };

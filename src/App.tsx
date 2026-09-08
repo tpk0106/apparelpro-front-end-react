@@ -36,6 +36,8 @@ import Basises from "./components/references/basis-tanstack/basis.component";
 import Seasons from "./components/references/season-tanstack/season.component";
 import OrderConfirmationRoutine from "./components/order-management/order-confirmation.component";
 import MaterialConsumption from "./components/material-consumption/material-consumption.component";
+import CompanyAddressSetupPage from "./components/import-export/company-address-setup.component";
+import CommercialInvoiceListPage from "./components/import-export/commercial-invoice-list.component";
 import SupplierPurchaseOrderWorkspace from "./components/supplier-purchase-order-management/supplier-purchase-order-workspace";
 import StylewiseEventsWorkspace from "./components/stylewise-events/stylewise-events-workspace";
 import TrimSheetApprovalWorkspace from "./components/order-management/trim-sheet-approval/trim-sheet-approval-workspace";
@@ -343,6 +345,8 @@ function App() {
         />
         <Route index path="supplier" element={<Suppliers />} />
         <Route index path="po" element={<OrderConfirmationRoutine />} />
+        <Route index path="ie-company-setup" element={<CompanyAddressSetupPage />} />
+        <Route index path="commercial-invoice" element={<CommercialInvoiceListPage />} />
         <Route
           index
           path="material-consumption"

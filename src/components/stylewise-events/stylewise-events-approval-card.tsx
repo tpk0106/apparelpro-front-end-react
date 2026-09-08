@@ -20,6 +20,7 @@ import { useApproveStyleEventsMutation } from "../../services/order-management/s
 import type { StylewiseEventRow } from "./stylewise-events.types";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
+import ConfirmDialog from "../common/confirm-dialog";
 
 interface ApprovalCardProps {
   buyerCode: number;
@@ -63,6 +64,7 @@ export default function StylewiseEventsApprovalCard({
   const [submitApproval, { isLoading: isSubmitting }] =
     useApproveStyleEventsMutation();
   const [isProcessingLock, setIsProcessingLock] = useState<boolean>(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState<boolean>(false);
 
   // 1. FIXED TYPE-SAFE DERIVED APPROVAL STATE: Clean of any toast, alert, or logging function calls!
   const approvalState = useMemo(() => {
@@ -84,19 +86,19 @@ export default function StylewiseEventsApprovalCard({
     };
   }, [eventsData]);
 
-  // 2. SELF-CONTAINED SECURE CLICK HANDLER: Toast loading runs STRICTLY inside here on user click
-  const handleExecuteApproval = async (
-    e: React.MouseEvent<HTMLButtonElement>,
-  ) => {
+  // 2. SELF-CONTAINED SECURE CLICK HANDLER: opens the confirm dialog; the
+  // actual submission (with its toast loading bar) runs in performApproval,
+  // invoked only from the dialog's onConfirm.
+  const handleExecuteApproval = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (isProcessingLock || isSubmitting || approvalState.isApproved) return;
 
-    const confirmationPrompt = `Approve Critical Path Milestone Events for Style [${styleCode}]?\n\nThis action will freeze all scheduled milestone targets and restrict operational data alterations. Proceed with executive sign-off?`;
+    setIsConfirmOpen(true);
+  };
 
-    if (!window.confirm(confirmationPrompt)) return;
-
+  const performApproval = async () => {
     setIsProcessingLock(true);
 
     // The ONLY place a toast loading bar is allowed to spawn in this entire module!
@@ -135,6 +137,7 @@ export default function StylewiseEventsApprovalCard({
       });
     } finally {
       setIsProcessingLock(false);
+      setIsConfirmOpen(false);
     }
   };
 
@@ -266,6 +269,17 @@ export default function StylewiseEventsApprovalCard({
           )}
         </Grid>
       </Grid>
+
+      <ConfirmDialog
+        open={isConfirmOpen}
+        title="Authorize Event Sign-Off"
+        message={`Approve Critical Path Milestone Events for Style "${styleCode}"? This action will freeze all scheduled milestone targets and restrict operational data alterations. Proceed with executive sign-off?`}
+        confirmLabel="Approve"
+        confirmColor="primary"
+        isConfirming={isProcessingLock || isSubmitting}
+        onConfirm={performApproval}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
     </Card>
   );
 }

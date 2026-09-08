@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { ExpandMoreOutlined } from "@mui/icons-material";
 import UnfoldLessOutlinedIcon from "@mui/icons-material/UnfoldLessOutlined";
 import UnfoldMoreOutlinedIcon from "@mui/icons-material/UnfoldMoreOutlined";
-import { Link } from "react-router-dom";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
+import { Link, useNavigate } from "react-router-dom";
 
 import {
   Card,
@@ -35,6 +37,8 @@ import Login from "./login.component";
 import PinnedMenu from "./pinned-menu.component";
 
 import { USER_CREDENTIALS } from "../interfaces/definitions";
+import { useGetToolbarPreferences, useSaveToolbarPreferences } from "../tanstack-hooks/toolbar.hooks";
+import { getDefaultToolbarPins } from "./toolbar-config";
 
 const handleMouseEnter = () => {
   const ele = document.getElementById("show-mobileMenu");
@@ -58,8 +62,24 @@ interface HeaderProps {
 }
 
 const Header = ({ toolbarCollapsed, onToggleToolbar }: HeaderProps) => {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(0);
   const [pinnedMenuOn, setPinnedMenuOn] = useState(false);
+  const { data: toolbarPreferences } = useGetToolbarPreferences();
+  const saveToolbarPreferencesMutation = useSaveToolbarPreferences();
+  // Whether to show the toolbar at all is a per-user preference any logged-in
+  // user can set, not an admin-only Settings option - it used to live in
+  // Settings, but that page (or at least its route) isn't reachable by every
+  // user, so a normal user had no way to turn it off. Nothing to
+  // collapse/expand once it's off, either - hide that toggle too.
+  const isToolbarEnabled = toolbarPreferences?.isEnabled ?? true;
+
+  const handleToggleToolbarEnabled = () => {
+    const nextEnabled = !isToolbarEnabled;
+    const pins = toolbarPreferences?.isDefault ? getDefaultToolbarPins() : (toolbarPreferences?.pins ?? []);
+    saveToolbarPreferencesMutation.mutate({ isEnabled: nextEnabled, pins });
+    if (nextEnabled) navigate("/");
+  };
 
   const [username] = useState<string | null>(
     localStorage.getItem(USER_CREDENTIALS.USER_KEY),
@@ -136,15 +156,26 @@ const Header = ({ toolbarCollapsed, onToggleToolbar }: HeaderProps) => {
               {/* login */}
 
               <div className="flex items-center justify-center gap-4 ">
-                <Tooltip title={toolbarCollapsed ? "Show quick-access toolbar" : "Hide quick-access toolbar"}>
-                  <IconButton onClick={onToggleToolbar} size="small" sx={{ color: "#C9803D" }}>
-                    {toolbarCollapsed ? (
-                      <UnfoldMoreOutlinedIcon fontSize="small" />
+                <Tooltip title={isToolbarEnabled ? "Hide quick-access toolbar" : "Show quick-access toolbar"}>
+                  <IconButton onClick={handleToggleToolbarEnabled} size="small" sx={{ color: "#60a5fa" }}>
+                    {isToolbarEnabled ? (
+                      <VisibilityOutlinedIcon fontSize="small" />
                     ) : (
-                      <UnfoldLessOutlinedIcon fontSize="small" />
+                      <VisibilityOffOutlinedIcon fontSize="small" />
                     )}
                   </IconButton>
                 </Tooltip>
+                {isToolbarEnabled && (
+                  <Tooltip title={toolbarCollapsed ? "Expand quick-access toolbar" : "Collapse quick-access toolbar"}>
+                    <IconButton onClick={onToggleToolbar} size="small" sx={{ color: "#60a5fa" }}>
+                      {toolbarCollapsed ? (
+                        <UnfoldMoreOutlinedIcon fontSize="small" />
+                      ) : (
+                        <UnfoldLessOutlinedIcon fontSize="small" />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                )}
                 {username && localStorage.getItem(USER_CREDENTIALS.USER_ID) && (
                   <div className="flex items-center">
                     <span className="text-center text-sm font-semibold text-white">

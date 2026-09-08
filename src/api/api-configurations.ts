@@ -232,6 +232,16 @@ export const APPARELPRO_ENDPOINTS = {
     TOOLBAR: {
       PREFERENCES: "api/toolbar/preferences",
     },
+    IMPORT_EXPORT: {
+      COMPANY_ADDRESSES: "api/import-export/company-addresses",
+    },
+    COMMERCIAL_INVOICE: {
+      LIST: "api/commercial-invoice/list",
+      GET: "api/commercial-invoice/detail",
+      SAVE: "api/commercial-invoice",
+      DELETE: "api/commercial-invoice",
+      PRINT_PDF: "api/commercial-invoice/print/pdf",
+    },
     SUBSCRIPTION: {
       GET: "api/subscription/list",
       POST: "api/subscription",
