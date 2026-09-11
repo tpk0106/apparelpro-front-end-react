@@ -27,6 +27,10 @@ interface TableProps {
   // Stage 1's mode - col.allocationWeight is a Ratio (not a Pcs count) when
   // true, so the column header must say "Ratio" instead of appending unit.
   isColorRatioMode: boolean;
+  // A Supplier Purchase Order has already been raised against this style -
+  // the breakdown is view-only from here on (see color-size-breakdown
+  // .component.tsx's isLockedByPurchaseOrder for how this gets set).
+  readOnly?: boolean;
 }
 
 // 1. ISOLATED DE-COUPLED CELL COMPONENT - Fully Typed for MUI v6
@@ -36,12 +40,14 @@ const MatrixNumericCell = ({
   sizeCode,
   setMatrixRows,
   setIsDirty,
+  readOnly,
 }: {
   initialValue: number;
   colorCode: string;
   sizeCode: string;
   setMatrixRows: React.Dispatch<React.SetStateAction<MatrixRow[]>>;
   setIsDirty: (dirty: boolean) => void;
+  readOnly?: boolean;
 }) => {
   const [localVal, setLocalVal] = useState<string>(String(initialValue || ""));
 
@@ -52,6 +58,14 @@ const MatrixNumericCell = ({
   if (initialValue !== prevInitialVal) {
     setPrevInitialVal(initialValue);
     setLocalVal(String(initialValue || ""));
+  }
+
+  if (readOnly) {
+    return (
+      <Box sx={{ textAlign: "right", fontFamily: "monospace", pr: 1 }}>
+        {initialValue || 0}
+      </Box>
+    );
   }
 
   const commitChanges = () => {
@@ -107,6 +121,7 @@ export default function SizeBreakdownTable({
   setIsDirty,
   unit,
   isColorRatioMode,
+  readOnly,
 }: TableProps) {
   // FIXED (2026-08-07): replaces window.alert() with the shared InfoDialog -
   // per project convention, no native browser alert/confirm popups.
@@ -218,6 +233,7 @@ export default function SizeBreakdownTable({
               sizeCode={row.original.sizeCode}
               setMatrixRows={setMatrixRows}
               setIsDirty={setIsDirty}
+              readOnly={readOnly}
             />
           );
         },
@@ -257,6 +273,7 @@ export default function SizeBreakdownTable({
     unit,
     isColorRatioMode,
     columnTotals,
+    readOnly,
   ]);
 
   const table = useApparelProTable<MatrixRow>({
@@ -285,7 +302,7 @@ export default function SizeBreakdownTable({
     enableColumnActions: false,
 
     renderTopToolbarCustomActions: () => (
-      <Box sx={{ p: 1 }}>
+      <Box sx={{ p: 1, display: readOnly ? "none" : "block" }}>
         <Button
           variant="contained"
           startIcon={<AddIcon />}

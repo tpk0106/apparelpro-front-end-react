@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -37,6 +38,10 @@ interface SizeBreakdownProps {
   setMatrixRows: React.Dispatch<React.SetStateAction<MatrixRow[]>>;
   sizeMode: "R" | "Q";
   setSizeMode: (mode: "R" | "Q") => void;
+  // A Supplier Purchase Order has already been raised against this style -
+  // set by ColorBreakdown's handleProceed when the colour-allocation save
+  // is rejected for exactly that reason (see color-breakdown.component.tsx).
+  isLockedByPurchaseOrder: boolean;
 }
 
 export default function SizeBreakdown({
@@ -49,6 +54,7 @@ export default function SizeBreakdown({
   setMatrixRows,
   sizeMode,
   setSizeMode,
+  isLockedByPurchaseOrder,
 }: SizeBreakdownProps) {
   const { mutateAsync: setSizeRatioModeOnServer } =
     useSetSizeRatioModeMutation();
@@ -105,6 +111,8 @@ export default function SizeBreakdown({
   };
 
   const handleVerifyAndSubmit = async () => {
+    if (isLockedByPurchaseOrder) return; // Save button is disabled in this state anyway.
+
     const totalColorWeights = selectedColors.reduce(
       (sum, c) => sum + c.allocationWeight,
       0,
@@ -331,6 +339,14 @@ export default function SizeBreakdown({
 
       <Divider sx={{ mb: 2, borderColor: DASHBOARD_COLORS.border }} />
 
+      {isLockedByPurchaseOrder && (
+        <Alert severity="info" sx={{ mb: 2, fontWeight: "bold" }}>
+          This style's Colour/Size Breakdown is locked - a Supplier Purchase
+          Order has already been raised against it, so it can no longer be
+          edited. Shown here as view only.
+        </Alert>
+      )}
+
       <SizeBreakdownTable
         matrixRows={matrixRows}
         setMatrixRows={setMatrixRows}
@@ -339,6 +355,7 @@ export default function SizeBreakdown({
         setIsDirty={setIsDirty}
         unit={styleContext.unit}
         isColorRatioMode={styleContext.colorRatio === "R"}
+        readOnly={isLockedByPurchaseOrder}
       />
 
       <Box
@@ -362,6 +379,7 @@ export default function SizeBreakdown({
           size="large"
           startIcon={<SaveIcon />}
           onClick={handleVerifyAndSubmit}
+          disabled={isLockedByPurchaseOrder}
           sx={{ ...primaryActionButtonSx, px: 4, fontWeight: "bold" }}
         >
           <span style={themedButtonLabelStyle}>[Esc] Save Breakdown Matrix</span>

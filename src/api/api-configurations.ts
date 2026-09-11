@@ -242,6 +242,12 @@ export const APPARELPRO_ENDPOINTS = {
       DELETE: "api/commercial-invoice",
       PRINT_PDF: "api/commercial-invoice/print/pdf",
     },
+    CERTIFICATE_OF_ORIGIN: {
+      GET: "api/certificate-of-origin/detail",
+      SAVE: "api/certificate-of-origin",
+      DELETE: "api/certificate-of-origin",
+      PRINT_PDF: "api/certificate-of-origin/print/pdf",
+    },
     SUBSCRIPTION: {
       GET: "api/subscription/list",
       POST: "api/subscription",

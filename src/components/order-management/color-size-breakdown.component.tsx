@@ -60,6 +60,13 @@ export default function ColorSizeBreakdown({
     new Set(),
   );
 
+  // A Supplier Purchase Order has already been raised against this style -
+  // detected reactively when ColorBreakdown's save attempt fails for exactly
+  // that reason (see color-breakdown.component.tsx's handleProceed). Once
+  // true, the Size Matrix step renders view-only instead of blocking
+  // navigation to it entirely.
+  const [isLockedByPurchaseOrder, setIsLockedByPurchaseOrder] = useState(false);
+
   // 2. Add the Matrix State Memory here at the master parent level
   const [matrixRows, setMatrixRows] = useState<MatrixRow[]>([
     { sizeCode: "S" },
@@ -85,6 +92,7 @@ export default function ColorSizeBreakdown({
     setActiveStep(0);
     setConfiguredColors([]);
     setExistingColorCodes(new Set());
+    setIsLockedByPurchaseOrder(false);
 
     // 3. Reset sizes back to blank base values ONLY when switching to an entirely different style
     setMatrixRows([
@@ -465,6 +473,8 @@ export default function ColorSizeBreakdown({
           colorMode={colorMode}
           setColorMode={setColorMode}
           onNextStep={handleColorConfigurationComplete}
+          isLockedByPurchaseOrder={isLockedByPurchaseOrder}
+          onPoLockDetected={() => setIsLockedByPurchaseOrder(true)}
         />
       )}
 
@@ -481,6 +491,7 @@ export default function ColorSizeBreakdown({
           setMatrixRows={setMatrixRows}
           sizeMode={sizeMode}
           setSizeMode={setSizeMode}
+          isLockedByPurchaseOrder={isLockedByPurchaseOrder}
         />
       )}
     </Box>

@@ -19,6 +19,7 @@ import {
   useBulkSaveColorQuantityRatiosMutation,
   useSetColorRatioModeMutation,
 } from "../../tanstack-hooks/custom-hooks";
+import type { AppError } from "../../auth/axiosClient";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 import { oliveGlossSx } from "../../themes/button-color-themes";
 import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
@@ -41,7 +42,14 @@ interface ColorBreakdownProps {
   colorMode: "R" | "Q";
   setColorMode: (mode: "R" | "Q") => void;
   onNextStep: (finalColors: LocalColorRow[]) => void;
+  // A Supplier Purchase Order has already been raised against this style -
+  // set once handleProceed's save attempt fails for exactly that reason, so
+  // re-clicking Proceed after that point skips the save (see handleProceed).
+  isLockedByPurchaseOrder: boolean;
+  onPoLockDetected: () => void;
 }
+
+const PO_LOCKED_MESSAGE_FRAGMENT = "Supplier Purchase Order has already been raised";
 
 export default function ColorBreakdown({
   styleContext,
@@ -52,6 +60,8 @@ export default function ColorBreakdown({
   colorMode,
   setColorMode,
   onNextStep,
+  isLockedByPurchaseOrder,
+  onPoLockDetected,
 }: ColorBreakdownProps) {
   const bulkQuantity = styleContext.quantity;
   const isRatioMode = colorMode === "R";
@@ -106,6 +116,13 @@ export default function ColorBreakdown({
       return;
     }
 
+    // Already known locked from a previous attempt this session - no point
+    // repeating a save that will just fail the same way again.
+    if (isLockedByPurchaseOrder) {
+      onNextStep(colorsList);
+      return;
+    }
+
     // Persist the colour-level allocation (od_clqr equivalent) before moving
     // on to the size matrix. In Ratio mode, the actual piece quantity per
     // colour is derived proportionally from the entered ratios - same
@@ -138,9 +155,19 @@ export default function ColorBreakdown({
         },
         payload,
       });
-    } catch {
-      // useBulkSaveColorQuantityRatiosMutation's onError already surfaces a
-      // toast - stop here rather than proceeding on top of a failed save.
+    } catch (err) {
+      const message = (err as AppError)?.message ?? "";
+      if (message.includes(PO_LOCKED_MESSAGE_FRAGMENT)) {
+        // Not a real failure from the user's point of view - the style is
+        // simply locked. Let them through to view (not edit) the Size
+        // Matrix rather than stranding them on this screen.
+        onPoLockDetected();
+        onNextStep(colorsList);
+        return;
+      }
+      // Any other failure: useBulkSaveColorQuantityRatiosMutation's onError
+      // already surfaced a toast - stop here rather than proceeding on top
+      // of a failed save.
       return;
     }
 

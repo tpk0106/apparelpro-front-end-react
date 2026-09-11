@@ -20,7 +20,9 @@ import {
   useGetOpenPartShipmentsByBuyer, useDownloadCommercialInvoicePrintPdf,
 } from "../../tanstack-hooks/import-export/commercial-invoice.hooks";
 import PrintIcon from "@mui/icons-material/Print";
+import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOutlined";
 import ConfirmDialog from "../common/confirm-dialog";
+import CertificateOfOriginDialog from "./certificate-of-origin-dialog.component";
 import type { CommercialInvoicePrintFormat } from "../../services/import-export/commercial-invoice.service";
 import type {
   CommercialInvoiceHeader, CommercialInvoiceLine, CommercialInvoiceDetail,
@@ -100,6 +102,8 @@ const CommercialInvoiceListPage = () => {
   const [printFormat, setPrintFormat] = useState<CommercialInvoicePrintFormat>("full");
   const [printAssessmentNo, setPrintAssessmentNo] = useState(true);
   const downloadPrintMutation = useDownloadCommercialInvoicePrintPdf();
+
+  const [coaInvoiceNumber, setCoaInvoiceNumber] = useState<string | null>(null);
 
   const { data: editingDetail, isFetching: isEditingDetailLoading } = useGetCommercialInvoice(editingInvoiceNumber);
   const saveMutation = useSaveCommercialInvoice();
@@ -288,6 +292,9 @@ const CommercialInvoiceListPage = () => {
         </IconButton>
         <IconButton size="small" onClick={() => openPrintDialog(row.original.invoiceNumber)}>
           <PrintIcon fontSize="small" />
+        </IconButton>
+        <IconButton size="small" onClick={() => setCoaInvoiceNumber(row.original.invoiceNumber)} title="Certificate of Origin">
+          <WorkspacePremiumOutlinedIcon fontSize="small" />
         </IconButton>
         <IconButton size="small" color="error" onClick={() => handleDelete(row.original.invoiceNumber)}>
           <DeleteIcon fontSize="small" />
@@ -553,6 +560,11 @@ const CommercialInvoiceListPage = () => {
         isConfirming={deleteMutation.isPending}
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteTargetInvoiceNumber(null)}
+      />
+
+      <CertificateOfOriginDialog
+        invoiceNumber={coaInvoiceNumber}
+        onClose={() => setCoaInvoiceNumber(null)}
       />
     </Box>
   );

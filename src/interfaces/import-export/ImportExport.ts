@@ -62,3 +62,33 @@ export interface CommercialInvoiceDetail {
   header: CommercialInvoiceHeader;
   lines: CommercialInvoiceLine[];
 }
+
+export interface CertificateOfOriginHeader {
+  invoiceNumber: string;
+  refNo: string;
+  companyAddressId: number;
+  countryOfOrigin: string;
+  portOfLoading?: string | null;
+  otherRemarks?: string | null;
+  competentAuthorityName?: string | null;
+  issuePlace?: string | null;
+  issueDate?: string | null;
+  requestSubmittedBy?: string | null;
+}
+
+export interface CertificateOfOriginLine {
+  id: number;
+  invoiceNumber: string;
+  itemNo: number;
+  shippingMarks: string;
+  packageTypeQuantity: string;
+  itemName: string;
+  hsCode: string;
+  nettWeight: number;
+  grossWeight: number;
+}
+
+export interface CertificateOfOriginDetail {
+  header: CertificateOfOriginHeader;
+  lines: CertificateOfOriginLine[];
+}
