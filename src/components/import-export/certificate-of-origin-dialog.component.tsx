@@ -8,8 +8,9 @@ import PrintIcon from "@mui/icons-material/Print";
 import { toast } from "react-toastify";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 import { useDropdownTheme } from "../../themes/useDropdownTheme";
-import { primaryActionButtonSx, themedButtonLabelStyle, numberFieldNoSpinnerSx } from "../../themes/workspace-theme";
+import { primaryActionButtonSx, themedButtonLabelStyle, numberFieldNoSpinnerSx, dateIconFieldSx } from "../../themes/workspace-theme";
 import { useGetCompanyAddresses } from "../../tanstack-hooks/import-export/company-address-setup.hooks";
+import { useGetCountriesQuery, useGetDestinations } from "../../tanstack-hooks/custom-hooks";
 import {
   useGetCertificateOfOrigin, useSaveCertificateOfOrigin, useDeleteCertificateOfOrigin,
   useDownloadCertificateOfOriginPrintPdf,
@@ -58,6 +59,14 @@ const CertificateOfOriginDialog = ({ invoiceNumber, onClose }: Props) => {
   const modalSelectMenuProps = { select: { MenuProps: { slotProps: { paper: { sx: listboxSx } } } } };
 
   const { data: addresses } = useGetCompanyAddresses();
+  const { data: countriesPage } = useGetCountriesQuery({
+    pageIndex: 0, pageSize: 999, sortColumn: "name", sortOrder: "asc", filterColumn: null, filterQuery: null,
+  });
+  const countries = countriesPage?.items ?? [];
+  const { data: portsPage } = useGetDestinations({
+    pageIndex: 0, pageSize: 999, sortColumn: "code", sortOrder: "asc", filterColumn: null, filterQuery: null,
+  });
+  const ports = portsPage?.items ?? [];
   const { data: existing, isFetching: isLoadingExisting } = useGetCertificateOfOrigin(invoiceNumber);
   const saveMutation = useSaveCertificateOfOrigin();
   const deleteMutation = useDeleteCertificateOfOrigin();
@@ -130,7 +139,7 @@ const CertificateOfOriginDialog = ({ invoiceNumber, onClose }: Props) => {
     <Dialog
       open={!!invoiceNumber}
       onClose={onClose}
-      maxWidth="md"
+      maxWidth="lg"
       fullWidth
       slotProps={{ paper: { sx: { backgroundColor: DASHBOARD_COLORS.cardBg } } }}
     >
@@ -147,11 +156,11 @@ const CertificateOfOriginDialog = ({ invoiceNumber, onClose }: Props) => {
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
-                label="Ref. No." size="small" fullWidth sx={fieldSx}
+                label="Ref. No." size="small" sx={{ ...fieldSx, width: 140 }}
                 value={header.refNo} onChange={(e) => setHeader((p) => ({ ...p, refNo: e.target.value }))}
               />
               <TextField
-                select label="Consignor / Exporter" size="small" fullWidth sx={fieldSx}
+                select label="Consignor / Exporter" size="small" sx={{ ...fieldSx, flexGrow: 1 }}
                 slotProps={modalSelectMenuProps}
                 value={header.companyAddressId || ""}
                 onChange={(e) => setHeader((p) => ({ ...p, companyAddressId: Number(e.target.value) }))}
@@ -161,15 +170,25 @@ const CertificateOfOriginDialog = ({ invoiceNumber, onClose }: Props) => {
                 ))}
               </TextField>
               <TextField
-                label="Country of Origin" size="small" sx={{ ...fieldSx, width: 160 }}
+                select label="Country of Origin" size="small" sx={{ ...fieldSx, width: 340 }}
+                slotProps={modalSelectMenuProps}
                 value={header.countryOfOrigin} onChange={(e) => setHeader((p) => ({ ...p, countryOfOrigin: e.target.value }))}
-              />
+              >
+                {countries.map((c) => (
+                  <MenuItem key={c.id} value={c.code}>{c.code} - {c.name}</MenuItem>
+                ))}
+              </TextField>
             </Box>
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
-                label="Port of Loading" size="small" fullWidth sx={fieldSx}
+                select label="Port of Loading" size="small" fullWidth sx={fieldSx}
+                slotProps={modalSelectMenuProps}
                 value={header.portOfLoading || ""} onChange={(e) => setHeader((p) => ({ ...p, portOfLoading: e.target.value }))}
-              />
+              >
+                {ports.map((d) => (
+                  <MenuItem key={`${d.countryCode}-${d.code}`} value={d.code}>{d.code} - {d.destinationName}</MenuItem>
+                ))}
+              </TextField>
               <TextField
                 label="Request Submitted By" size="small" fullWidth sx={fieldSx}
                 value={header.requestSubmittedBy || ""} onChange={(e) => setHeader((p) => ({ ...p, requestSubmittedBy: e.target.value }))}
@@ -190,7 +209,8 @@ const CertificateOfOriginDialog = ({ invoiceNumber, onClose }: Props) => {
                 value={header.issuePlace || ""} onChange={(e) => setHeader((p) => ({ ...p, issuePlace: e.target.value }))}
               />
               <TextField
-                type="date" label="Issue Date" size="small" fullWidth sx={fieldSx}
+                type="date" label="Issue Date" size="small" fullWidth
+                sx={{ ...(fieldSx as Record<string, unknown>), ...(dateIconFieldSx as Record<string, unknown>) }}
                 slotProps={{ inputLabel: { shrink: true } }}
                 value={header.issueDate?.split("T")[0] || ""}
                 onChange={(e) => setHeader((p) => ({ ...p, issueDate: e.target.value || null }))}
