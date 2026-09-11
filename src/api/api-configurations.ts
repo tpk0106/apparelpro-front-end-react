@@ -248,6 +248,11 @@ export const APPARELPRO_ENDPOINTS = {
       DELETE: "api/certificate-of-origin",
       PRINT_PDF: "api/certificate-of-origin/print/pdf",
     },
+    LETTER_OF_CREDIT: {
+      GET: "api/letter-of-credit/detail",
+      SAVE: "api/letter-of-credit",
+      DELETE: "api/letter-of-credit",
+    },
     SUBSCRIPTION: {
       GET: "api/subscription/list",
       POST: "api/subscription",

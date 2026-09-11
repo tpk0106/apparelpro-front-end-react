@@ -872,6 +872,12 @@ export const navbarData = [
         label: "Commercial (Export) Invoice",
         pinned: false,
       },
+      {
+        routerLink: "letter-of-credit",
+        icon: null,
+        label: "L/C Form",
+        pinned: false,
+      },
     ],
     tag: "importexportdoc",
   },

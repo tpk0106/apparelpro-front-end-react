@@ -38,6 +38,7 @@ import OrderConfirmationRoutine from "./components/order-management/order-confir
 import MaterialConsumption from "./components/material-consumption/material-consumption.component";
 import CompanyAddressSetupPage from "./components/import-export/company-address-setup.component";
 import CommercialInvoiceListPage from "./components/import-export/commercial-invoice-list.component";
+import LetterOfCreditPage from "./components/import-export/letter-of-credit.component";
 import SupplierPurchaseOrderWorkspace from "./components/supplier-purchase-order-management/supplier-purchase-order-workspace";
 import StylewiseEventsWorkspace from "./components/stylewise-events/stylewise-events-workspace";
 import TrimSheetApprovalWorkspace from "./components/order-management/trim-sheet-approval/trim-sheet-approval-workspace";
@@ -347,6 +348,7 @@ function App() {
         <Route index path="po" element={<OrderConfirmationRoutine />} />
         <Route index path="ie-company-setup" element={<CompanyAddressSetupPage />} />
         <Route index path="commercial-invoice" element={<CommercialInvoiceListPage />} />
+        <Route index path="letter-of-credit" element={<LetterOfCreditPage />} />
         <Route
           index
           path="material-consumption"
