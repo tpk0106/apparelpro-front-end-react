@@ -5,6 +5,8 @@ import UnfoldMoreOutlinedIcon from "@mui/icons-material/UnfoldMoreOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import { Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useQueryClient } from "@tanstack/react-query";
 
 import {
   Card,
@@ -39,6 +41,7 @@ import PinnedMenu from "./pinned-menu.component";
 import { USER_CREDENTIALS } from "../interfaces/definitions";
 import { useGetToolbarPreferences, useSaveToolbarPreferences } from "../tanstack-hooks/toolbar.hooks";
 import { getDefaultToolbarPins } from "./toolbar-config";
+import { getCurrentUser } from "../sagaStore/user/user.selector";
 
 const handleMouseEnter = () => {
   const ele = document.getElementById("show-mobileMenu");
@@ -63,6 +66,8 @@ interface HeaderProps {
 
 const Header = ({ toolbarCollapsed, onToggleToolbar }: HeaderProps) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const currentUserEmail = useSelector(getCurrentUser);
   const [open, setOpen] = useState(0);
   const [pinnedMenuOn, setPinnedMenuOn] = useState(false);
   const { data: toolbarPreferences } = useGetToolbarPreferences();
@@ -81,12 +86,27 @@ const Header = ({ toolbarCollapsed, onToggleToolbar }: HeaderProps) => {
     if (nextEnabled) navigate("/");
   };
 
-  const [username] = useState<string | null>(
-    localStorage.getItem(USER_CREDENTIALS.USER_KEY),
+  const [username, setUsername] = useState<string | null>(
+    () => localStorage.getItem(USER_CREDENTIALS.USER_KEY),
   );
-  const [userId] = useState<string | null>(
-    localStorage.getItem(USER_CREDENTIALS.USER_ID),
+  const [userId, setUserId] = useState<string | null>(
+    () => localStorage.getItem(USER_CREDENTIALS.USER_ID),
   );
+
+  // Header is mounted once at app startup (by MainMenu, which wraps /sign-in
+  // too) and never remounts on login - so the useState initializers above
+  // only ever saw localStorage BEFORE login wrote to it. currentUserEmail is
+  // the one piece of this that IS reactive (Redux signInSuccess dispatch),
+  // so use its change as the trigger to re-read localStorage and refresh the
+  // toolbar preferences query, which was similarly stuck in a pre-login
+  // errored state with no auth token.
+  useEffect(() => {
+    setUsername(localStorage.getItem(USER_CREDENTIALS.USER_KEY));
+    setUserId(localStorage.getItem(USER_CREDENTIALS.USER_ID));
+    if (currentUserEmail) {
+      queryClient.invalidateQueries({ queryKey: ["toolbar", "preferences"] });
+    }
+  }, [currentUserEmail, queryClient]);
 
   useEffect(() => {
     const ele = document.getElementById("show-mobileMenu");
