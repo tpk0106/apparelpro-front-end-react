@@ -253,6 +253,11 @@ export const APPARELPRO_ENDPOINTS = {
       SAVE: "api/letter-of-credit",
       DELETE: "api/letter-of-credit",
     },
+    LETTER_OF_CREDIT_COVERING_LETTER: {
+      GET: "api/letter-of-credit-covering-letter/detail",
+      SAVE: "api/letter-of-credit-covering-letter",
+      DELETE: "api/letter-of-credit-covering-letter",
+    },
     SUBSCRIPTION: {
       GET: "api/subscription/list",
       POST: "api/subscription",

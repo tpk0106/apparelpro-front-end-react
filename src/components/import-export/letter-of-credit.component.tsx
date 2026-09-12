@@ -18,6 +18,7 @@ import {
   useGetLetterOfCredit, useSaveLetterOfCredit, useDeleteLetterOfCredit,
 } from "../../tanstack-hooks/import-export/letter-of-credit.hooks";
 import ConfirmDialog from "../common/confirm-dialog";
+import LetterOfCreditCoveringLetterDialog from "./letter-of-credit-covering-letter-dialog.component";
 import type { LetterOfCreditHeader, LetterOfCreditLine } from "../../interfaces/import-export/ImportExport";
 
 const BANK_OPTIONS = [
@@ -63,6 +64,7 @@ const LetterOfCreditPage = () => {
   const [bankCode, setBankCode] = useState("BOC");
   const [lcNoInput, setLcNoInput] = useState("");
   const [activeLcNo, setActiveLcNo] = useState<string | null>(null);
+  const [isCoveringLetterOpen, setIsCoveringLetterOpen] = useState(false);
 
   const { data: buyersPage } = useGetBuyersQuery({
     pageIndex: 0, pageSize: 999, sortColumn: "name", sortOrder: "asc", filterColumn: null, filterQuery: null,
@@ -433,12 +435,20 @@ const LetterOfCreditPage = () => {
             </Box>
 
             <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-              <Button
-                variant="contained" color="error" disabled={!existing || isLoadingExisting}
-                onClick={() => setIsDeleteConfirmOpen(true)}
-              >
-                <span style={themedButtonLabelStyle}>Delete</span>
-              </Button>
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <Button
+                  variant="contained" color="error" disabled={!existing || isLoadingExisting}
+                  onClick={() => setIsDeleteConfirmOpen(true)}
+                >
+                  <span style={themedButtonLabelStyle}>Delete</span>
+                </Button>
+                {/* Legacy IE_LCLT1.PRG only offers this letter type for BOC/SCB, not Peoples Bank. */}
+                {(bankCode === "BOC" || bankCode === "SCB") && (
+                  <Button variant="contained" sx={primaryActionButtonSx} onClick={() => setIsCoveringLetterOpen(true)}>
+                    <span style={themedButtonLabelStyle}>Covering Letter</span>
+                  </Button>
+                )}
+              </Box>
               <Button variant="contained" sx={primaryActionButtonSx} disabled={saveMutation.isPending} onClick={handleSave}>
                 <span style={themedButtonLabelStyle}>Save L/C Form</span>
               </Button>
@@ -456,6 +466,12 @@ const LetterOfCreditPage = () => {
         isConfirming={deleteMutation.isPending}
         onConfirm={handleConfirmDelete}
         onCancel={() => setIsDeleteConfirmOpen(false)}
+      />
+
+      <LetterOfCreditCoveringLetterDialog
+        bankCode={isCoveringLetterOpen ? bankCode : null}
+        lcNo={isCoveringLetterOpen ? activeLcNo : null}
+        onClose={() => setIsCoveringLetterOpen(false)}
       />
     </div>
   );

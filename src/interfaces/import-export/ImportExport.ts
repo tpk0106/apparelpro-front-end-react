@@ -173,3 +173,30 @@ export interface LetterOfCreditDetail {
   header: LetterOfCreditHeader;
   lines: LetterOfCreditLine[];
 }
+
+export interface LetterOfCreditCoveringLetter {
+  bankCode: string;
+  lcNo: string;
+  letterDate?: string | null;
+  exportLcNo?: string | null;
+  value?: string | null;
+  item1?: string | null;
+  item2?: string | null;
+  box1Selected: boolean;
+  box2Selected: boolean;
+  attn1?: string | null;
+  box3Selected: boolean;
+  attn2?: string | null;
+  box4Selected: boolean;
+  sampleLcNo?: string | null;
+  box5Selected: boolean;
+  box6Selected: boolean;
+  box7Selected: boolean;
+  percentage?: number | null;
+  box8Line1?: string | null;
+  box8Line2?: string | null;
+  box9Line1?: string | null;
+  box9Line2?: string | null;
+  box10Line1?: string | null;
+  box10Line2?: string | null;
+}
