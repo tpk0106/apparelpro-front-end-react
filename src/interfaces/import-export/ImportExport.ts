@@ -174,6 +174,142 @@ export interface LetterOfCreditDetail {
   lines: LetterOfCreditLine[];
 }
 
+export interface CustomsDeclarationHeader {
+  cusNo: string;
+  exporterCode?: string | null;
+  boiRegNo?: string | null;
+  consigneeCode?: string | null;
+  notifyPartyCode?: string | null;
+  declarantCode?: string | null;
+  clearanceOfficeCode?: string | null;
+  frontierOfficeCode?: string | null;
+  countryOfConsignmentCode?: string | null;
+  locationOfGoods?: string | null;
+  countryOfOriginCode?: string | null;
+  countryOfDestinationCode?: string | null;
+  warehouseNo?: string | null;
+  warehousePeriod?: string | null;
+  precedingDocNo?: string | null;
+  voyageNo?: string | null;
+  voyageDate?: string | null;
+  blAwbNo?: string | null;
+  paymentTermCode?: string | null;
+  deliveryTermCode?: string | null;
+  vessel?: string | null;
+  portOfLoadingCode?: string | null;
+  transportModeCode?: string | null;
+  prepaymentAccountName?: string | null;
+  prepaymentAccountNo?: string | null;
+  portOfDischargeCode?: string | null;
+  placeOfDeliveryCode?: string | null;
+  bankCode?: string | null;
+  referenceNo?: string | null;
+  remark1?: string | null;
+  remark2?: string | null;
+  remark3?: string | null;
+  remark4?: string | null;
+  declarantName?: string | null;
+  submittedByName?: string | null;
+}
+
+export interface CustomsDeclarationLineTax {
+  id: number;
+  taxCode?: string | null;
+  baseCode?: string | null;
+  rate?: number | null;
+  amount?: number | null;
+  exempted?: number | null;
+  payable?: number | null;
+}
+
+export interface CustomsDeclarationLine {
+  id: number;
+  item: string;
+  customsProcedureCode?: string | null;
+  commodityCode?: string | null;
+  netWeight?: number | null;
+  grossWeight?: number | null;
+  supplementaryUnitCode?: string | null;
+  supplementaryQty?: number | null;
+  currencyCode?: string | null;
+  fob?: number | null;
+  freight?: number | null;
+  insurance?: number | null;
+  other?: number | null;
+  exchangeRate?: number | null;
+  countryCode?: string | null;
+  licenceNo?: string | null;
+  agreementCode?: string | null;
+  qtyDeducted?: number | null;
+  value?: string | null;
+  anyOther?: string | null;
+  detail?: string | null;
+  taxes: CustomsDeclarationLineTax[];
+}
+
+export interface CustomsDeclarationAttachedDocument {
+  id: number;
+  docNo: string;
+  docTypeCode: string;
+}
+
+export interface CustomsDeclarationDetail {
+  header: CustomsDeclarationHeader;
+  lines: CustomsDeclarationLine[];
+  attachedDocuments: CustomsDeclarationAttachedDocument[];
+}
+
+// CUSDEC I/II reference-code masters (2026-09-12) - simple Code+Description
+// lookups used by the customs declaration form (built separately). All 8 of
+// these are keyed by Code (the primary key); DocumentType is the exception,
+// keyed by an auto Id with a composite-unique (DocNo, DocTypeCode).
+export interface ClearanceOffice {
+  code: string;
+  description: string;
+}
+
+export interface PaymentTerm {
+  code: string;
+  description: string;
+}
+
+export interface TransportMode {
+  code: string;
+  description: string;
+}
+
+export interface DutyTaxCode {
+  code: string;
+  description: string;
+}
+
+export interface TaxBaseCode {
+  code: string;
+  description: string;
+}
+
+export interface AgreementCode {
+  code: string;
+  description: string;
+}
+
+export interface CommodityCode {
+  code: string;
+  description: string;
+}
+
+export interface CustomsProcedureCode {
+  code: string;
+  description: string;
+}
+
+export interface DocumentType {
+  id: number;
+  docNo: string;
+  docTypeCode: string;
+  description: string;
+}
+
 export interface LetterOfCreditCoveringLetter {
   bankCode: string;
   lcNo: string;

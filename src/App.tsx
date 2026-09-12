@@ -39,6 +39,16 @@ import MaterialConsumption from "./components/material-consumption/material-cons
 import CompanyAddressSetupPage from "./components/import-export/company-address-setup.component";
 import CommercialInvoiceListPage from "./components/import-export/commercial-invoice-list.component";
 import LetterOfCreditPage from "./components/import-export/letter-of-credit.component";
+import CustomsDeclarationPage from "./components/import-export/customs-declaration.component";
+import ClearanceOfficePage from "./components/import-export/clearance-office.component";
+import PaymentTermPage from "./components/import-export/payment-term.component";
+import TransportModePage from "./components/import-export/transport-mode.component";
+import DutyTaxCodePage from "./components/import-export/duty-tax-code.component";
+import TaxBaseCodePage from "./components/import-export/tax-base-code.component";
+import AgreementCodePage from "./components/import-export/agreement-code.component";
+import CommodityCodePage from "./components/import-export/commodity-code.component";
+import CustomsProcedureCodePage from "./components/import-export/customs-procedure-code.component";
+import DocumentTypePage from "./components/import-export/document-type.component";
 import SupplierPurchaseOrderWorkspace from "./components/supplier-purchase-order-management/supplier-purchase-order-workspace";
 import StylewiseEventsWorkspace from "./components/stylewise-events/stylewise-events-workspace";
 import TrimSheetApprovalWorkspace from "./components/order-management/trim-sheet-approval/trim-sheet-approval-workspace";
@@ -349,6 +359,16 @@ function App() {
         <Route index path="ie-company-setup" element={<CompanyAddressSetupPage />} />
         <Route index path="commercial-invoice" element={<CommercialInvoiceListPage />} />
         <Route index path="letter-of-credit" element={<LetterOfCreditPage />} />
+        <Route index path="customs-declaration" element={<CustomsDeclarationPage />} />
+        <Route index path="clearance-office" element={<ClearanceOfficePage />} />
+        <Route index path="payment-term" element={<PaymentTermPage />} />
+        <Route index path="transport-mode" element={<TransportModePage />} />
+        <Route index path="document-type" element={<DocumentTypePage />} />
+        <Route index path="duty-tax-code" element={<DutyTaxCodePage />} />
+        <Route index path="tax-base-code" element={<TaxBaseCodePage />} />
+        <Route index path="agreement-code" element={<AgreementCodePage />} />
+        <Route index path="commodity-code" element={<CommodityCodePage />} />
+        <Route index path="customs-procedure-code" element={<CustomsProcedureCodePage />} />
         <Route
           index
           path="material-consumption"

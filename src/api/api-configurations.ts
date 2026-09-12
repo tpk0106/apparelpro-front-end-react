@@ -235,6 +235,75 @@ export const APPARELPRO_ENDPOINTS = {
     IMPORT_EXPORT: {
       COMPANY_ADDRESSES: "api/import-export/company-addresses",
     },
+    // CUSDEC I/II reference-code masters (2026-09-12) - 9 simple Code+Description
+    // (DocumentType is Id+DocNo+DocTypeCode+Description) lookups used by the
+    // customs declaration form, which is being built separately. All 8
+    // code-keyed masters share the same shape: paginated LIST, code-keyed
+    // GET_BY_CODE, POST to add, PUT with ?code= to update, DELETE/{code}.
+    // DocumentType is Id-keyed instead (?id= / DELETE/{id}).
+    CLEARANCE_OFFICE: {
+      LIST: "api/clearance-office/list",
+      GET_BY_CODE: "api/clearance-office/list/",
+      POST: "api/clearance-office",
+      PUT: "api/clearance-office",
+      DELETE: "api/clearance-office/",
+    },
+    PAYMENT_TERM: {
+      LIST: "api/payment-term/list",
+      GET_BY_CODE: "api/payment-term/list/",
+      POST: "api/payment-term",
+      PUT: "api/payment-term",
+      DELETE: "api/payment-term/",
+    },
+    TRANSPORT_MODE: {
+      LIST: "api/transport-mode/list",
+      GET_BY_CODE: "api/transport-mode/list/",
+      POST: "api/transport-mode",
+      PUT: "api/transport-mode",
+      DELETE: "api/transport-mode/",
+    },
+    DUTY_TAX_CODE: {
+      LIST: "api/duty-tax-code/list",
+      GET_BY_CODE: "api/duty-tax-code/list/",
+      POST: "api/duty-tax-code",
+      PUT: "api/duty-tax-code",
+      DELETE: "api/duty-tax-code/",
+    },
+    TAX_BASE_CODE: {
+      LIST: "api/tax-base-code/list",
+      GET_BY_CODE: "api/tax-base-code/list/",
+      POST: "api/tax-base-code",
+      PUT: "api/tax-base-code",
+      DELETE: "api/tax-base-code/",
+    },
+    AGREEMENT_CODE: {
+      LIST: "api/agreement-code/list",
+      GET_BY_CODE: "api/agreement-code/list/",
+      POST: "api/agreement-code",
+      PUT: "api/agreement-code",
+      DELETE: "api/agreement-code/",
+    },
+    COMMODITY_CODE: {
+      LIST: "api/commodity-code/list",
+      GET_BY_CODE: "api/commodity-code/list/",
+      POST: "api/commodity-code",
+      PUT: "api/commodity-code",
+      DELETE: "api/commodity-code/",
+    },
+    CUSTOMS_PROCEDURE_CODE: {
+      LIST: "api/customs-procedure-code/list",
+      GET_BY_CODE: "api/customs-procedure-code/list/",
+      POST: "api/customs-procedure-code",
+      PUT: "api/customs-procedure-code",
+      DELETE: "api/customs-procedure-code/",
+    },
+    DOCUMENT_TYPE: {
+      LIST: "api/document-type/list",
+      GET_BY_ID: "api/document-type/list/",
+      POST: "api/document-type",
+      PUT: "api/document-type",
+      DELETE: "api/document-type/",
+    },
     COMMERCIAL_INVOICE: {
       LIST: "api/commercial-invoice/list",
       GET: "api/commercial-invoice/detail",
@@ -257,6 +326,11 @@ export const APPARELPRO_ENDPOINTS = {
       GET: "api/letter-of-credit-covering-letter/detail",
       SAVE: "api/letter-of-credit-covering-letter",
       DELETE: "api/letter-of-credit-covering-letter",
+    },
+    CUSTOMS_DECLARATION: {
+      GET: "api/customs-declaration/detail",
+      SAVE: "api/customs-declaration",
+      DELETE: "api/customs-declaration",
     },
     SUBSCRIPTION: {
       GET: "api/subscription/list",
