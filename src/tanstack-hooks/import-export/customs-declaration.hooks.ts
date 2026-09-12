@@ -4,6 +4,7 @@ import type { AppError } from "../../auth/axiosClient";
 import type { CustomsDeclarationDetail } from "../../interfaces/import-export/ImportExport";
 import {
   loadCustomsDeclarationByCusNo, saveCustomsDeclaration, deleteCustomsDeclaration,
+  downloadCustomsDeclarationPrintPdf,
 } from "../../services/import-export/customs-declaration.service";
 
 // A brand-new CUSDEC No. legitimately has no saved form yet - the backend
@@ -36,6 +37,23 @@ export const useSaveCustomsDeclaration = () => {
       queryClient.invalidateQueries({
         queryKey: ["importExport", "customsDeclaration", data.header.cusNo],
       });
+    },
+  });
+};
+
+export const useDownloadCustomsDeclarationPrintPdf = () => {
+  return useMutation<void, AppError, string>({
+    mutationFn: async (cusNo) => {
+      const response = await downloadCustomsDeclarationPrintPdf(cusNo);
+      const safeCusNo = cusNo.replace(/\//g, "-");
+      const blobUrl = window.URL.createObjectURL(response.data);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `CUSDEC_${safeCusNo}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
     },
   });
 };

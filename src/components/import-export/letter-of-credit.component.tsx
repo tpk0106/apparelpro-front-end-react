@@ -6,6 +6,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
 import { useDropdownTheme } from "../../themes/useDropdownTheme";
+import { copperTextColor } from "../../themes/button-color-themes";
 import {
   primaryActionButtonSx, themedButtonLabelStyle, numberFieldNoSpinnerSx, dateIconFieldSx, workspaceHeadingSx,
   workspaceSectionLabelSx,
@@ -155,10 +156,12 @@ const LetterOfCreditPage = () => {
 
   const checkboxField = (label: string, field: keyof LetterOfCreditHeader) => (
     <FormControlLabel
+      sx={{ "& .MuiFormControlLabel-label": { color: "#F4F6F8" } }}
       control={
         <Checkbox
           checked={header[field] === "X"}
           onChange={(e) => setField(field, (e.target.checked ? "X" : null) as never)}
+          sx={{ color: copperTextColor, "&.Mui-checked": { color: copperTextColor } }}
         />
       }
       label={label}
@@ -198,9 +201,10 @@ const LetterOfCreditPage = () => {
           </Box>
         ) : (
           <>
-            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mt: 1 }}>Identification</Typography>
-            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mt: 1, mb: 1.5 }}>Identification</Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
               <TextField label="Credit No." size="small" sx={{ ...fieldSx, width: 220 }}
+                slotProps={{ htmlInput: { maxLength: 15 } }}
                 value={header.creditNo || ""} onChange={(e) => setField("creditNo", e.target.value)} />
               <TextField type="date" label="Opening Date" size="small"
                 sx={{ ...(fieldSx as Record<string, unknown>), ...(dateIconFieldSx as Record<string, unknown>), width: 200 }}
@@ -223,8 +227,8 @@ const LetterOfCreditPage = () => {
               </TextField>
             </Box>
 
-            <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>Parties</Typography>
-            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1.5 }}>Parties</Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
               <TextField select label="Beneficiary (Supplier)" size="small" sx={{ ...fieldSx, width: 280 }} slotProps={modalSelectMenuProps}
                 value={header.beneficiaryCode || ""} onChange={(e) => setField("beneficiaryCode", Number(e.target.value))}>
                 {(suppliers ?? []).map((s) => <MenuItem key={s.supplierCode} value={s.supplierCode}>{s.supplierCode} - {s.name}</MenuItem>)}
@@ -243,8 +247,8 @@ const LetterOfCreditPage = () => {
               </TextField>
             </Box>
 
-            <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>Credit Terms</Typography>
-            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center", mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1.5 }}>Credit Terms</Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center", mb: 3 }}>
               {checkboxField("Transferable Credit", "transferableCredit")}
               <TextField select label="Confirmed Credit" size="small" sx={{ ...fieldSx, width: 220 }} slotProps={modalSelectMenuProps}
                 value={header.confirmedCredit || ""} onChange={(e) => setField("confirmedCredit", e.target.value)}>
@@ -267,6 +271,7 @@ const LetterOfCreditPage = () => {
               {header.beneficiaryDraft === "B" && (
                 <>
                   <TextField label="Tenor Days" size="small" sx={{ ...fieldSx, ...numberFieldNoSpinnerSx, width: 130 }}
+                    slotProps={{ htmlInput: { maxLength: 3 } }}
                     value={header.tenorDays || ""} onChange={(e) => setField("tenorDays", e.target.value)} />
                   <TextField type="date" label="Tenor From Date" size="small"
                     sx={{ ...(fieldSx as Record<string, unknown>), ...(dateIconFieldSx as Record<string, unknown>), width: 200 }}
@@ -275,19 +280,24 @@ const LetterOfCreditPage = () => {
                 </>
               )}
               <TextField label="Drawn On" size="small" sx={{ ...fieldSx, width: 220 }}
+                slotProps={{ htmlInput: { maxLength: 20 } }}
                 value={header.drawnOn || ""} onChange={(e) => setField("drawnOn", e.target.value)} />
               <TextField label="Credit Available With" size="small" sx={{ ...fieldSx, width: 220 }}
+                slotProps={{ htmlInput: { maxLength: 20 } }}
                 value={header.creditAvailableWith || ""} onChange={(e) => setField("creditAvailableWith", e.target.value)} />
               <TextField label="Credit Documents" size="small" sx={{ ...fieldSx, width: 220 }}
+                slotProps={{ htmlInput: { maxLength: 10 } }}
                 value={header.creditDocuments || ""} onChange={(e) => setField("creditDocuments", e.target.value)} />
               <TextField label="Licence Type" size="small" sx={{ ...fieldSx, width: 160 }}
+                slotProps={{ htmlInput: { maxLength: 6 } }}
                 value={header.licenceType || ""} onChange={(e) => setField("licenceType", e.target.value)} />
               <TextField label="Licence No." size="small" sx={{ ...fieldSx, width: 220 }}
+                slotProps={{ htmlInput: { maxLength: 15 } }}
                 value={header.licenceNo || ""} onChange={(e) => setField("licenceNo", e.target.value)} />
             </Box>
 
-            <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>Shipment</Typography>
-            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1.5 }}>Shipment</Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
               <TextField select label="Part Shipment" size="small" sx={{ ...fieldSx, width: 200 }} slotProps={modalSelectMenuProps}
                 value={header.partShipment || ""} onChange={(e) => setField("partShipment", e.target.value)}>
                 <MenuItem value="A">A. Allowed</MenuItem>
@@ -307,6 +317,7 @@ const LetterOfCreditPage = () => {
               </TextField>
               {header.shipmentTerm === "D" && (
                 <TextField label="Other Term Label" size="small" sx={{ ...fieldSx, width: 180 }}
+                  slotProps={{ htmlInput: { maxLength: 10 } }}
                   value={header.shipmentTermCustomLabel || ""} onChange={(e) => setField("shipmentTermCustomLabel", e.target.value)} />
               )}
               <TextField select label="Shipment From" size="small" sx={{ ...fieldSx, width: 220 }} slotProps={modalSelectMenuProps}
@@ -314,6 +325,7 @@ const LetterOfCreditPage = () => {
                 {ports.map((p) => <MenuItem key={p.code} value={p.code}>{p.code} - {p.destinationName}</MenuItem>)}
               </TextField>
               <TextField label="Transport To" size="small" sx={{ ...fieldSx, width: 260 }}
+                slotProps={{ htmlInput: { maxLength: 40 } }}
                 value={header.transportTo || ""} onChange={(e) => setField("transportTo", e.target.value)} />
               <TextField type="date" label="Not Later Than" size="small"
                 sx={{ ...(fieldSx as Record<string, unknown>), ...(dateIconFieldSx as Record<string, unknown>), width: 200 }}
@@ -332,11 +344,12 @@ const LetterOfCreditPage = () => {
                 <MenuItem value="D">D. Tindal's Receipt</MenuItem>
               </TextField>
               <TextField label="Packing Specification" size="small" sx={{ ...fieldSx, width: 200 }}
+                slotProps={{ htmlInput: { maxLength: 3 } }}
                 value={header.packingSpecification || ""} onChange={(e) => setField("packingSpecification", e.target.value)} />
             </Box>
 
-            <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>Insurance</Typography>
-            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center", mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1.5 }}>Insurance</Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center", mb: 3 }}>
               {checkboxField("Insurance Coverage", "insuranceCoverage")}
               <TextField label="Insurance %" size="small" type="number" sx={{ ...fieldSx, ...numberFieldNoSpinnerSx, width: 130 }}
                 value={header.insurancePercent ?? ""} onChange={(e) => setField("insurancePercent", e.target.value === "" ? null : Number(e.target.value))} />
@@ -344,14 +357,19 @@ const LetterOfCreditPage = () => {
                 value={header.insuranceValueCurrency || ""} onChange={(e) => setField("insuranceValueCurrency", e.target.value)}>
                 {currencies.map((c) => <MenuItem key={c.id} value={c.code}>{c.code} - {c.name}</MenuItem>)}
               </TextField>
-              <TextField label="Insurance Clause" size="small" sx={{ ...fieldSx, width: 160 }}
-                value={header.insuranceClause || ""} onChange={(e) => setField("insuranceClause", e.target.value)} />
+              <TextField select label="Insurance Clause" size="small" sx={{ ...fieldSx, width: 200 }} slotProps={modalSelectMenuProps}
+                value={header.insuranceClause || ""} onChange={(e) => setField("insuranceClause", e.target.value)}>
+                <MenuItem value="A">A - Institute Cargo Clauses (A)</MenuItem>
+                <MenuItem value="B">B - Institute Cargo Clauses (B)</MenuItem>
+                <MenuItem value="C">C - Institute Cargo Clauses (C)</MenuItem>
+              </TextField>
               <TextField label="Insurance Remarks" size="small" fullWidth sx={{ ...fieldSx, minWidth: 300 }}
+                slotProps={{ htmlInput: { maxLength: 50 } }}
                 value={header.insuranceRemarks || ""} onChange={(e) => setField("insuranceRemarks", e.target.value)} />
             </Box>
 
-            <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>Documents</Typography>
-            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center", mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1.5 }}>Documents</Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center", mb: 3 }}>
               {checkboxField("Bill of Lading Issued", "billOfLadingIssued")}
               <TextField select label="Invoice Selection" size="small" sx={{ ...fieldSx, width: 280 }} slotProps={modalSelectMenuProps}
                 value={header.invoiceSelection || ""} onChange={(e) => setField("invoiceSelection", e.target.value)}>
@@ -359,62 +377,81 @@ const LetterOfCreditPage = () => {
                 <MenuItem value="B">B. Signed Commercial Invoices</MenuItem>
               </TextField>
               <TextField label="CI Copies" size="small" sx={{ ...fieldSx, ...numberFieldNoSpinnerSx, width: 110 }}
+                slotProps={{ htmlInput: { maxLength: 3 } }}
                 value={header.ciCopies || ""} onChange={(e) => setField("ciCopies", e.target.value)} />
               <TextField label="Doc. Presentation Days" size="small" sx={{ ...fieldSx, width: 180 }}
+                slotProps={{ htmlInput: { maxLength: 3 } }}
                 value={header.documentPresentationDays || ""} onChange={(e) => setField("documentPresentationDays", e.target.value)} />
               <TextField label="Certified Mail Copies" size="small" sx={{ ...fieldSx, width: 180 }}
+                slotProps={{ htmlInput: { maxLength: 3 } }}
                 value={header.certifiedMailCopies || ""} onChange={(e) => setField("certifiedMailCopies", e.target.value)} />
               <TextField select label="Country of Origin" size="small" sx={{ ...fieldSx, width: 260 }} slotProps={modalSelectMenuProps}
                 value={header.countryOfOriginCode || ""} onChange={(e) => setField("countryOfOriginCode", e.target.value)}>
                 {countries.map((c) => <MenuItem key={c.id} value={c.code}>{c.code} - {c.name}</MenuItem>)}
               </TextField>
               <TextField label="Conformity With" size="small" fullWidth sx={{ ...fieldSx, minWidth: 300 }}
+                slotProps={{ htmlInput: { maxLength: 50 } }}
                 value={header.conformityWith || ""} onChange={(e) => setField("conformityWith", e.target.value)} />
               <TextField label="Marine B/L" size="small" fullWidth sx={{ ...fieldSx, minWidth: 280 }}
+                slotProps={{ htmlInput: { maxLength: 40 } }}
                 value={header.marineBillOfLading || ""} onChange={(e) => setField("marineBillOfLading", e.target.value)} />
               <TextField label="Marine B/L Consignee" size="small" fullWidth sx={{ ...fieldSx, minWidth: 280 }}
+                slotProps={{ htmlInput: { maxLength: 40 } }}
                 value={header.marineBillOfLadingConsignee || ""} onChange={(e) => setField("marineBillOfLadingConsignee", e.target.value)} />
               <TextField label="Air Waybill" size="small" fullWidth sx={{ ...fieldSx, minWidth: 280 }}
+                slotProps={{ htmlInput: { maxLength: 40 } }}
                 value={header.airWaybill || ""} onChange={(e) => setField("airWaybill", e.target.value)} />
               <TextField label="Air Waybill Consignee" size="small" fullWidth sx={{ ...fieldSx, minWidth: 280 }}
+                slotProps={{ htmlInput: { maxLength: 40 } }}
                 value={header.airWaybillConsignee || ""} onChange={(e) => setField("airWaybillConsignee", e.target.value)} />
               <TextField label="Other Documents" size="small" fullWidth sx={{ ...fieldSx, minWidth: 280 }}
+                slotProps={{ htmlInput: { maxLength: 40 } }}
                 value={header.otherDocuments || ""} onChange={(e) => setField("otherDocuments", e.target.value)} />
             </Box>
 
-            <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>Bank / Admin</Typography>
-            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center", mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1.5 }}>Bank / Admin</Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center", mb: 3 }}>
               {checkboxField("Additional Conditions", "additionalConditions")}
               {checkboxField("Extra Conditions", "extraConditions")}
               <TextField label="Account No." size="small" sx={{ ...fieldSx, width: 220 }}
+                slotProps={{ htmlInput: { maxLength: 15 } }}
                 value={header.accountNo || ""} onChange={(e) => setField("accountNo", e.target.value)} />
               <TextField label="Branch" size="small" sx={{ ...fieldSx, width: 220 }}
+                slotProps={{ htmlInput: { maxLength: 20 } }}
                 value={header.branch || ""} onChange={(e) => setField("branch", e.target.value)} />
               <TextField label="Bank Sent To" size="small" fullWidth sx={{ ...fieldSx, minWidth: 300 }}
+                slotProps={{ htmlInput: { maxLength: 50 } }}
                 value={header.bankSentTo || ""} onChange={(e) => setField("bankSentTo", e.target.value)} />
               <TextField label="Import Permit No." size="small" sx={{ ...fieldSx, width: 220 }}
+                slotProps={{ htmlInput: { maxLength: 20 } }}
                 value={header.importPermitNo || ""} onChange={(e) => setField("importPermitNo", e.target.value)} />
               <TextField label="Import Contract No." size="small" sx={{ ...fieldSx, width: 220 }}
+                slotProps={{ htmlInput: { maxLength: 15 } }}
                 value={header.importContractNo || ""} onChange={(e) => setField("importContractNo", e.target.value)} />
               <TextField type="date" label="Import Validity Date" size="small"
                 sx={{ ...(fieldSx as Record<string, unknown>), ...(dateIconFieldSx as Record<string, unknown>), width: 220 }}
                 slotProps={{ inputLabel: { shrink: true } }}
                 value={header.importValidityDate?.split("T")[0] || ""} onChange={(e) => setField("importValidityDate", e.target.value || null)} />
               <TextField label="Income Tax No." size="small" sx={{ ...fieldSx, width: 220 }}
+                slotProps={{ htmlInput: { maxLength: 15 } }}
                 value={header.incomeTaxNo || ""} onChange={(e) => setField("incomeTaxNo", e.target.value)} />
               <TextField label="BTT Reference No." size="small" sx={{ ...fieldSx, width: 220 }}
+                slotProps={{ htmlInput: { maxLength: 15 } }}
                 value={header.bttReferenceNo || ""} onChange={(e) => setField("bttReferenceNo", e.target.value)} />
             </Box>
 
-            <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>Item Lines</Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1.5 }}>Item Lines</Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 3 }}>
               {lines.map((line, index) => (
                 <Box key={index} sx={{ display: "flex", gap: 1, alignItems: "center" }}>
                   <TextField label="Item Code" size="small" sx={{ ...fieldSx, width: 160 }}
+                    slotProps={{ htmlInput: { maxLength: 22 } }}
                     value={line.itemCode} onChange={(e) => handleLineChange(index, "itemCode", e.target.value)} />
                   <TextField label="Description" size="small" sx={{ ...fieldSx, flexGrow: 1 }}
+                    slotProps={{ htmlInput: { maxLength: 60 } }}
                     value={line.description} onChange={(e) => handleLineChange(index, "description", e.target.value)} />
                   <TextField label="Unit" size="small" sx={{ ...fieldSx, width: 100 }}
+                    slotProps={{ htmlInput: { maxLength: 3 } }}
                     value={line.unit} onChange={(e) => handleLineChange(index, "unit", e.target.value)} />
                   <TextField label="Qty" size="small" type="number" sx={{ ...fieldSx, ...numberFieldNoSpinnerSx, width: 110 }}
                     value={line.quantity} onChange={(e) => handleLineChange(index, "quantity", Number(e.target.value))} />
@@ -425,13 +462,14 @@ const LetterOfCreditPage = () => {
                   <TextField label="Unit Price" size="small" type="number" sx={{ ...fieldSx, ...numberFieldNoSpinnerSx, width: 120 }}
                     value={line.unitPrice} onChange={(e) => handleLineChange(index, "unitPrice", Number(e.target.value))} />
                   <TextField label="BTN No." size="small" sx={{ ...fieldSx, width: 120 }}
+                    slotProps={{ htmlInput: { maxLength: 10 } }}
                     value={line.btnNo || ""} onChange={(e) => handleLineChange(index, "btnNo", e.target.value)} />
                   <IconButton size="small" color="error" onClick={() => handleDeleteLine(index)}>
                     <DeleteIcon fontSize="small" />
                   </IconButton>
                 </Box>
               ))}
-              <Button size="small" onClick={handleAddLine} sx={{ alignSelf: "flex-start" }}>+ Add Item</Button>
+              <Button size="small" onClick={handleAddLine} sx={{ alignSelf: "flex-start", color: copperTextColor }}>+ Add Item</Button>
             </Box>
 
             <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>

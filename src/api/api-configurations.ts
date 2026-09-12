@@ -331,6 +331,7 @@ export const APPARELPRO_ENDPOINTS = {
       GET: "api/customs-declaration/detail",
       SAVE: "api/customs-declaration",
       DELETE: "api/customs-declaration",
+      PRINT_PDF: "api/customs-declaration/print/pdf",
     },
     SUBSCRIPTION: {
       GET: "api/subscription/list",

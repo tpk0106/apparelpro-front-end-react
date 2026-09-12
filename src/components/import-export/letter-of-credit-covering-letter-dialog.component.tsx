@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 import { useDropdownTheme } from "../../themes/useDropdownTheme";
 import { primaryActionButtonSx, themedButtonLabelStyle, dateIconFieldSx, numberFieldNoSpinnerSx } from "../../themes/workspace-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
 import {
   useGetLetterOfCreditCoveringLetter, useSaveLetterOfCreditCoveringLetter, useDeleteLetterOfCreditCoveringLetter,
 } from "../../tanstack-hooks/import-export/letter-of-credit-covering-letter.hooks";
@@ -67,10 +68,12 @@ const LetterOfCreditCoveringLetterDialog = ({ bankCode, lcNo, onClose }: Props) 
 
   const checkbox = (label: string, field: keyof LetterOfCreditCoveringLetter) => (
     <FormControlLabel
+      sx={{ "& .MuiFormControlLabel-label": { color: "#F4F6F8" } }}
       control={
         <Checkbox
           checked={!!letter[field]}
           onChange={(e) => setField(field, e.target.checked as never)}
+          sx={{ color: copperTextColor, "&.Mui-checked": { color: copperTextColor } }}
         />
       }
       label={label}
@@ -97,57 +100,90 @@ const LetterOfCreditCoveringLetterDialog = ({ bankCode, lcNo, onClose }: Props) 
                 slotProps={{ inputLabel: { shrink: true } }}
                 value={letter.letterDate?.split("T")[0] || ""} onChange={(e) => setField("letterDate", e.target.value || null)} />
               <TextField label="Exp. L/C No." size="small" sx={{ ...fieldSx, width: 220 }}
+                slotProps={{ htmlInput: { maxLength: 20 } }}
                 value={letter.exportLcNo || ""} onChange={(e) => setField("exportLcNo", e.target.value)} />
               <TextField label="Value" size="small" sx={{ ...fieldSx, width: 200 }}
+                slotProps={{ htmlInput: { maxLength: 15 } }}
                 value={letter.value || ""} onChange={(e) => setField("value", e.target.value)} />
               <TextField label="Item" size="small" sx={{ ...fieldSx, width: 180 }}
+                slotProps={{ htmlInput: { maxLength: 15 } }}
                 value={letter.item1 || ""} onChange={(e) => setField("item1", e.target.value)} />
               <TextField label="Item" size="small" sx={{ ...fieldSx, width: 180 }}
+                slotProps={{ htmlInput: { maxLength: 15 } }}
                 value={letter.item2 || ""} onChange={(e) => setField("item2", e.target.value)} />
             </Box>
 
-            <Typography sx={{ fontWeight: 600, mt: 1 }}>Paragraphs</Typography>
+            <Typography sx={{ fontWeight: 600, mt: 1 }}>
+              Paragraphs (tick any that apply to this letter)
+            </Typography>
 
-            {checkbox("Box 1", "box1Selected")}
+            {checkbox("1. Detailed Packing List in duplicate", "box1Selected")}
 
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-              {checkbox("Box 2 - DHL courier document despatch (Attn.)", "box2Selected")}
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
+              {checkbox(
+                "2. One full set of copy documents (invoice & packing list in duplicate) to be sent under DHL Courier Service direct to buyer, Attn.:",
+                "box2Selected",
+              )}
               <TextField label="Attn." size="small" sx={{ ...fieldSx, width: 220 }} disabled={!letter.box2Selected}
+                slotProps={{ htmlInput: { maxLength: 20 } }}
                 value={letter.attn1 || ""} onChange={(e) => setField("attn1", e.target.value)} />
             </Box>
 
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-              {checkbox("Box 3 - Shipment sample by registered airmail (Attn.)", "box3Selected")}
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
+              {checkbox(
+                "3. Shipment Sample to be sent by Registered Airmail direct to Buyer, 15 days before the onboard B/L date, Attn.:",
+                "box3Selected",
+              )}
               <TextField label="Attn." size="small" sx={{ ...fieldSx, width: 220 }} disabled={!letter.box3Selected}
+                slotProps={{ htmlInput: { maxLength: 20 } }}
                 value={letter.attn2 || ""} onChange={(e) => setField("attn2", e.target.value)} />
             </Box>
 
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-              {checkbox("Box 4 - Sample marking (L/C No.)", "box4Selected")}
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center", flexWrap: "wrap" }}>
+              {checkbox(
+                "4. Seaworthy Tamper-Proof Cartons/Cases/Bales to indicate Marks and Nos. as follows - Sample L/C No.:",
+                "box4Selected",
+              )}
               <TextField label="Sample L/C No." size="small" sx={{ ...fieldSx, width: 220 }} disabled={!letter.box4Selected}
+                slotProps={{ htmlInput: { maxLength: 20 } }}
                 value={letter.sampleLcNo || ""} onChange={(e) => setField("sampleLcNo", e.target.value)} />
             </Box>
 
-            {checkbox("Box 5", "box5Selected")}
-            {checkbox("Box 6", "box6Selected")}
-            {checkbox("Box 7", "box7Selected")}
+            {checkbox(
+              "5. Fibre content, yardage and width must be indicated on each roll and a statement evidencing which must be submitted",
+              "box5Selected",
+            )}
+            {checkbox(
+              "6. Our Block Licence Application No: ED/S/194 must be indicated on your Bill of Lading and Commercial Invoice",
+              "box6Selected",
+            )}
+            {checkbox("7. Negotiation of L/C to be available with any Bank", "box7Selected")}
 
-            <TextField label="Percentage" size="small" type="number" sx={{ ...fieldSx, ...numberFieldNoSpinnerSx, width: 160 }}
+            <TextField label="More or Less on quantity & Amount are acceptable (%)" size="small" type="number"
+              sx={{ ...fieldSx, ...numberFieldNoSpinnerSx, width: 320 }}
               value={letter.percentage ?? ""} onChange={(e) => setField("percentage", e.target.value === "" ? null : Number(e.target.value))} />
 
-            <Typography sx={{ fontWeight: 600, mt: 1 }}>Free-Text Paragraphs</Typography>
+            <Typography sx={{ fontWeight: 600, mt: 1 }}>
+              Additional Remarks (free text, 2 lines each)
+            </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              <TextField label="Box 8 - Line 1" size="small" fullWidth sx={fieldSx}
+              <TextField label="Remark 1 - Line 1" size="small" fullWidth sx={fieldSx}
+                slotProps={{ htmlInput: { maxLength: 60 } }}
                 value={letter.box8Line1 || ""} onChange={(e) => setField("box8Line1", e.target.value)} />
-              <TextField label="Box 8 - Line 2" size="small" fullWidth sx={fieldSx}
+              <TextField label="Remark 1 - Line 2" size="small" fullWidth sx={fieldSx}
+                slotProps={{ htmlInput: { maxLength: 60 } }}
                 value={letter.box8Line2 || ""} onChange={(e) => setField("box8Line2", e.target.value)} />
-              <TextField label="Box 9 - Line 1" size="small" fullWidth sx={fieldSx}
+              <TextField label="Remark 2 - Line 1" size="small" fullWidth sx={fieldSx}
+                slotProps={{ htmlInput: { maxLength: 60 } }}
                 value={letter.box9Line1 || ""} onChange={(e) => setField("box9Line1", e.target.value)} />
-              <TextField label="Box 9 - Line 2" size="small" fullWidth sx={fieldSx}
+              <TextField label="Remark 2 - Line 2" size="small" fullWidth sx={fieldSx}
+                slotProps={{ htmlInput: { maxLength: 60 } }}
                 value={letter.box9Line2 || ""} onChange={(e) => setField("box9Line2", e.target.value)} />
-              <TextField label="Box 10 - Line 1" size="small" fullWidth sx={fieldSx}
+              <TextField label="Remark 3 - Line 1" size="small" fullWidth sx={fieldSx}
+                slotProps={{ htmlInput: { maxLength: 60 } }}
                 value={letter.box10Line1 || ""} onChange={(e) => setField("box10Line1", e.target.value)} />
-              <TextField label="Box 10 - Line 2" size="small" fullWidth sx={fieldSx}
+              <TextField label="Remark 3 - Line 2" size="small" fullWidth sx={fieldSx}
+                slotProps={{ htmlInput: { maxLength: 60 } }}
                 value={letter.box10Line2 || ""} onChange={(e) => setField("box10Line2", e.target.value)} />
             </Box>
           </Box>

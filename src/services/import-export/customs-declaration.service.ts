@@ -19,4 +19,15 @@ const deleteCustomsDeclaration = async (cusNo: string) => {
   });
 };
 
-export { loadCustomsDeclarationByCusNo, saveCustomsDeclaration, deleteCustomsDeclaration };
+// Streams the PDF as a blob - the caller turns it into a browser download.
+const downloadCustomsDeclarationPrintPdf = async (cusNo: string) => {
+  return await client.get<Blob>(
+    APPARELPRO_ENDPOINTS.REFERENCE_SECTION.CUSTOMS_DECLARATION.PRINT_PDF,
+    { params: { cusNo }, responseType: "blob" },
+  );
+};
+
+export {
+  loadCustomsDeclarationByCusNo, saveCustomsDeclaration, deleteCustomsDeclaration,
+  downloadCustomsDeclarationPrintPdf,
+};

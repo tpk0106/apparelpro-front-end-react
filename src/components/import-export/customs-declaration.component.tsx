@@ -17,6 +17,7 @@ import {
 } from "../../tanstack-hooks/custom-hooks";
 import {
   useGetCustomsDeclaration, useSaveCustomsDeclaration, useDeleteCustomsDeclaration,
+  useDownloadCustomsDeclarationPrintPdf,
 } from "../../tanstack-hooks/import-export/customs-declaration.hooks";
 import {
   useGetClearanceOfficeLookup, useGetPaymentTermLookup, useGetTransportModeLookup, useGetDutyTaxCodeLookup,
@@ -93,6 +94,7 @@ const CustomsDeclarationPage = () => {
   const { data: existing, isFetching: isLoadingExisting } = useGetCustomsDeclaration(activeCusNo);
   const saveMutation = useSaveCustomsDeclaration();
   const deleteMutation = useDeleteCustomsDeclaration();
+  const printMutation = useDownloadCustomsDeclarationPrintPdf();
 
   const [header, setHeader] = useState<CustomsDeclarationHeader>(emptyHeader(""));
   const [lines, setLines] = useState<CustomsDeclarationLine[]>([]);
@@ -172,6 +174,13 @@ const CustomsDeclarationPage = () => {
     });
   };
 
+  const handlePrint = () => {
+    if (!activeCusNo) return;
+    printMutation.mutate(activeCusNo, {
+      onError: (error) => toast.error(error.message || "Failed to generate CUSDEC print PDF."),
+    });
+  };
+
   const dateFieldSx = { ...(fieldSx as Record<string, unknown>), ...(dateIconFieldSx as Record<string, unknown>) };
 
   return (
@@ -197,8 +206,8 @@ const CustomsDeclarationPage = () => {
           </Box>
         ) : (
           <>
-            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mt: 1 }}>Identification / Parties</Typography>
-            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mt: 1, mb: 1.5 }}>Identification / Parties</Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
               <TextField select label="Exporter" size="small" sx={{ ...fieldSx, width: 260 }} slotProps={modalSelectMenuProps}
                 value={header.exporterCode || ""} onChange={(e) => setField("exporterCode", e.target.value)}>
                 {buyers.map((b) => <MenuItem key={b.buyerCode} value={String(b.buyerCode)}>{b.buyerCode} - {b.name}</MenuItem>)}
@@ -227,8 +236,8 @@ const CustomsDeclarationPage = () => {
               </TextField>
             </Box>
 
-            <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>Origin / Destination</Typography>
-            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1.5 }}>Origin / Destination</Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
               <TextField select label="Country of Consignment" size="small" sx={{ ...fieldSx, width: 260 }} slotProps={modalSelectMenuProps}
                 value={header.countryOfConsignmentCode || ""} onChange={(e) => setField("countryOfConsignmentCode", e.target.value)}>
                 {countries.map((c) => <MenuItem key={c.id} value={c.code}>{c.code} - {c.name}</MenuItem>)}
@@ -251,8 +260,8 @@ const CustomsDeclarationPage = () => {
                 value={header.precedingDocNo || ""} onChange={(e) => setField("precedingDocNo", e.target.value)} />
             </Box>
 
-            <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>Shipment</Typography>
-            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1.5 }}>Shipment</Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
               <TextField label="Voyage No." size="small" sx={{ ...fieldSx, width: 180 }}
                 value={header.voyageNo || ""} onChange={(e) => setField("voyageNo", e.target.value)} />
               <TextField type="date" label="Voyage Date" size="small" sx={{ ...dateFieldSx, width: 200 }}
@@ -292,8 +301,8 @@ const CustomsDeclarationPage = () => {
               </TextField>
             </Box>
 
-            <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>Bank / Reference</Typography>
-            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1.5 }}>Bank / Reference</Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
               <TextField select label="Bank" size="small" sx={{ ...fieldSx, width: 260 }} slotProps={modalSelectMenuProps}
                 value={header.bankCode || ""} onChange={(e) => setField("bankCode", e.target.value)}>
                 {banks.map((b) => <MenuItem key={b.bankCode} value={b.bankCode}>{b.bankCode} - {b.name}</MenuItem>)}
@@ -302,8 +311,8 @@ const CustomsDeclarationPage = () => {
                 value={header.referenceNo || ""} onChange={(e) => setField("referenceNo", e.target.value)} />
             </Box>
 
-            <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>Declarant / Remarks</Typography>
-            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1.5 }}>Declarant / Remarks</Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 3 }}>
               <TextField label="Name of Declarant (Person)" size="small" sx={{ ...fieldSx, width: 280 }}
                 value={header.declarantName || ""} onChange={(e) => setField("declarantName", e.target.value)} />
               <TextField label="Submitted By (Name)" size="small" sx={{ ...fieldSx, width: 280 }}
@@ -318,8 +327,8 @@ const CustomsDeclarationPage = () => {
                 value={header.remark4 || ""} onChange={(e) => setField("remark4", e.target.value)} />
             </Box>
 
-            <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>Item Lines</Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1.5 }}>Item Lines</Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 3 }}>
               {lines.map((line, index) => (
                 <Box key={index} sx={{ border: "1px solid rgba(139,147,161,0.15)", borderRadius: "10px", p: 1.5 }}>
                   <Box sx={{ display: "flex", gap: 1, alignItems: "center", flexWrap: "wrap" }}>
@@ -420,8 +429,8 @@ const CustomsDeclarationPage = () => {
               <Button size="small" onClick={handleAddLine} sx={{ alignSelf: "flex-start" }}>+ Add Item Line</Button>
             </Box>
 
-            <Typography variant="subtitle2" sx={workspaceSectionLabelSx}>Attached Documents</Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ ...workspaceSectionLabelSx, mb: 1.5 }}>Attached Documents</Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 3 }}>
               {documents.map((doc, index) => {
                 const docNoOptions = Array.from(new Map((documentTypes ?? []).map((d) => [d.docNo, d])).values());
                 const docTypeOptions = (documentTypes ?? []).filter((d) => d.docNo === doc.docNo);
@@ -451,9 +460,18 @@ const CustomsDeclarationPage = () => {
               >
                 <span style={themedButtonLabelStyle}>Delete</span>
               </Button>
-              <Button variant="contained" sx={primaryActionButtonSx} disabled={saveMutation.isPending} onClick={handleSave}>
-                <span style={themedButtonLabelStyle}>Save CUSDEC</span>
-              </Button>
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <Button
+                  variant="contained" sx={primaryActionButtonSx}
+                  disabled={!existing || isLoadingExisting || printMutation.isPending}
+                  onClick={handlePrint}
+                >
+                  <span style={themedButtonLabelStyle}>Print CUSDEC I/II</span>
+                </Button>
+                <Button variant="contained" sx={primaryActionButtonSx} disabled={saveMutation.isPending} onClick={handleSave}>
+                  <span style={themedButtonLabelStyle}>Save CUSDEC</span>
+                </Button>
+              </Box>
             </Box>
           </>
         )
