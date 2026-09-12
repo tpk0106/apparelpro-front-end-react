@@ -310,6 +310,44 @@ export interface DocumentType {
   description: string;
 }
 
+export interface PackingListCartonDetail {
+  id: number;
+  fromCartonNo: number;
+  toCartonNo: number;
+  color: string;
+  size: string;
+  qty: number;
+  noOfCartons: number;
+}
+
+export interface PackingListStringDetail {
+  id: number;
+  barNo: number;
+  fromStringNo: number;
+  toStringNo: number;
+  color: string;
+  size: string;
+  qty: number;
+}
+
+export interface PackingListDetail {
+  detail?: string | null;
+  cartonRows: PackingListCartonDetail[];
+  stringRows: PackingListStringDetail[];
+}
+
+export interface SavePackingList {
+  invoiceNumber: string;
+  buyerCode: number;
+  order: string;
+  typeCode: number;
+  styleCode: string;
+  newOrder: string;
+  detail?: string | null;
+  cartonRows: PackingListCartonDetail[];
+  stringRows: PackingListStringDetail[];
+}
+
 export interface LetterOfCreditCoveringLetter {
   bankCode: string;
   lcNo: string;

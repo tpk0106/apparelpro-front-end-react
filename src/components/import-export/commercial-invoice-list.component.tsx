@@ -14,7 +14,7 @@ import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 import {
   primaryActionButtonSx, themedButtonLabelStyle, numberFieldNoSpinnerSx, dateIconFieldSx,
 } from "../../themes/workspace-theme";
-import { useGetBuyersQuery, useGetCurrenciesQuery, useGetDestinations, useGetUnits } from "../../tanstack-hooks/custom-hooks";
+import { useGetBuyersQuery, useGetCurrenciesQuery, useGetDestinations, useGetUnits, useGetBanksQuery } from "../../tanstack-hooks/custom-hooks";
 import {
   useGetCommercialInvoices, useGetCommercialInvoice, useSaveCommercialInvoice, useDeleteCommercialInvoice,
   useGetOpenPartShipmentsByBuyer, useDownloadCommercialInvoicePrintPdf,
@@ -23,6 +23,8 @@ import PrintIcon from "@mui/icons-material/Print";
 import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOutlined";
 import ConfirmDialog from "../common/confirm-dialog";
 import CertificateOfOriginDialog from "./certificate-of-origin-dialog.component";
+import PackingListDialog from "./packing-list-dialog.component";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import type { CommercialInvoicePrintFormat } from "../../services/import-export/commercial-invoice.service";
 import type {
   CommercialInvoiceHeader, CommercialInvoiceLine, CommercialInvoiceDetail,
@@ -33,6 +35,7 @@ const EMPTY_HEADER: CommercialInvoiceHeader = {
   invoiceDate: new Date().toISOString().split("T")[0],
   buyerCode: 0,
   currencyCode: "",
+  loadPortCode: "",
   destinationCode: "",
   carrierCode: "",
   shipDate: "",
@@ -104,6 +107,7 @@ const CommercialInvoiceListPage = () => {
   const downloadPrintMutation = useDownloadCommercialInvoicePrintPdf();
 
   const [coaInvoiceNumber, setCoaInvoiceNumber] = useState<string | null>(null);
+  const [packingListLine, setPackingListLine] = useState<CommercialInvoiceLine | null>(null);
 
   const { data: editingDetail, isFetching: isEditingDetailLoading } = useGetCommercialInvoice(editingInvoiceNumber);
   const saveMutation = useSaveCommercialInvoice();
@@ -128,6 +132,11 @@ const CommercialInvoiceListPage = () => {
     pageIndex: 0, pageSize: 999, sortColumn: "code", sortOrder: "asc", filterColumn: null, filterQuery: null,
   });
   const units = useMemo(() => unitsPage?.items || [], [unitsPage]);
+
+  const { data: banksPage } = useGetBanksQuery({
+    pageIndex: 0, pageSize: 999, sortColumn: "bankCode", sortOrder: "asc", filterColumn: null, filterQuery: null,
+  });
+  const banks = useMemo(() => banksPage?.items || [], [banksPage]);
 
   const buyerNameByCode = useMemo(
     () => new Map(buyers.map((b) => [b.buyerCode, b.name])),
@@ -378,6 +387,16 @@ const CommercialInvoiceListPage = () => {
             </Box>
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
+                select label="Port of Loading" size="small" fullWidth sx={fieldSx}
+                slotProps={{ select: { MenuProps: modalSelectMenuProps } }}
+                value={header.loadPortCode || ""}
+                onChange={(e) => setHeader((p) => ({ ...p, loadPortCode: e.target.value }))}
+              >
+                {destinations.map((d) => (
+                  <MenuItem key={`${d.countryCode}-${d.code}`} value={d.code} sx={modalMenuItemSx}>{d.code} - {d.destinationName}</MenuItem>
+                ))}
+              </TextField>
+              <TextField
                 select label="Destination" size="small" fullWidth sx={fieldSx}
                 slotProps={{ select: { MenuProps: modalSelectMenuProps } }}
                 value={header.destinationCode || ""}
@@ -409,6 +428,29 @@ const CommercialInvoiceListPage = () => {
                 value={header.shipDate?.split("T")[0] || ""}
                 onChange={(e) => setHeader((p) => ({ ...p, shipDate: e.target.value }))}
               />
+            </Box>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                select label="Notify Party (blank = same as Buyer)" size="small" fullWidth sx={fieldSx}
+                slotProps={{ select: { MenuProps: modalSelectMenuProps } }}
+                value={header.notifyPartyCode || ""}
+                onChange={(e) => setHeader((p) => ({ ...p, notifyPartyCode: e.target.value || null }))}
+              >
+                <MenuItem value="" sx={modalMenuItemSx}><em>Same as Buyer</em></MenuItem>
+                {buyers.map((b) => (
+                  <MenuItem key={b.buyerCode} value={String(b.buyerCode)} sx={modalMenuItemSx}>{b.buyerCode} - {b.name}</MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                select label="Issuing Bank" size="small" fullWidth sx={fieldSx}
+                slotProps={{ select: { MenuProps: modalSelectMenuProps } }}
+                value={header.issuingBankCode || ""}
+                onChange={(e) => setHeader((p) => ({ ...p, issuingBankCode: e.target.value || null }))}
+              >
+                {banks.map((b) => (
+                  <MenuItem key={b.bankCode} value={b.bankCode} sx={modalMenuItemSx}>{b.bankCode} - {b.name}</MenuItem>
+                ))}
+              </TextField>
             </Box>
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField label="Remark 1" size="small" fullWidth sx={fieldSx}
@@ -479,6 +521,12 @@ const CommercialInvoiceListPage = () => {
                       <MenuItem value="1" sx={modalMenuItemSx}>Carton</MenuItem>
                       <MenuItem value="2" sx={modalMenuItemSx}>Container</MenuItem>
                     </TextField>
+                    <IconButton
+                      size="small" disabled={!selectedPartShipment || !header.invoiceNumber}
+                      title="Packing List" onClick={() => setPackingListLine(line)}
+                    >
+                      <Inventory2OutlinedIcon fontSize="small" />
+                    </IconButton>
                     <IconButton size="small" color="error" onClick={() => handleDeleteLine(index)}>
                       <DeleteIcon fontSize="small" />
                     </IconButton>
@@ -565,6 +613,17 @@ const CommercialInvoiceListPage = () => {
       <CertificateOfOriginDialog
         invoiceNumber={coaInvoiceNumber}
         onClose={() => setCoaInvoiceNumber(null)}
+      />
+
+      <PackingListDialog
+        invoiceNumber={packingListLine ? header.invoiceNumber : null}
+        buyerCode={packingListLine?.buyerCode ?? null}
+        order={packingListLine?.order ?? null}
+        typeCode={packingListLine?.typeCode ?? null}
+        styleCode={packingListLine?.styleCode ?? null}
+        newOrder={packingListLine?.newOrder ?? null}
+        packingMedia={packingListLine?.packingMedia ?? null}
+        onClose={() => setPackingListLine(null)}
       />
     </Box>
   );

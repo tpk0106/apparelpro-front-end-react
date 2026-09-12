@@ -884,6 +884,14 @@ export const navbarData = [
         label: "CUSDEC I/II",
         pinned: false,
       },
+    ],
+    tag: "importexportdoc",
+  },
+  {
+    routerLink: "iereference",
+    icon: "../assets/order-management/Order-Management.png",
+    label: "Import/Export Reference",
+    subMenus: [
       {
         routerLink: "clearance-office",
         icon: null,
@@ -939,7 +947,7 @@ export const navbarData = [
         pinned: false,
       },
     ],
-    tag: "importexportdoc",
+    tag: "iereference",
   },
   {
     routerLink: "reports",
