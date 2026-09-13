@@ -22,9 +22,11 @@ import {
 import PrintIcon from "@mui/icons-material/Print";
 import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOutlined";
 import DirectionsBoatFilledOutlinedIcon from "@mui/icons-material/DirectionsBoatFilledOutlined";
+import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import ConfirmDialog from "../common/confirm-dialog";
 import CertificateOfOriginDialog from "./certificate-of-origin-dialog.component";
 import BoatNoteDialog from "./boat-note-dialog.component";
+import ValueDeclarationDialog from "./value-declaration-dialog.component";
 import PackingListDialog from "./packing-list-dialog.component";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import type { CommercialInvoicePrintFormat } from "../../services/import-export/commercial-invoice.service";
@@ -110,6 +112,7 @@ const CommercialInvoiceListPage = () => {
 
   const [coaInvoiceNumber, setCoaInvoiceNumber] = useState<string | null>(null);
   const [boatNoteInvoiceNumber, setBoatNoteInvoiceNumber] = useState<string | null>(null);
+  const [valueDeclarationInvoiceNumber, setValueDeclarationInvoiceNumber] = useState<string | null>(null);
   const [packingListLine, setPackingListLine] = useState<CommercialInvoiceLine | null>(null);
 
   const { data: editingDetail, isFetching: isEditingDetailLoading } = useGetCommercialInvoice(editingInvoiceNumber);
@@ -321,6 +324,9 @@ const CommercialInvoiceListPage = () => {
         </IconButton>
         <IconButton size="small" onClick={() => setBoatNoteInvoiceNumber(row.original.invoiceNumber)} title="Boat Note">
           <DirectionsBoatFilledOutlinedIcon fontSize="small" />
+        </IconButton>
+        <IconButton size="small" onClick={() => setValueDeclarationInvoiceNumber(row.original.invoiceNumber)} title="Value Declaration Form">
+          <FactCheckOutlinedIcon fontSize="small" />
         </IconButton>
         <IconButton size="small" color="error" onClick={() => handleDelete(row.original.invoiceNumber)}>
           <DeleteIcon fontSize="small" />
@@ -635,6 +641,11 @@ const CommercialInvoiceListPage = () => {
       <BoatNoteDialog
         invoiceNumber={boatNoteInvoiceNumber}
         onClose={() => setBoatNoteInvoiceNumber(null)}
+      />
+
+      <ValueDeclarationDialog
+        invoiceNumber={valueDeclarationInvoiceNumber}
+        onClose={() => setValueDeclarationInvoiceNumber(null)}
       />
 
       <PackingListDialog

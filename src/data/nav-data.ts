@@ -884,6 +884,12 @@ export const navbarData = [
         label: "CUSDEC I/II",
         pinned: false,
       },
+      {
+        routerLink: "value-declaration",
+        icon: null,
+        label: "Value Declaration Form",
+        pinned: false,
+      },
     ],
     tag: "importexportdoc",
   },

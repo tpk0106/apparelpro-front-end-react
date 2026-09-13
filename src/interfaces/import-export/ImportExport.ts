@@ -412,3 +412,79 @@ export interface BoatNoteDetail {
   header: BoatNoteHeader;
   lines: BoatNoteCargoLine[];
 }
+
+export interface ValueDeclarationHeader {
+  id: number;
+  // Invoice-scoped flow only (Exporter = our own company, additive
+  // alongside the standalone flow's own fields below).
+  invoiceNumber?: string | null;
+  companyAddressId?: number | null;
+  previousImportsDetails?: string | null;
+  year?: string | null;
+  officeCode?: string | null;
+  seriesLetter?: string | null;
+  cusDecNo?: string | null;
+  exporterName: string;
+  exporterAddress?: string | null;
+  indentingAgentName?: string | null;
+  indentingAgentAddress?: string | null;
+  importerVatNo?: string | null;
+  declarantVatNo?: string | null;
+  salesContractNo?: string | null;
+  salesContractDate?: string | null;
+  invoiceNo: string;
+  invoiceDate?: string | null;
+  totalInvoiceValue: number;
+  natureOfTransaction?: string | null;
+  currencyCode?: string | null;
+  termsOfDeliveryCode?: string | null;
+  isRelatedToSeller?: boolean | null;
+  wasValueInfluencedByRelationship?: boolean | null;
+  isSaleSubjectToConditions?: boolean | null;
+  hasPreviousImportsLast3Months?: boolean | null;
+  brokerageCommission: number;
+  costOfContainers: number;
+  packingCosts: number;
+  costOfGoodsSuppliedByBuyer: number;
+  royaltiesLicenseFees: number;
+  proceedsToSeller: number;
+  loadingHandlingCharges: number;
+  insurance: number;
+  freight: number;
+  otherPayments: number;
+  termsOfPaymentCode?: string | null;
+  portOfShipmentCode?: string | null;
+  awbBlNo?: string | null;
+  awbBlDate?: string | null;
+  importerCompanyAddressId?: number | null;
+  signatoryName?: string | null;
+  signatoryTitle?: string | null;
+  signatoryDate?: string | null;
+  signatoryCompanyName?: string | null;
+  continuationSheetsCount?: number | null;
+  appraiserComments?: string | null;
+  scComments?: string | null;
+  valuationReferenceNo?: string | null;
+  centralValuationEndorsement?: string | null;
+}
+
+export interface ValueDeclarationLine {
+  id: number;
+  valueDeclarationHeaderId: number;
+  itemNo: number;
+  description: string;
+  brand?: string | null;
+  model?: string | null;
+  size?: string | null;
+  countryOfOriginCode?: string | null;
+  unitCode?: string | null;
+  quantity: number;
+  value: number;
+  hsCode?: string | null;
+  weight?: number | null;
+}
+
+export interface ValueDeclarationDetail {
+  header: ValueDeclarationHeader;
+  lines: ValueDeclarationLine[];
+}

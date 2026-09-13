@@ -344,6 +344,19 @@ export const APPARELPRO_ENDPOINTS = {
       DELETE: "api/boat-note",
       PRINT_PDF: "api/boat-note/print/pdf",
     },
+    VALUE_DECLARATION: {
+      LIST: "api/value-declaration/list",
+      GET: "api/value-declaration",
+      SAVE: "api/value-declaration",
+      DELETE: "api/value-declaration",
+      PRINT_PDF: "api/value-declaration",
+      // Invoice-scoped flow (one Value Declaration per Commercial Invoice) -
+      // additive, alongside the standalone endpoints above.
+      DETAIL_BY_INVOICE: "api/value-declaration/detail",
+      SAVE_FOR_INVOICE: "api/value-declaration/for-invoice",
+      DELETE_FOR_INVOICE: "api/value-declaration/for-invoice",
+      PRINT_PDF_FOR_INVOICE: "api/value-declaration/print/pdf/for-invoice",
+    },
     SUBSCRIPTION: {
       GET: "api/subscription/list",
       POST: "api/subscription",
