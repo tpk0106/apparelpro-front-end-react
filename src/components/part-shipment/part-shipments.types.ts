@@ -22,11 +22,5 @@ export interface PartShipmentRow {
   unit: string;
   quantity: number;
   shippingMode: "SEA" | "AIR";
-  quotaCountry: string;
-  quotaStatus: string;
-  quotaCategory: string;
-  quotaType: string;
-  fromYearMonth: string;
-  toYearMonth: string;
   balance: number;
 }

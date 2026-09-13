@@ -119,7 +119,6 @@ import YearSeasonOrdersReportWorkspace from "./components/reports/order-manageme
 import PendingEventsReportWorkspace from "./components/reports/order-management/pending-events-report/pending-events-report-workspace";
 import StockArrivalStatusReportWorkspace from "./components/reports/order-management/stock-arrival-status-report/stock-arrival-status-report-workspace";
 import CostOfProductionReportWorkspace from "./components/reports/order-management/cost-of-production-report/cost-of-production-report-workspace";
-import OrderQuotaDetailReportWorkspace from "./components/reports/order-management/order-quota-detail-report/order-quota-detail-report-workspace";
 import PostOrderCostSheetReportWorkspace from "./components/reports/order-management/post-order-cost-sheet-report/post-order-cost-sheet-report-workspace";
 import MonthlyActualShipmentsReportWorkspace from "./components/reports/order-management/monthly-actual-shipments-report/monthly-actual-shipments-report-workspace";
 import TrimSheetReportWorkspace from "./components/reports/orderwise-inventory/trim-sheet-report/trim-sheet-report-workspace";
@@ -664,11 +663,6 @@ function App() {
           index
           path="cost-of-production-report"
           element={<CostOfProductionReportWorkspace />}
-        />
-        <Route
-          index
-          path="order-quota-detail-report"
-          element={<OrderQuotaDetailReportWorkspace />}
         />
         <Route
           index

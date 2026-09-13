@@ -665,13 +665,6 @@ export const APPARELPRO_ENDPOINTS = {
       GET_DETAILS: "api/cost-of-production-report/details",
       GET_PDF: "api/cost-of-production-report/pdf",
     },
-    // Order/Quota Detail Report (Reports -> Order Management -> Order/Quota Detail).
-    // Backed by OrderQuotaDetailReportController - see
-    // src/components/reports/order-management/order-quota-detail-report/*.
-    ORDER_QUOTA_DETAIL_REPORT: {
-      GET_DETAILS: "api/order-quota-detail-report/details",
-      GET_PDF: "api/order-quota-detail-report/pdf",
-    },
     // Post Order Cost Sheet Report (Reports -> Order Management -> Post Order Cost Sheet).
     // Backed by PostOrderCostSheetReportController - see
     // src/components/reports/order-management/post-order-cost-sheet-report/*.

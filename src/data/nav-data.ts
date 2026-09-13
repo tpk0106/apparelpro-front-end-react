@@ -995,11 +995,6 @@ export const navbarData = [
         label: "Pending Events",
       },
       {
-        routerLink: "order-quota-detail-report",
-        icon: null,
-        label: "Order/Quota Detail",
-      },
-      {
         routerLink: "stock-arrival-status-report",
         icon: null,
         label: "Stock Arrival Status",

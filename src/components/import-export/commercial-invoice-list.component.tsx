@@ -57,10 +57,6 @@ const EMPTY_LINE: Omit<CommercialInvoiceLine, "id" | "invoiceNumber"> = {
   unit: "PCS",
   quantity: 0,
   balance: 0,
-  quotaCategory: "",
-  fromYearMonth: "",
-  toYearMonth: "",
-  quotaCountry: "",
   packingMedia: "",
 };
 

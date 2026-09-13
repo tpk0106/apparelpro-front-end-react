@@ -57,13 +57,14 @@ function extractErrorMessage(
   error: FetchBaseQueryError | SerializedError | undefined,
 ): string {
   if (!error) return "An unexpected network communication anomaly occurred.";
-  if (
-    "data" in error &&
-    error.data &&
-    typeof error.data === "object" &&
-    "Error" in error.data
-  ) {
-    return String((error.data as { Error: string }).Error);
+  if ("data" in error && error.data && typeof error.data === "object") {
+    // ASP.NET Core's default JSON serializer camel-cases property names
+    // (the controllers write `new { Error = ... }`, but the actual response
+    // body key is "error", not "Error") - check both so this doesn't
+    // silently fall through to the generic fallback below.
+    const data = error.data as Record<string, unknown>;
+    if (typeof data.error === "string") return data.error;
+    if (typeof data.Error === "string") return data.Error;
   }
   if ("message" in error && error.message) return error.message;
   return "Failed to process logistics transaction on the C# database server.";
@@ -117,12 +118,6 @@ export default function PartShipmentsGrid({
     unit: "PCS",
     quantity: 0,
     shippingMode: "SEA",
-    quotaCountry: "",
-    quotaStatus: "N",
-    quotaCategory: "",
-    quotaType: "",
-    fromYearMonth: "",
-    toYearMonth: "",
   });
 
   // Fetch master system units to drive cell and modal dropdown selectors
@@ -188,18 +183,6 @@ export default function PartShipmentsGrid({
           columnId === "shippingMode"
             ? (value as "SEA" | "AIR")
             : original.shippingMode,
-        quotaCountry:
-          columnId === "quotaCountry" ? String(value) : original.quotaCountry,
-        quotaStatus:
-          columnId === "quotaStatus" ? String(value) : original.quotaStatus,
-        quotaCategory:
-          columnId === "quotaCategory" ? String(value) : original.quotaCategory,
-        quotaType:
-          columnId === "quotaType" ? String(value) : original.quotaType,
-        fromYearMonth:
-          columnId === "fromYearMonth" ? String(value) : original.fromYearMonth,
-        toYearMonth:
-          columnId === "toYearMonth" ? String(value) : original.toYearMonth,
       };
 
       try {
@@ -236,8 +219,8 @@ export default function PartShipmentsGrid({
       !newForm.destinationCode.trim() ||
       !newForm.shipDate
     ) {
-      alert(
-        "Validation Error: Please fill out Split Order, Destination, and Shipping Date parameters.",
+      toast.error(
+        "Please fill out Split Order, Destination, and Shipping Date parameters.",
       );
       return;
     }
@@ -262,15 +245,9 @@ export default function PartShipmentsGrid({
         unit: "PCS",
         quantity: 0,
         shippingMode: "SEA",
-        quotaCountry: "",
-        quotaStatus: "N",
-        quotaCategory: "",
-        quotaType: "",
-        fromYearMonth: "",
-        toYearMonth: "",
       });
     } catch (err) {
-      alert(extractErrorMessage(err as FetchBaseQueryError | SerializedError));
+      toast.error(extractErrorMessage(err as FetchBaseQueryError | SerializedError));
     }
   };
 
@@ -405,88 +382,6 @@ export default function PartShipmentsGrid({
         editSelectOptions: ["SEA", "AIR"],
         editVariant: "select",
       },
-      {
-        accessorKey: "quotaCountry",
-        header: "Quota Country",
-        size: 85,
-        Edit: ({ cell, row }) => (
-          <TextField
-            size="small"
-            variant="standard"
-            defaultValue={cell.getValue() || ""}
-            disabled={row.original.subContractFlag === "Y"}
-            onBlur={(e) =>
-              handleCellEditBlur(
-                row,
-                "quotaCountry",
-                e.target.value.toUpperCase(),
-              )
-            }
-            slotProps={{
-              htmlInput: {
-                style: { fontSize: "13px", textTransform: "uppercase" },
-              },
-            }}
-          />
-        ),
-      },
-      {
-        accessorKey: "quotaStatus",
-        header: "Qta.;Stat",
-        size: 65,
-        editSelectOptions: ["N", "Q"],
-        editVariant: "select",
-      },
-      {
-        accessorKey: "fromYearMonth",
-        header: "From YYMM",
-        size: 70,
-        Edit: ({ cell, row }) => (
-          <TextField
-            size="small"
-            variant="standard"
-            placeholder="94/07"
-            defaultValue={cell.getValue() || ""}
-            disabled={row.original.quotaStatus === "N"}
-            onBlur={(e) =>
-              handleCellEditBlur(row, "fromYearMonth", e.target.value)
-            }
-            slotProps={{ htmlInput: { style: { fontSize: "13px" } } }}
-          />
-        ),
-      },
-      {
-        accessorKey: "quotaCategory",
-        header: "Qta.;Cat.",
-        size: 70,
-        Edit: ({ cell, row }) => (
-          <TextField
-            size="small"
-            variant="standard"
-            defaultValue={cell.getValue() || ""}
-            disabled={row.original.quotaStatus === "N"}
-            onBlur={(e) =>
-              handleCellEditBlur(
-                row,
-                "quotaCategory",
-                e.target.value.toUpperCase(),
-              )
-            }
-            slotProps={{
-              htmlInput: {
-                style: { fontSize: "13px", textTransform: "uppercase" },
-              },
-            }}
-          />
-        ),
-      },
-      {
-        accessorKey: "quotaType",
-        header: "Cat.;Type",
-        size: 65,
-        editSelectOptions: ["", "OR", "AD", "PL"],
-        editVariant: "select",
-      },
     ],
     [handleCellEditBlur, systemUnits],
   );
@@ -543,7 +438,7 @@ export default function PartShipmentsGrid({
       <ConfirmDialog
         open={rowPendingDelete != null}
         title="Delete Part Shipment Entry"
-        message="Delete this partial shipment entry? Associated quota blocks will be reversed automatically. This cannot be undone."
+        message="Delete this partial shipment entry? This cannot be undone."
         confirmLabel="Delete"
         confirmColor="error"
         isConfirming={isDeletingRow}

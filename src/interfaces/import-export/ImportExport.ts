@@ -24,10 +24,6 @@ export interface CommercialInvoiceLine {
   unit: string;
   quantity: number;
   balance: number;
-  quotaCategory: string;
-  fromYearMonth: string;
-  toYearMonth: string;
-  quotaCountry: string;
   packingMedia: string;
 }
 
