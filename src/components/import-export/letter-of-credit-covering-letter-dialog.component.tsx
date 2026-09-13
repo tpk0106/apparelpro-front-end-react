@@ -113,7 +113,7 @@ const LetterOfCreditCoveringLetterDialog = ({ bankCode, lcNo, onClose }: Props) 
                 value={letter.item2 || ""} onChange={(e) => setField("item2", e.target.value)} />
             </Box>
 
-            <Typography sx={{ fontWeight: 600, mt: 1 }}>
+            <Typography sx={{ fontWeight: 600, mt: 1, color: DASHBOARD_COLORS.textPrimary }}>
               Paragraphs (tick any that apply to this letter)
             </Typography>
 
@@ -163,7 +163,7 @@ const LetterOfCreditCoveringLetterDialog = ({ bankCode, lcNo, onClose }: Props) 
               sx={{ ...fieldSx, ...numberFieldNoSpinnerSx, width: 320 }}
               value={letter.percentage ?? ""} onChange={(e) => setField("percentage", e.target.value === "" ? null : Number(e.target.value))} />
 
-            <Typography sx={{ fontWeight: 600, mt: 1 }}>
+            <Typography sx={{ fontWeight: 600, mt: 1, color: DASHBOARD_COLORS.textPrimary }}>
               Additional Remarks (free text, 2 lines each)
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>

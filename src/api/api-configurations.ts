@@ -338,6 +338,12 @@ export const APPARELPRO_ENDPOINTS = {
       SAVE: "api/packing-list",
       PRINT_PDF: "api/packing-list/print/pdf",
     },
+    BOAT_NOTE: {
+      GET: "api/boat-note/detail",
+      SAVE: "api/boat-note",
+      DELETE: "api/boat-note",
+      PRINT_PDF: "api/boat-note/print/pdf",
+    },
     SUBSCRIPTION: {
       GET: "api/subscription/list",
       POST: "api/subscription",

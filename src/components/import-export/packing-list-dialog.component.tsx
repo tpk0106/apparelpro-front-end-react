@@ -232,7 +232,7 @@ const PackingListDialog = ({
               value={detail} onChange={(e) => setDetail(e.target.value)}
             />
 
-            <Typography sx={{ fontWeight: 600 }}>
+            <Typography sx={{ fontWeight: 600, color: DASHBOARD_COLORS.textPrimary }}>
               {packingMedia === "1" ? "Carton Breakdown" : "Container / Hanging Garments Breakdown"}
             </Typography>
 

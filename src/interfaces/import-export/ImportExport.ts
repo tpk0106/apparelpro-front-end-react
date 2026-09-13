@@ -374,3 +374,41 @@ export interface LetterOfCreditCoveringLetter {
   box10Line1?: string | null;
   box10Line2?: string | null;
 }
+
+export interface BoatNoteHeader {
+  invoiceNumber: string;
+  boatNoteNumber?: string | null;
+  boatNoteDateTime?: string | null;
+  customsRegNo?: string | null;
+  cusDecRef?: string | null;
+  companyAddressId: number;
+  vesselName?: string | null;
+  voyageNo?: string | null;
+  portOfLoadingCode?: string | null;
+  dischargePortCode?: string | null;
+  remarks?: string | null;
+  customsOfficerStatus?: string | null;
+  customsOfficerReference?: string | null;
+  terminalOperatorReleaseStatus?: string | null;
+  terminalOperatorReference?: string | null;
+  shipperAgentSignOffStatus?: string | null;
+  chaLicenseNo?: string | null;
+}
+
+export interface BoatNoteCargoLine {
+  id: number;
+  invoiceNumber: string;
+  lineNo: number;
+  containerNo: string;
+  sealNo?: string | null;
+  packageQuantity: string;
+  description: string;
+  hsCode?: string | null;
+  grossWeight: number;
+  weightUnit: string;
+}
+
+export interface BoatNoteDetail {
+  header: BoatNoteHeader;
+  lines: BoatNoteCargoLine[];
+}

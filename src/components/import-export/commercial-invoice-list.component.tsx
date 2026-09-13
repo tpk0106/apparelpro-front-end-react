@@ -21,8 +21,10 @@ import {
 } from "../../tanstack-hooks/import-export/commercial-invoice.hooks";
 import PrintIcon from "@mui/icons-material/Print";
 import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOutlined";
+import DirectionsBoatFilledOutlinedIcon from "@mui/icons-material/DirectionsBoatFilledOutlined";
 import ConfirmDialog from "../common/confirm-dialog";
 import CertificateOfOriginDialog from "./certificate-of-origin-dialog.component";
+import BoatNoteDialog from "./boat-note-dialog.component";
 import PackingListDialog from "./packing-list-dialog.component";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import type { CommercialInvoicePrintFormat } from "../../services/import-export/commercial-invoice.service";
@@ -107,6 +109,7 @@ const CommercialInvoiceListPage = () => {
   const downloadPrintMutation = useDownloadCommercialInvoicePrintPdf();
 
   const [coaInvoiceNumber, setCoaInvoiceNumber] = useState<string | null>(null);
+  const [boatNoteInvoiceNumber, setBoatNoteInvoiceNumber] = useState<string | null>(null);
   const [packingListLine, setPackingListLine] = useState<CommercialInvoiceLine | null>(null);
 
   const { data: editingDetail, isFetching: isEditingDetailLoading } = useGetCommercialInvoice(editingInvoiceNumber);
@@ -164,6 +167,17 @@ const CommercialInvoiceListPage = () => {
     setLines([]);
     setEditingInvoiceNumber(invoiceNumber);
     setDialogOpen(true);
+  };
+
+  // Clears editingInvoiceNumber (not just dialogOpen) on close - otherwise
+  // reselecting the SAME invoice next time leaves editingInvoiceNumber
+  // unchanged, so the load-effect below never re-fires and the form is
+  // left stuck on the EMPTY_HEADER that openEditDialog had already set.
+  const closeDialog = () => {
+    setDialogOpen(false);
+    setEditingInvoiceNumber(null);
+    setHeader(EMPTY_HEADER);
+    setLines([]);
   };
 
   const openPrintDialog = (invoiceNumber: string) => {
@@ -256,7 +270,7 @@ const CommercialInvoiceListPage = () => {
     saveMutation.mutate(payload, {
       onSuccess: () => {
         toast.success(`Invoice ${header.invoiceNumber} saved.`);
-        setDialogOpen(false);
+        closeDialog();
       },
       onError: (error) => toast.error(error.message || "Failed to save invoice."),
     });
@@ -305,6 +319,9 @@ const CommercialInvoiceListPage = () => {
         <IconButton size="small" onClick={() => setCoaInvoiceNumber(row.original.invoiceNumber)} title="Certificate of Origin">
           <WorkspacePremiumOutlinedIcon fontSize="small" />
         </IconButton>
+        <IconButton size="small" onClick={() => setBoatNoteInvoiceNumber(row.original.invoiceNumber)} title="Boat Note">
+          <DirectionsBoatFilledOutlinedIcon fontSize="small" />
+        </IconButton>
         <IconButton size="small" color="error" onClick={() => handleDelete(row.original.invoiceNumber)}>
           <DeleteIcon fontSize="small" />
         </IconButton>
@@ -326,7 +343,7 @@ const CommercialInvoiceListPage = () => {
 
       <Dialog
         open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
+        onClose={closeDialog}
         maxWidth="md"
         fullWidth
         slotProps={{
@@ -461,7 +478,7 @@ const CommercialInvoiceListPage = () => {
                 value={header.remark3 || ""} onChange={(e) => setHeader((p) => ({ ...p, remark3: e.target.value }))} />
             </Box>
 
-            <Typography sx={{ fontWeight: 600, mt: 1 }}>Line Items</Typography>
+            <Typography sx={{ fontWeight: 600, mt: 1, color: DASHBOARD_COLORS.textPrimary }}>Line Items</Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
               {!header.buyerCode && (
                 <Typography sx={{ fontSize: 12.5, color: "text.secondary", fontStyle: "italic" }}>
@@ -541,7 +558,7 @@ const CommercialInvoiceListPage = () => {
           )}
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setDialogOpen(false)} variant="contained" sx={primaryActionButtonSx}>
+          <Button onClick={closeDialog} variant="contained" sx={primaryActionButtonSx}>
             <span style={themedButtonLabelStyle}>Cancel</span>
           </Button>
           <Button
@@ -613,6 +630,11 @@ const CommercialInvoiceListPage = () => {
       <CertificateOfOriginDialog
         invoiceNumber={coaInvoiceNumber}
         onClose={() => setCoaInvoiceNumber(null)}
+      />
+
+      <BoatNoteDialog
+        invoiceNumber={boatNoteInvoiceNumber}
+        onClose={() => setBoatNoteInvoiceNumber(null)}
       />
 
       <PackingListDialog

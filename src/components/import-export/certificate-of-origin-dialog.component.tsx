@@ -217,7 +217,7 @@ const CertificateOfOriginDialog = ({ invoiceNumber, onClose }: Props) => {
               />
             </Box>
 
-            <Typography sx={{ fontWeight: 600, mt: 1 }}>Items</Typography>
+            <Typography sx={{ fontWeight: 600, mt: 1, color: DASHBOARD_COLORS.textPrimary }}>Items</Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
               {lines.map((line, index) => (
                 <Box key={index} sx={{ display: "flex", gap: 1, alignItems: "center" }}>
