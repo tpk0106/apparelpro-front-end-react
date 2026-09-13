@@ -357,6 +357,13 @@ export const APPARELPRO_ENDPOINTS = {
       DELETE_FOR_INVOICE: "api/value-declaration/for-invoice",
       PRINT_PDF_FOR_INVOICE: "api/value-declaration/print/pdf/for-invoice",
     },
+    EXPORT_LICENSE: {
+      LIST: "api/export-license/list",
+      GET: "api/export-license",
+      SAVE: "api/export-license",
+      DELETE: "api/export-license",
+      PRINT_PDF: "api/export-license",
+    },
     SUBSCRIPTION: {
       GET: "api/subscription/list",
       POST: "api/subscription",

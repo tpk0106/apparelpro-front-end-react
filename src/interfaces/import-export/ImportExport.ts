@@ -488,3 +488,46 @@ export interface ValueDeclarationDetail {
   header: ValueDeclarationHeader;
   lines: ValueDeclarationLine[];
 }
+
+export interface ExportLicenseHeader {
+  id: number;
+  companyAddressId: number;
+  applicantType?: string | null;
+  businessRegistrationNo?: string | null;
+  vatRegistrationNo?: string | null;
+  telephone?: string | null;
+  fax?: string | null;
+  email?: string | null;
+  applicantIdOfficeUse?: string | null;
+  licenseType?: string | null;
+  exchangeType?: string | null;
+  commercialType?: string | null;
+  bankCode?: string | null;
+  modeOfPayment?: string | null;
+  modeOfTransportation?: string | null;
+  consignee1BuyerCode?: number | null;
+  consignee2BuyerCode?: number | null;
+  purposeOfExportation?: string | null;
+  useOfCommodity?: string | null;
+  signatoryDate?: string | null;
+}
+
+export interface ExportLicenseLine {
+  id: number;
+  exportLicenseHeaderId: number;
+  itemNo: number;
+  hsNumber?: string | null;
+  description: string;
+  packSize?: string | null;
+  unitCode?: string | null;
+  quantity: number;
+  unitPrice: number;
+  insurance: number;
+  freight: number;
+  totalCif: number;
+}
+
+export interface ExportLicenseDetail {
+  header: ExportLicenseHeader;
+  lines: ExportLicenseLine[];
+}

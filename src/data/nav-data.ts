@@ -890,6 +890,12 @@ export const navbarData = [
         label: "Value Declaration Form",
         pinned: false,
       },
+      {
+        routerLink: "export-license",
+        icon: null,
+        label: "Export License",
+        pinned: false,
+      },
     ],
     tag: "importexportdoc",
   },

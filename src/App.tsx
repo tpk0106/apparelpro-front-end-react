@@ -41,6 +41,7 @@ import CommercialInvoiceListPage from "./components/import-export/commercial-inv
 import LetterOfCreditPage from "./components/import-export/letter-of-credit.component";
 import CustomsDeclarationPage from "./components/import-export/customs-declaration.component";
 import ValueDeclarationListPage from "./components/import-export/value-declaration-list.component";
+import ExportLicenseListPage from "./components/import-export/export-license-list.component";
 import ClearanceOfficePage from "./components/import-export/clearance-office.component";
 import PaymentTermPage from "./components/import-export/payment-term.component";
 import TransportModePage from "./components/import-export/transport-mode.component";
@@ -362,6 +363,7 @@ function App() {
         <Route index path="letter-of-credit" element={<LetterOfCreditPage />} />
         <Route index path="customs-declaration" element={<CustomsDeclarationPage />} />
         <Route index path="value-declaration" element={<ValueDeclarationListPage />} />
+        <Route index path="export-license" element={<ExportLicenseListPage />} />
         <Route index path="clearance-office" element={<ClearanceOfficePage />} />
         <Route index path="payment-term" element={<PaymentTermPage />} />
         <Route index path="transport-mode" element={<TransportModePage />} />
