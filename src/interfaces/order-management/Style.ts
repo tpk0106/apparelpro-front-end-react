@@ -19,4 +19,5 @@ export interface Style {
   estimateApprovalDate: Date | null;
   estimateApprovalUserName: string;
   exported: boolean;
+  hasSupplierPurchaseOrder: boolean;
 }

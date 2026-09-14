@@ -529,10 +529,22 @@ const StyleTable = ({
             <ModeEditOutlinedIcon />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Delete">
-          <IconButton color="error" onClick={() => openDeleteConfirmModal(row)}>
-            <DeleteForeverOutlinedIcon className="flex w-full justify-start h-5 w1-5 border1-4 border1-yellow-300" />
-          </IconButton>
+        <Tooltip
+          title={
+            row.original.hasSupplierPurchaseOrder
+              ? "Cannot delete - a Supplier Purchase Order has already been raised against this style"
+              : "Delete"
+          }
+        >
+          <span>
+            <IconButton
+              color="error"
+              disabled={row.original.hasSupplierPurchaseOrder}
+              onClick={() => openDeleteConfirmModal(row)}
+            >
+              <DeleteForeverOutlinedIcon className="flex w-full justify-start h-5 w1-5 border1-4 border1-yellow-300" />
+            </IconButton>
+          </span>
         </Tooltip>
         <Tooltip title="Configure Colour & Size Matrix Allocation Breakdown">
           <IconButton

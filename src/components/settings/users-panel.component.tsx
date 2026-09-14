@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Box, Typography, Chip, TextField, MenuItem, CircularProgress } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { Box, Button, Typography, Chip, TextField, MenuItem, CircularProgress } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import {
   useGetUsersWithGroupsQuery,
   useGetGroupsQuery,
@@ -10,6 +12,7 @@ import type { UserWithGroups } from "../../interfaces/register/UserWithGroups";
 import type { Group } from "../../interfaces/register/Group";
 import { useDropdownTheme } from "../../themes/useDropdownTheme";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
+import { primaryActionButtonSx, themedButtonLabelStyle } from "../../themes/workspace-theme";
 
 interface UserRowProps {
   user: UserWithGroups;
@@ -113,6 +116,7 @@ const UserRow = ({ user, availableGroups, onAssign, onRemove, isMutating }: User
 // which reads AspNetUsers directly (see design doc section 8 on why the older
 // GET api/user/list endpoint is not used here).
 const UsersPanel = () => {
+  const navigate = useNavigate();
   const { data: users, isLoading: usersLoading, isError: usersError } = useGetUsersWithGroupsQuery();
   const { data: groups } = useGetGroupsQuery();
   const assignMutation = useAssignUserToGroupMutation();
@@ -130,6 +134,18 @@ const UsersPanel = () => {
 
   return (
     <Box>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+        <Button
+          size="small"
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => navigate("/sign-up")}
+          sx={primaryActionButtonSx}
+        >
+          <span style={themedButtonLabelStyle}>Add User</span>
+        </Button>
+      </Box>
+
       {usersLoading && (
         <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
           <CircularProgress size={28} />

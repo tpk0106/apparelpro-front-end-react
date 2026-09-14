@@ -21,6 +21,7 @@ import {
   type SelectChangeEvent,
 } from "@mui/material";
 import { Bars } from "react-loading-icons";
+import { toast } from "react-toastify";
 
 import {
   signUpStart,
@@ -31,7 +32,16 @@ import { loadCountries } from "../services/references/country.service";
 import type { Country } from "../interfaces/references/Country";
 import type { User } from "../interfaces/register/User";
 import { asideMenuTitleTypographyTheme } from "../themes/themes";
-import { numberFieldNoSpinnerSx } from "../themes/workspace-theme";
+import {
+  dateIconFieldSx,
+  numberFieldNoSpinnerSx,
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+} from "../themes/workspace-theme";
+import { DASHBOARD_COLORS } from "../components/dashboard/dashboard-theme";
+import { useDropdownTheme } from "../themes/useDropdownTheme";
+import { copperTextColor } from "../themes/button-color-themes";
 import { AddressType, GENDER_MAP } from "../interfaces/definitions";
 import SelectList from "../lib/select-list.component";
 import type { SignupFormData } from "../interfaces/register/signup";
@@ -190,6 +200,33 @@ const SignupForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [countries, setCountries] = useState<Country[]>([]);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  // Same olive dropdown/field theme used by Order Confirmation Routine, so
+  // this form's fields and Country dropdown match the rest of the app
+  // instead of rendering with default (invisible-on-dark) MUI colors.
+  const { theme: dropdownTheme, fieldSx: dropdownFieldSx } = useDropdownTheme();
+  const selectLabelSx = {
+    color: dropdownTheme.labelText,
+    "&.MuiInputLabel-shrink": { color: dropdownTheme.labelText },
+    "&.Mui-focused": { color: dropdownTheme.labelFocusText },
+  };
+  const selectFieldSx = {
+    backgroundColor: `${dropdownTheme.fieldBg} !important`,
+    color: `${dropdownTheme.fieldText} !important`,
+    ".MuiOutlinedInput-notchedOutline": { borderColor: dropdownTheme.fieldBorder },
+    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: dropdownTheme.fieldBorderHover },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: dropdownTheme.fieldBorderFocus },
+    "& .MuiSvgIcon-root": { color: dropdownTheme.iconColor },
+  };
+  const selectMenuSx = {
+    backgroundColor: `${dropdownTheme.panelBg} !important`,
+    border: `1px solid ${dropdownTheme.panelBorder}`,
+  };
+  const selectMenuItemSx = {
+    color: `${dropdownTheme.optionText} !important`,
+    "&:hover": { backgroundColor: `${dropdownTheme.optionHoverBg} !important` },
+    "&.Mui-selected": { backgroundColor: `${dropdownTheme.optionSelectedBg} !important`, color: `${dropdownTheme.optionSelectedText} !important` },
+  };
 
   // wai 1
   // const { registerSuccess, isLoading } = useSelector(
@@ -394,13 +431,13 @@ const SignupForm = () => {
       } else {
         // 3. Map payload cleanly for New Registration Mode
         if (!signupFormData.password || !signupFormData.confirmPassword) {
-          alert(
+          toast.error(
             "Password fields are required for creating a new user account.",
           );
           return;
         }
         if (signupFormData.password !== signupFormData.confirmPassword) {
-          alert("Your passwords do not match");
+          toast.error("Your passwords do not match");
           return;
         }
 
@@ -473,16 +510,29 @@ const SignupForm = () => {
   // 9. Component Interface Render Layout
   return (
     <>
-      <div className="flex justify-center w-full m-auto h1-screen h-1/2 mx-auto my-auto mt-10 mb-5 ">
+      <div
+        className="flex flex-col justify-center w-full m-auto h1-screen h1-1/2 mx-auto my-auto mt-3 mb-5"
+        style={{ backgroundColor: DASHBOARD_COLORS.pageBg, padding: 24, borderRadius: 8 }}
+      >
         <Box
           component="form"
           onSubmit={handleSubmit}
-          sx={{ width: "50%", padding: 4 }}
-          className="flex flex-col m-auto border rounded-md border-gray-300 shadow-xl bg-white"
+          sx={{
+            width: "65%",
+            padding: 4,
+            backgroundColor: DASHBOARD_COLORS.cardBg,
+            border: `1px solid ${DASHBOARD_COLORS.border}`,
+            boxShadow: "0 10px 28px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.3)",
+          }}
+          className="flex flex-col m-auto rounded-md"
         >
           <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-            <Typography color="blue-gray" className="text-center">
-              Sign Up
+            {/* Theme's default letterSpacing (0.7em, tuned for short titles like
+                "COUNTRIES") makes a 2-3 word heading like "Update Profile" run
+                too wide and clip - override it down here rather than in the
+                shared theme, which other screens' short headings still rely on. */}
+            <Typography sx={{ ...workspaceHeadingSx, letterSpacing: "0.15em" }}>
+              {isUpdateMode ? "Update Profile" : "Create New User"}
             </Typography>
           </ThemeProvider>
           <Box className="flex flex-col mx-auto w-full">
@@ -501,6 +551,7 @@ const SignupForm = () => {
                     value={signupFormData.knownAs}
                     onChange={handleChange}
                     className="w-[95%]"
+                    sx={dropdownFieldSx}
                   />
                 </FormControl>
                 <FormControl className="w-[30%]">
@@ -515,6 +566,7 @@ const SignupForm = () => {
                     fullWidth
                     margin="normal"
                     className="w-[95%]"
+                    sx={dropdownFieldSx}
                   />
                   {errors.email && (
                     <div className="text-red-500 text-[.7em]">
@@ -532,14 +584,18 @@ const SignupForm = () => {
                     value={signupFormData.dateOfBirth} // 🚀 Reads straight from your flat state!
                     className="w-[95%]"
                     onChange={handleChange}
+                    sx={{ ...dropdownFieldSx, ...dateIconFieldSx }}
                   />
                 </FormControl>
               </div>
 
               <div className="flex w-full justify-around p-0 m-0">
                 <FormControl className="flex w-[49%] justify-around px-10">
-                  <div className="flex w-full justify-around items-center border border-gray-300 rounded-md">
-                    <FormLabel>Gender</FormLabel>
+                  <div
+                    className="flex w-full justify-around items-center rounded-md"
+                    style={{ border: `1px solid ${DASHBOARD_COLORS.border}` }}
+                  >
+                    <FormLabel sx={{ color: copperTextColor, "&.Mui-focused": { color: copperTextColor } }}>Gender</FormLabel>
 
                     <RadioGroup
                       row
@@ -554,15 +610,31 @@ const SignupForm = () => {
                     >
                       <FormControlLabel
                         value={"Male"}
-                        control={<Radio />}
+                        control={
+                          <Radio
+                            sx={{
+                              color: "rgba(201,128,61,0.6)",
+                              "&.Mui-checked": { color: copperTextColor },
+                            }}
+                          />
+                        }
                         label="Male"
                         className={"p-1"}
+                        sx={{ color: copperTextColor }}
                       />
                       <FormControlLabel
                         value={"Female"}
-                        control={<Radio />}
+                        control={
+                          <Radio
+                            sx={{
+                              color: "rgba(201,128,61,0.6)",
+                              "&.Mui-checked": { color: copperTextColor },
+                            }}
+                          />
+                        }
                         label="Female"
                         className={"p-1"}
+                        sx={{ color: copperTextColor }}
                       />
                     </RadioGroup>
                   </div>
@@ -576,7 +648,7 @@ const SignupForm = () => {
                     size="small"
                     value={signupFormData.phoneNumber}
                     onChange={handleChange}
-                    sx={numberFieldNoSpinnerSx}
+                    sx={{ ...dropdownFieldSx, ...numberFieldNoSpinnerSx }}
                   />
                 </FormControl>
               </div>
@@ -596,6 +668,7 @@ const SignupForm = () => {
                     fullWidth
                     size="small"
                     margin="normal"
+                    sx={dropdownFieldSx}
                   >
                     <InputLabel htmlFor="password" error={!!errors.password}>
                       Password
@@ -631,6 +704,7 @@ const SignupForm = () => {
                     fullWidth
                     size="small"
                     margin="normal"
+                    sx={dropdownFieldSx}
                   >
                     <InputLabel
                       htmlFor="confirmPassword"
@@ -674,6 +748,7 @@ const SignupForm = () => {
                     size="small"
                     value={signupFormData.streetAddress}
                     onChange={handleChange}
+                    sx={dropdownFieldSx}
                   />
                 </FormControl>
                 <FormControl>
@@ -684,6 +759,7 @@ const SignupForm = () => {
                     size="small"
                     value={signupFormData.city}
                     onChange={handleChange}
+                    sx={dropdownFieldSx}
                   />
                 </FormControl>
                 <FormControl>
@@ -694,6 +770,7 @@ const SignupForm = () => {
                     size="small"
                     value={signupFormData.postCode}
                     onChange={handleChange}
+                    sx={dropdownFieldSx}
                   />
                 </FormControl>
               </div>
@@ -706,6 +783,7 @@ const SignupForm = () => {
                     size="small"
                     value={signupFormData.state}
                     onChange={handleChange}
+                    sx={dropdownFieldSx}
                   />
                 </FormControl>
                 <div className="w-[50%]">
@@ -717,6 +795,11 @@ const SignupForm = () => {
                     labelKey="name"
                     valueKey="code"
                     handleSelectedChange={handleSelectedChange}
+                    size="small"
+                    labelSx={selectLabelSx}
+                    menuSx={selectMenuSx}
+                    menuItemSx={selectMenuItemSx}
+                    selectSx={selectFieldSx}
                   />
                 </div>
               </div>
@@ -725,21 +808,23 @@ const SignupForm = () => {
                 <Button
                   variant="contained"
                   size="small"
-                  color="primary"
                   type="submit"
                   className="mt-8 w-[45%]"
+                  sx={primaryActionButtonSx}
                 >
-                  {isUpdateMode ? "Update Profile" : "Sign Up User"}
+                  <span style={themedButtonLabelStyle}>
+                    {isUpdateMode ? "Update Profile" : "Create User"}
+                  </span>
                 </Button>
                 <Button
                   variant="contained"
                   size="small"
-                  color="primary"
-                  type="submit"
+                  type="button"
                   className="mt-8 w-[45%]"
                   onClick={handleCancel}
+                  sx={primaryActionButtonSx}
                 >
-                  Cancel
+                  <span style={themedButtonLabelStyle}>Cancel</span>
                 </Button>
               </div>
             </FormControl>

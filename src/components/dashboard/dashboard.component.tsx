@@ -67,7 +67,7 @@ const withOliveAccent = (outerTheme: Theme) =>
 const DashboardHome = () => {
   const { data: currentStyle, isLoading: isLoadingCurrentStyle } = useGetCurrentStyle();
   const [overrideScope, setOverrideScope] = useState<StyleScope | null>(null);
-  const [tab, setTab] = useState<"order" | "inventory" | "production">("production");
+  const [tab, setTab] = useState<"order" | "inventory" | "production">("order");
 
   const activeScope: StyleScope | null = overrideScope ?? (currentStyle
     ? {

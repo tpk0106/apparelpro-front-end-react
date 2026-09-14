@@ -1,7 +1,7 @@
 import { Box, Checkbox, Typography, CircularProgress } from "@mui/material";
 import { navbarData } from "../../data/nav-data";
 import { useGetToolbarPreferences, useSaveToolbarPreferences } from "../../tanstack-hooks/toolbar.hooks";
-import { SCOPED_GROUPS, GROUP_LABELS, getDefaultToolbarPins } from "../../navigation/toolbar-config";
+import { SCOPED_GROUPS, GROUP_LABELS, GROUP_FULL_NAMES, getDefaultToolbarPins } from "../../navigation/toolbar-config";
 import { copperTextColor } from "../../themes/button-color-themes";
 
 const TEXT_WHITE = "#F4F6F8";
@@ -65,7 +65,7 @@ const ToolbarSettingsPanel = () => {
       {groups.map((group) => (
         <Box key={group.routerLink} sx={{ mb: 3 }}>
           <Typography sx={{ fontWeight: 600, fontSize: 13, mb: 1, color: TEXT_WHITE }}>
-            {GROUP_LABELS[group.routerLink]}
+            {GROUP_LABELS[group.routerLink]} ({GROUP_FULL_NAMES[group.routerLink]})
           </Typography>
           <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 0.25 }}>
             {group.subMenus.map((sm) => (
