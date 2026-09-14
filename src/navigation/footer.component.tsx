@@ -8,7 +8,8 @@ const Footer = () => {
             Broadsword Apparel Pvt Ltd
           </div>
           <div className="flex justify-around text-[0.66em]">
-            {formatDate()} All rights reserved
+            {formatDate()} All rights reserved - Designed and Developed by
+            Thusith Kathaluwage
           </div>
         </div>
       </div>

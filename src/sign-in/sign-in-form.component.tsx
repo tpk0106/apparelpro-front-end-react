@@ -25,6 +25,13 @@ import { asideMenuTitleTypographyTheme } from "../themes/themes";
 import { useNavigate } from "react-router-dom";
 import { USER_CREDENTIALS } from "../interfaces/definitions";
 import { getCurrentUser, getIsLoading } from "../sagaStore/user/user.selector";
+import { DASHBOARD_COLORS } from "../components/dashboard/dashboard-theme";
+import { useDropdownTheme } from "../themes/useDropdownTheme";
+import {
+  primaryActionButtonSx,
+  themedButtonLabelStyle,
+  workspaceHeadingSx,
+} from "../themes/workspace-theme";
 
 const SignInForm = () => {
   const signInForm: LoginRequest = {
@@ -79,6 +86,11 @@ const SignInForm = () => {
   type signInFormErrors = Partial<Record<keyof signInFormData, string[]>>;
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  // Same olive dropdown/field theme used by Order Confirmation Routine and
+  // the Update Profile form, so this form's fields match the rest of the
+  // app instead of rendering with default (invisible-on-dark) MUI colors.
+  const { fieldSx: dropdownFieldSx } = useDropdownTheme();
 
   const validateForm = (data: signInFormData): signInFormErrors => {
     try {
@@ -135,15 +147,28 @@ const SignInForm = () => {
   };
 
   return (
-    <div className="flex justify-center w-full m-auto h1-screen h-1/2 mx-auto my-auto mt-10 ">
+    <div
+      className="flex flex-col justify-center w-full m-auto h1-screen h1-1/2 mx-auto my-auto mt-3"
+      style={{ backgroundColor: DASHBOARD_COLORS.pageBg, padding: 24, borderRadius: 8 }}
+    >
       <Box
         component="form"
         onSubmit={handleSubmit}
-        sx={{ width: "50%", padding: 4 }}
-        className="flex flex-col m-auto border rounded-md border-gray-300 shadow-xl bg-white"
+        sx={{
+          width: "50%",
+          padding: 4,
+          backgroundColor: DASHBOARD_COLORS.cardBg,
+          border: `1px solid ${DASHBOARD_COLORS.border}`,
+          boxShadow: "0 10px 28px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.3)",
+        }}
+        className="flex flex-col m-auto rounded-md"
       >
         <ThemeProvider theme={asideMenuTitleTypographyTheme}>
-          <Typography color="blue-gray" className="text-center">
+          {/* Theme's default letterSpacing (0.7em, tuned for short titles like
+              "COUNTRIES") makes a 2-word heading like "Sign In" run wide -
+              override it down here rather than in the shared theme, which
+              other screens' short headings still rely on. */}
+          <Typography sx={{ ...workspaceHeadingSx, letterSpacing: "0.15em" }}>
             Sign In
           </Typography>
         </ThemeProvider>
@@ -163,6 +188,7 @@ const SignInForm = () => {
                 variant="outlined"
                 fullWidth
                 margin="normal"
+                sx={dropdownFieldSx}
               />
               {errors.email && (
                 <div className="text-red-500 text-[.7em]">
@@ -171,7 +197,7 @@ const SignInForm = () => {
               )}
             </div>
 
-            <FormControl>
+            <FormControl sx={dropdownFieldSx}>
               <InputLabel
                 htmlFor="password"
                 error={!!errors.password}
@@ -211,7 +237,6 @@ const SignInForm = () => {
             <Button
               variant="contained"
               size="small"
-              color="primary"
               type="submit"
               className="mt-8"
               disabled={isLoading}
@@ -220,8 +245,11 @@ const SignInForm = () => {
                   <CircularProgress size={18} color="inherit" />
                 ) : null
               }
+              sx={primaryActionButtonSx}
             >
-              {isLoading ? "Logging in..." : "Login"}
+              <span style={themedButtonLabelStyle}>
+                {isLoading ? "Logging in..." : "Login"}
+              </span>
             </Button>
           </FormControl>
         </Box>

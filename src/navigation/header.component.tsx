@@ -162,8 +162,11 @@ const Header = ({ toolbarCollapsed, onToggleToolbar }: HeaderProps) => {
         <div className="flex w-full">
           <div className="container flex-wrap w-full flex 1 1 100% mx1-5">
             <div className="w-full flex justify-around h1-[10%]">
-              {/* header logo */}
-              <div className="flex w-[80%] m-auto ">
+              {/* header logo - pl-4 clears the retracted mobile-menu hover
+                  strip (id="show-mobileMenu"), which always leaves a ~10px
+                  sliver visible at the left edge even when closed, and was
+                  cropping the logo's first letter */}
+              <div className="flex w-[80%] m-auto pl-4">
                 <Link to={"/"}>
                   <img
                     src={verticalMenuLogo}

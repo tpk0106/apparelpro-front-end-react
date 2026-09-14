@@ -584,7 +584,7 @@ const SignupForm = () => {
                     value={signupFormData.dateOfBirth} // 🚀 Reads straight from your flat state!
                     className="w-[95%]"
                     onChange={handleChange}
-                    sx={{ ...dropdownFieldSx, ...dateIconFieldSx }}
+                    sx={{ ...(dropdownFieldSx as object), ...(dateIconFieldSx as object) }}
                   />
                 </FormControl>
               </div>
