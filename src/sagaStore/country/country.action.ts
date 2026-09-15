@@ -60,12 +60,17 @@ const deleteCountryStart = (code: string) => {
   return createAction(COUNTRIES_ACTION_TYPES.DELETE_COUNTRY_START, code);
 };
 
-const deleteCountrySuccess = (success: boolean) => {
-  return createAction(COUNTRIES_ACTION_TYPES.DELETE_COUNTRY_START, success);
+// Carries the deleted code (not just a boolean) so the reducer can remove
+// that one row from paginationAPIResult.items directly - relying on a
+// follow-up LOAD_ALL_COUNTRIES_START reload instead was racy: takeLatest
+// cancels that in-flight reload if the user changes pages before it
+// resolves, silently dropping the update.
+const deleteCountrySuccess = (code: string) => {
+  return createAction(COUNTRIES_ACTION_TYPES.DELETE_COUNTRY_SUCCESS, code);
 };
 
 const deleteCountryFailure = (error: unknown) => {
-  return createAction(COUNTRIES_ACTION_TYPES.DELETE_COUNTRY_START, error);
+  return createAction(COUNTRIES_ACTION_TYPES.DELETE_COUNTRY_FAILURE, error);
 };
 
 export {

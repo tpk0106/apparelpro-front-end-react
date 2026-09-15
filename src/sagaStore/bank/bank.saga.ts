@@ -15,6 +15,8 @@ import type { Bank } from "../../interfaces/references/Bank";
 import {
   createBankFailure,
   createBankSuccess,
+  deleteBankFailure,
+  deleteBankSuccess,
   loadAllBanksFailed,
   loadAllBanksSuccess,
   updateBankFailure,
@@ -23,12 +25,14 @@ import {
 import {
   loadBanks,
   createNewBank,
-  // deleteBank,
+  deleteBank,
   updateEditBank,
 } from "../../services/references/bank.service";
 import type { PaginationData } from "../../interfaces/definitions";
 import type { PaginationAPIModel } from "../../interfaces/references/ApiResult";
 import { BANK_ACTION_TYPES } from "./bank.types";
+import { handleApiError } from "../../utils/errorHandler";
+import { toast } from "react-toastify";
 
 export function* LoadAllBanks(
   action: PayloadAction<PaginationData>,
@@ -72,6 +76,33 @@ export function* updateBank(
   }
 }
 
+export function* deleteBankSaga(
+  action: PayloadAction<string>,
+): Generator<CallEffect | PutEffect<AnyAction>, void, boolean> {
+  try {
+    const bankCode = action.payload;
+    if (!bankCode) {
+      toast.error("Cannot delete this bank - its code is missing.", {
+        position: "top-right",
+        autoClose: 5000,
+      });
+      yield put(deleteBankFailure("Missing bank code"));
+      return;
+    }
+
+    yield call(deleteBank, bankCode);
+
+    yield put(deleteBankSuccess(bankCode));
+    toast.success("Bank deleted successfully", {
+      position: "top-right",
+      autoClose: 2000,
+    });
+  } catch (error) {
+    handleApiError(error);
+    yield put(deleteBankFailure(error));
+  }
+}
+
 function* onLoadAllBanks() {
   yield takeLatest(BANK_ACTION_TYPES.LOAD_ALL_BANKS_START, LoadAllBanks);
 }
@@ -84,6 +115,15 @@ function* onUpdateBank() {
   yield takeLatest(BANK_ACTION_TYPES.UPDATE_BANK_START, updateBank);
 }
 
+function* onDeleteBank() {
+  yield takeLatest(BANK_ACTION_TYPES.DELETE_BANK_START, deleteBankSaga);
+}
+
 export function* bankSagas() {
-  yield all([call(onLoadAllBanks), call(onCreateBank), call(onUpdateBank)]);
+  yield all([
+    call(onLoadAllBanks),
+    call(onCreateBank),
+    call(onUpdateBank),
+    call(onDeleteBank),
+  ]);
 }

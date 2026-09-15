@@ -32,6 +32,15 @@ type CountryAction =
       boolean,
       | typeof COUNTRIES_ACTION_TYPES.UPDATE_COUNTRY_SUCCESS
       | typeof COUNTRIES_ACTION_TYPES.CREATE_COUNTRY_SUCCESS
+    >
+  | PayloadAction<
+      string,
+      | typeof COUNTRIES_ACTION_TYPES.DELETE_COUNTRY_START
+      | typeof COUNTRIES_ACTION_TYPES.DELETE_COUNTRY_SUCCESS
+    >
+  | PayloadAction<
+      Error | string | unknown,
+      typeof COUNTRIES_ACTION_TYPES.DELETE_COUNTRY_FAILURE
     >;
 
 const countryReducer = (
@@ -65,6 +74,7 @@ const countryReducer = (
       };
     case COUNTRIES_ACTION_TYPES.CREATE_COUNTRY_START:
     case COUNTRIES_ACTION_TYPES.UPDATE_COUNTRY_START:
+    case COUNTRIES_ACTION_TYPES.DELETE_COUNTRY_START:
       return {
         ...state,
         isLoading: true,
@@ -83,8 +93,33 @@ const countryReducer = (
         // ✅ PROTECTED: Leave paginationAPIResult out so it stays preserved in state
         // paginationAPIResult: null,
       };
+
+    case COUNTRIES_ACTION_TYPES.DELETE_COUNTRY_SUCCESS: {
+      // Remove the deleted row directly instead of waiting on a follow-up
+      // reload (that reload raced with pagination clicks via takeLatest and
+      // could get silently cancelled - see country.saga.ts).
+      const deletedCode = payload as string;
+      const previousResult = state.paginationAPIResult;
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        success: true,
+        paginationAPIResult: previousResult
+          ? {
+              ...previousResult,
+              items: previousResult.items.filter(
+                (country) => country.code !== deletedCode,
+              ),
+              totalItems: Math.max(0, previousResult.totalItems - 1),
+            }
+          : previousResult,
+      };
+    }
+
     case COUNTRIES_ACTION_TYPES.CREATE_COUNTRY_FAILURE:
     case COUNTRIES_ACTION_TYPES.UPDATE_COUNTRY_FAILURE:
+    case COUNTRIES_ACTION_TYPES.DELETE_COUNTRY_FAILURE:
       return {
         ...state,
         isLoading: false,

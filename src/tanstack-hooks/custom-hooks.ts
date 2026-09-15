@@ -1263,8 +1263,7 @@ export const useDeleteBuyerAddressMutation = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["buyers"] });
-      // Note: You might want to update this text to "Address deleted successfully"
-      toast.success("Buyer deleted successfully");
+      toast.success("Address deleted successfully");
     },
     onError: (error) => {
       toast.error(`Delete failed: ${error.message}`);

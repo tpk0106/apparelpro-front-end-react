@@ -45,8 +45,8 @@ const deleteBankStart = (bankCode: string) => {
   return createAction(BANK_ACTION_TYPES.DELETE_BANK_START, bankCode);
 };
 
-const deleteBankSuccess = (success: boolean) => {
-  return createAction(BANK_ACTION_TYPES.DELETE_BANK_SUCCESS, success);
+const deleteBankSuccess = (bankCode: string) => {
+  return createAction(BANK_ACTION_TYPES.DELETE_BANK_SUCCESS, bankCode);
 };
 
 const deleteBankFailure = (error: unknown) => {

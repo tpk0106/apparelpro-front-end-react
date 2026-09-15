@@ -10,6 +10,7 @@ import {
 import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import ModeEditOutlinedIcon from "@mui/icons-material/ModeEditOutlined";
+import { toast } from "react-toastify";
 
 import type { PaginationData } from "../../../interfaces/definitions";
 
@@ -121,7 +122,13 @@ const CountryTable = ({
 
   const handleConfirmDelete = async () => {
     if (!rowToDelete) return;
-    await deleteCountry(rowToDelete.original.code);
+    const code = rowToDelete.original.code;
+    if (!code) {
+      toast.error("Cannot delete this country - its code is missing.");
+      setRowToDelete(null);
+      return;
+    }
+    await deleteCountry(code);
     setRowToDelete(null);
   };
 

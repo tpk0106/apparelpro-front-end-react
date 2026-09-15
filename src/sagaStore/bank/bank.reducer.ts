@@ -81,6 +81,42 @@ export const bankReducer = (
         success: false,
         paginationAPIResult: null,
       };
+    case BANK_ACTION_TYPES.DELETE_BANK_START:
+      return {
+        ...state,
+        isLoading: true,
+        error: null,
+        success: false,
+      };
+    case BANK_ACTION_TYPES.DELETE_BANK_SUCCESS: {
+      // Remove the deleted row directly instead of nulling the whole grid
+      // (the old CREATE/UPDATE convention above) or relying on a follow-up
+      // reload, which races with pagination clicks via takeLatest.
+      const deletedBankCode = payload as unknown as string;
+      const previousResult = state.paginationAPIResult as PaginationAPIModel<Bank> | null;
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        success: true,
+        paginationAPIResult: previousResult
+          ? {
+              ...previousResult,
+              items: previousResult.items.filter(
+                (bank) => bank.bankCode !== deletedBankCode,
+              ),
+              totalItems: Math.max(0, previousResult.totalItems - 1),
+            }
+          : previousResult,
+      };
+    }
+    case BANK_ACTION_TYPES.DELETE_BANK_FAILURE:
+      return {
+        ...state,
+        isLoading: false,
+        error: payload,
+        success: false,
+      };
     default:
       return state;
   }

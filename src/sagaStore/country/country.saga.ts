@@ -147,14 +147,27 @@ export function* deleteCountry(
 ): Generator<CallEffect | PutEffect<AnyAction>, void, boolean> {
   try {
     const code = action.payload;
+    if (!code) {
+      toast.error("Cannot delete this country - its code is missing.", {
+        position: "top-right",
+        autoClose: 5000,
+      });
+      yield put(deleteCountryFailure("Missing country code"));
+      return;
+    }
+
     yield call(removeCountry, code);
 
-    yield put(deleteCountrySuccess(true));
+    // Pass the deleted code through so the reducer can remove that exact
+    // row from state directly - no follow-up reload needed, so there's no
+    // race with a page-change dispatch cancelling it via takeLatest.
+    yield put(deleteCountrySuccess(code));
     toast.success("Country deleted successfully", {
       position: "top-right",
       autoClose: 2000,
     });
   } catch (error) {
+    handleApiError(error);
     yield put(deleteCountryFailure(error));
   }
 }
