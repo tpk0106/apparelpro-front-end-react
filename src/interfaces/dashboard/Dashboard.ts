@@ -76,12 +76,24 @@ export type ApprovalStageDetail = {
   approvedDate: string | null;
 };
 
-export type SupplierPoStageDetail = {
+export type MaterialLine = {
+  itemCode: string;
+  description: string;
+  unit: string;
+  requiredQuantity: number;
   raisedQuantity: number;
-  raisedValue: number;
   outstandingQuantity: number;
   outstandingValue: number;
+  coveredPercent: number;
+};
+
+export type SupplierPoStageDetail = {
+  coveragePercent: number;
+  raisedValue: number;
+  outstandingValue: number;
   currency: string;
+  bottleneck: MaterialLine | null;
+  outstandingLines: MaterialLine[];
 };
 
 export type GrnStageDetail = {

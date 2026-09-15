@@ -58,7 +58,7 @@ function isStageActuallyDone(stage: number, row: OrderPipelineRow): boolean {
     case 1:
       return row.approval.isApproved;
     case 2:
-      return row.supplierPo.outstandingQuantity <= 0;
+      return row.supplierPo.outstandingValue <= 0;
     case 3:
       return row.grn.orderedQuantity <= 0 || row.grn.receivedQuantity >= row.grn.orderedQuantity;
     case 4:
@@ -152,28 +152,69 @@ function StageDetailContent({ stage, row, isDone }: { stage: number; row: OrderP
 
   if (stage === 2) {
     const p = row.supplierPo;
+    const visibleLines = p.outstandingLines.slice(0, 3);
+    const extraCount = p.outstandingLines.length - visibleLines.length;
     return (
       <>
-        <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, py: 0.5 }}>
-          <Typography sx={rowLabel}>Raised so far</Typography>
-          <Typography sx={neutralValue}>{numberFmt(p.raisedQuantity)}</Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 0.5 }}>
+          <MiniPercentRing pct={p.coveragePercent} done={isDone} />
+          <Box sx={{ flex: 1 }}>
+            <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, py: 0.5 }}>
+              <Typography sx={rowLabel}>Committed</Typography>
+              <Typography sx={neutralValue}>{moneyFmt(p.raisedValue, p.currency)}</Typography>
+            </Box>
+            <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, py: 0.5 }}>
+              <Typography sx={rowLabel}>Outstanding</Typography>
+              <Typography sx={{ ...rowValue, color: p.outstandingValue > 0 ? PENDING_COLOR : DONE_COLOR }}>
+                {moneyFmt(p.outstandingValue, p.currency)}
+              </Typography>
+            </Box>
+          </Box>
         </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, py: 0.5 }}>
-          <Typography sx={rowLabel}>Raised value</Typography>
-          <Typography sx={neutralValue}>{moneyFmt(p.raisedValue, p.currency)}</Typography>
-        </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, py: 0.5 }}>
-          <Typography sx={rowLabel}>Still to raise (qty)</Typography>
-          <Typography sx={{ ...rowValue, color: p.outstandingQuantity > 0 ? PENDING_COLOR : DONE_COLOR }}>
-            {numberFmt(p.outstandingQuantity)}
-          </Typography>
-        </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, py: 0.5 }}>
-          <Typography sx={rowLabel}>Still to raise (value)</Typography>
-          <Typography sx={{ ...rowValue, color: p.outstandingValue > 0 ? PENDING_COLOR : DONE_COLOR }}>
-            {moneyFmt(p.outstandingValue, p.currency)}
-          </Typography>
-        </Box>
+
+        {p.bottleneck && (
+          <Box
+            sx={{
+              mt: 0.5,
+              mb: 0.5,
+              p: 1,
+              borderRadius: 1,
+              border: `1px solid ${PENDING_COLOR}`,
+              backgroundColor: "rgba(201,128,61,0.08)",
+            }}
+          >
+            <Typography sx={{ fontSize: 11, fontWeight: 700, color: PENDING_COLOR, textTransform: "uppercase", letterSpacing: 0.3 }}>
+              Blocking
+            </Typography>
+            <Typography sx={{ fontSize: 12.5, color: DASHBOARD_COLORS.textPrimary }}>
+              {p.bottleneck.description || p.bottleneck.itemCode}
+            </Typography>
+            <Typography sx={{ fontSize: 11.5, color: DASHBOARD_COLORS.textSecondary }}>
+              {Math.round(p.bottleneck.coveredPercent)}% covered · {moneyFmt(p.bottleneck.outstandingValue, p.currency)} outstanding
+              {" "}({numberFmt(p.bottleneck.outstandingQuantity)} {p.bottleneck.unit})
+            </Typography>
+          </Box>
+        )}
+
+        {visibleLines.length > 1 && (
+          <Box sx={{ mt: 0.5 }}>
+            {visibleLines.map((line) => (
+              <Box key={line.itemCode} sx={{ display: "flex", justifyContent: "space-between", gap: 2, py: 0.25 }}>
+                <Typography sx={{ ...rowLabel, fontSize: 11.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {line.description || line.itemCode}
+                </Typography>
+                <Typography sx={{ fontFamily: "monospace", fontSize: 11.5, color: DASHBOARD_COLORS.textSecondary, flexShrink: 0 }}>
+                  {moneyFmt(line.outstandingValue, p.currency)}
+                </Typography>
+              </Box>
+            ))}
+            {extraCount > 0 && (
+              <Typography sx={{ fontSize: 11, color: DASHBOARD_COLORS.textSecondary, fontStyle: "italic", mt: 0.25 }}>
+                +{extraCount} more outstanding line{extraCount > 1 ? "s" : ""}
+              </Typography>
+            )}
+          </Box>
+        )}
       </>
     );
   }
@@ -260,43 +301,91 @@ function StageDetailContent({ stage, row, isDone }: { stage: number; row: OrderP
   );
 }
 
+// Below 30% progress on whichever stage is current reads as a real risk
+// signal (not just "still in progress") - copper/olive alone doesn't carry
+// that distinction, so this case borrows the semantic danger color instead.
+const COVERAGE_RISK_THRESHOLD = 30;
+
+// Merchandising (0) and Approval (1) are checklists, not percentages - no
+// bar for those. Every other stage already has a target/actual pair sitting
+// in the row's own data; this just picks the right one for whichever stage
+// the order is currently stuck at.
+function getCurrentStagePercent(row: OrderPipelineRow): number | null {
+  switch (row.stage) {
+    case 2:
+      return row.supplierPo.coveragePercent;
+    case 3:
+      return row.grn.orderedQuantity > 0 ? (row.grn.receivedQuantity / row.grn.orderedQuantity) * 100 : null;
+    case 4:
+      return row.production.targetQuantity > 0 ? (row.production.actualQuantity / row.production.targetQuantity) * 100 : null;
+    case 5:
+      return row.shipment.targetQuantity > 0 ? (row.shipment.scheduledQuantity / row.shipment.targetQuantity) * 100 : null;
+    default:
+      return null;
+  }
+}
+
 function StageTracker({ row, onStepClick }: { row: OrderPipelineRow; onStepClick: (e: MouseEvent<HTMLElement>, stage: number) => void }) {
   return (
-    <Box sx={{ display: "flex", alignItems: "flex-start", overflowX: "auto", pb: 0.5 }}>
-      {STAGE_LABELS.slice(0, 6).map((label, i) => {
-        const done = i < row.stage || row.stage >= 6;
-        const current = i === row.stage;
-        return (
-          <Box key={label} sx={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1, minWidth: 60, position: "relative" }}>
-            {i > 0 && (
-              <Box sx={{
-                position: "absolute", top: 8, left: "-50%", width: "100%", height: 2,
-                backgroundColor: done ? DASHBOARD_COLORS.accent : "rgba(191,168,90,0.16)",
-              }} />
-            )}
-            <Box
-              onClick={(e) => onStepClick(e, i)}
-              sx={{
-                width: 17, height: 17, borderRadius: "50%", zIndex: 1, cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 10, fontWeight: 700, color: DASHBOARD_COLORS.pageBg,
-                backgroundColor: done ? DASHBOARD_COLORS.accent : (current ? DASHBOARD_COLORS.pageBg : "rgba(191,168,90,0.16)"),
-                border: current ? `2px solid ${PENDING_COLOR}` : "2px solid transparent",
-                boxShadow: current ? `0 0 0 3px rgba(201,128,61,0.22)` : "none",
-              }}
-            >
-              {done ? "✓" : ""}
+    <Box>
+      <Box sx={{ display: "flex", alignItems: "flex-start", overflowX: "auto", pb: 0.5 }}>
+        {STAGE_LABELS.slice(0, 6).map((label, i) => {
+          const done = i < row.stage || row.stage >= 6;
+          const current = i === row.stage;
+          return (
+            <Box key={label} sx={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1, minWidth: 60, position: "relative" }}>
+              {i > 0 && (
+                <Box sx={{
+                  position: "absolute", top: 8, left: "-50%", width: "100%", height: 2,
+                  backgroundColor: done ? DASHBOARD_COLORS.accent : "rgba(191,168,90,0.16)",
+                }} />
+              )}
+              <Box
+                onClick={(e) => onStepClick(e, i)}
+                sx={{
+                  width: 17, height: 17, borderRadius: "50%", zIndex: 1, cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 10, fontWeight: 700, color: DASHBOARD_COLORS.pageBg,
+                  backgroundColor: done ? DASHBOARD_COLORS.accent : (current ? DASHBOARD_COLORS.pageBg : "rgba(191,168,90,0.16)"),
+                  border: current ? `2px solid ${PENDING_COLOR}` : "2px solid transparent",
+                  boxShadow: current ? `0 0 0 3px rgba(201,128,61,0.22)` : "none",
+                }}
+              >
+                {done ? "✓" : ""}
+              </Box>
+              <Typography sx={{
+                fontSize: 10.5, mt: 0.75, textAlign: "center", lineHeight: 1.25, maxWidth: 70,
+                color: current ? PENDING_COLOR : DASHBOARD_COLORS.textSecondary,
+                fontWeight: current ? 500 : 400,
+              }}>
+                {label}
+              </Typography>
             </Box>
-            <Typography sx={{
-              fontSize: 10.5, mt: 0.75, textAlign: "center", lineHeight: 1.25, maxWidth: 70,
-              color: current ? PENDING_COLOR : DASHBOARD_COLORS.textSecondary,
-              fontWeight: current ? 500 : 400,
-            }}>
-              {label}
+          );
+        })}
+      </Box>
+      {(() => {
+        const pct = getCurrentStagePercent(row);
+        if (pct === null) return null;
+        const clamped = Math.max(0, Math.min(100, pct));
+        return (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.25, px: 0.5 }}>
+            <Box sx={{ flex: 1, height: 4, borderRadius: 2, backgroundColor: "rgba(191,168,90,0.16)", overflow: "hidden" }}>
+              <Box
+                sx={{
+                  width: `${clamped}%`,
+                  height: "100%",
+                  backgroundColor: pct < COVERAGE_RISK_THRESHOLD ? DASHBOARD_COLORS.critical : DASHBOARD_COLORS.accent,
+                  transition: "width 0.3s ease",
+                }}
+              />
+            </Box>
+            <Typography sx={{ fontSize: 10, color: DASHBOARD_COLORS.textSecondary, minWidth: 30, textAlign: "right" }}>
+              {Math.round(pct)}%
             </Typography>
           </Box>
         );
-      })}
+      })()}
     </Box>
   );
 }
