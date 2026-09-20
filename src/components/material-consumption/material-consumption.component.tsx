@@ -1,8 +1,9 @@
 import { useState, useCallback, useRef } from "react";
-import { Box, Paper, Typography, Alert } from "@mui/material";
+import { Box, Paper, Typography, Alert, IconButton, Tooltip } from "@mui/material";
 import Grid from "@mui/material/Grid";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
 import AiSummariseButton from "../ai/AiSummariseButton";
-import AiChatPanel from "../ai/AiChatPanel";
+import AiChatWindow from "../ai/AiChatWindow";
 import ConsumptionScopeHeader from "./consumption-scope-header.component";
 import MaterialMasterList from "./material-master-list.component"; // type OrderItemLookupRow,
 import ConsumptionEntryForm from "./consumption-entry-form.component";
@@ -23,6 +24,7 @@ import type {
 import ConsumptionLedgerGrid from "./consumption-ledger-grid.component";
 import { DASHBOARD_COLORS } from "../dashboard/dashboard-theme";
 import { workspaceHeadingSx } from "../../themes/workspace-theme";
+import { copperTextColor } from "../../themes/button-color-themes";
 
 // THIRD ATTEMPT AT THIS BUG (see feedback_material_consumption_panel_height /
 // project_material_consumption_height_todo memory): the previous
@@ -59,6 +61,9 @@ export default function MaterialConsumption() {
   const [scopeContext, setScopeContext] = useState<SelectedScopeContext | null>(
     null,
   );
+
+  // AI Chat window open/close state
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // 2. FIXED: Declare the state hook to track a true data item instance row (REMOVED 'typeof')
   const [activeSelection, setActiveSelection] =
@@ -128,11 +133,23 @@ export default function MaterialConsumption() {
           />
         )}
 
+        {/* Spacer pushes the chat icon to the right */}
+        <Box sx={{ flex: 1 }} />
+
         {scopeContext && (
-          <AiChatPanel
-            entityType="Style"
-            entityKey={`${scopeContext.buyerCode}/${scopeContext.order}/${scopeContext.typeCode}/${scopeContext.styleCode}`}
-          />
+          <Tooltip title="AI Chat">
+            <IconButton
+              onClick={() => setIsChatOpen(true)}
+              sx={{
+                color: copperTextColor,
+                "&:hover": {
+                  backgroundColor: "rgba(201, 128, 61, 0.08)",
+                },
+              }}
+            >
+              <SmartToyIcon />
+            </IconButton>
+          </Tooltip>
         )}
       </Box>
 
@@ -296,6 +313,16 @@ export default function MaterialConsumption() {
           Please select a Buyer, Purchase Order, Garment Type, and Style in the
           header above to load the consumption details.
         </Alert>
+      )}
+
+      {/* Floating AI chat window — position:fixed, never affects page layout */}
+      {scopeContext && (
+        <AiChatWindow
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          entityType="Style"
+          entityKey={`${scopeContext.buyerCode}/${scopeContext.order}/${scopeContext.typeCode}/${scopeContext.styleCode}`}
+        />
       )}
     </Box>
   );

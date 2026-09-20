@@ -928,8 +928,13 @@ export const APPARELPRO_ENDPOINTS = {
   AI: {
     SUMMARISE: "api/ai/summarise",
     ANALYSE: "api/ai/analyse",
-    CHAT_SEND: "api/ai/chat/send",
-    CHAT_SESSIONS: "api/ai/chat/sessions",
+    CHAT: {
+      SEND: "api/ai/chat/send",
+      SESSIONS: "api/ai/chat/sessions",
+      SESSION_BY_ID: (sessionId: string) => `api/ai/chat/sessions/${sessionId}`,
+      DELETE_SESSION: (sessionId: string) =>
+        `api/ai/chat/sessions/${sessionId}`,
+    },
   },
   URLS: {
     BASEURL: import.meta.env.VITE_API_BASE_URL || "https://localhost:5000/",

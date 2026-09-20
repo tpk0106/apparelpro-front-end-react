@@ -10,21 +10,21 @@ import type { AppError } from "../../auth/axiosClient";
 import {
   sendChatMessage,
   getChatSessions,
-  getChatSessionDetail,
+  getChatSession,
   deleteChatSession,
   type AiChatSendMessageRequest,
   type AiChatMessageResponse,
-  type PaginatedChatSessions,
+  type AiChatSessionsPage,
   type AiChatSessionDetail,
-} from "../../services/ai/ai-chat.service";
+} from "../../services/ai/ai.service";
 
 // ─── Query keys ───────────────────────────────────────────
 
 export const aiChatKeys = {
   all: ["ai-chat"] as const,
-  sessions: (entityType: string, entityKey: string) =>
-    [...aiChatKeys.all, "sessions", entityType, entityKey] as const,
-  sessionDetail: (sessionId: string) =>
+  sessions: (page: number, size: number) =>
+    [...aiChatKeys.all, "sessions", page, size] as const,
+  session: (sessionId: string) =>
     [...aiChatKeys.all, "session", sessionId] as const,
 };
 
@@ -37,66 +37,66 @@ export const useAiChatSend = (): UseMutationResult<
 > => {
   const queryClient = useQueryClient();
 
-  return useMutation<AiChatMessageResponse, AppError, AiChatSendMessageRequest>(
-    {
-      mutationFn: async (request) => {
-        const response: AxiosResponse<AiChatMessageResponse> =
-          await sendChatMessage(request);
-        return response.data;
-      },
-      onSuccess: (data) => {
-        // Invalidate sessions list so new/updated session appears
-        queryClient.invalidateQueries({
-          queryKey: aiChatKeys.all,
-        });
-        // If we have session detail loaded, invalidate it too
-        if (data.sessionId) {
-          queryClient.invalidateQueries({
-            queryKey: aiChatKeys.sessionDetail(data.sessionId),
-          });
-        }
-      },
+  return useMutation<
+    AiChatMessageResponse,
+    AppError,
+    AiChatSendMessageRequest
+  >({
+    mutationFn: async (request) => {
+      const response: AxiosResponse<AiChatMessageResponse> =
+        await sendChatMessage(request);
+      return response.data;
     },
-  );
+    onSuccess: (data) => {
+      // Invalidate sessions list so it picks up new/updated sessions
+      queryClient.invalidateQueries({ queryKey: aiChatKeys.all });
+      // If continuing an existing session, invalidate that session's detail
+      if (!data.isNewSession) {
+        queryClient.invalidateQueries({
+          queryKey: aiChatKeys.session(data.sessionId),
+        });
+      }
+    },
+  });
 };
 
-// ─── List sessions (query) ───────────────────────────────
+// ─── Get sessions list (query) ────────────────────────────
 
 export const useAiChatSessions = (
-  entityType: string,
-  entityKey: string,
   pageNumber: number = 1,
   pageSize: number = 20,
   enabled: boolean = true,
-): UseQueryResult<PaginatedChatSessions, AppError> => {
-  return useQuery<PaginatedChatSessions, AppError>({
-    queryKey: [...aiChatKeys.sessions(entityType, entityKey), pageNumber, pageSize],
+): UseQueryResult<AiChatSessionsPage, AppError> => {
+  return useQuery<AiChatSessionsPage, AppError>({
+    queryKey: aiChatKeys.sessions(pageNumber, pageSize),
     queryFn: async () => {
-      const response: AxiosResponse<PaginatedChatSessions> =
-        await getChatSessions(entityType, entityKey, pageNumber, pageSize);
+      const response: AxiosResponse<AiChatSessionsPage> =
+        await getChatSessions(pageNumber, pageSize);
       return response.data;
     },
     enabled,
+    staleTime: 30_000,
   });
 };
 
-// ─── Session detail (query) ──────────────────────────────
+// ─── Get single session detail (query) ────────────────────
 
-export const useAiChatSessionDetail = (
+export const useAiChatSession = (
   sessionId: string | null,
 ): UseQueryResult<AiChatSessionDetail, AppError> => {
   return useQuery<AiChatSessionDetail, AppError>({
-    queryKey: aiChatKeys.sessionDetail(sessionId ?? ""),
+    queryKey: aiChatKeys.session(sessionId ?? ""),
     queryFn: async () => {
       const response: AxiosResponse<AiChatSessionDetail> =
-        await getChatSessionDetail(sessionId!);
+        await getChatSession(sessionId!);
       return response.data;
     },
     enabled: !!sessionId,
+    staleTime: 10_000,
   });
 };
 
-// ─── Delete session (mutation) ───────────────────────────
+// ─── Delete session (mutation) ────────────────────────────
 
 export const useAiChatDeleteSession = (): UseMutationResult<
   void,
@@ -110,9 +110,7 @@ export const useAiChatDeleteSession = (): UseMutationResult<
       await deleteChatSession(sessionId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: aiChatKeys.all,
-      });
+      queryClient.invalidateQueries({ queryKey: aiChatKeys.all });
     },
   });
 };
