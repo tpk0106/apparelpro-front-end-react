@@ -1,6 +1,8 @@
 import { useState, useCallback, useRef } from "react";
 import { Box, Paper, Typography, Alert } from "@mui/material";
 import Grid from "@mui/material/Grid";
+import AiSummariseButton from "../ai/AiSummariseButton";
+import AiChatPanel from "../ai/AiChatPanel";
 import ConsumptionScopeHeader from "./consumption-scope-header.component";
 import MaterialMasterList from "./material-master-list.component"; // type OrderItemLookupRow,
 import ConsumptionEntryForm from "./consumption-entry-form.component";
@@ -111,12 +113,28 @@ export default function MaterialConsumption() {
         backgroundColor: DASHBOARD_COLORS.pageBg,
       }}
     >
-      <Typography
-        variant="h5"
-        sx={{ ...workspaceHeadingSx, textTransform: "uppercase", mb: 1 }}
-      >
-        Material Consumption Details
-      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+        <Typography
+          variant="h5"
+          sx={{ ...workspaceHeadingSx, textTransform: "uppercase", mb: 0 }}
+        >
+          Material Consumption Details
+        </Typography>
+        {scopeContext && (
+          <AiSummariseButton
+            entityType="Style"
+            entityKey={`${scopeContext.buyerCode}/${scopeContext.order}/${scopeContext.typeCode}/${scopeContext.styleCode}`}
+            tooltipLabel="AI Summarise this style's consumption"
+          />
+        )}
+
+        {scopeContext && (
+          <AiChatPanel
+            entityType="Style"
+            entityKey={`${scopeContext.buyerCode}/${scopeContext.order}/${scopeContext.typeCode}/${scopeContext.styleCode}`}
+          />
+        )}
+      </Box>
 
       <ConsumptionScopeHeader onScopeChange={handleScopeContextChange} />
 

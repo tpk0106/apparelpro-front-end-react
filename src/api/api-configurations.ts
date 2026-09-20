@@ -925,6 +925,12 @@ export const APPARELPRO_ENDPOINTS = {
     MATRIX: "api/permissions/matrix",
     UPDATE_ROLE: "api/permissions/role",
   },
+  AI: {
+    SUMMARISE: "api/ai/summarise",
+    ANALYSE: "api/ai/analyse",
+    CHAT_SEND: "api/ai/chat/send",
+    CHAT_SESSIONS: "api/ai/chat/sessions",
+  },
   URLS: {
     BASEURL: import.meta.env.VITE_API_BASE_URL || "https://localhost:5000/",
   },
