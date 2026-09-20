@@ -38,10 +38,7 @@ import type {
   AiChatMessageItem,
   AiChatSendMessageRequest,
 } from "../../services/ai/ai.service";
-import {
-  copperGlossButtonSx,
-  copperTextColor,
-} from "../../themes/button-color-themes";
+import { copperGlossButtonSx } from "../../themes/button-color-themes";
 
 // ─── Theme tokens ─────────────────────────────────────────
 
