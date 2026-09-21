@@ -1,5 +1,12 @@
 import { useState, useCallback, useRef } from "react";
-import { Box, Paper, Typography, Alert, IconButton, Tooltip } from "@mui/material";
+import {
+  Box,
+  Paper,
+  Typography,
+  Alert,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
 import Grid from "@mui/material/Grid";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import AiSummariseButton from "../ai/AiSummariseButton";
@@ -137,7 +144,7 @@ export default function MaterialConsumption() {
         <Box sx={{ flex: 1 }} />
 
         {scopeContext && (
-          <Tooltip title="AI Chat">
+          <Tooltip title="Chat with Bobby" placement="top">
             <IconButton
               onClick={() => setIsChatOpen(true)}
               sx={{

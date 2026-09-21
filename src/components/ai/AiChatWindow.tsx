@@ -663,7 +663,7 @@ export default function AiChatWindow({
                       fontWeight: 500,
                     }}
                   >
-                    {msg.role === "assistant" ? "AI" : "You"}
+                    {msg.role === "assistant" ? "Bobby" : "You"}
                   </Typography>
                 </Box>
 
