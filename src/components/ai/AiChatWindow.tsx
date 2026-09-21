@@ -28,6 +28,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import PersonIcon from "@mui/icons-material/Person";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CheckIcon from "@mui/icons-material/Check";
 import {
   useAiChatSend,
   useAiChatSessions,
@@ -114,6 +116,9 @@ export default function AiChatWindow({
   // query refetches. These are cleared once server data catches up.
   const [pendingMessages, setPendingMessages] = useState<LocalMessage[]>([]);
 
+  // Tracks which message ID was just copied (shows ✓ briefly)
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
   // Position & size (draggable / resizable)
   const [position, setPosition] = useState(() => ({
     x:
@@ -171,11 +176,28 @@ export default function AiChatWindow({
   }, [sessionDetailQuery.data]);
 
   // Merge: show server messages, then any pending optimistic messages
-  // whose IDs aren't already in the server data.
+  // that the server hasn't caught up to yet.
+  // Temp user messages (temp-xxx) are matched by role+content since
+  // the server assigns a different real GUID.
+  // AI messages use exact ID match (ID comes from server response).
   const localMessages: LocalMessage[] = useMemo(() => {
     if (pendingMessages.length === 0) return serverMessages;
+
     const serverIds = new Set(serverMessages.map((m) => m.id));
-    const unsyncedPending = pendingMessages.filter((m) => !serverIds.has(m.id));
+    const serverContentKeys = new Set(
+      serverMessages.map((m) => `${m.role}::${m.content}`),
+    );
+
+    const unsyncedPending = pendingMessages.filter((m) => {
+      // AI messages have real IDs from the server response — match by ID
+      if (serverIds.has(m.id)) return false;
+      // Temp user messages — match by role+content to catch server refetch
+      if (m.id.startsWith("temp-") || m.id.startsWith("err-")) {
+        return !serverContentKeys.has(`${m.role}::${m.content}`);
+      }
+      return true;
+    });
+
     return [...serverMessages, ...unsyncedPending];
   }, [serverMessages, pendingMessages]);
 
@@ -255,6 +277,28 @@ export default function AiChatWindow({
     },
     [handleSend],
   );
+
+  // ── Copy message to clipboard ─────────────────────────
+
+  const handleCopy = useCallback(async (msgId: string, content: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedId(msgId);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      // Fallback for older browsers
+      const textarea = document.createElement("textarea");
+      textarea.value = content;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      setCopiedId(msgId);
+      setTimeout(() => setCopiedId(null), 2000);
+    }
+  }, []);
 
   // ── New chat ──────────────────────────────────────────
 
@@ -492,8 +536,7 @@ export default function AiChatWindow({
         boxShadow:
           "0 12px 48px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.04)",
         overflow: "hidden",
-        // Prevent text selection during drag
-        userSelect: "none",
+        // Text selection enabled in message area; userSelect: "none" only on title bar
       }}
     >
       {/* ── Resize handle: top-left ──────────────────── */}
@@ -521,6 +564,7 @@ export default function AiChatWindow({
           py: 0.75,
           minHeight: 44,
           cursor: "move",
+          userSelect: "none",
           background: `linear-gradient(135deg, ${CHAT_COLORS.surface} 0%, ${CHAT_COLORS.canvas} 100%)`,
           borderBottom: `1px solid ${CHAT_COLORS.border}`,
           flexShrink: 0,
@@ -554,12 +598,18 @@ export default function AiChatWindow({
             flexShrink: 0,
           }}
         >
-          <Tooltip title="New chat">
+          <Tooltip
+            title="New chat"
+            slotProps={{ popper: { sx: { zIndex: 10000 } } }}
+          >
             <IconButton size="small" onClick={handleNewChat}>
               <AddIcon sx={{ fontSize: 18, color: CHAT_COLORS.muted }} />
             </IconButton>
           </Tooltip>
-          <Tooltip title={view === "history" ? "Back to chat" : "History"}>
+          <Tooltip
+            title={view === "history" ? "Back to chat" : "Chat history"}
+            slotProps={{ popper: { sx: { zIndex: 10000 } } }}
+          >
             <IconButton
               size="small"
               onClick={() => setView(view === "history" ? "chat" : "history")}
@@ -573,12 +623,18 @@ export default function AiChatWindow({
               )}
             </IconButton>
           </Tooltip>
-          <Tooltip title="Minimize">
+          <Tooltip
+            title="Minimize"
+            slotProps={{ popper: { sx: { zIndex: 10000 } } }}
+          >
             <IconButton size="small" onClick={() => setIsMinimized(true)}>
               <MinimizeIcon sx={{ fontSize: 18, color: CHAT_COLORS.muted }} />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Close">
+          <Tooltip
+            title="Close"
+            slotProps={{ popper: { sx: { zIndex: 10000 } } }}
+          >
             <IconButton size="small" onClick={onClose}>
               <CloseIcon sx={{ fontSize: 18, color: CHAT_COLORS.muted }} />
             </IconButton>
@@ -599,6 +655,8 @@ export default function AiChatWindow({
               display: "flex",
               flexDirection: "column",
               gap: 1.5,
+              userSelect: "text",
+              cursor: "auto",
               ...SCROLLBAR_SX,
             }}
           >
@@ -690,32 +748,73 @@ export default function AiChatWindow({
                 >
                   <Typography
                     variant="body2"
+                    component="div"
                     sx={{
                       color: CHAT_COLORS.text,
                       whiteSpace: "pre-wrap",
                       lineHeight: 1.6,
                       fontSize: "0.82rem",
                       wordBreak: "break-word",
+                      userSelect: "text",
+                      cursor: "text",
                     }}
                   >
                     {msg.content}
                   </Typography>
                 </Box>
 
-                {/* Token count for AI messages */}
-                {msg.role === "assistant" && msg.tokensUsed != null && (
-                  <Typography
-                    variant="caption"
+                {/* Copy button + token count for AI messages */}
+                {msg.role === "assistant" && (
+                  <Box
                     sx={{
-                      color: CHAT_COLORS.muted,
-                      fontSize: "0.62rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
                       mt: 0.25,
                       px: 0.5,
-                      opacity: 0.7,
                     }}
                   >
-                    {msg.tokensUsed.toLocaleString()} tokens
-                  </Typography>
+                    <Tooltip
+                      title={copiedId === msg.id ? "Copied!" : "Copy response"}
+                      slotProps={{ popper: { sx: { zIndex: 10000 } } }}
+                    >
+                      <IconButton
+                        size="small"
+                        onClick={() => handleCopy(msg.id, msg.content)}
+                        sx={{
+                          p: 0.25,
+                          color:
+                            copiedId === msg.id
+                              ? CHAT_COLORS.copper
+                              : CHAT_COLORS.muted,
+                          opacity: copiedId === msg.id ? 1 : 0.5,
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            opacity: 1,
+                            color: CHAT_COLORS.copper,
+                          },
+                        }}
+                      >
+                        {copiedId === msg.id ? (
+                          <CheckIcon sx={{ fontSize: 14 }} />
+                        ) : (
+                          <ContentCopyIcon sx={{ fontSize: 14 }} />
+                        )}
+                      </IconButton>
+                    </Tooltip>
+                    {msg.tokensUsed != null && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: CHAT_COLORS.muted,
+                          fontSize: "0.62rem",
+                          opacity: 0.7,
+                        }}
+                      >
+                        {msg.tokensUsed.toLocaleString()} tokens
+                      </Typography>
+                    )}
+                  </Box>
                 )}
               </Box>
             ))}
@@ -804,7 +903,10 @@ export default function AiChatWindow({
                 },
               }}
             />
-            <Tooltip title="Send (Enter)">
+            <Tooltip
+              title="Send (Enter)"
+              slotProps={{ popper: { sx: { zIndex: 10000 } } }}
+            >
               <span>
                 <IconButton
                   onClick={handleSend}
@@ -929,7 +1031,10 @@ export default function AiChatWindow({
                     </Typography>
                   }
                 />
-                <Tooltip title="Delete session">
+                <Tooltip
+                  title="Delete session"
+                  slotProps={{ popper: { sx: { zIndex: 10000 } } }}
+                >
                   <IconButton
                     size="small"
                     onClick={(e) => handleDeleteSession(session.sessionId, e)}
