@@ -7,6 +7,9 @@ import QuickAccessToolbar from "./quick-access-toolbar.component";
 import { DASHBOARD_COLORS } from "../components/dashboard/dashboard-theme";
 import { getCurrentUser } from "../sagaStore/user/user.selector";
 
+import { AiEntityProvider } from "../components/ai/AiEntityContext";
+import AiChatFab from "../components/ai/AiChatFab";
+
 const MainMenu = () => {
   const [toolbarCollapsed, setToolbarCollapsed] = useState(false);
   // MainMenu wraps /sign-in too (it's not a separate unmounted layout), so
@@ -17,38 +20,41 @@ const MainMenu = () => {
   const currentUserEmail = useSelector(getCurrentUser);
 
   return (
-    <div className="flex m-auto min-h-screen overflow-hidden h-screen w-screen">
-      <div className="flex flex-col w-full h-full">
-        {/* Header Container */}
-        <div
-          className="flex justify-center py-2 bg-linear-to-r
-                     from-gray-500 via-gray-700 to-gray-900"
-        >
-          <Header
-            toolbarCollapsed={toolbarCollapsed}
-            onToggleToolbar={() => setToolbarCollapsed((c) => !c)}
-          />
-        </div>
+    <AiEntityProvider>
+      <div className="flex m-auto min-h-screen overflow-hidden h-screen w-screen">
+        <div className="flex flex-col w-full h-full">
+          {/* Header Container */}
+          <div
+            className="flex justify-center py-2 bg-linear-to-r
+                       from-gray-500 via-gray-700 to-gray-900"
+          >
+            <Header
+              toolbarCollapsed={toolbarCollapsed}
+              onToggleToolbar={() => setToolbarCollapsed((c) => !c)}
+            />
+          </div>
 
-        {/* Quick-access toolbar - unmounted entirely when collapsed, or when
-            signed out (see currentUserEmail above), so no residual
-            strip/border line or dead-end icons are left showing. */}
-        {!toolbarCollapsed && !!currentUserEmail && <QuickAccessToolbar />}
+          {/* Quick-access toolbar - unmounted entirely when collapsed, or when
+              signed out (see currentUserEmail above), so no residual
+              strip/border line or dead-end icons are left showing. */}
+          {!toolbarCollapsed && !!currentUserEmail && <QuickAccessToolbar />}
 
-        {/* Page Content */}
-        <div
-          className="flex-1 overflow-y-auto"
-          style={{ backgroundColor: DASHBOARD_COLORS.pageBg }}
-        >
-          <Outlet />
-        </div>
+          {/* Page Content */}
+          <div
+            className="flex-1 overflow-y-auto"
+            style={{ backgroundColor: DASHBOARD_COLORS.pageBg }}
+          >
+            <Outlet />
+          </div>
 
-        {/* Footer Container */}
-        <div className="flex flex-col w-full h-[9%] border-2 border-gray-600 justify-center bg-black text-blue-500">
-          <Footer />
+          {/* Footer Container */}
+          <div className="flex flex-col w-full h-[9%] border-2 border-gray-600 justify-center bg-black text-blue-500">
+            <Footer />
+          </div>
+          {!!currentUserEmail && <AiChatFab />}
         </div>
       </div>
-    </div>
+    </AiEntityProvider>
   );
 };
 

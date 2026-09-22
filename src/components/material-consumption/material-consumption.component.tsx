@@ -11,6 +11,7 @@ import Grid from "@mui/material/Grid";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import AiSummariseButton from "../ai/AiSummariseButton";
 import AiChatWindow from "../ai/AiChatWindow";
+import { useSetAiEntity } from "../ai/AiEntityContext";
 import ConsumptionScopeHeader from "./consumption-scope-header.component";
 import MaterialMasterList from "./material-master-list.component"; // type OrderItemLookupRow,
 import ConsumptionEntryForm from "./consumption-entry-form.component";
@@ -83,6 +84,16 @@ export default function MaterialConsumption() {
   // Scroll target for the "jump back up to the form" behavior below - the top
   // Grid row containing both the Materials list and the form panel.
   const formSectionRef = useRef<HTMLDivElement | null>(null);
+
+  // ── Publish entity context to the global AI FAB / Voice panel ──
+  // When a style is selected, the voice FAB automatically picks up this
+  // entity context. Clears when the component unmounts or scope is cleared.
+  useSetAiEntity(
+    scopeContext ? "Style" : undefined,
+    scopeContext
+      ? `${scopeContext.buyerCode}/${scopeContext.order}/${scopeContext.typeCode}/${scopeContext.styleCode}`
+      : undefined,
+  );
 
   // Memoized callback handler tracking context alterations
   const handleScopeContextChange = useCallback(
