@@ -289,7 +289,7 @@ export function useVoiceChat(
 
       const request: AiChatSendMessageRequest = {
         message: spokenText,
-        preferredProvider: "OpenAI",
+        preferredProvider: "Anthropic",
         ...(currentSessionId
           ? { sessionId: currentSessionId }
           : {
