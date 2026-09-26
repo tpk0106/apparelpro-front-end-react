@@ -106,6 +106,7 @@ const summariseEntity = async (request: AiSummariseRequest) => {
   return await client.post<AiSummariseResponse>(
     APPARELPRO_ENDPOINTS.AI.SUMMARISE,
     request,
+    { timeout: 120000 }, // 2 minutes — enriched summaries need more time
   );
 };
 
