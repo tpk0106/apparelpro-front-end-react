@@ -70,23 +70,23 @@ export default function AiChatFab() {
           right: 24,
           zIndex: 10000,
           display: "flex",
-          flexDirection: "column",
+          flexDirection: "row",
           alignItems: "center",
-          gap: 1.25,
+          gap: 1.5,
         }}
       >
-        {/* Voice FAB (shown above main FAB when expanded or as secondary) */}
+        {/* Voice FAB — sits to the left of the main Chat FAB */}
         {!isAnyOpen && (
           <Tooltip
             title="Voice Assistant"
-            placement="left"
+            placement="top"
             slotProps={{ popper: { sx: { zIndex: 10001 } } }}
           >
             <Box
               onClick={handleToggleVoice}
               sx={{
-                width: 42,
-                height: 42,
+                width: 44,
+                height: 44,
                 borderRadius: "50%",
                 display: "flex",
                 alignItems: "center",
@@ -116,20 +116,21 @@ export default function AiChatFab() {
 
         {/* Main FAB — Chat or Close */}
         <Tooltip
-          title={
-            isAnyOpen
-              ? "Close"
-              : "AI Chat"
-          }
-          placement="left"
+          title={isAnyOpen ? "Close" : "Chat with Bobby"}
+          placement="top"
           slotProps={{ popper: { sx: { zIndex: 10001 } } }}
         >
           <Box
-            onClick={isAnyOpen ? (isChatOpen ? handleToggleChat : handleToggleVoice) : handleToggleChat}
+            onClick={
+              isAnyOpen
+                ? isChatOpen
+                  ? handleToggleChat
+                  : handleToggleVoice
+                : handleToggleChat
+            }
             sx={{
               width: 52,
               height: 52,
-              borderRadius: "50%",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

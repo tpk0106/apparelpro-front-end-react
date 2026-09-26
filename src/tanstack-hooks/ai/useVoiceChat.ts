@@ -80,6 +80,23 @@ export interface UseVoiceChatReturn {
 
 // ─── Browser API type guards ─────────────────────────────
 
+/** Minimal SpeechRecognition type for browsers that support the Web Speech API. */
+interface SpeechRecognition extends EventTarget {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  maxAlternatives: number;
+  start(): void;
+  stop(): void;
+  abort(): void;
+  onstart: (() => void) | null;
+  onaudiostart: ((ev: Event) => void) | null;
+  onaudioend: ((ev: Event) => void) | null;
+  onresult: ((ev: SpeechRecognitionEvent) => void) | null;
+  onerror: ((ev: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+}
+
 interface SpeechRecognitionEvent {
   resultIndex: number;
   results: SpeechRecognitionResultList;
@@ -91,7 +108,7 @@ interface SpeechRecognitionErrorEvent {
 }
 
 function getSpeechRecognition(): (new () => SpeechRecognition) | null {
-  const w = window as Record<string, unknown>;
+  const w = window as unknown as Record<string, unknown>;
   return (
     (w.SpeechRecognition as new () => SpeechRecognition) ??
     (w.webkitSpeechRecognition as new () => SpeechRecognition) ??
@@ -117,17 +134,26 @@ export function useVoiceChat(
     language = "en-US",
   } = options;
 
+  // ── Browser support (computed once) ─────────────────
+  const browserSupported = !!getSpeechRecognition();
+
   // ── State ───────────────────────────────────────────
-  const [voiceState, setVoiceState] = useState<VoiceState>("idle");
+  const [voiceState, setVoiceState] = useState<VoiceState>(
+    browserSupported ? "idle" : "unsupported",
+  );
   const [transcripts, setTranscripts] = useState<VoiceTranscript[]>([]);
   const [interimTranscript, setInterimTranscript] = useState("");
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [audioLevel, setAudioLevel] = useState(0);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(
+    browserSupported
+      ? null
+      : "Speech recognition is not supported in this browser. Please use Chrome or Edge.",
+  );
 
   // ── Refs ────────────────────────────────────────────
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const synthRef = useRef<SpeechSynthesis | null>(null);
+  const synthRef = useRef<SpeechSynthesis | null>(getSpeechSynthesis());
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -136,17 +162,6 @@ export function useVoiceChat(
 
   // ── Chat mutation ───────────────────────────────────
   const chatMutation = useAiChatSend();
-
-  // ── Check browser support on mount ──────────────────
-  useEffect(() => {
-    if (!getSpeechRecognition()) {
-      setVoiceState("unsupported");
-      setErrorMessage(
-        "Speech recognition is not supported in this browser. Please use Chrome or Edge.",
-      );
-    }
-    synthRef.current = getSpeechSynthesis();
-  }, []);
 
   // ── Audio level analyser ────────────────────────────
   const startAudioAnalyser = useCallback(async () => {
