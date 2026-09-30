@@ -100,6 +100,67 @@ export interface AiChatSessionsPage {
   filterQuery: string | null;
 }
 
+// ─── RAG types (matching RagModels.cs) ───────────────────────
+//
+// 🎓 RAG = Retrieval-Augmented Generation.
+// Instead of asking Claude to "just know" about our ERP data,
+// we first SEARCH our vector database (Qdrant) for relevant chunks,
+// then pass those chunks as context to Claude so it can generate
+// a grounded, verifiable answer with source references.
+
+/**
+ * 🎓 What the frontend sends to POST /api/rag/query.
+ *
+ * - `question` — the user's natural-language question
+ * - `entityTypeFilter` — optional: restricts the vector search to one
+ *    entity type (e.g. "Style", "PurchaseOrder", "Buyer", "Supplier").
+ *    When null/undefined the search spans ALL entity types.
+ */
+export interface RagQueryRequest {
+  question: string;
+  entityTypeFilter?: string | null;
+}
+
+/**
+ * 🎓 A single "citation" returned alongside the RAG answer.
+ *
+ * Each source tells the user:
+ *   • which ERP record contributed to the answer (entityType + entityKey)
+ *   • how relevant it was (score — cosine similarity 0–1)
+ *   • a short text preview so they can recognise the record at a glance
+ *
+ * The UI renders these as clickable "evidence cards" beneath the answer.
+ */
+export interface RagSourceReference {
+  entityType: string;
+  entityKey: string;
+  /** Cosine similarity score (0.0 – 1.0). Higher = more relevant. */
+  score: number;
+  /** First ~150 chars of the chunk text — enough to recognise the record. */
+  chunkPreview: string;
+}
+
+/**
+ * 🎓 Full response from the RAG pipeline.
+ *
+ * Key fields for the UI:
+ *   • `hasResults` — false means no vector matches; show a "rephrase" hint
+ *   • `answer` — Claude's generated text grounded in the retrieved chunks
+ *   • `sources` — the evidence cards (ordered by relevance, highest first)
+ *   • token counts — useful for a subtle cost/usage indicator
+ */
+export interface RagQueryResponse {
+  answer: string;
+  hasResults: boolean;
+  sources: RagSourceReference[];
+  retrievedChunkCount: number;
+  provider: string;
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+}
+
 // ─── Service functions ─────────────────────────────────────
 
 const summariseEntity = async (request: AiSummariseRequest) => {
@@ -148,6 +209,25 @@ const deleteChatSession = async (sessionId: string) => {
   );
 };
 
+/**
+ * 🎓 Send a RAG query to the backend pipeline.
+ *
+ * Flow:  Question → OpenAI embedding → Qdrant vector search
+ *        → matched chunks as context → Claude generates answer
+ *
+ * Timeout is 120 seconds because the pipeline does THREE async operations:
+ *   1. Embed the question (~200ms)
+ *   2. Search Qdrant (~100ms)
+ *   3. Claude generation (~5-15s depending on context size)
+ */
+const queryRag = async (request: RagQueryRequest) => {
+  return await client.post<RagQueryResponse>(
+    APPARELPRO_ENDPOINTS.AI.RAG.QUERY,
+    request,
+    { timeout: 120000 },
+  );
+};
+
 export {
   summariseEntity,
   analyseEntity,
@@ -155,4 +235,5 @@ export {
   getChatSessions,
   getChatSession,
   deleteChatSession,
+  queryRag,
 };

@@ -935,6 +935,19 @@ export const APPARELPRO_ENDPOINTS = {
       DELETE_SESSION: (sessionId: string) =>
         `api/ai/chat/sessions/${sessionId}`,
     },
+    /**
+     * 🎓 RAG (Retrieval-Augmented Generation) endpoints.
+     * These hit the RagController on the backend which:
+     *   1. Embeds the user's question via OpenAI
+     *   2. Searches Qdrant for similar entity chunks
+     *   3. Sends matched context + question to Claude for generation
+     */
+    RAG: {
+      /** POST — send a question, get an AI-generated answer with source references */
+      QUERY: "api/rag/query",
+      /** GET — lightweight check that the RAG pipeline (Qdrant + embeddings) is healthy */
+      HEALTH: "api/rag/health",
+    },
   },
   URLS: {
     BASEURL: import.meta.env.VITE_API_BASE_URL || "https://localhost:5000/",
