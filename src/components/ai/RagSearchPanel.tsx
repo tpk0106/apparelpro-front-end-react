@@ -45,7 +45,11 @@ import { useRagQuery } from "../../tanstack-hooks/ai/useRagQuery";
 import type {
   RagQueryResponse,
   RagSourceReference,
+  ReportIntentDetection,
 } from "../../services/ai/ai.service";
+import { fetchReportPdf } from "../../services/ai/ai.service";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
 // ─── Theme tokens (shared with AiChatWindow) ────────────────
 // 🎓 We duplicate these rather than importing from AiChatWindow
@@ -70,6 +74,14 @@ const CHAT_COLORS = {
   /** 🎓 New: teal tint for source evidence cards */
   sourceBg: "rgba(45, 212, 191, 0.08)",
   sourceBorder: "rgba(45, 212, 191, 0.2)",
+  /**
+   * 🎓 Report intent action card colors — a warm amber/gold to visually
+   * distinguish "I can generate a PDF for you" from regular source cards (teal).
+   * This uses a gold tint that complements the copper accent without clashing.
+   */
+  reportBg: "rgba(234, 179, 8, 0.08)",
+  reportBorder: "rgba(234, 179, 8, 0.25)",
+  reportText: "rgba(250, 204, 21, 0.9)",
 } as const;
 
 const SCROLLBAR_SX = {
@@ -117,6 +129,15 @@ interface RagMessage {
   hasResults?: boolean;
   /** Token usage for subtle cost indicator */
   totalTokens?: number;
+  /**
+   * 🎓 When Claude detects the user wants a REPORT (not just asking a question),
+   * this carries the structured intent: which report, extracted parameters, and
+   * the API endpoint to call. The UI renders a "Generate Report" action card
+   * when this is present instead of (or in addition to) the normal text answer.
+   *
+   * Null/undefined = normal RAG answer (just show text + sources).
+   */
+  detectedReportIntent?: ReportIntentDetection | null;
   /** Timestamp for display */
   createdAt: string;
 }
@@ -231,6 +252,45 @@ export default function RagSearchPanel({
     }
   }, [isOpen]);
 
+  // ── Report PDF generation ───────────────────────────────
+  /**
+   * 🎓 Opens a report PDF in a new browser tab using AUTHENTICATED request.
+   *
+   * HOW IT WORKS:
+   * The backend PDF endpoints are protected by JWT Bearer token authentication.
+   * We CANNOT use window.open() because it doesn't send the Authorization header
+   * → results in HTTP 401 Unauthorized.
+   *
+   * Instead, we use fetchReportPdf() from ai.service.ts which:
+   *   1. Uses the authenticated axios client (has JWT interceptor) to GET the PDF
+   *   2. Receives the PDF as a binary Blob
+   *   3. Creates a temporary blob URL (blob:https://...)
+   *   4. Opens that blob URL in a new tab → browser's native PDF viewer
+   *   5. Revokes the blob URL after 60s to free memory
+   *
+   * 🎓 WHY NOT JUST window.open()?
+   * window.open() makes a plain browser navigation request with NO custom headers.
+   * Our API requires: Authorization: Bearer <jwt_token>
+   * Only axios (or fetch with headers) can send that token.
+   * So we fetch the binary data WITH auth, wrap it in a Blob URL, then open that.
+   */
+  const openReportPdf = useCallback(async (intent: ReportIntentDetection) => {
+    const blobUrl = await fetchReportPdf(intent.endpointTemplate, intent.parameters);
+
+    if (!blobUrl) {
+      // 🎓 If the PDF fetch failed, show an error message in the chat
+      // so the user knows something went wrong (network error, 500, etc.)
+      const errorMessage: RagMessage = {
+        id: `pdf-err-${Date.now()}`,
+        role: "assistant",
+        content: `Sorry, I couldn't generate the ${intent.displayName}. The report endpoint returned an error. Please check that the parameters are correct and try again.`,
+        hasResults: false,
+        createdAt: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    }
+  }, []);
+
   // ── Send question ──────────────────────────────────────
 
   const handleSend = useCallback(() => {
@@ -258,7 +318,9 @@ export default function RagSearchPanel({
       },
       {
         onSuccess: (data: RagQueryResponse) => {
-          // 🎓 Add the AI's answer as a message bubble with source cards
+          // 🎓 Add the AI's answer as a message bubble with source cards.
+          // If Claude detected a report intent, we attach it to the message
+          // so the UI can render a "Generate Report" action card below the answer.
           const aiMessage: RagMessage = {
             id: `rag-${Date.now()}`,
             role: "assistant",
@@ -266,9 +328,26 @@ export default function RagSearchPanel({
             sources: data.sources,
             hasResults: data.hasResults,
             totalTokens: data.totalTokens,
+            detectedReportIntent: data.detectedReportIntent ?? null,
             createdAt: new Date().toISOString(),
           };
           setMessages((prev) => [...prev, aiMessage]);
+
+          /**
+           * 🎓 AUTO-TRIGGER PDF FOR HIGH-CONFIDENCE REPORT INTENTS:
+           *
+           * When confidence >= 0.8, the user's intent is clear ("Generate the trim
+           * sheet for ANCHORAGE"), so we open the PDF immediately in a new tab.
+           * The text answer STILL appears in the chat as context/confirmation.
+           *
+           * For confidence 0.5–0.8 (ambiguous), we just show the action card with
+           * a "Generate Report" button — the user decides whether to click it.
+           *
+           * For confidence < 0.5, the backend filters it out (detectedReportIntent = null).
+           */
+          if (data.detectedReportIntent && data.detectedReportIntent.confidence >= 0.8) {
+            openReportPdf(data.detectedReportIntent);
+          }
         },
         onError: (error) => {
           // 🎓 Show the error as a system message so the user knows what happened
@@ -798,6 +877,32 @@ export default function RagSearchPanel({
                   ))}
                 </Box>
               )}
+
+            {/* ─── 🆕 Report Intent Action Card ────────────────────────────
+             * 🎓 WHAT IS THIS?
+             * When Claude detects the user asked for a REPORT (not just a question),
+             * we show a special action card below the text answer. This card:
+             *   • Shows the report name and extracted parameters
+             *   • Provides a "Generate Report" button to open the PDF
+             *   • Visually distinct from source cards (gold/amber vs teal)
+             *
+             * 🎓 WHEN DOES IT APPEAR?
+             * Only when detectedReportIntent is present on the message.
+             * For high-confidence intents (>= 0.8), the PDF already opened
+             * automatically — but the card still shows so the user can:
+             *   • Re-open the PDF if they closed the tab
+             *   • See exactly which parameters were extracted
+             *   • Verify the intent detection was correct
+             *
+             * For medium-confidence (0.5–0.8), the card is the ONLY trigger —
+             * the user must click the button to generate the PDF.
+             */}
+            {msg.role === "assistant" && msg.detectedReportIntent && (
+              <ReportIntentCard
+                intent={msg.detectedReportIntent}
+                onGenerate={openReportPdf}
+              />
+            )}
           </Box>
         ))}
 
@@ -1073,6 +1178,209 @@ function SourceCard({ source }: { source: RagSourceReference }) {
           {source.chunkPreview}
         </Typography>
       )}
+    </Box>
+  );
+}
+
+// ─── Report Intent Action Card sub-component ────────────────────
+
+/**
+ * 🎓 An action card that appears when Claude detects a REPORT request.
+ *
+ * This is visually distinct from SourceCards (gold/amber vs teal) because
+ * it serves a different purpose: it's not a citation, it's an ACTION trigger.
+ *
+ * The card displays:
+ *   • PDF icon + report display name (e.g., "Trim Sheet Report")
+ *   • Extracted parameters as tag-like chips (e.g., "Style: ANCHORAGE")
+ *   • Confidence indicator
+ *   • "Generate Report" button that opens the PDF in a new tab
+ *
+ * 🎓 WHY A SEPARATE COMPONENT?
+ * Same reason as SourceCard — it keeps the main component's JSX clean
+ * and makes the report action card independently testable and reusable.
+ */
+function ReportIntentCard({
+  intent,
+  onGenerate,
+}: {
+  intent: ReportIntentDetection;
+  onGenerate: (intent: ReportIntentDetection) => void;
+}) {
+  /** 🎓 Convert confidence (0–1) to a percentage for display */
+  const confidencePercent = Math.round(intent.confidence * 100);
+
+  return (
+    <Box
+      sx={{
+        mt: 0.75,
+        maxWidth: "88%",
+        display: "flex",
+        flexDirection: "column",
+        gap: 0.75,
+      }}
+    >
+      {/* 🎓 Section label — distinguishes this from the source cards above */}
+      <Typography
+        variant="caption"
+        sx={{
+          color: CHAT_COLORS.reportText,
+          fontSize: "0.65rem",
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
+          px: 0.5,
+        }}
+      >
+        Report Available
+      </Typography>
+
+      {/* The action card itself */}
+      <Box
+        sx={{
+          px: 1.25,
+          py: 1,
+          borderRadius: "10px",
+          backgroundColor: CHAT_COLORS.reportBg,
+          border: `1px solid ${CHAT_COLORS.reportBorder}`,
+          transition: "all 0.2s ease",
+          "&:hover": {
+            borderColor: "rgba(234, 179, 8, 0.45)",
+            backgroundColor: "rgba(234, 179, 8, 0.12)",
+          },
+        }}
+      >
+        {/* Top row: PDF icon + report name + confidence */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mb: 0.5,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+            <PictureAsPdfIcon
+              sx={{ fontSize: 16, color: CHAT_COLORS.reportText }}
+            />
+            <Typography
+              variant="caption"
+              sx={{
+                fontSize: "0.75rem",
+                fontWeight: 600,
+                color: CHAT_COLORS.text,
+              }}
+            >
+              {intent.displayName}
+            </Typography>
+          </Box>
+          {/* 🎓 Confidence badge — green for high, amber for medium */}
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: "0.6rem",
+              fontWeight: 600,
+              color:
+                confidencePercent >= 80
+                  ? "rgba(74, 222, 128, 0.9)"
+                  : CHAT_COLORS.reportText,
+            }}
+          >
+            {confidencePercent}% confident
+          </Typography>
+        </Box>
+
+        {/* 🎓 Extracted parameters as small chips/tags
+         * These show the user exactly what Claude extracted from their query,
+         * so they can verify before generating. For example:
+         *   Style: ANCHORAGE | Buyer: 5 | Order: 1017-18 | Type: 1
+         */}
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 0.5,
+            mb: 0.75,
+          }}
+        >
+          {Object.entries(intent.parameters).map(([key, value]) => (
+            <Box
+              key={key}
+              sx={{
+                px: 0.75,
+                py: 0.15,
+                borderRadius: "4px",
+                backgroundColor: "rgba(234, 179, 8, 0.1)",
+                border: "1px solid rgba(234, 179, 8, 0.15)",
+              }}
+            >
+              <Typography
+                variant="caption"
+                sx={{
+                  fontSize: "0.6rem",
+                  color: CHAT_COLORS.muted,
+                }}
+              >
+                <Box
+                  component="span"
+                  sx={{
+                    fontWeight: 600,
+                    color: CHAT_COLORS.reportText,
+                    mr: 0.25,
+                    textTransform: "capitalize",
+                  }}
+                >
+                  {/* 🎓 Convert camelCase param keys to readable labels
+                   * e.g., "buyerCode" → "Buyer Code", "styleCode" → "Style Code"
+                   */}
+                  {key.replace(/([A-Z])/g, " $1").trim()}:
+                </Box>
+                {value}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
+
+        {/* 🎓 "Generate Report" button
+         * Uses the copper gloss style to match the send button, but with
+         * a gold/amber tint to match the report intent theme.
+         * Opens the PDF endpoint in a new browser tab via openReportPdf().
+         */}
+        <Box
+          onClick={() => onGenerate(intent)}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 0.75,
+            px: 1.5,
+            py: 0.5,
+            borderRadius: "6px",
+            backgroundColor: "rgba(234, 179, 8, 0.15)",
+            border: "1px solid rgba(234, 179, 8, 0.3)",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+            "&:hover": {
+              backgroundColor: "rgba(234, 179, 8, 0.25)",
+              borderColor: "rgba(234, 179, 8, 0.5)",
+              boxShadow: "0 0 8px rgba(234, 179, 8, 0.2)",
+            },
+          }}
+        >
+          <OpenInNewIcon sx={{ fontSize: 14, color: CHAT_COLORS.reportText }} />
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: "0.72rem",
+              fontWeight: 600,
+              color: CHAT_COLORS.reportText,
+              letterSpacing: "0.02em",
+            }}
+          >
+            Generate Report
+          </Typography>
+        </Box>
+      </Box>
     </Box>
   );
 }
