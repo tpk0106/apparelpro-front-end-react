@@ -409,7 +409,7 @@ const SopAdminPage = () => {
       {
         accessorKey: "sopCode",
         header: "SOP Code",
-        size: 140,
+        size: 120,
         enableEditing: false,
         enableSorting: false,
         Cell: ({ renderedCellValue }) => (
@@ -423,14 +423,14 @@ const SopAdminPage = () => {
       {
         accessorKey: "title",
         header: "Title",
-        size: 280,
+        size: 180,
         enableEditing: false,
         enableSorting: false,
       },
       {
         accessorKey: "category",
         header: "Category",
-        size: 120,
+        size: 100,
         enableEditing: false,
         enableSorting: false,
         Cell: ({ renderedCellValue }) => (
@@ -457,9 +457,66 @@ const SopAdminPage = () => {
         ),
       },
       {
+        // 🎓 RULE STATUS COLUMN:
+        // Shows a summary of the SOP's applicability rules at a glance.
+        // Reads the sopApplicabilities array from the row data to count
+        // how many rules are Include vs Exclude, then renders chips:
+        //   • All Include → green "N Include" chip
+        //   • All Exclude → red "N Exclude" chip
+        //   • Mixed → both chips side by side
+        //   • No rules → muted "No Rules" chip
+        accessorKey: "sopApplicabilities",
+        header: "Rules",
+        size: 120,
+        enableEditing: false,
+        enableSorting: false,
+        Cell: ({ row }) => {
+          const rules = row.original.sopApplicabilities;
+          if (!rules || rules.length === 0) {
+            return (
+              <Chip
+                label="No Rules"
+                size="small"
+                variant="outlined"
+                sx={{ borderColor: "#8B93A1", color: "#8B93A1" }}
+              />
+            );
+          }
+
+          const includeCount = rules.filter((r) => !r.isExcluded).length;
+          const excludeCount = rules.filter((r) => r.isExcluded).length;
+
+          return (
+            <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
+              {includeCount > 0 && (
+                <Chip
+                  label={`${includeCount} Include`}
+                  size="small"
+                  color="success"
+                  variant="outlined"
+                  sx={{ fontWeight: 500 }}
+                />
+              )}
+              {excludeCount > 0 && (
+                <Chip
+                  label={`${excludeCount} Exclude`}
+                  size="small"
+                  variant="outlined"
+                  sx={{
+                    borderColor: "#ef4444",
+                    color: "#ef4444",
+                    fontWeight: 600,
+                  }}
+                />
+              )}
+            </Box>
+          );
+        },
+      },
+      {
         accessorKey: "effectiveFrom",
-        header: "Effective From",
-        size: 130,
+        header: "From",
+        size: 100,
         enableEditing: false,
         enableSorting: false,
         Cell: ({ cell }) => {
@@ -469,8 +526,8 @@ const SopAdminPage = () => {
       },
       {
         accessorKey: "effectiveTo",
-        header: "Effective To",
-        size: 130,
+        header: "To",
+        size: 100,
         enableEditing: false,
         enableSorting: false,
         Cell: ({ cell }) => {
@@ -479,16 +536,9 @@ const SopAdminPage = () => {
         },
       },
       {
-        accessorKey: "displayOrder",
-        header: "Order",
-        size: 70,
-        enableEditing: false,
-        enableSorting: false,
-      },
-      {
         accessorKey: "createdBy",
         header: "Created By",
-        size: 130,
+        size: 110,
         enableEditing: false,
         enableSorting: false,
       },
@@ -509,6 +559,12 @@ const SopAdminPage = () => {
         pageSize: pagination.pageSize,
       },
     },
+
+    // 🎓 LAYOUT MODE:
+    // "grid" uses CSS grid so `size` sets exact column widths instead of
+    // minimums that MRT stretches to fill the container. This prevents
+    // the horizontal scrollbar when total column widths exceed the panel.
+    layoutMode: "grid",
 
     // 🎓 Disable inline editing — we use a Dialog instead.
     // enableRowActions: true is REQUIRED for renderRowActions to display
