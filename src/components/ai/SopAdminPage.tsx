@@ -841,17 +841,31 @@ const SopAdminPage = () => {
             {/* 🎓 Active switch — copper color matching System Parameters panel.
                 Uses copperSwitchSx for consistent copper toggle appearance
                 across all admin screens (see system-parameters-panel). */}
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={formState.isActive}
-                  onChange={(e) => updateField("isActive", e.target.checked)}
-                  sx={copperSwitchSx}
-                />
-              }
-              label="Active"
-              sx={{ flex: 0.5, "& .MuiFormControlLabel-label": { color: DASHBOARD_COLORS.textPrimary } }}
-            />
+            {/* 🎓 ACTIVE/INACTIVE VISUAL DISTINCTION:
+                Instead of a plain switch that's hard to read at a glance,
+                we pair the copper switch with a colour-coded Chip label:
+                  • Active  → green "success" chip (matches table column)
+                  • Inactive → red outlined chip (immediately obvious)
+                The Chip IS the label — clicking it toggles the switch too. */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, flex: 0.5 }}>
+              <Switch
+                checked={formState.isActive}
+                onChange={(e) => updateField("isActive", e.target.checked)}
+                sx={copperSwitchSx}
+              />
+              <Chip
+                label={formState.isActive ? "Active" : "Inactive"}
+                size="small"
+                color={formState.isActive ? "success" : "default"}
+                variant={formState.isActive ? "filled" : "outlined"}
+                sx={
+                  formState.isActive
+                    ? { fontWeight: 600 }
+                    : { borderColor: "#ef4444", color: "#ef4444", fontWeight: 600 }
+                }
+                onClick={() => updateField("isActive", !formState.isActive)}
+              />
+            </Box>
           </Box>
 
           {/* ── Applicability Rules Section ───────────────────── */}
