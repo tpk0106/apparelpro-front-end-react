@@ -159,6 +159,8 @@ import EstimatedProductionLineAllocationWorkspace from "./components/production/
 import DailyProductionTimeTicketWorkspace from "./components/production/daily-production-time-ticket/daily-production-time-ticket.component";
 import EstimatedProductionEntryWorkspace from "./components/production/estimated-production-entry/estimated-production-entry.component";
 import DailyProductionEntryWorkspace from "./components/production/daily-production-entry/daily-production-entry.component";
+// 🎓 AI — SOP Admin CRUD page for managing Standard Operating Procedures
+import SopAdminPage from "./components/ai/SopAdminPage";
 
 function App() {
   const location = useLocation();
@@ -684,6 +686,8 @@ function App() {
           path="outstanding-purchase-order-list-report"
           element={<OutstandingPurchaseOrderListReportWorkspace />}
         />
+        {/* 🎓 AI — SOP Admin: manage Standard Operating Procedures + applicability rules */}
+        <Route index path="sop-admin" element={<SopAdminPage />} />
         <Route index path="settings" element={<SettingsPage />} />
       </Route>
     </Routes>

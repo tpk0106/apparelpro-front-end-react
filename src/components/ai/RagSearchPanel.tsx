@@ -110,6 +110,9 @@ const ENTITY_FILTERS = [
   { label: "Purchase Orders", value: "PurchaseOrder" },
   { label: "Buyers", value: "Buyer" },
   { label: "Suppliers", value: "Supplier" },
+  // 🎓 SOPs added in Phase 2 Step 6 — allows users to scope RAG queries
+  // specifically to Standard Operating Procedures (company rules, T&C, compliance).
+  { label: "SOPs", value: "Sop" },
 ] as const;
 
 // ─── Types ───────────────────────────────────────────────────
@@ -708,8 +711,8 @@ export default function RagSearchPanel({
                 lineHeight: 1.5,
               }}
             >
-              Ask questions about styles, purchase orders, buyers, or suppliers.
-              Answers are generated from your actual ERP data.
+              Ask questions about styles, purchase orders, buyers, suppliers, or
+              SOPs. Answers are generated from your actual ERP data.
             </Typography>
           </Box>
         )}

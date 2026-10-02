@@ -1026,4 +1026,25 @@ export const navbarData = [
       },
     ],
   },
+  // 🎓 Divider — blank routerLink acts as a visual separator in the sidebar
+  {
+    routerLink: "",
+    icon: "",
+    label: "",
+    subMenus: [],
+  },
+  {
+    routerLink: "ai",
+    icon: "../assets/order-management/Order-Management.png",
+    label: "AI Intelligence",
+    subMenus: [
+      {
+        routerLink: "sop-admin",
+        icon: null,
+        label: "SOP Management",
+        pinned: false,
+      },
+    ],
+    tag: "ai",
+  },
 ];

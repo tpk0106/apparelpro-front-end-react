@@ -948,6 +948,17 @@ export const APPARELPRO_ENDPOINTS = {
       /** GET — lightweight check that the RAG pipeline (Qdrant + embeddings) is healthy */
       HEALTH: "api/rag/health",
     },
+    /**
+     * 🎓 SOP (Standard Operating Procedure) CRUD endpoints.
+     * These hit the SopController on the backend which manages
+     * SOPs and their polymorphic applicability rules.
+     */
+    SOP: {
+      /** Base path for GET /{id}, POST, PUT, DELETE /{id} */
+      BASE: "api/sop",
+      /** GET — paginated list with sorting & filtering */
+      LIST: "api/sop/list",
+    },
   },
   URLS: {
     BASEURL: import.meta.env.VITE_API_BASE_URL || "https://localhost:5000/",
