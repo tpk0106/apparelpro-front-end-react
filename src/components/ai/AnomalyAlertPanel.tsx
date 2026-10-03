@@ -36,12 +36,7 @@
 
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Button,
-  IconButton,
-  Tooltip,
-  CircularProgress,
-} from "@mui/material";
+import { Button, IconButton, Tooltip, CircularProgress } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 // 🎓 ICON IMPORTS:
 // This project's @mui/icons-material version doesn't include the "Outline"
@@ -67,7 +62,7 @@ import { toast } from "react-toastify";
 //   AI component's primary action (AiChatFab, AiSummariseButton, RagSearchPanel)
 // copperTextColor — the canonical copper accent (#C9803D), used for headings,
 //   borders, icons, and any text that needs the copper identity
-import { copperGlossButtonSx, copperTextColor } from "../../themes/button-color-themes";
+import { copperGlossButtonSx } from "../../themes/button-color-themes";
 
 import type {
   AnomalyAlert,
@@ -86,18 +81,18 @@ import {
 // RagSearchPanel, and AiVoicePanel — same copper tokens, centralised here
 // so the panel reads as part of the same AI component family.
 const ALERT_COLORS = {
-  canvas: "#0A0E14",        // 🎓 App-wide canvas background
-  surface: "#141922",       // 🎓 Panel/card surfaces
-  input: "#0D1117",         // 🎓 Input fields, stat boxes
-  text: "#F4F6F8",          // 🎓 Primary text
-  muted: "#8B93A1",         // 🎓 Secondary/muted text
-  copper: "#C9803D",        // 🎓 Primary copper accent
+  canvas: "#0A0E14", // 🎓 App-wide canvas background
+  surface: "#141922", // 🎓 Panel/card surfaces
+  input: "#0D1117", // 🎓 Input fields, stat boxes
+  text: "#F4F6F8", // 🎓 Primary text
+  muted: "#8B93A1", // 🎓 Secondary/muted text
+  copper: "#C9803D", // 🎓 Primary copper accent
   copperLight: "rgba(201, 128, 61, 0.15)", // 🎓 Tinted backgrounds
-  copperGlow: "rgba(201, 128, 61, 0.3)",   // 🎓 Focus rings, glows
-  copperWarm: "#F3E9D6",    // 🎓 Warm off-white (button text on copper)
-  copperDark: "#6B4420",    // 🎓 Dark copper for borders, depth
-  border: "rgba(255, 255, 255, 0.06)",     // 🎓 Subtle divider borders
-  borderHover: "rgba(255, 255, 255, 0.12)",// 🎓 Hover state borders
+  copperGlow: "rgba(201, 128, 61, 0.3)", // 🎓 Focus rings, glows
+  copperWarm: "#F3E9D6", // 🎓 Warm off-white (button text on copper)
+  copperDark: "#6B4420", // 🎓 Dark copper for borders, depth
+  border: "rgba(255, 255, 255, 0.06)", // 🎓 Subtle divider borders
+  borderHover: "rgba(255, 255, 255, 0.12)", // 🎓 Hover state borders
 } as const;
 
 // ─── Constants ──────────────────────────────────────────────
@@ -109,14 +104,14 @@ const severityColors: Record<AnomalySeverity, string> = {
   CRITICAL: "#ef4444",
   HIGH: "#f97316",
   MEDIUM: "#f59e0b",
-  LOW: "#60a5fa",  // 🎓 Low severity stays blue — it's a calm/info tone
+  LOW: "#60a5fa", // 🎓 Low severity stays blue — it's a calm/info tone
 };
 
 // 🎓 Status colors — green for resolved, copper for acknowledged (was blue),
 // gray for dismissed. Acknowledged now uses copper to match the theme.
 const statusColors: Record<AnomalyStatus, string> = {
   NEW: "#ef4444",
-  ACKNOWLEDGED: ALERT_COLORS.copper,  // 🎓 Was #60a5fa — now copper
+  ACKNOWLEDGED: ALERT_COLORS.copper, // 🎓 Was #60a5fa — now copper
   RESOLVED: "#22c55e",
   DISMISSED: "#6b7280",
 };
@@ -136,7 +131,13 @@ const anomalyTypeLabels: Record<AnomalyType, string> = {
 
 // 🎓 Anomaly type icon — same as NotificationBell for consistency.
 // These are semantic warning colors, not theme colors.
-const AnomalyTypeIcon = ({ type, size = 20 }: { type: AnomalyType; size?: number }) => {
+const AnomalyTypeIcon = ({
+  type,
+  size = 20,
+}: {
+  type: AnomalyType;
+  size?: number;
+}) => {
   switch (type) {
     case "OVER_CONSUMPTION":
       return <WarningAmberIcon sx={{ fontSize: size, color: "#f59e0b" }} />;
@@ -223,7 +224,11 @@ const AnomalyAlertPanel = () => {
   const [selectedAlert, setSelectedAlert] = useState<AnomalyAlert | null>(null);
 
   // ── TanStack Query hooks ────────────────────────────────
-  const { data: alertsPage, isLoading, isFetching } = useAnomalyAlerts({
+  const {
+    data: alertsPage,
+    isLoading,
+    isFetching,
+  } = useAnomalyAlerts({
     pageNumber,
     pageSize,
     severity: severity || undefined,
@@ -278,10 +283,11 @@ const AnomalyAlertPanel = () => {
 
   // 🎓 Filter change resets to page 1
   const handleFilterChange = useCallback(
-    (setter: (value: string) => void) => (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setter(e.target.value);
-      setPageNumber(1);
-    },
+    (setter: (value: string) => void) =>
+      (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setter(e.target.value);
+        setPageNumber(1);
+      },
     [],
   );
 
@@ -311,66 +317,77 @@ const AnomalyAlertPanel = () => {
             Close navigates back to the previous page (workspace).
             Both sit in a flex row so they're neatly aligned. */}
         <div className="flex items-center gap-2">
-        {/* 🎓 CLOSE ENTIRE PANEL BUTTON — copper-bordered, matches detail
+          {/* 🎓 CLOSE ENTIRE PANEL BUTTON — copper-bordered, matches detail
             panel's close button style. Navigates back from /anomaly-alerts
             to wherever the user came from (typically the workspace). */}
-        <button
-          onClick={() => navigate(-1)}
-          style={{
-            border: `1px solid ${ALERT_COLORS.copper}`,
-            color: ALERT_COLORS.copper,
-            backgroundColor: "transparent",
-          }}
-          className="flex items-center gap-1.5 rounded-md px-3 py-1.5
+          <button
+            onClick={() => navigate(-1)}
+            style={{
+              border: `1px solid ${ALERT_COLORS.copper}`,
+              color: ALERT_COLORS.copper,
+              backgroundColor: "transparent",
+            }}
+            className="flex items-center gap-1.5 rounded-md px-3 py-1.5
                      text-xs font-medium cursor-pointer
                      transition-all duration-150
                      hover:shadow-[0_0_10px_rgba(201,128,61,0.3)]"
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = ALERT_COLORS.copperLight;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-        >
-          <CloseIcon sx={{ fontSize: 14 }} />
-          Close
-        </button>
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = ALERT_COLORS.copperLight;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+            }}
+          >
+            <CloseIcon sx={{ fontSize: 14 }} />
+            Close
+          </button>
 
-        {/* 🎓 COPPER: "Scan Now" uses copperGlossButtonSx — the same glass-bottle
+          {/* 🎓 COPPER: "Scan Now" uses copperGlossButtonSx — the same glass-bottle
             gradient button used by AiChatFab, AiSummariseButton, and
             RagSearchPanel's send button. The <span style={{ position: "relative",
             zIndex: 1 }}> wrapper keeps the label text above the ::before/::after
             gloss overlay layers (same technique as themedButtonLabelStyle in
             workspace-theme.ts). */}
-        <Tooltip title="Run anomaly scan now">
-          <span>
-            <Button
-              onClick={handleFullScan}
-              disabled={fullScanMutation.isPending}
-              sx={{
-                ...copperGlossButtonSx,
-                borderRadius: "8px",
-                padding: "6px 16px",
-                minWidth: "auto",
-                fontSize: "0.75rem",
-                fontWeight: 600,
-                "&.Mui-disabled": {
-                  opacity: 0.5,
-                  color: ALERT_COLORS.copperWarm,
-                },
-              }}
-            >
-              <span style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: "6px" }}>
-                {fullScanMutation.isPending ? (
-                  <CircularProgress size={16} sx={{ color: ALERT_COLORS.copperWarm }} />
-                ) : (
-                  <RefreshIcon sx={{ fontSize: 18 }} />
-                )}
-                Scan Now
-              </span>
-            </Button>
-          </span>
-        </Tooltip>
+          <Tooltip title="Run anomaly scan now">
+            <span>
+              <Button
+                onClick={handleFullScan}
+                disabled={fullScanMutation.isPending}
+                sx={{
+                  ...copperGlossButtonSx,
+                  borderRadius: "8px",
+                  padding: "6px 16px",
+                  minWidth: "auto",
+                  fontSize: "0.75rem",
+                  fontWeight: 600,
+                  "&.Mui-disabled": {
+                    opacity: 0.5,
+                    color: ALERT_COLORS.copperWarm,
+                  },
+                }}
+              >
+                <span
+                  style={{
+                    position: "relative",
+                    zIndex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  {fullScanMutation.isPending ? (
+                    <CircularProgress
+                      size={16}
+                      sx={{ color: ALERT_COLORS.copperWarm }}
+                    />
+                  ) : (
+                    <RefreshIcon sx={{ fontSize: 18 }} />
+                  )}
+                  Scan Now
+                </span>
+              </Button>
+            </span>
+          </Tooltip>
         </div>
       </div>
 
@@ -380,9 +397,24 @@ const AnomalyAlertPanel = () => {
           copper input border treatment in AiChatWindow and RagSearchPanel. */}
       <div className="flex items-center gap-3 flex-wrap">
         {[
-          { options: SEVERITY_OPTIONS, value: severity, setter: setSeverity, label: "Severity" },
-          { options: TYPE_OPTIONS, value: anomalyType, setter: setAnomalyType, label: "Type" },
-          { options: STATUS_OPTIONS, value: status, setter: setStatus, label: "Status" },
+          {
+            options: SEVERITY_OPTIONS,
+            value: severity,
+            setter: setSeverity,
+            label: "Severity",
+          },
+          {
+            options: TYPE_OPTIONS,
+            value: anomalyType,
+            setter: setAnomalyType,
+            label: "Type",
+          },
+          {
+            options: STATUS_OPTIONS,
+            value: status,
+            setter: setStatus,
+            label: "Status",
+          },
         ].map(({ options, value, setter, label }) => (
           <select
             key={label}
@@ -391,13 +423,20 @@ const AnomalyAlertPanel = () => {
             style={{
               backgroundColor: ALERT_COLORS.input,
               color: ALERT_COLORS.text,
-              borderColor: value ? ALERT_COLORS.copper : "rgba(255,255,255,0.1)",
+              borderColor: value
+                ? ALERT_COLORS.copper
+                : "rgba(255,255,255,0.1)",
             }}
             className="rounded-md border text-xs px-3 py-2
                        focus:outline-none cursor-pointer
                        transition-colors duration-150"
-            onFocus={(e) => { e.currentTarget.style.borderColor = ALERT_COLORS.copper; }}
-            onBlur={(e) => { if (!value) e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = ALERT_COLORS.copper;
+            }}
+            onBlur={(e) => {
+              if (!value)
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+            }}
             aria-label={`Filter by ${label}`}
           >
             {options.map((opt) => (
@@ -424,8 +463,10 @@ const AnomalyAlertPanel = () => {
               <CircularProgress size={32} sx={{ color: ALERT_COLORS.copper }} />
             </div>
           ) : alerts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20"
-                 style={{ color: ALERT_COLORS.muted }}>
+            <div
+              className="flex flex-col items-center justify-center py-20"
+              style={{ color: ALERT_COLORS.muted }}
+            >
               <NotificationsOffIcon />
               <p className="text-sm mt-2">No alerts match your filters</p>
               <p className="text-xs mt-1" style={{ color: ALERT_COLORS.muted }}>
@@ -454,12 +495,12 @@ const AnomalyAlertPanel = () => {
                           }
                         : {
                             borderLeft: "3px solid transparent",
-                          }
-                      ),
+                          }),
                     }}
                     onMouseEnter={(e) => {
                       if (selectedAlert?.alertId !== alert.alertId) {
-                        e.currentTarget.style.backgroundColor = "rgba(201, 128, 61, 0.08)";
+                        e.currentTarget.style.backgroundColor =
+                          "rgba(201, 128, 61, 0.08)";
                       }
                     }}
                     onMouseLeave={(e) => {
@@ -504,15 +545,24 @@ const AnomalyAlertPanel = () => {
                         </span>
                       </div>
 
-                      <p className="text-xs line-clamp-1" style={{ color: ALERT_COLORS.muted }}>
+                      <p
+                        className="text-xs line-clamp-1"
+                        style={{ color: ALERT_COLORS.muted }}
+                      >
                         {alert.description}
                       </p>
 
                       <div className="flex items-center gap-3 mt-1">
-                        <span className="text-[10px]" style={{ color: ALERT_COLORS.muted }}>
+                        <span
+                          className="text-[10px]"
+                          style={{ color: ALERT_COLORS.muted }}
+                        >
                           Style: {alert.styleCode} · Order: {alert.order}
                         </span>
-                        <span className="text-[10px]" style={{ color: "rgba(139,147,161,0.6)" }}>
+                        <span
+                          className="text-[10px]"
+                          style={{ color: "rgba(139,147,161,0.6)" }}
+                        >
                           {formatDate(alert.detectedAt)}
                         </span>
                       </div>
@@ -535,7 +585,8 @@ const AnomalyAlertPanel = () => {
                           </IconButton>
                         </Tooltip>
                       )}
-                      {(alert.status === "NEW" || alert.status === "ACKNOWLEDGED") && (
+                      {(alert.status === "NEW" ||
+                        alert.status === "ACKNOWLEDGED") && (
                         <>
                           <Tooltip title="Resolve">
                             <IconButton
@@ -652,7 +703,8 @@ const AnomalyAlertPanel = () => {
                            transition-all duration-150
                            hover:shadow-[0_0_10px_rgba(201,128,61,0.3)]"
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = ALERT_COLORS.copperLight;
+                  e.currentTarget.style.backgroundColor =
+                    ALERT_COLORS.copperLight;
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = "transparent";
@@ -793,15 +845,36 @@ const AnomalyAlertPanel = () => {
               {/* 🎓 CRASH FIX: Null coalescing so undefined renders as "—"
                   instead of the string "undefined". String(undefined) = "undefined"
                   which is technically safe but looks like a bug to the user. */}
-              <DetailField label="Buyer Code" value={selectedAlert.buyerCode != null ? String(selectedAlert.buyerCode) : "—"} />
-              <DetailField label="Type Code" value={selectedAlert.typeCode != null ? String(selectedAlert.typeCode) : "—"} />
+              <DetailField
+                label="Buyer Code"
+                value={
+                  selectedAlert.buyerCode != null
+                    ? String(selectedAlert.buyerCode)
+                    : "—"
+                }
+              />
+              <DetailField
+                label="Type Code"
+                value={
+                  selectedAlert.typeCode != null
+                    ? String(selectedAlert.typeCode)
+                    : "—"
+                }
+              />
             </div>
 
             {/* Item info */}
             {/* 🎓 CRASH FIX: itemCode can be null — guard the template literal
                 so it doesn't render "Item Name (null)" to the user. */}
             {selectedAlert.itemDescription && (
-              <DetailField label="Item" value={selectedAlert.itemCode ? `${selectedAlert.itemDescription} (${selectedAlert.itemCode})` : selectedAlert.itemDescription} />
+              <DetailField
+                label="Item"
+                value={
+                  selectedAlert.itemCode
+                    ? `${selectedAlert.itemDescription} (${selectedAlert.itemCode})`
+                    : selectedAlert.itemDescription
+                }
+              />
             )}
 
             {/* Recommended action */}
@@ -866,14 +939,17 @@ const AnomalyAlertPanel = () => {
                 other primary action in the AI component family.
                 Resolve keeps green (semantic: success/done).
                 Dismiss stays muted gray (semantic: ignore/skip). */}
-            {(selectedAlert.status === "NEW" || selectedAlert.status === "ACKNOWLEDGED") && (
+            {(selectedAlert.status === "NEW" ||
+              selectedAlert.status === "ACKNOWLEDGED") && (
               <div
                 className="flex gap-2 pt-3"
                 style={{ borderTop: `1px solid ${ALERT_COLORS.border}` }}
               >
                 {selectedAlert.status === "NEW" && (
                   <Button
-                    onClick={() => handleStatusChange(selectedAlert.alertId, "ACKNOWLEDGED")}
+                    onClick={() =>
+                      handleStatusChange(selectedAlert.alertId, "ACKNOWLEDGED")
+                    }
                     sx={{
                       ...copperGlossButtonSx,
                       flex: 1,
@@ -889,18 +965,26 @@ const AnomalyAlertPanel = () => {
                   </Button>
                 )}
                 <button
-                  onClick={() => handleStatusChange(selectedAlert.alertId, "RESOLVED")}
+                  onClick={() =>
+                    handleStatusChange(selectedAlert.alertId, "RESOLVED")
+                  }
                   className="flex-1 rounded-md px-3 py-2 text-xs
                              font-medium text-black
                              transition-colors duration-150 cursor-pointer"
                   style={{ backgroundColor: "#22c55e" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#4ade80"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#22c55e"; }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#4ade80";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#22c55e";
+                  }}
                 >
                   Resolve
                 </button>
                 <button
-                  onClick={() => handleStatusChange(selectedAlert.alertId, "DISMISSED")}
+                  onClick={() =>
+                    handleStatusChange(selectedAlert.alertId, "DISMISSED")
+                  }
                   className="flex-1 rounded-md px-3 py-2
                              text-xs font-medium cursor-pointer
                              transition-colors duration-150"
