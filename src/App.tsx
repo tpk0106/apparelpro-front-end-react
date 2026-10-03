@@ -161,6 +161,8 @@ import EstimatedProductionEntryWorkspace from "./components/production/estimated
 import DailyProductionEntryWorkspace from "./components/production/daily-production-entry/daily-production-entry.component";
 // 🎓 AI — SOP Admin CRUD page for managing Standard Operating Procedures
 import SopAdminPage from "./components/ai/SopAdminPage";
+// 🎓 AI — Phase 3: Anomaly Alert Panel for viewing and managing anomaly detection alerts
+import AnomalyAlertPanel from "./components/ai/AnomalyAlertPanel";
 
 function App() {
   const location = useLocation();
@@ -688,6 +690,8 @@ function App() {
         />
         {/* 🎓 AI — SOP Admin: manage Standard Operating Procedures + applicability rules */}
         <Route index path="sop-admin" element={<SopAdminPage />} />
+        {/* 🎓 AI — Phase 3: Anomaly Detection alert panel (reached via bell dropdown "View All") */}
+        <Route index path="anomaly-alerts" element={<AnomalyAlertPanel />} />
         <Route index path="settings" element={<SettingsPage />} />
       </Route>
     </Routes>

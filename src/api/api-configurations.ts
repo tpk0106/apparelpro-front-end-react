@@ -959,6 +959,36 @@ export const APPARELPRO_ENDPOINTS = {
       /** GET — paginated list with sorting & filtering */
       LIST: "api/sop/list",
     },
+    /**
+     * 🎓 ANOMALY DETECTION & ALERTS (Phase 3) endpoints.
+     * These hit the AnomalyAlertController on the backend which manages:
+     *   - Querying alerts (paginated, by style, recent summaries)
+     *   - Unread count for the notification bell badge
+     *   - Status lifecycle (NEW → ACKNOWLEDGED → RESOLVED / DISMISSED)
+     *   - Manual scan triggers (full scan or targeted style scan)
+     *
+     * 🎓 WHY A SEPARATE CONTROLLER (not under /api/ai)?
+     * Anomaly detection is its own bounded context — it has its own entity
+     * (AnomalyAlert), its own background job, and its own UI (bell + panel).
+     * Keeping it at /api/anomaly makes the URL structure cleaner and avoids
+     * bloating the AI controller with unrelated endpoints.
+     */
+    ANOMALY: {
+      /** GET — paginated list with severity/type/status filters */
+      LIST: "api/anomaly/alerts",
+      /** GET — count of NEW alerts (for the bell badge number) */
+      UNREAD_COUNT: "api/anomaly/alerts/unread-count",
+      /** GET — latest 10 alerts as compact summaries (for bell dropdown) */
+      RECENT: "api/anomaly/alerts/recent",
+      /** GET — all alerts for a specific style (query params: buyerCode, order, typeCode, styleCode) */
+      BY_STYLE: "api/anomaly/alerts/style",
+      /** PUT — base path; callers append /{alertId}/status */
+      UPDATE_STATUS: "api/anomaly/alerts",
+      /** POST — trigger a full anomaly scan across all styles */
+      SCAN: "api/anomaly/scan",
+      /** POST — trigger a targeted scan for one specific style */
+      SCAN_STYLE: "api/anomaly/scan/style",
+    },
   },
   URLS: {
     BASEURL: import.meta.env.VITE_API_BASE_URL || "https://localhost:5000/",

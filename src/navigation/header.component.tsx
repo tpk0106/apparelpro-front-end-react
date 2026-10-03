@@ -37,6 +37,8 @@ import {
 import Menu from "./menu.component";
 import Login from "./login.component";
 import PinnedMenu from "./pinned-menu.component";
+// 🎓 Phase 3: Anomaly Detection — notification bell with unread badge
+import NotificationBell from "../components/ai/NotificationBell";
 
 import { USER_CREDENTIALS } from "../interfaces/definitions";
 import { useGetToolbarPreferences, useSaveToolbarPreferences } from "../tanstack-hooks/toolbar.hooks";
@@ -199,6 +201,10 @@ const Header = ({ toolbarCollapsed, onToggleToolbar }: HeaderProps) => {
                     </IconButton>
                   </Tooltip>
                 )}
+                {/* 🎓 Phase 3: Anomaly alert bell — polls unread count every 30s,
+                    shows a dropdown of recent alerts when clicked */}
+                <NotificationBell />
+
                 {username && localStorage.getItem(USER_CREDENTIALS.USER_ID) && (
                   <div className="flex items-center">
                     <span className="text-center text-sm font-semibold text-white">
