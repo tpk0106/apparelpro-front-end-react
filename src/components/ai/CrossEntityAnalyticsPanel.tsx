@@ -66,7 +66,6 @@ import { toast } from "react-toastify";
 
 import type {
   AnalyticsCategory,
-  CrossEntityAnalyticsResponse,
 } from "../../interfaces/ai/cross-entity-analytics.interfaces";
 import {
   useAnalyticsCategories,
@@ -758,7 +757,6 @@ const CrossEntityAnalyticsPanel: React.FC<CrossEntityAnalyticsPanelProps> = ({
                 alignItems: "center",
                 gap: 6,
                 padding: "8px 16px",
-                borderRadius: 8,
                 fontSize: 13,
                 fontWeight: 500,
                 border: "none",
@@ -766,7 +764,7 @@ const CrossEntityAnalyticsPanel: React.FC<CrossEntityAnalyticsPanelProps> = ({
                 opacity: !selectedCategory || isAnalysisRunning ? 0.4 : 1,
                 transition: "all 0.2s ease",
                 ...copperGlossButtonSx,
-              }}
+              } as React.CSSProperties}
             >
               {isAnalysisRunning ? (
                 <>
