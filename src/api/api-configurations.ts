@@ -989,6 +989,32 @@ export const APPARELPRO_ENDPOINTS = {
       /** POST — trigger a targeted scan for one specific style */
       SCAN_STYLE: "api/anomaly/scan/style",
     },
+    /**
+     * 🎓 CROSS-ENTITY ANALYTICS (Phase 2, Feature 1) endpoints.
+     * These hit the CrossEntityAnalyticsController on the backend which:
+     *   1. Aggregates data across multiple entities (styles, buyers, suppliers, orders)
+     *   2. Builds category-specific prompts from AnalyticsPromptTemplates
+     *   3. Sends aggregated data + prompt to the AI for strategic analysis
+     *
+     * 🎓 WHY A SEPARATE CONTROLLER (not adding to AiController)?
+     * Single Responsibility: AiController handles single-entity summarise/analyse.
+     * CrossEntityAnalyticsController handles cross-entity analytics — different
+     * request shape (category + optional question), different service, different
+     * response structure (includes entityCount, category echo-back).
+     *
+     * 5 supported categories:
+     *   MATERIAL_CONSUMPTION — consumption patterns, wastage, cost drivers
+     *   SUPPLIER_PERFORMANCE — supplier coverage, concentration, contact gaps
+     *   BUYER_PORTFOLIO      — revenue distribution, order activity, pricing
+     *   ORDER_PIPELINE       — pipeline value, age distribution, garment mix
+     *   COST_ANALYSIS        — cost structures, wastage impact, margin indicators
+     */
+    ANALYTICS: {
+      /** POST — run a cross-entity analytics analysis for a given category */
+      RUN: "api/ai/analytics",
+      /** GET — list of supported analytics categories (for the dropdown) */
+      CATEGORIES: "api/ai/analytics/categories",
+    },
   },
   URLS: {
     BASEURL: import.meta.env.VITE_API_BASE_URL || "https://localhost:5000/",
