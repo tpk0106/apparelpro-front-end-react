@@ -163,6 +163,11 @@ import DailyProductionEntryWorkspace from "./components/production/daily-product
 import SopAdminPage from "./components/ai/SopAdminPage";
 // 🎓 AI — Phase 3: Anomaly Alert Panel for viewing and managing anomaly detection alerts
 import AnomalyAlertPanel from "./components/ai/AnomalyAlertPanel";
+// 🎓 AI — Phase 5: Predictions Dashboard for forward-looking AI forecasts
+// This is a full-page component (not a floating panel) because predictions
+// need significant screen real estate for category cards, time horizon slider,
+// and the large AI-generated result area.
+import PredictionsDashboard from "./components/ai/PredictionsDashboard";
 
 function App() {
   const location = useLocation();
@@ -692,6 +697,12 @@ function App() {
         <Route index path="sop-admin" element={<SopAdminPage />} />
         {/* 🎓 AI — Phase 3: Anomaly Detection alert panel (reached via bell dropdown "View All") */}
         <Route index path="anomaly-alerts" element={<AnomalyAlertPanel />} />
+        {/* 🎓 AI — Phase 5: Predictions Dashboard — full-page predictive AI forecasts.
+            Navigated to via the purple/violet Predictions FAB button in AiChatFab.
+            Unlike Chat/Voice/RAG/Analytics which use floating panels, Predictions
+            uses a dedicated route because it needs more screen space for the
+            category cards, time horizon slider, and large result display area. */}
+        <Route index path="ai-predictions" element={<PredictionsDashboard />} />
         <Route index path="settings" element={<SettingsPage />} />
       </Route>
     </Routes>

@@ -1015,6 +1015,31 @@ export const APPARELPRO_ENDPOINTS = {
       /** GET — list of supported analytics categories (for the dropdown) */
       CATEGORIES: "api/ai/analytics/categories",
     },
+
+    /**
+     * 🎓 PREDICTIVE AI (Phase 5) endpoints.
+     * These hit the PredictiveAiController on the backend which:
+     *   1. Aggregates historical data across orders, styles, suppliers, materials
+     *   2. Computes trend signals (order velocity, shortage indicators, risk scores)
+     *   3. Builds category-specific prompts from PredictivePromptTemplates
+     *   4. Calls the AI provider for forward-looking predictions with action items
+     *
+     * 🎓 FOUR PREDICTION CATEGORIES:
+     *   DEMAND_FORECASTING   — predict future order quantities and seasonal trends
+     *   MATERIAL_SHORTAGE    — forecast potential material shortfalls before they happen
+     *   SUPPLIER_RISK        — assess supplier reliability and delivery risk
+     *   COST_OPTIMIZATION    — identify cost reduction opportunities and pricing trends
+     *
+     * 🎓 KEY DIFFERENCE FROM ANALYTICS:
+     * Analytics (Phase 2) looks BACKWARD — "what happened across our data?"
+     * Predictions (Phase 5) look FORWARD — "what will happen, and what should we do?"
+     */
+    PREDICTIONS: {
+      /** POST — run a predictive analysis for a given category */
+      RUN: "api/ai/predictions",
+      /** GET — list of supported prediction categories (for the dashboard cards) */
+      CATEGORIES: "api/ai/predictions/categories",
+    },
   },
   URLS: {
     BASEURL: import.meta.env.VITE_API_BASE_URL || "https://localhost:5000/",
