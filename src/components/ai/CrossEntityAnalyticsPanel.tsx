@@ -63,6 +63,10 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CheckIcon from "@mui/icons-material/Check";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import { toast } from "react-toastify";
+// 🎓 jsPDF — generates real downloadable PDF files client-side.
+// Replaces the old window.print() approach that opened a print preview.
+// Now triggers an automatic .pdf file download — matching PredictionsDashboard.
+import { jsPDF } from "jspdf";
 
 import type {
   AnalyticsCategory,
@@ -156,25 +160,405 @@ const simpleMarkdownToHtml = (md: string): string => {
     .replace(/\n/g, "<br />");
 };
 
-// ─── PDF-friendly markdown → HTML converter ─────────────────
-// 🎓 Similar to simpleMarkdownToHtml but uses print-friendly styles
-// (black text, no dark-theme classes). Used by the PDF download handler
-// to generate a clean, paper-ready HTML document.
-const simpleMarkdownToHtmlForPdf = (md: string): string => {
-  return md
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, "<em>$1</em>")
-    .replace(/^- (.+)$/gm, "<li>$1</li>")
-    .replace(/^\d+\. (.+)$/gm, "<li>$1</li>")
-    .replace(/^---$/gm, "<hr />")
-    .replace(/\n\n/g, "<br /><br />")
-    .replace(/\n/g, "<br />");
-};
+// ─── PDF download helper (jsPDF) ────────────────────────────
+// 🎓 REAL PDF GENERATION using jsPDF — replaces the old window.print() approach.
+// Matches the same architecture as PredictionsDashboard's downloadAsPdf().
+//
+// 🎓 KEY FEATURES:
+//   1. COLORED DOTS — emoji circles (🔴🟢🟡🟠) are replaced with tokens {R} {G}
+//      and rendered as actual colored filled circles via doc.circle().
+//   2. WORD WRAPPING — all text is word-wrapped via jsPDF's splitTextToSize().
+//   3. MARKDOWN TABLES — detected by | delimiters, rendered as key:value rows.
+//   4. BLOCKQUOTES — rendered with copper left bar + indented text.
+//   5. AUTO-PAGINATION — new pages added automatically when cursor nears bottom.
+function downloadAnalyticsAsPdf(
+  analysis: string,
+  category: string,
+  categoryName: string,
+  entityCount: number,
+  provider: string,
+  model: string,
+  totalTokens: number,
+  inputTokens: number,
+  outputTokens: number,
+  estimatedCost: number,
+  userQueryText: string,
+) {
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
+  const pageWidth = 210;
+  const pageHeight = 297;
+  const marginLeft = 20;
+  const marginRight = 20;
+  const marginTop = 25;
+  const marginBottom = 25;
+  const contentWidth = pageWidth - marginLeft - marginRight;
+
+  let cursorY = marginTop;
+
+  // ── Emoji → dot token replacement ──────────────────────
+  // 🎓 Helvetica has no emoji glyphs — they render as garbled boxes.
+  // Replace colored circle emojis with {R} {G} {Y} {O} tokens.
+  // drawLineWithDots() later renders these as colored filled circles.
+  function replaceEmojis(text: string): string {
+    return text
+      .replace(/\u{1F534}/gu, "{R} ")
+      .replace(/\u{1F7E2}/gu, "{G} ")
+      .replace(/\u{1F7E1}/gu, "{Y} ")
+      .replace(/\u{1F7E0}/gu, "{O} ")
+      .replace(/\u{1F7E3}/gu, "{P} ")
+      .replace(/\u{1F535}/gu, "{B} ")
+      .replace(/✅/g, "{G} ")
+      .replace(/❌/g, "{R} ")
+      .replace(/⚠️?/g, "{Y} ")
+      .replace(/↑/g, "^").replace(/↓/g, "v")
+      .replace(/→/g, "->").replace(/←/g, "<-")
+      .replace(/\u{1F4CA}/gu, "[CHART]")
+      .replace(/\u{1F4C8}/gu, "[UP]")
+      .replace(/\u{1F4C9}/gu, "[DOWN]")
+      .replace(/\u{1F6A8}/gu, "[ALERT]")
+      .replace(/\u{1F50D}/gu, "")
+      .replace(/\u{2139}️?/gu, "[i]")
+      .replace(/[\u{1F300}-\u{1F9FF}]/gu, "")
+      .replace(/[\u{2600}-\u{26FF}]/gu, "")
+      .replace(/[\u{2700}-\u{27BF}]/gu, "");
+  }
+
+  // ── Dot color map ──────────────────────────────────────
+  const DOT_COLORS: Record<string, [number, number, number]> = {
+    R: [220, 38, 38],
+    G: [22, 163, 74],
+    Y: [234, 179, 8],
+    O: [234, 88, 12],
+    P: [147, 51, 234],
+    B: [37, 99, 235],
+  };
+
+  // ── Helpers ────────────────────────────────────────────
+  function ensureSpace(neededMm: number) {
+    if (cursorY + neededMm > pageHeight - marginBottom) {
+      doc.addPage();
+      cursorY = marginTop;
+    }
+  }
+
+  function stripMd(text: string): string {
+    return text
+      .replace(/\*\*(.+?)\*\*/g, "$1")
+      .replace(/\*(.+?)\*/g, "$1")
+      .replace(/`([^`]+)`/g, "$1");
+  }
+
+  function wrapText(text: string, maxWidth: number): string[] {
+    return doc.splitTextToSize(text, maxWidth) as string[];
+  }
+
+  // 🎓 Draw a single line with inline colored dots.
+  // Scans for {R} {G} {Y} etc. tokens and renders filled circles.
+  function drawLineWithDots(line: string, x: number, y: number, textR: number, textG: number, textB: number) {
+    const dotRegex = /\{([RGYOPB])\}/g;
+    let currentX = x;
+    let lastIdx = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = dotRegex.exec(line)) !== null) {
+      const beforeText = line.slice(lastIdx, match.index);
+      if (beforeText) {
+        doc.setTextColor(textR, textG, textB);
+        doc.text(beforeText, currentX, y);
+        currentX += doc.getTextWidth(beforeText);
+      }
+      const colorKey = match[1];
+      const [cr, cg, cb] = DOT_COLORS[colorKey] ?? [100, 100, 100];
+      const dotRadius = 1.2;
+      doc.setFillColor(cr, cg, cb);
+      doc.circle(currentX + dotRadius + 0.3, y - dotRadius * 0.6, dotRadius, "F");
+      currentX += dotRadius * 2 + 1.2;
+      lastIdx = match.index + match[0].length;
+    }
+
+    const remaining = line.slice(lastIdx);
+    if (remaining) {
+      doc.setTextColor(textR, textG, textB);
+      doc.text(remaining, currentX, y);
+    }
+  }
+
+  // 🎓 Draw a block of text with word-wrapping AND inline colored dots.
+  function drawWrappedBlock(text: string, x: number, maxW: number, fontSize: number, lineH: number, r: number, g: number, b: number, style: string = "normal") {
+    doc.setFontSize(fontSize);
+    doc.setFont("helvetica", style);
+    doc.setTextColor(r, g, b);
+    const clean = stripMd(text);
+    const lines = wrapText(clean, maxW);
+    for (const ln of lines) {
+      ensureSpace(lineH);
+      drawLineWithDots(ln, x, cursorY, r, g, b);
+      cursorY += lineH;
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // HEADER
+  // ══════════════════════════════════════════════════════════
+  doc.setFontSize(10);
+  doc.setTextColor(201, 128, 61);
+  doc.text("ApparelPro AI", pageWidth / 2, cursorY, { align: "center" });
+  cursorY += 8;
+
+  doc.setFontSize(18);
+  doc.setTextColor(40, 40, 40);
+  doc.setFont("helvetica", "bold");
+  const titleText = `Cross-Entity Analytics: ${categoryName}`;
+  const titleLines = wrapText(titleText, contentWidth - 20);
+  for (const tl of titleLines) {
+    doc.text(tl, pageWidth / 2, cursorY, { align: "center" });
+    cursorY += 8;
+  }
+
+  // 🎓 Copper accent line
+  doc.setDrawColor(201, 128, 61);
+  doc.setLineWidth(0.8);
+  doc.line(marginLeft + 20, cursorY, pageWidth - marginRight - 20, cursorY);
+  cursorY += 6;
+
+  // 🎓 Subtitle — entity count, date, provider
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100, 100, 100);
+  const subtitle = `${entityCount} entities analysed  |  ${provider} (${model})  |  ${new Date().toLocaleDateString()}`;
+  doc.text(subtitle, pageWidth / 2, cursorY, { align: "center" });
+  cursorY += 10;
+
+  // 🎓 User query (if present)
+  if (userQueryText.trim()) {
+    ensureSpace(12);
+    doc.setDrawColor(201, 128, 61);
+    doc.setFillColor(201, 128, 61);
+    doc.rect(marginLeft, cursorY - 3.5, 1.5, 8, "F");
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "italic");
+    doc.setTextColor(100, 100, 100);
+    const queryLines = wrapText(`Question: ${userQueryText.trim()}`, contentWidth - 12);
+    for (const ql of queryLines) {
+      ensureSpace(5);
+      doc.text(ql, marginLeft + 6, cursorY);
+      cursorY += 5;
+    }
+    doc.setFont("helvetica", "normal");
+    cursorY += 4;
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // BODY — Parse and render the markdown analysis
+  // ══════════════════════════════════════════════════════════
+  const cleanedAnalysis = replaceEmojis(analysis);
+  const allLines = cleanedAnalysis.split("\n");
+
+  let inTable = false;
+  let tableHeaders: string[] = [];
+
+  for (let li = 0; li < allLines.length; li++) {
+    const line = allLines[li].trim();
+
+    if (!line) {
+      inTable = false;
+      tableHeaders = [];
+      cursorY += 3;
+      continue;
+    }
+
+    // ── Horizontal rule ─────────────────────────────────
+    if (/^[-*_]{3,}$/.test(line)) {
+      inTable = false;
+      ensureSpace(6);
+      cursorY += 3;
+      doc.setDrawColor(180, 180, 180);
+      doc.setLineWidth(0.3);
+      doc.line(marginLeft, cursorY, pageWidth - marginRight, cursorY);
+      cursorY += 4;
+      continue;
+    }
+
+    // ── Markdown table row ──────────────────────────────
+    if (line.startsWith("|") && line.endsWith("|")) {
+      const cells = line.split("|").map((c) => c.trim()).filter((c) => c.length > 0);
+      if (cells.every((c) => /^[-:]+$/.test(c))) continue;
+
+      if (!inTable) {
+        inTable = true;
+        tableHeaders = cells.map((c) => stripMd(c));
+        ensureSpace(7);
+        cursorY += 2;
+        const headerText = tableHeaders.join("  |  ");
+        drawWrappedBlock(headerText, marginLeft, contentWidth, 9, 4.5, 201, 128, 61, "bold");
+        doc.setDrawColor(201, 128, 61);
+        doc.setLineWidth(0.3);
+        doc.line(marginLeft, cursorY, pageWidth - marginRight, cursorY);
+        cursorY += 2;
+      } else {
+        let rowText: string;
+        if (tableHeaders.length > 0 && tableHeaders.length === cells.length) {
+          const pairs = cells.map((cell, idx) => `${tableHeaders[idx]}: ${stripMd(cell)}`);
+          rowText = pairs.join("  |  ");
+        } else {
+          rowText = cells.map((c) => stripMd(c)).join("  |  ");
+        }
+        drawWrappedBlock(rowText, marginLeft + 2, contentWidth - 4, 8.5, 4, 50, 50, 50);
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.1);
+        doc.line(marginLeft, cursorY, pageWidth - marginRight, cursorY);
+        cursorY += 1.5;
+      }
+      continue;
+    }
+
+    inTable = false;
+    tableHeaders = [];
+
+    // ── Blockquote ──────────────────────────────────────
+    if (line.startsWith("> ")) {
+      const quoteText = line.slice(2);
+      ensureSpace(8);
+      const quoteClean = stripMd(quoteText);
+      doc.setFontSize(10);
+      const quoteLines = wrapText(quoteClean, contentWidth - 12);
+      const quoteHeight = quoteLines.length * 5;
+      doc.setDrawColor(201, 128, 61);
+      doc.setFillColor(201, 128, 61);
+      doc.rect(marginLeft, cursorY - 3.5, 1.5, quoteHeight + 1, "F");
+      doc.setFont("helvetica", "italic");
+      doc.setTextColor(80, 80, 80);
+      for (const ql of quoteLines) {
+        ensureSpace(5);
+        drawLineWithDots(ql, marginLeft + 6, cursorY, 80, 80, 80);
+        cursorY += 5;
+      }
+      doc.setFont("helvetica", "normal");
+      cursorY += 2;
+      continue;
+    }
+
+    // ── Heading ####: h4 ────────────────────────────────
+    if (line.startsWith("#### ")) {
+      const headingText = stripMd(line.slice(5));
+      ensureSpace(8);
+      cursorY += 3;
+      drawWrappedBlock(headingText, marginLeft, contentWidth, 12, 5.5, 139, 94, 60, "bold");
+      cursorY += 2;
+      continue;
+    }
+
+    // ── Heading ###: h3 ─────────────────────────────────
+    if (line.startsWith("### ")) {
+      const headingText = stripMd(line.slice(4));
+      ensureSpace(10);
+      cursorY += 4;
+      drawWrappedBlock(headingText, marginLeft, contentWidth, 13, 6, 139, 94, 60, "bold");
+      cursorY += 2;
+      continue;
+    }
+
+    // ── Heading ##: h2 ──────────────────────────────────
+    if (line.startsWith("## ")) {
+      const headingText = stripMd(line.slice(3));
+      ensureSpace(12);
+      cursorY += 5;
+      drawWrappedBlock(headingText, marginLeft, contentWidth, 15, 7, 201, 128, 61, "bold");
+      cursorY += 3;
+      continue;
+    }
+
+    // ── Heading #: h1 ───────────────────────────────────
+    if (line.startsWith("# ")) {
+      const headingText = stripMd(line.slice(2));
+      ensureSpace(14);
+      cursorY += 6;
+      drawWrappedBlock(headingText, marginLeft, contentWidth, 16, 7.5, 201, 128, 61, "bold");
+      cursorY += 3;
+      continue;
+    }
+
+    // ── Bullet list item ────────────────────────────────
+    const bulletMatch = line.match(/^[-*]\s+(.+)$/);
+    if (bulletMatch) {
+      const itemText = stripMd(bulletMatch[1]);
+      ensureSpace(6);
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(50, 50, 50);
+      doc.text("-", marginLeft + 3, cursorY);
+      const indentX = marginLeft + 8;
+      const indentW = contentWidth - 8;
+      const wrapped = wrapText(itemText, indentW);
+      for (const wl of wrapped) {
+        ensureSpace(5);
+        drawLineWithDots(wl, indentX, cursorY, 50, 50, 50);
+        cursorY += 5;
+      }
+      cursorY += 1;
+      continue;
+    }
+
+    // ── Numbered list item ──────────────────────────────
+    const numberedMatch = line.match(/^(\d+)\.\s+(.+)$/);
+    if (numberedMatch) {
+      const num = numberedMatch[1];
+      const itemText = stripMd(numberedMatch[2]);
+      ensureSpace(6);
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(50, 50, 50);
+      doc.text(`${num}.`, marginLeft + 3, cursorY);
+      doc.setFont("helvetica", "normal");
+      const indentX = marginLeft + 10;
+      const indentW = contentWidth - 10;
+      const wrapped = wrapText(itemText, indentW);
+      for (const wl of wrapped) {
+        ensureSpace(5);
+        drawLineWithDots(wl, indentX, cursorY, 50, 50, 50);
+        cursorY += 5;
+      }
+      cursorY += 1;
+      continue;
+    }
+
+    // ── Regular paragraph text ──────────────────────────
+    drawWrappedBlock(line, marginLeft, contentWidth, 11, 5, 50, 50, 50);
+    cursorY += 2;
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // FOOTER — token usage + branding
+  // ══════════════════════════════════════════════════════════
+  ensureSpace(20);
+  cursorY += 8;
+  doc.setDrawColor(200, 200, 200);
+  doc.setLineWidth(0.3);
+  doc.line(marginLeft, cursorY, pageWidth - marginRight, cursorY);
+  cursorY += 6;
+  doc.setFontSize(9);
+  doc.setTextColor(150, 150, 150);
+  doc.text(
+    `Tokens: ${totalTokens.toLocaleString()} (${inputTokens.toLocaleString()} in / ${outputTokens.toLocaleString()} out)  |  Cost: $${estimatedCost.toFixed(4)}`,
+    pageWidth / 2,
+    cursorY,
+    { align: "center" },
+  );
+  cursorY += 5;
+  doc.text(
+    "Generated by ApparelPro AI  |  Cross-Entity Analytics",
+    pageWidth / 2,
+    cursorY,
+    { align: "center" },
+  );
+
+  // ══════════════════════════════════════════════════════════
+  // SAVE — triggers browser download
+  // ══════════════════════════════════════════════════════════
+  const dateStr = new Date().toISOString().split("T")[0];
+  doc.save(`ApparelPro_Analytics_${category}_${dateStr}.pdf`);
+}
 
 // ─── Main component ──────────────────────────────────────────
 
@@ -311,101 +695,27 @@ const CrossEntityAnalyticsPanel: React.FC<CrossEntityAnalyticsPanelProps> = ({
   }, [analyticsResult]);
 
   // ── Download as PDF handler ────────────────────────────────
-  // 🎓 NEW: Opens a styled print preview window with the formatted analysis.
-  // The user can then "Save as PDF" or print directly. This approach is
-  // zero-dependency — no jsPDF or html2canvas needed. The print window
-  // uses clean styling optimised for paper/PDF output.
-  //
-  // 🎓 WHY NOT jsPDF?
-  // Adding jsPDF + html2canvas would add ~200KB to the bundle. The browser's
-  // native print-to-PDF produces better quality output with proper text
-  // selection, links, and pagination. Every modern browser supports this.
+  // 🎓 REAL PDF GENERATION using jsPDF — replaces the old window.print() approach.
+  // Now triggers an automatic .pdf file download, matching PredictionsDashboard.
+  // No more print preview window — the user clicks the PDF button and gets a
+  // proper .pdf file saved directly to their Downloads folder.
   const handleDownloadPdf = useCallback(() => {
     if (!analyticsResult) return;
-
-    // 🎓 Build a standalone HTML document with the analysis content,
-    // styled for clean PDF output (white background, readable fonts).
-    const categoryName = selectedCategoryInfo?.name ?? analyticsResult.category;
-    const generatedDate = new Date(analyticsResult.generatedAt).toLocaleString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <title>${categoryName} — Cross-Entity Analytics</title>
-        <style>
-          /* 🎓 PDF-optimised styling: clean, professional, printable */
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            font-size: 12px;
-            line-height: 1.6;
-            color: #1a1a1a;
-            padding: 40px;
-            max-width: 800px;
-            margin: 0 auto;
-          }
-          h1 { font-size: 20px; margin-bottom: 4px; color: #111; }
-          h2 { font-size: 16px; margin-top: 20px; margin-bottom: 8px; color: #222; border-bottom: 1px solid #e0e0e0; padding-bottom: 4px; }
-          h3 { font-size: 14px; margin-top: 16px; margin-bottom: 6px; color: #333; }
-          p { margin-bottom: 8px; }
-          ul, ol { margin-left: 20px; margin-bottom: 8px; }
-          li { margin-bottom: 4px; }
-          hr { border: none; border-top: 1px solid #ddd; margin: 16px 0; }
-          strong { color: #111; }
-          .header { border-bottom: 2px solid #C9803D; padding-bottom: 12px; margin-bottom: 20px; }
-          .header .category { color: #C9803D; font-weight: 600; font-size: 14px; }
-          .header .meta { font-size: 11px; color: #666; margin-top: 6px; }
-          .footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 10px; color: #888; }
-          .user-query { background: #f8f4ef; border-left: 3px solid #C9803D; padding: 8px 12px; margin-bottom: 16px; font-style: italic; color: #555; }
-          table { border-collapse: collapse; width: 100%; margin: 12px 0; }
-          th, td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; font-size: 11px; }
-          th { background: #f5f5f5; font-weight: 600; }
-          @media print {
-            body { padding: 20px; }
-            @page { margin: 1.5cm; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>${categoryIcons[analyticsResult.category] ?? "📊"} ${categoryName}</h1>
-          <div class="category">Cross-Entity Analytics Report</div>
-          <div class="meta">
-            ${analyticsResult.entityCount} entities analysed &nbsp;|&nbsp;
-            Generated: ${generatedDate} &nbsp;|&nbsp;
-            Provider: ${analyticsResult.provider} (${analyticsResult.model})
-          </div>
-        </div>
-        ${userQuery.trim() ? `<div class="user-query"><strong>Question:</strong> ${userQuery.trim()}</div>` : ""}
-        <div class="content">${simpleMarkdownToHtmlForPdf(analyticsResult.analysis)}</div>
-        <div class="footer">
-          Tokens: ${analyticsResult.totalTokens.toLocaleString()} (${analyticsResult.inputTokens.toLocaleString()} in / ${analyticsResult.outputTokens.toLocaleString()} out)
-          &nbsp;|&nbsp; Estimated cost: $${analyticsResult.estimatedCost.toFixed(4)}
-          &nbsp;|&nbsp; ApparelPro Cross-Entity Analytics
-        </div>
-      </body>
-      </html>
-    `;
-
-    // 🎓 Open a new window, write the HTML, and trigger the print dialog.
-    // The user sees "Save as PDF" in the print dialog on all modern browsers.
-    const printWindow = window.open("", "_blank", "width=850,height=700");
-    if (printWindow) {
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
-      // 🎓 Small delay to let the DOM render before triggering print
-      setTimeout(() => printWindow.print(), 400);
-    } else {
-      toast.error("Pop-up blocked. Please allow pop-ups for this site to download PDF.");
-    }
+    const catName = selectedCategoryInfo?.name ?? analyticsResult.category;
+    downloadAnalyticsAsPdf(
+      analyticsResult.analysis,
+      analyticsResult.category,
+      catName,
+      analyticsResult.entityCount,
+      analyticsResult.provider,
+      analyticsResult.model,
+      analyticsResult.totalTokens,
+      analyticsResult.inputTokens,
+      analyticsResult.outputTokens,
+      analyticsResult.estimatedCost,
+      userQuery,
+    );
+    toast.success("PDF downloaded successfully!");
   }, [analyticsResult, selectedCategoryInfo, userQuery]);
 
   // ── Drag handlers ───────────────────────────────────────────
@@ -991,9 +1301,9 @@ const CrossEntityAnalyticsPanel: React.FC<CrossEntityAnalyticsPanelProps> = ({
                   </Tooltip>
 
                   {/* 🎓 DOWNLOAD AS PDF BUTTON
-                      Opens a styled print preview window with the formatted analysis.
-                      The user clicks "Save as PDF" in the browser's print dialog.
-                      Zero dependencies — uses the browser's native print engine. */}
+                      Uses jsPDF to generate a real .pdf file and trigger a browser
+                      download — no print preview window, no pop-up. Matches the
+                      PredictionsDashboard's PDF download approach. */}
                   <Tooltip title="Download as PDF">
                     <IconButton
                       onClick={handleDownloadPdf}
