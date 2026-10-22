@@ -11,7 +11,7 @@
 //
 // 🎓 PAGE LAYOUT:
 //   ┌─────────────────────────────────────────────────────────────┐
-//   │  Header: "Predictive AI" title + close button              │
+//   │  Header: "Predictive & Prescriptive AI" + close button     │
 //   ├─────────────────────────────────────────────────────────────┤
 //   │  Category Cards (4 across)                                 │
 //   │  [Demand] [Material] [Supplier] [Cost]                     │
@@ -19,7 +19,8 @@
 //   │  Controls: Time Horizon Slider (1-12 months) + Query input │
 //   │  [Run Prediction] button                                   │
 //   ├─────────────────────────────────────────────────────────────┤
-//   │  Results: AI-generated prediction (markdown)               │
+//   │  Results: AI predictions + prescriptive action plans        │
+//   │  (causality chains, priority scores, decision matrices)     │
 //   │  Token usage footer                                        │
 //   └─────────────────────────────────────────────────────────────┘
 //
@@ -289,10 +290,57 @@ function downloadAsPdf(prediction: string, category: string, horizon: number) {
       .replace(/`([^`]+)`/g, "$1");
   }
 
-  // 🎓 Word-wrap text to fit within maxWidth at the CURRENT font settings.
-  // Returns an array of lines that each fit within the given mm width.
+  // 🎓 CUSTOM WORD-WRAP using doc.getTextWidth() — the ACTUAL rendered width.
+  //
+  // WHY NOT splitTextToSize()?
+  // jsPDF's splitTextToSize() uses an internal font-metric table that is
+  // APPROXIMATE. It consistently UNDERESTIMATES rendered widths — especially
+  // for bold text, mixed-case strings, and punctuation-heavy lines. The error
+  // accumulates per character: over a 50+ char line at 13pt bold, the total
+  // underestimation can reach 10–15mm, pushing the last few words off the
+  // right edge of the page. After multiple failed attempts to patch this with
+  // safety buffers (3mm, 5mm, 15mm), the only reliable fix is to MEASURE
+  // each word's actual rendered width with getTextWidth() and build lines
+  // manually. getTextWidth() queries the same font engine that DRAWS the text,
+  // so its measurement matches what appears on the page — no guessing.
+  //
+  // HOW IT WORKS:
+  // 1. Split text into words by spaces
+  // 2. For each word, measure its actual rendered width with getTextWidth()
+  // 3. If adding this word would exceed maxWidth, start a new line
+  // 4. A single word longer than maxWidth gets its own line (won't infinite-loop)
+  // 5. A 2mm safety margin absorbs sub-pixel rounding at PDF render time
   function wrapText(text: string, maxWidth: number): string[] {
-    return doc.splitTextToSize(text, maxWidth) as string[];
+    const safeMax = maxWidth - 2; // 🎓 2mm margin for sub-pixel rounding
+    const words = text.split(" ");
+    const lines: string[] = [];
+    let currentLine = "";
+
+    for (const word of words) {
+      if (currentLine === "") {
+        // 🎓 First word on a new line — always accept it even if it's too wide
+        // (a single word wider than the column can't be split further)
+        currentLine = word;
+      } else {
+        // 🎓 Measure the line WITH this word appended — using getTextWidth()
+        // which returns the ACTUAL rendered width in mm for the current font
+        const testLine = currentLine + " " + word;
+        const testWidth = doc.getTextWidth(testLine);
+        if (testWidth <= safeMax) {
+          currentLine = testLine;
+        } else {
+          // 🎓 Adding this word would overflow — push the current line and
+          // start a new one with this word
+          lines.push(currentLine);
+          currentLine = word;
+        }
+      }
+    }
+    // 🎓 Don't forget the last line being built
+    if (currentLine !== "") {
+      lines.push(currentLine);
+    }
+    return lines;
   }
 
   // 🎓 Draw a SINGLE LINE with inline colored dots.
@@ -469,11 +517,25 @@ function downloadAsPdf(prediction: string, category: string, horizon: number) {
         cursorY += 2;
         const headerText = tableHeaders.join("  |  ");
         drawWrappedBlock(headerText, marginLeft, contentWidth, 9, 4.5, 201, 128, 61, "bold");
-        // 🎓 Thin line under header
+        // 🎓 Thin copper underline below the table header row.
+        //
+        //    GAP BEFORE LINE (2mm):
+        //    drawWrappedBlock leaves cursorY at (last baseline + lineH).
+        //    Text descenders (g, y, p, q) extend ~1mm below the baseline,
+        //    so they sit at roughly cursorY - lineH + 1mm = cursorY - 3.5mm.
+        //    A 2mm gap ensures the line clears all descenders comfortably.
+        //
+        //    GAP AFTER LINE (3.5mm):
+        //    The NEXT row's text is drawn at cursorY (the baseline), but the
+        //    TOP of capital letters / ascenders (b, d, h, k) rises ~2.2mm
+        //    ABOVE the baseline. Without enough gap, text tops poke above
+        //    the line — the "no top margin" bug. 3.5mm gives ~1.3mm visual
+        //    clearance above the tallest characters.
+        cursorY += 2;
         doc.setDrawColor(201, 128, 61);
         doc.setLineWidth(0.3);
         doc.line(marginLeft, cursorY, pageWidth - marginRight, cursorY);
-        cursorY += 2;
+        cursorY += 3.5;
       } else {
         // 🎓 Data row — pair each cell with its header for readability.
         // If we have headers, format as "Header: Value". If not, just join.
@@ -485,12 +547,29 @@ function downloadAsPdf(prediction: string, category: string, horizon: number) {
         } else {
           rowText = cells.map((c) => stripMd(c)).join("  |  ");
         }
+        // 🎓 Data row: indented 2mm from left margin, wrap width reduced by
+        //    4mm to account for the indent. The universal 3mm safety buffer
+        //    in wrapText() handles font metric imprecision separately.
         drawWrappedBlock(rowText, marginLeft + 2, contentWidth - 4, 8.5, 4, 50, 50, 50);
-        // 🎓 Faint dotted separator between table rows
+        // 🎓 Faint separator between table rows.
+        //
+        //    GAP BEFORE LINE (2mm):
+        //    drawWrappedBlock leaves cursorY at (last baseline + lineH = 4mm).
+        //    Descenders extend ~1mm below the baseline, sitting at about
+        //    cursorY - 3mm. A 2mm gap keeps the line well below descenders
+        //    (total distance from descender to line ≈ 5mm).
+        //
+        //    GAP AFTER LINE (3.5mm):
+        //    The NEXT data row's text baseline is drawn at cursorY, but
+        //    ascenders (capital letters, b/d/h/k) rise ~2.2mm ABOVE baseline.
+        //    With only 1.5mm gap (old code), text tops sat 0.7mm ABOVE the
+        //    separator — the "no top margin from top border" bug.
+        //    3.5mm gap → text top sits 1.3mm BELOW the line = clean visual margin.
+        cursorY += 2;
         doc.setDrawColor(220, 220, 220);
         doc.setLineWidth(0.1);
         doc.line(marginLeft, cursorY, pageWidth - marginRight, cursorY);
-        cursorY += 1.5;
+        cursorY += 3.5;
       }
       continue;
     }
@@ -804,7 +883,7 @@ export default function PredictionsDashboard() {
                 letterSpacing: "-0.02em",
               }}
             >
-              Predictive AI
+              Predictive & Prescriptive AI
             </Box>
             <Box
               sx={{
@@ -813,7 +892,7 @@ export default function PredictionsDashboard() {
                 marginTop: "2px",
               }}
             >
-              Forward-looking forecasts & prescriptive recommendations
+              Forecasts with actionable plans, priorities & decision matrices
             </Box>
           </Box>
         </Box>
